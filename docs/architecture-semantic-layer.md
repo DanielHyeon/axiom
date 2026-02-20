@@ -67,7 +67,9 @@
 ## 6. 참조 문서
 - `docs/legacy-data-isolation-policy.md`
 - `docs/domain-contract-registry.md`
+- `docs/architecture-4source-ingestion.md` (4-Source 파이프라인 통합 규약)
 - `services/weaver/docs/01_architecture/data-fabric.md`
 - `services/weaver/docs/01_architecture/metadata-service.md`
 - `services/synapse/docs/06_data/ontology-model.md`
+- `services/vision/docs/01_architecture/simulation-catalog.md` (Golden Question 카탈로그)
 - `services/vision/docs/03_backend/etl-pipeline.md`
