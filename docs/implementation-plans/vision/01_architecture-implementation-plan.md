@@ -9,6 +9,8 @@
 - services/vision/docs/01_architecture/olap-engine.md
 - services/vision/docs/01_architecture/root-cause-engine.md
 - services/vision/docs/01_architecture/what-if-engine.md
+- services/vision/docs/01_architecture/simulation-catalog.md
+- docs/domain-contract-registry.md
 
 ### Phase 적용 원칙
 - `root-cause-engine.md`는 Phase 4(출시 후) 범위로 관리한다.

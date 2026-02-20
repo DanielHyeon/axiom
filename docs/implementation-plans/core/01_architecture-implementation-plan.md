@@ -10,6 +10,10 @@
 - services/core/docs/01_architecture/bpm-engine.md
 - services/core/docs/01_architecture/event-driven.md
 - services/core/docs/01_architecture/resilience-patterns.md
+- services/core/docs/01_architecture/agent-layering.md
+- services/core/docs/01_architecture/early-warning-runbook.md
+- docs/architecture-self-verification.md
+- docs/domain-contract-registry.md
 
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, backend-developer | 협업: code-refactor, code-reviewer

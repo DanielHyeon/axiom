@@ -10,6 +10,10 @@
 - services/synapse/docs/01_architecture/graph-search.md
 - services/synapse/docs/01_architecture/ontology-4layer.md
 - services/synapse/docs/01_architecture/process-mining-engine.md
+- services/synapse/docs/01_architecture/code-archaeology-pipeline.md
+- services/synapse/docs/01_architecture/audio-ingestion-pipeline.md
+- docs/architecture-4source-ingestion.md
+- docs/domain-contract-registry.md
 
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, backend-developer | 협업: code-refactor, code-reviewer
