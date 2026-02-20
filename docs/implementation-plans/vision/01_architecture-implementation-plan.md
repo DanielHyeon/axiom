@@ -10,6 +10,10 @@
 - services/vision/docs/01_architecture/root-cause-engine.md
 - services/vision/docs/01_architecture/what-if-engine.md
 
+### Phase 적용 원칙
+- `root-cause-engine.md`는 Phase 4(출시 후) 범위로 관리한다.
+- Sprint 1~5 구현 범위는 OLAP/What-if 중심이며, root-cause는 인터페이스 추적만 유지한다.
+
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, backend-developer | 협업: code-refactor, code-reviewer
 - 공통 점검: code-inspector-tester(테스트 완결성), code-standards-enforcer(품질게이트), code-documenter(문서 동기화)

@@ -647,6 +647,29 @@ manager 2시간 미확인 → admin에게 이메일 + Slack 긴급 에스컬레�
 
 > Watch CEP Worker의 주기적 스캔(5분 간격)으로 미확인 CRITICAL 알림을 탐지한다. 에스컬레이션 알림 자체도 idempotency_key로 중복 방지된다. 상세 정책은 `apps/canvas/docs/04_frontend/watch-alerts.md` §9를 참조한다.
 
+### 4.6 Early Warning 폐루프 표준 (DB 연계)
+
+```
+[결정] Watch는 "탐지 -> RCA -> 팀 통보 -> 조치 완료"의 폐루프를 기본 운영 단위로 사용한다.
+[근거] 경고 자체보다 조치 완료까지의 리드타임이 운영 품질을 결정한다.
+```
+
+알림 등급 표준:
+- `CRITICAL`: 즉시 대응, 1시간 내 1차 조치
+- `HIGH`: 당일 조치
+- `MEDIUM`: 영업일 기준 모니터링 강화
+- `LOW`: 추세 관찰
+
+폐루프 SLA:
+- 감지 시간(`detected_at`)부터 최초 확인(`acknowledged_at`)까지 `p95 <= 15분`
+- 감지 시간부터 조치 완료(`resolved_at`)까지 `p95 <= 24시간`
+- 오탐률(`false_positive`) 월간 `<= 10%`
+
+DB 추적 원칙:
+- `watch_alerts`는 상태(`unread/acknowledged/dismissed`)와 시각 필드를 필수 기록한다.
+- RCA/대응 조치 이력은 감사 가능한 별도 히스토리 테이블로 누적한다.
+- 집계 지표는 운영 대시보드(`performance-monitoring.md`)로 노출한다.
+
 ---
 
 ## 5. Consumer Group 설계
@@ -697,6 +720,7 @@ manager 2시간 미확인 → admin에게 이메일 + Slack 긴급 에스컬레�
 | `apps/canvas/docs/04_frontend/watch-alerts.md` | 프론트엔드 알림 UI — 역할별 알림 관련성(§8), 생명주기 & 에스컬레이션(§9), 실시간 채널 아키텍처(§10) |
 | `02_api/watch-api.md` | Watch 구독/알림 REST API, SSE 스트림, 역할별 기본 구독 시드(§2.5) |
 | [08_operations/performance-monitoring.md](../08_operations/performance-monitoring.md) | 이벤트 처리 지연, Pending 메시지 메트릭, Workers & Events 대시보드 |
+| `docs/domain-contract-registry.md` | 이벤트 계약 버전/브레이킹 변경 승인 기준 |
 
 ---
 

@@ -66,7 +66,24 @@ tenant_id (UUID, JWT에서 추출)
 (:DataSource)--:HAS_SNAPSHOT-->(:FabricSnapshot)--:DIFF_TO-->(:SnapshotDiff)
 
 (:GlossaryTerm)--:DESCRIBES-->(:Table) 또는 (:Column)
+(:GlossaryTerm)--:SUPPORTED_BY-->(:ReferenceSource)   [Planned]
 ```
+
+### 1.4 4-Source 메타데이터 계보 태깅
+
+Semantic Layer 표준에 따라 메타데이터/용어 사전은 원천 계보를 기록한다.
+
+| 태그 | 의미 |
+|------|------|
+| `database` | 운영 DB/카탈로그 추출 |
+| `legacy_code` | 코드 고고학/정적 분석 추출 |
+| `official_docs` | SOP/규정/내부 문서 근거 |
+| `external_reference` | 산업 표준/외부 온톨로지 참조 |
+
+권장 속성:
+- `source_family`: 원천 분류
+- `source_ref`: 원천 식별자 (schema/table, repo/path, doc_id, uri)
+- `golden_question_id`: 질문 기반 필터 추적 키
 
 ---
 
@@ -109,6 +126,9 @@ tenant_id (UUID, JWT에서 추출)
 | `last_extracted` | DATETIME | Yes | 마지막 메타데이터 추출 시각 |
 | `created_at` | DATETIME | No | 생성 시각 |
 | `updated_at` | DATETIME | Yes | 수정 시각 |
+| `source_family` | STRING | Yes | 계보 태그 (`database`, `legacy_code`, `official_docs`, `external_reference`) |
+| `source_ref` | STRING | Yes | 원천 식별자 |
+| `golden_question_id` | STRING (UUID) | Yes | 질문 기반 필터 추적 키 |
 
 **고유 제약**: `(tenant_id, case_id, name)`
 

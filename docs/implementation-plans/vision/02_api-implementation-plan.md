@@ -10,6 +10,10 @@
 - services/vision/docs/02_api/root-cause-api.md
 - services/vision/docs/02_api/what-if-api.md
 
+### Phase 적용 원칙
+- `root-cause-api.md`는 Phase 4(출시 후) 구현 대상으로 분리한다.
+- Sprint 1~5 API 계약/테스트 범위는 analytics/olap/what-if로 한정한다.
+
 ## 3. 에이전트 운영
 - 주관: api-developer | 협업: backend-developer, code-security-auditor, code-documenter
 - 공통 점검: code-inspector-tester(테스트 완결성), code-standards-enforcer(품질게이트), code-documenter(문서 동기화)

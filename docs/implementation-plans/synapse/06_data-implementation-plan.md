@@ -20,11 +20,15 @@
 3. 마이그레이션/이관/롤백 전략과 무결성 검증 계획 수립
 4. 이벤트/그래프/캐시 모델 간 정합성 규칙 확정
 5. 데이터 품질 지표와 정기 검증 배치 정의
+6. 4-Source 계보 필드(`source_family`, `source_ref`) 및 질문 필터 키(`golden_question_id`) 저장 경로 고정
+7. 추출/HITL/온톨로지 커밋 단계별 계보 보존 검증(엔티티/관계 단위)
 
 ## 5. 통과 기준 (Gate 06)
 - 무결성 제약 위반 0건
 - 마이그레이션 드라이런/롤백 리허설 완료
 - 핵심 조회 성능 목표(p95) 충족
+- extraction_tasks/extracted_entities/extracted_relations의 계보 필드 누락률 0%
+- 샘플 3케이스에서 Golden Question 추적 키 기반 재현 조회 성공
 
 ## 6. 산출물
 - 구현 PR(코드 + 테스트 + 문서)

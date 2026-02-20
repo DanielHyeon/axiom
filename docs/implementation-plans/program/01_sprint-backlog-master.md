@@ -34,6 +34,7 @@
 - 핵심 산출물:
   - 온톨로지/그래프 API 계약 테스트
   - metadata ingest/propagation 정합성 테스트
+  - 4-Source Ingestion 계보 필드(`source_family/source_ref`) 저장 검증
 - 통과 기준:
   - Synapse/Weaver Gate S1/W1 통과
 
@@ -47,11 +48,12 @@
   - Oracle Gate O1/O2/O3 통과
 
 ### Sprint 5 (Vision Analytics)
-- 목표: Vision 엔진(OLAP/What-if/Root Cause) API 안정화
+- 목표: Vision 엔진(OLAP/What-if) API 안정화
 - 범위: Vision 02/03/05/06/08
 - 핵심 산출물:
   - 분석 API 계약 테스트 + 비동기 실행 안정화
   - ETL/MV 갱신 및 성능 검증
+  - What-if 질문 템플릿(골든퀘션) 카탈로그 초안
 - 통과 기준:
   - Vision Gate V1/V2 주요 항목 통과
 
@@ -70,6 +72,7 @@
 - 핵심 산출물:
   - 침투/부하/복구 리허설 결과
   - ADR 재평가 트리거 점검
+  - Early Warning 폐루프 SLA(`detect->RCA->notify->resolve`) 검증 리포트
 - 통과 기준:
   - Critical/High 취약점 0
   - 운영 리허설 완료

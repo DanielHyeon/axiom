@@ -23,12 +23,16 @@
 4. 이벤트/그래프/캐시 모델 간 정합성 규칙 확정
 5. 데이터 품질 지표와 정기 검증 배치 정의
 6. `GlossaryTerm` 등 Planned/Experimental 스키마의 활성화 조건과 마이그레이션 타이밍 명시
+7. Neo4j v2 노드의 계보 태그(`source_family`, `source_ref`)와 질문 필터 키(`golden_question_id`) 확장 설계
+8. 공식 문서/규정/외부 참조를 메타데이터 레퍼런스로 연결하는 모델(`ReferenceSource`) 적용 여부 결정
 
 ## 5. 통과 기준 (Gate 06)
 - 무결성 제약 위반 0건
 - 마이그레이션 드라이런/롤백 리허설 완료
 - 핵심 조회 성능 목표(p95) 충족
 - 레거시 원본 DB 스키마 직접 변경 경로 0건
+- 메타데이터 노드 계보 필드 누락률 0%
+- 4-Source 분류( database / legacy_code / official_docs / external_reference ) 통계 조회 가능
 
 ## 6. 산출물
 - 구현 PR(코드 + 테스트 + 문서)

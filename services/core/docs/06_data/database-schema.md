@@ -168,7 +168,9 @@ CREATE TABLE watch_alerts (
     status VARCHAR(20) DEFAULT 'unread',  -- unread, acknowledged, dismissed
     tenant_id UUID NOT NULL REFERENCES tenants(id),
     triggered_at TIMESTAMPTZ DEFAULT now(),
-    acknowledged_at TIMESTAMPTZ
+    acknowledged_at TIMESTAMPTZ,
+    resolved_at TIMESTAMPTZ,              -- 대응 완료 시각 (운영 폐루프 추적)
+    false_positive BOOLEAN DEFAULT false  -- 오탐 플래그
 );
 
 -- 알림 발송 이력
@@ -179,6 +181,17 @@ CREATE TABLE watch_alert_deliveries (
     status VARCHAR(20) NOT NULL,          -- SENT, FAILED
     sent_at TIMESTAMPTZ DEFAULT now(),
     error_message TEXT
+);
+
+-- 알림 대응 이력 (Early Warning 폐루프)
+CREATE TABLE watch_alert_actions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    alert_id UUID NOT NULL REFERENCES watch_alerts(id),
+    action_type VARCHAR(40) NOT NULL,     -- RCA_STARTED, TEAM_NOTIFIED, MITIGATION_APPLIED, RESOLVED, REOPENED
+    actor_id UUID REFERENCES users(id),   -- null이면 시스템 자동 처리
+    action_payload JSONB DEFAULT '{}',
+    tenant_id UUID NOT NULL REFERENCES tenants(id),
+    created_at TIMESTAMPTZ DEFAULT now()
 );
 ```
 
@@ -256,6 +269,7 @@ CREATE INDEX idx_workitem_status ON bpm_work_item (proc_inst_id, status);
 CREATE INDEX idx_outbox_pending ON event_outbox (status, created_at) WHERE status = 'PENDING';
 CREATE INDEX idx_alerts_unread ON watch_alerts (tenant_id, status) WHERE status = 'unread';
 CREATE INDEX idx_proc_inst_case ON bpm_proc_inst (case_id, status);
+CREATE INDEX idx_alert_actions_alert ON watch_alert_actions (alert_id, created_at);
 
 -- pgvector 인덱스 (벡터 검색)
 CREATE EXTENSION IF NOT EXISTS vector;

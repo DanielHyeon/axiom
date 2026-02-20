@@ -25,7 +25,7 @@
 2. `Synapse` 그래프/온톨로지/마이닝 기반 구축
 3. `Weaver` 메타데이터 수집/동기화 및 그래프 스키마 보강
 4. `Oracle` NL2SQL + 품질게이트 + Synapse 연동 경로 확정
-5. `Vision` OLAP/What-if/Root Cause 엔진 및 API 안정화
+5. `Vision` OLAP/What-if 엔진 및 API 안정화 (Root Cause는 Phase 4)
 6. `Canvas` 프론트엔드 통합(BFF/API 계약, UX, 실시간 상호작용)
 
 ## 4. 교차 의존성
@@ -43,8 +43,18 @@
 - `Gate P3 (구현 완성)`: 기능/보안/성능/운영 테스트 통과, Critical 결함 0
 - `Gate P4 (운영 준비)`: 배포/복구/관측/경보/런북 검증 완료
 
+## 5.1 Research Delta 반영 Gate (추가)
+- `Gate P2-D`: Domain Event Contract Registry 초안 확정
+  - Command/Event/Policy 계약에 `owner/version/payload_schema/idempotency_key` 명시
+- `Gate P3-D`: 4-Source Ingestion 경로 검증
+  - DB/LegacyCode/OfficialDocs/ExternalReference 계보 필드 DB 저장 확인
+- `Gate P4-D`: Early Warning 폐루프 SLA 검증
+  - `detect -> RCA -> notify -> resolve` 리드타임 지표가 운영 대시보드에서 추적 가능
+
 ## 6. 문서 연동 규칙
 - 구현 시 모든 변경은 해당 번호 문서(00~99)에 반영한다.
 - ADR 변경은 99에 선반영 후 구현한다.
 - 통과 기준 미충족 시 다음 단계로 이동하지 않는다.
 - API 문서는 구현 상태를 `Implemented / Experimental / Planned`로 명시하고 코드 상태와 동기화한다.
+- 이벤트 계약은 `docs/domain-contract-registry.md`를 기준으로 버전/호환성/승인을 관리한다.
+- K-AIR 미구현/저성숙 항목 추적은 `10_feature-maturity-checklist.md`를 프로그램 공통 SSOT로 사용한다.

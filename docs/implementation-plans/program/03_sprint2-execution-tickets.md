@@ -15,7 +15,8 @@
 | S2-PGM-005 | Oracle | text2sql API/보안 정책/연동 어댑터 구현 시작 | S2-PGM-003 | 4d | backend-developer, api-developer | Oracle Gate O1 선행조건 충족 |
 | S2-PGM-006 | Vision | 분석 API 계약/비동기 실행 준비 | S2-PGM-001 | 3d | backend-developer, api-developer | Vision Gate V1 선행조건 충족 |
 | S2-PGM-007 | Canvas | Core/Oracle/Synapse/Weaver/Vision 계약 반영 BFF 경로 점검 | S2-PGM-002,S2-PGM-003,S2-PGM-004,S2-PGM-005,S2-PGM-006 | 3d | api-developer, code-documenter | Canvas 계약 정합 리포트 완료 |
-| S2-PGM-008 | Program | Sprint 2 Exit Review (기능/API/보안 점검) | S2-PGM-002~007 | 1d | code-reviewer, code-security-auditor | Sprint3 진입 승인 |
+| S2-PGM-008 | Core | FM-006 착수: CEP 오탐률/지연 지표 기준선 수집 체계 수립 | S2-PGM-002 | 1d | backend-developer, code-inspector-tester | FM-006 D2 착수 증적 확보 |
+| S2-PGM-009 | Program | Sprint 2 Exit Review (기능/API/보안 점검) | S2-PGM-002~008 | 1d | code-reviewer, code-security-auditor | Sprint3 진입 승인 |
 
 ## Sprint 2 Exit Criteria
 - Core 주요 런타임 흐름 회귀 0건

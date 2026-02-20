@@ -78,6 +78,19 @@ extracted (LLM 추출)
                                └─ REJECT  → deleted (삭제)
 ```
 
+### 2.4 4-Source Provenance (DB 계층 확장)
+
+온톨로지 생성/갱신 데이터는 아래 소스 계보를 필수 기록한다.
+
+| source_family | 설명 | 예시 |
+|--------------|------|------|
+| `database` | 운영 DB/로그/뷰 기반 | ERP 테이블, 이벤트 로그 |
+| `legacy_code` | 레거시 코드 분석 기반 | Java 서비스 로직, 규칙 엔진 |
+| `official_docs` | SOP/규정/내부 문서 기반 | 운영 절차서, 컴플라이언스 문서 |
+| `external_reference` | 산업 표준/외부 온톨로지 기반 | 표준 분류체계, 레퍼런스 사전 |
+
+`golden_question_id`를 통해 "이 데이터가 어떤 업무 질문을 지원하는가"를 추적한다.
+
 ---
 
 ## 3. PostgreSQL vs Neo4j 데이터 분배
@@ -101,6 +114,8 @@ CREATE TABLE extraction_tasks (
     status VARCHAR(20) NOT NULL DEFAULT 'queued',
     -- queued, processing, completed, failed, partially_completed
     options JSONB,              -- extraction options
+    source_profile JSONB,       -- {"source_family":"official_docs","source_ref":"sop-v3.pdf"}
+    golden_question_id UUID,    -- 질문 기반 필터 추적 키
     progress JSONB,             -- step-by-step progress
     result_summary JSONB,       -- entity/relation counts
     error_message TEXT,
@@ -121,6 +136,9 @@ CREATE TABLE extracted_entities (
     confidence FLOAT NOT NULL,
     context TEXT,
     source_chunk INTEGER,
+    source_family VARCHAR(40),   -- database, legacy_code, official_docs, external_reference
+    source_ref TEXT,             -- 원천 식별자 (table/code/doc/url 등)
+    golden_question_id UUID,     -- 질문 기반 필터 추적 키
     ontology_mapping JSONB,     -- {"layer": "resource", "label": "Company:Resource"}
     neo4j_node_id VARCHAR(50),  -- NULL until committed
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
@@ -141,6 +159,9 @@ CREATE TABLE extracted_relations (
     object_entity_id UUID REFERENCES extracted_entities(id),
     confidence FLOAT NOT NULL,
     evidence TEXT,
+    source_family VARCHAR(40),
+    source_ref TEXT,
+    golden_question_id UUID,
     ontology_mapping JSONB,
     status VARCHAR(20) NOT NULL DEFAULT 'pending',
     created_at TIMESTAMPTZ DEFAULT NOW()

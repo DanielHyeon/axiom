@@ -6,7 +6,7 @@
 
 | Ticket ID | 프로젝트 | 작업 | 선행 의존 | 예상 공수 | 담당 에이전트 | 완료 기준 |
 |---|---|---|---|---|---|---|
-| S4-PGM-001 | Program | Sprint 4 킥오프 및 Oracle 의존성 확정 | S3-PGM-006 | 0.5d | code-implementation-planner | 범위 승인 |
+| S4-PGM-001 | Program | Sprint 4 킥오프 및 Oracle 의존성 확정 | S3-PGM-008 | 0.5d | code-implementation-planner | 범위 승인 |
 | S4-PGM-002 | Oracle | NL2SQL 파이프라인 + SQL Guard + 실행 경계 구현 | S4-PGM-001 | 5d | backend-developer, api-developer | Oracle Gate O1 통과 |
 | S4-PGM-003 | Oracle | 품질게이트/캐시/ValueMapping 구현 | S4-PGM-002 | 3d | backend-developer | Oracle Gate O2 통과 |
 | S4-PGM-004 | Oracle | 보안정책(마스킹/ACL/row limit) 적용 검증 | S4-PGM-002 | 2d | code-security-auditor | Oracle Gate O3 통과 |
