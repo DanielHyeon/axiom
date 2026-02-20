@@ -20,10 +20,17 @@
   - 각 프로젝트 `96~90` 티켓 보드 상태 최신화
   - 각 프로젝트 `98_gate-pass-criteria.md` 체크 결과 반영
   - 각 프로젝트 `99_traceability-matrix.md` 반영율 100%
+  - `10_feature-maturity-checklist.md` 단계(D1/D2/D3) 상태 최신화
+  - Domain Event 계약 증적(`owner/version/payload_schema/idempotency_key`) 첨부
+  - DB 계보 증적(`source_family/source_ref/golden_question_id`) 샘플 검증 첨부
 - S4/S7 보안 집중 구간
   - code-security-auditor 서명 결과(취약점 등급/조치 상태)
 - S5 품질 집중 구간
   - code-refactor, code-quality-refactorer 개선 지표(복잡도/중복/경고 수)
+  - Watch Early Warning 폐루프 지표(탐지-확인-해결 리드타임, 오탐률) 첨부
+- S6/S7 계층 및 거버넌스 검증 (Layering & Orchestration)
+  - 로컬 에이전트(실행)와 글로벌 오케스트레이터(통제) 간 호출 경계 위반 0건 증적
+  - 장애/비정상 상황 시 글로벌 에이전트의 Fail-safe(코레오그래피 안전 장치 작동 여부) 시나리오 검증 결과 첨부
 
 ## 4. 통과/반려 규칙
 - 통과
