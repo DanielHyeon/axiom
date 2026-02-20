@@ -45,9 +45,13 @@
 │  │                    Extraction Layer                                │ │
 │  │  ┌──────────────┐  ┌────────────────┐  ┌──────────────────────┐ │ │
 │  │  │ner_extractor │  │ relation_      │  │ ontology_mapper      │ │ │
-│  │  │GPT-4o NER    │  │ extractor      │  │ 매핑 (신규)          │ │ │
+│  │  │GPT-4o NER    │  │ extractor      │  │ 매핑 (비정형/음성)   │ │ │
 │  │  └──────────────┘  └────────────────┘  └──────────────────────┘ │ │
-│  └──────────────────────────────────────────────────────────────────┘ │
+│  │  ┌──────────────┐  ┌────────────────┐                             │ │
+│  │  │audio_ingestio│  │ code_archaeolog│                             │ │
+│  │  │n_worker (음성)│  │ y_worker (코드 │                             │ │
+│  │  └──────────────┘  └────────────────┘                             │ │
+└──────────────────────────────────────────────────────────────────┘ │
 │                                                                       │
 │  ┌──────────────────────────────────────────────────────────────────┐ │
 │  │                  Process Mining Layer (신규)                       │ │
@@ -154,23 +158,25 @@ Canvas → Core → Synapse API → Graph Layer → Neo4j
                                     └→ 결과 JSON 반환
 ```
 
-### 3.2 비정형 문서 추출 흐름
+### 3.2 비정형 및 특수 소스(음성, Legacy Code) 추출 흐름
 
 ```
-Canvas → Core → Synapse API (POST /extract-ontology)
+Canvas → Core → Synapse API (POST /extract-ontology 또는 /ingest/audio)
                      │
                      ▼ 비동기 작업 생성 (task_id 즉시 반환)
                      │
                      ▼ Extraction Layer
-                     ├─ 1. 텍스트 추출 + 청킹 (800토큰)
-                     ├─ 2. NER (GPT-4o Structured Output)
-                     ├─ 3. 관계 추출 (GPT-4o Structured Output)
-                     ├─ 4. 온톨로지 매핑 (4계층 분류)
-                     └─ 5. 신뢰도 < 0.75 → HITL 대기열
+                     ├─ 1a. [문서] 텍스트 청킹 (800토큰)
+                     ├─ 1b. [오디오] Whisper STT 전사 및 PII 마스킹 처리
+                     ├─ 1c. [레거시 코드] AST 기반 제어/데이터 흐름(DFG) 파싱
+                     ├─ 2. NER 및 규칙 추론 (GPT-4o Structured Output / Rules Engine)
+                     ├─ 3. 관계(Relation) 및 정책(Policy) 추출
+                     ├─ 4. 4계층 온톨로지 매핑
+                     └─ 5. 신뢰도 < 0.80 → HITL 대기열
                               │
                               ▼ Graph Layer
-                              └─ 신뢰도 >= 0.75 → Neo4j 자동 반영
-                                 신뢰도 < 0.75 → 인간 확인 후 반영
+                              └─ 신뢰도 >= 0.80 → Neo4j 자동 반영
+                                 신뢰도 < 0.80 → 인간 확인 후 반영
 ```
 
 ### 3.3 자동 인제스트 흐름 (이벤트 기반)
@@ -376,3 +382,5 @@ RETURN r
 - `01_architecture/ontology-4layer.md` (4계층 온톨로지 상세)
 - `01_architecture/extraction-pipeline.md` (추출 파이프라인 상세)
 - `01_architecture/process-mining-engine.md` (Process Mining Engine 상세)
+- `01_architecture/audio-ingestion-pipeline.md` (음성 ASR -> 온톨로지 Ingestion)
+- `01_architecture/code-archaeology-pipeline.md` (레거시 코드 -> DDD Aggregate 추출)

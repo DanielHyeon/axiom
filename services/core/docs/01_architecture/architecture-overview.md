@@ -160,7 +160,7 @@ Core 내부 경계:
        |
   [BPM 영역]         프로세스 정의, 실행, Saga 보상
        |
-  [Agent 영역]       LangGraph 오케스트레이션, MCP 도구, 지식 학습
+  [Agent 영역]       Local Execution (단일 서비스), Global Orchestrator (전체 조율 및 Fail-safe), MCP 도구, 지식 학습
        |
   [Event 영역]       Event Outbox, Redis Streams 발행/소비
        |
@@ -282,6 +282,7 @@ Canvas --> Core API (작업 생성)
 3. Workitem 실행 루프:
    a. agentMode 확인
       - AUTONOMOUS: LangGraph 에이전트 자동 실행
+      - SELF_VERIFY: (AUTONOMOUS 성공 후 자동 검증) 20% 랜덤 샘플링 룰에 따른 Self-Check Validator 평가 (Fail 시 HITL로 라우팅)
       - SUPERVISED: AI 실행 결과 -> HITL 승인 대기
       - MANUAL: 사용자가 직접 완료
    b. POST /process/submit (워크아이템 제출)
@@ -335,6 +336,8 @@ Canvas --> Core API (작업 생성)
 
 | 문서 | 관계 |
 |------|------|
+| [01_architecture/agent-layering.md](./agent-layering.md) | Local Agent와 Global Orchestrator의 책임 경계 및 Fail-safe 시나리오 상세 |
+| [architecture-self-verification.md](../../../docs/architecture-self-verification.md) | 20% 샘플링 자기 검증 하네스와 운영 자동 라우팅 정책 |
 | [01_architecture/resilience-patterns.md](./resilience-patterns.md) | Circuit Breaker, Retry, Fallback, DLQ, K8s Probe 등 전체 복원력 패턴 상세 |
 
 ---

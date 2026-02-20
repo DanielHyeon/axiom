@@ -44,10 +44,12 @@
 - `Gate P4 (운영 준비)`: 배포/복구/관측/경보/런북 검증 완료
 
 ## 5.1 Research Delta 반영 Gate (추가)
-- `Gate P2-D`: Domain Event Contract Registry 초안 확정
-  - Command/Event/Policy 계약에 `owner/version/payload_schema/idempotency_key` 명시
-- `Gate P3-D`: 4-Source Ingestion 경로 검증
+- `Gate P1-D / P2-D`: Domain Event Contract Registry 확정 및 Golden Question 준수
+  - Command/Event/Policy 계약에 `owner/version/payload_schema/idempotency_key` 명시 (100% 충족)
+  - 모든 메타데이터/온톨로지 확장은 Golden Question Triage 템플릿 필첨 여부 확인
+- `Gate P3-D`: 4-Source Ingestion 경로 및 자기 검증(Self-Verification) 연동 통과
   - DB/LegacyCode/OfficialDocs/ExternalReference 계보 필드 DB 저장 확인
+  - Self-Check 20% 샘플링 파이프라인 연계 및 HITL 큐 추방/라우팅 자동화 통과율 입증
 - `Gate P4-D`: Early Warning 폐루프 SLA 검증
   - `detect -> RCA -> notify -> resolve` 리드타임 지표가 운영 대시보드에서 추적 가능
 
