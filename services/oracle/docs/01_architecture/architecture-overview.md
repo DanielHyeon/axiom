@@ -133,7 +133,7 @@ async def ask(q: AskRequest):
 
 **경계 규칙**: 코어 모듈은 데이터 계층에 직접 접근하지 않고, 추상화된 인터페이스(Repository 패턴)를 통해 접근한다.
 
-**근거**: Target DB(비즈니스 데이터)와 Synapse Graph API(메타데이터)의 접근 패턴이 다르며, 향후 저장소 변경(SQLite -> PostgreSQL 이력 이관 등)에 유연하게 대응해야 한다.
+**근거**: Target DB(비즈니스 데이터)와 Synapse Graph API(메타데이터)의 접근 패턴이 다르며, 이력 저장소를 PostgreSQL 표준으로 유지하면서도 레거시(K-AIR SQLite) 호환 경로에 유연하게 대응해야 한다.
 
 ---
 

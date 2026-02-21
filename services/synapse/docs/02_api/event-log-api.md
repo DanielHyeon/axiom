@@ -1,6 +1,6 @@
 # Event Log 관리 API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -33,14 +33,14 @@
 
 | Method | Path | 설명 | 동기/비동기 | 상태 | 근거(구현/티켓) |
 |--------|------|------|-----------|------|------------------|
-| POST | `/ingest` | 이벤트 로그 인제스트 (CSV/XES/DB) | 비동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/` | 이벤트 로그 목록 조회 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/{log_id}` | 이벤트 로그 상세 조회 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| DELETE | `/{log_id}` | 이벤트 로그 삭제 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/{log_id}/statistics` | 이벤트 로그 통계 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| PUT | `/{log_id}/column-mapping` | 컬럼 매핑 수정 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| POST | `/{log_id}/refresh` | 이벤트 로그 재인제스트 (DB 소스) | 비동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/ingest` | 이벤트 로그 인제스트 (CSV/XES/DB) | 비동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| GET | `/` | 이벤트 로그 목록 조회 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| GET | `/{log_id}` | 이벤트 로그 상세 조회 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| DELETE | `/{log_id}` | 이벤트 로그 삭제 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| GET | `/{log_id}/statistics` | 이벤트 로그 통계 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| GET | `/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| PUT | `/{log_id}/column-mapping` | 컬럼 매핑 수정 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| POST | `/{log_id}/refresh` | 이벤트 로그 재인제스트 (DB 소스) | 비동기 | Implemented | `services/synapse/app/api/event_logs.py` |
 
 ---
 
@@ -107,6 +107,8 @@ Content-Type: application/json
 }
 ```
 
+> 운영 규칙: `source_config.connection_id`는 Synapse 환경변수 `AXIOM_EVENTLOG_CONNECTIONS_JSON`에 등록된 연결 정의를 참조한다. 예) `{"erp-connection-uuid":{"engine":"postgres","database_url":"postgresql://arkos:arkos@localhost:5432/insolvency_os"}}`
+
 #### Request: XES 파일 업로드
 
 ```
@@ -135,6 +137,8 @@ metadata: {
 | `options.timestamp_format` | string | N | ISO8601, epoch, custom |
 | `filter.where_clause` | string | db시 N | SQL WHERE 조건 |
 | `filter.max_rows` | int | N | 최대 행 수 (기본: 1,000,000) |
+
+> 보안 제한: `where_clause`에는 `;`, `--`, `/* */`, DDL/DML 키워드(`insert/update/delete/drop/alter/create/truncate/grant/revoke`)를 허용하지 않는다.
 
 #### Response (202 Accepted)
 

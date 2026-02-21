@@ -1,5 +1,7 @@
 # K-AIR text2sql -> Oracle 이식 가이드
 
+> 상태: 레거시 이식 참고 문서 (Axiom 현재 저장소 표준은 PostgreSQL)
+
 ## 이 문서가 답하는 질문
 
 - K-AIR에서 Axiom Oracle로 이식할 때 어떤 단계를 거쳐야 하는가?
@@ -35,15 +37,31 @@ K-AIR `robo-data-text2sql-main`의 구현 완성도는 **95%**로, 대부분의 
 
 ## 2. 이식 단계
 
+> 기준일: 2026-02-21
+> 아래 Phase 2~8 표는 원안 계획이며, 실제 상태는 "2.0 현재 구현 현황"을 우선 기준으로 본다.
+
+### 2.0 현재 구현 현황 (코드 기준)
+
+| Phase | 상태 | 근거 |
+|------|------|------|
+| Phase 1 (구조 셋업) | 부분 완료 | `app/main.py`, `app/core/config.py`, `requirements.txt` 존재. `Dockerfile`/compose는 미확인 |
+| Phase 2 (코어 모듈) | 부분 완료 | `sql_guard.py`, `sql_exec.py`, `graph_search.py`, `llm_factory.py` 구현. 일부 모듈은 mock/미구현 |
+| Phase 3 (파이프라인 분리) | 완료 | `pipelines/nl2sql_pipeline.py`, `pipelines/react_agent.py` 구현 |
+| Phase 4 (API 라우터) | 부분 완료 | `api/text2sql.py`, `api/feedback.py` 구현, `meta/events/history` 라우터 미구현 |
+| Phase 5 (데이터 계층) | 부분 완료 | `core/synapse_client.py`, `core/query_history.py` 존재하나 mock 기반 |
+| Phase 6 (도메인 적응) | 부분 완료 | `core/value_mapping.py`/`sql_guard.py` 반영, 도메인 데이터 세트 고도화 미완 |
+| Phase 7 (인증/보안) | 부분 완료 | `core/auth.py`, `core/security.py` 존재. 실서비스 JWT/DB 계정 분리 미완 |
+| Phase 8 (테스트/검증) | 부분 완료 | `tests/unit/` 존재. 통합/성능 검증은 별도 진행 필요 |
+
 ### Phase 1: 구조 셋업 (1~2일)
 
 | 단계 | 작업 | 상태 |
 |------|------|------|
-| 1.1 | 디렉터리 구조 생성 (routers/core/pipelines/models) | 미착수 |
-| 1.2 | pyproject.toml 작성 (의존성 정의) | 미착수 |
-| 1.3 | config.py 작성 (환경 변수 관리) | 미착수 |
+| 1.1 | 디렉터리 구조 생성 (routers/core/pipelines/models) | 완료 |
+| 1.2 | pyproject.toml 작성 (의존성 정의) | 부분 완료 (`requirements.txt` 사용) |
+| 1.3 | config.py 작성 (환경 변수 관리) | 완료 |
 | 1.4 | Dockerfile / docker-compose.yml 작성 | 미착수 |
-| 1.5 | 기본 main.py (FastAPI 앱 뼈대) | 미착수 |
+| 1.5 | 기본 main.py (FastAPI 앱 뼈대) | 완료 |
 
 ### Phase 2: 코어 모듈 이식 (3~5일)
 

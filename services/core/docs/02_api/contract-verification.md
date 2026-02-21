@@ -23,3 +23,10 @@ This document verifies the API contracts described in `gateway-api.md`, `process
 
 ## Conclusion
 The API contracts reflect a standardized REST architecture augmented by SSEs for live streams. They are cleared for implementation in subsequent sprints.
+
+## 4. Cross-Service Contract Checks (2026-02-22)
+- [x] Core Gateway `graph/ontology` proxy routes map to Synapse v3 paths and preserve tenant headers.
+- [x] Live HTTP E2E validated for Core -> Synapse (`tests/integration/test_e2e_gateway_graph_ontology_live.py`).
+- [x] Live HTTP E2E validated for Core -> Synapse EventLog/ProcessMining proxy routes (`tests/integration/test_e2e_gateway_eventlog_mining_live.py`).
+- [x] Live HTTP E2E validated for Core -> Synapse Extraction/Schema-Edit proxy routes (`tests/integration/test_e2e_gateway_extraction_schema_live.py`).
+- [x] Live HTTP E2E validated for Oracle -> Synapse(meta) and Oracle -> Core(events/watch-agent) (`services/oracle/tests/integration/test_cross_service_contract_live.py`).

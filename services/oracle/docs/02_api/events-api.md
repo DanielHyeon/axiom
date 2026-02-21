@@ -1,6 +1,6 @@
 # 이벤트 룰 CRUD API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented (Core Watch Proxy)`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -17,9 +17,8 @@
 
 ## 1. 이관 공지
 
-> **중요**: 이벤트 API는 Core Watch 모듈로 이관 예정이다.
-> 이관 완료 시까지 Oracle에서 직접 제공하며, 이관 후에는 Oracle이 Core Watch로 프록시한다.
-> API 경로와 요청/응답 형식은 이관 전후 동일하게 유지된다.
+> **중요**: Oracle 이벤트 API는 Core Watch API를 프록시한다.
+> Oracle은 `/text2sql/events/*` 경로를 유지하고, 내부적으로 Core `/api/v1/watches/*`를 호출한다.
 > 상세: [01_architecture/cep-engine.md](../01_architecture/cep-engine.md)
 
 ---
@@ -28,16 +27,16 @@
 
 | Method | Path | 설명 | 이관 후 | 상태 | 근거(구현/티켓) |
 |--------|------|------|--------|------|------------------|
-| POST | `/text2sql/events/rules` | 이벤트 룰 생성 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| GET | `/text2sql/events/rules` | 이벤트 룰 목록 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| GET | `/text2sql/events/rules/{id}` | 이벤트 룰 상세 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| PUT | `/text2sql/events/rules/{id}` | 이벤트 룰 수정 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| DELETE | `/text2sql/events/rules/{id}` | 이벤트 룰 삭제 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| POST | `/text2sql/events/scheduler/start` | 스케줄러 시작 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| POST | `/text2sql/events/scheduler/stop` | 스케줄러 중지 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| GET | `/text2sql/events/scheduler/status` | 스케줄러 상태 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| GET | `/text2sql/events/stream/alarms` | SSE 알림 스트림 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
-| POST | `/text2sql/watch-agent/chat` | 감시 에이전트 대화 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| POST | `/text2sql/events/rules` | 이벤트 룰 생성 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| GET | `/text2sql/events/rules` | 이벤트 룰 목록 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| GET | `/text2sql/events/rules/{id}` | 이벤트 룰 상세 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| PUT | `/text2sql/events/rules/{id}` | 이벤트 룰 수정 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| DELETE | `/text2sql/events/rules/{id}` | 이벤트 룰 삭제 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| POST | `/text2sql/events/scheduler/start` | 스케줄러 시작 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| POST | `/text2sql/events/scheduler/stop` | 스케줄러 중지 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| GET | `/text2sql/events/scheduler/status` | 스케줄러 상태 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| GET | `/text2sql/events/stream/alarms` | SSE 알림 스트림 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
+| POST | `/text2sql/watch-agent/chat` | 감시 에이전트 대화 | Core Watch | Implemented | `services/oracle/app/api/events.py` |
 
 ---
 
@@ -109,6 +108,7 @@
 ### 4.1 설명
 
 SSE(Server-Sent Events) 스트림으로 실시간 알림을 수신한다.
+Oracle은 이 요청을 Core `/api/v1/watches/stream`으로 프록시하며, `token` 쿼리 파라미터를 함께 전달한다.
 
 ### 4.2 응답 (text/event-stream)
 
@@ -152,7 +152,7 @@ data: {"rule_id": "rule_20240115_002", ...}
             "name": "매출 감소 부서 감시",
             "sql": "SELECT ...",
             "schedule": {"type": "interval", "value": "1h"},
-            "condition": {"type": "row_count", "operator": "gt", "threshold": 0}
+            "condition": {"type": "threshold", "field": "change_rate", "operator": "lte", "threshold": -0.1}
         },
         "action_required": "confirm",
         "session_id": "watch_session_001"

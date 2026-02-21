@@ -1,5 +1,8 @@
 # 피드백 + 이력 API
 
+> 구현 상태 태그: `Partially Implemented`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - 사용자가 SQL 품질에 대한 피드백을 어떻게 제출하는가?
@@ -13,15 +16,15 @@
 
 ## 1. 엔드포인트 요약
 
-| Method | Path | 설명 | 인증 |
-|--------|------|------|------|
-| POST | `/text2sql/feedback` | SQL 피드백 제출 | Required |
-| GET | `/text2sql/history` | 쿼리 이력 조회 | Required |
-| GET | `/text2sql/history/{id}` | 특정 이력 상세 | Required |
+| Method | Path | 설명 | 인증 | 상태 | 근거 |
+|--------|------|------|------|------|------|
+| POST | `/feedback` | SQL 피드백 제출 | Required | Implemented | `services/oracle/app/api/feedback.py` |
+| GET | `/text2sql/history` | 쿼리 이력 조회 | Required | Planned | `services/oracle/docs/06_data/query-history.md` |
+| GET | `/text2sql/history/{id}` | 특정 이력 상세 | Required | Planned | `services/oracle/docs/06_data/query-history.md` |
 
 ---
 
-## 2. POST /text2sql/feedback
+## 2. POST /feedback
 
 ### 2.1 설명
 
@@ -49,18 +52,11 @@
 
 ```json
 {
-    "success": true,
-    "data": {
-        "feedback_id": "fb_20240115_xyz789",
-        "query_id": "q_20240115_abc123",
-        "rating": "positive",
-        "impact": {
-            "query_verified": true,
-            "confidence_updated": 0.95
-        }
-    }
+    "success": true
 }
 ```
+
+> 주의: 현재 구현은 최소 저장 성공 여부만 반환한다.
 
 ### 2.4 피드백 처리 흐름
 
@@ -77,7 +73,7 @@
 
 ---
 
-## 3. GET /text2sql/history
+## 3. GET /text2sql/history (Planned)
 
 ### 3.1 설명
 
@@ -140,7 +136,7 @@
 
 ---
 
-## 4. GET /text2sql/history/{id}
+## 4. GET /text2sql/history/{id} (Planned)
 
 ### 4.1 설명
 
@@ -187,7 +183,7 @@
 
 | 결정 | 근거 |
 |------|------|
-| 이력은 SQLite -> PostgreSQL로 이관 | SQLite는 동시 쓰기에 취약, PostgreSQL은 Core와 통합 |
+| 이력 저장소는 PostgreSQL 표준으로 운영 | SQLite는 K-AIR 레거시 저장소이며 동시 쓰기에 취약 |
 | 피드백은 Synapse API 경유로 그래프 저장소에 반영 | 벡터 검색에서 피드백이 반영된 쿼리가 우선 검색되도록 |
 
 ## 관련 문서

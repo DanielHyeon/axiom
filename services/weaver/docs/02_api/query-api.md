@@ -1,6 +1,6 @@
 # 쿼리 실행 API
 
-> 구현 상태 태그: `Partial`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 <!-- affects: frontend, backend, llm -->
@@ -20,12 +20,12 @@
 
 | 메서드 | 경로 | 설명 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------------------|
-| `POST` | `/api/query` | MindsDB SQL 쿼리 실행 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/query/status` | MindsDB 서버 상태 확인 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `POST` | `/api/query/materialized-table` | 쿼리 결과를 물리화 테이블로 생성 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/query/models` | MindsDB ML 모델 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/query/jobs` | MindsDB 스케줄 작업 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/query/knowledge-bases` | MindsDB 지식 베이스 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/query` | MindsDB SQL 쿼리 실행 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/status` | MindsDB 서버 상태 확인 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/query/materialized-table` | 쿼리 결과를 물리화 테이블로 생성 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/models` | MindsDB ML 모델 목록 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/jobs` | MindsDB 스케줄 작업 목록 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/knowledge-bases` | MindsDB 지식 베이스 목록 | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 
 ---
 
@@ -81,7 +81,6 @@ MindsDB를 통해 SQL 쿼리를 실행한다. 단일 DB 쿼리뿐 아니라, **�
 | 400 | `INVALID_SQL` | SQL 문법 오류 |
 | 400 | `EMPTY_QUERY` | 빈 쿼리 |
 | 404 | `DATABASE_NOT_FOUND` | 지정한 데이터베이스가 MindsDB에 없음 |
-| 408 | `QUERY_TIMEOUT` | 쿼리 타임아웃 (120초 초과) |
 | 500 | `EXECUTION_ERROR` | 쿼리 실행 중 에러 |
 | 503 | `MINDSDB_UNAVAILABLE` | MindsDB 서버 접근 불가 |
 
@@ -116,6 +115,9 @@ MindsDB를 통해 SQL 쿼리를 실행한다. 단일 DB 쿼리뿐 아니라, **�
 ### 2.2 GET /api/query/status
 
 MindsDB 서버의 현재 상태를 확인한다.
+
+- `models_count`는 현재 테넌트 기준 모델 수를 집계한다.
+- `uptime_seconds`와 `response_time_ms`는 Weaver 런타임 기준 계산값이다.
 
 **응답 예시** (정상):
 
@@ -211,6 +213,8 @@ MindsDB에 등록된 ML 모델 목록을 반환한다.
 
 MindsDB 스케줄 작업 목록을 반환한다.
 
+- 현재 구현에서는 `POST /api/query/materialized-table` 실행 시 job 이력이 생성되며, 테넌트별로 조회된다.
+
 **응답 예시**:
 
 ```json
@@ -256,10 +260,8 @@ MindsDB 지식 베이스 목록을 반환한다.
 
 | 항목 | 값 | 설명 |
 |------|-----|------|
-| MindsDB API 타임아웃 | 120초 | httpx 클라이언트 타임아웃 |
-| 쿼리 실행 타임아웃 | 120초 | MindsDB API 타임아웃과 동일 |
-| 헬스체크 타임아웃 | 10초 | 빠른 응답 필요 |
-| 연결 테스트 타임아웃 | 30초 | 네트워크 지연 고려 |
+| MindsDB API 타임아웃 | `MINDSDB_TIMEOUT` 환경변수 (기본 15초) | httpx 클라이언트 타임아웃 |
+| 쿼리 SQL 길이 제한 | 20,000자 | 요청 모델에서 강제 |
 
 **금지사항**: 클라이언트에서 타임아웃 값을 지정할 수 없다. 서버 설정만 사용한다.
 
@@ -276,7 +278,8 @@ MindsDB 지식 베이스 목록을 반환한다.
 ### 필수사항
 
 - 모든 쿼리는 감사 로그에 기록한다 (사용자, 쿼리, 시각, 실행 시간)
-- LIMIT 없는 SELECT는 서버에서 기본 LIMIT 1000을 추가한다
+- write 엔드포인트(`POST /api/query`, `POST /api/query/materialized-table`)는 Idempotency-Key 및 분당 Rate Limit을 적용한다
+- 모든 응답은 `X-Request-Id` 헤더를 반환한다 (미지정 시 서버 생성)
 
 ---
 

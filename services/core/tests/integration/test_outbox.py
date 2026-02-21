@@ -1,15 +1,10 @@
 import pytest
 import pytest_asyncio
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy import select
 from app.models.base_models import Base, WorkItem, EventOutbox
 from app.services.process_service import ProcessService
 from app.core.middleware import _tenant_id
-
-# In-memory SQLite for testing Async ORM
-TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
-engine = create_async_engine(TEST_DB_URL, echo=False)
-AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+from app.core.database import engine, AsyncSessionLocal
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():

@@ -1,14 +1,19 @@
 import pytest
-import asyncio
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 from app.core.sql_guard import sql_guard
-from app.pipelines.nl2sql_pipeline import nl2sql_pipeline
 
-client = TestClient(app)
 
-def test_health_live():
-    res = client.get("/health/live")
+@pytest_asyncio.fixture
+async def ac():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
+
+
+@pytest.mark.asyncio
+async def test_health_live(ac: AsyncClient):
+    res = await ac.get("/health/live")
     assert res.status_code == 200
     assert res.json()["status"] == "alive"
 
@@ -18,13 +23,14 @@ def test_sql_guard_blocks_destructive_keywords():
     assert sql_guard.guard_sql("DROP TABLE foo").status == "REJECT"
     assert sql_guard.guard_sql("UPDATE foo SET bar=1").status == "REJECT"
 
-def test_text2sql_ask_endpoint():
+@pytest.mark.asyncio
+async def test_text2sql_ask_endpoint(ac: AsyncClient):
     payload = {
         "question": "Show me everything",
         "datasource_id": "test",
         "options": {"row_limit": 1000}
     }
-    res = client.post("/text2sql/ask", json=payload)
+    res = await ac.post("/text2sql/ask", json=payload)
     assert res.status_code == 200
     data = res.json()
     assert data["success"] == True

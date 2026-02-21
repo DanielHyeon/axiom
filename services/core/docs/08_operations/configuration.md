@@ -13,6 +13,9 @@
 
 ## 1. 환경 변수 목록
 
+운영/개발/통합 테스트는 모두 PostgreSQL(`DATABASE_URL`) 기준으로 동작한다.
+SQLite 기반 테스트 경로는 유지하지 않는다.
+
 ### 1.1 필수 환경 변수
 
 | 변수명 | 설명 | 예시 | 시크릿 |
@@ -57,6 +60,7 @@
 # app/core/config.py
 
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     """환경 설정 - 모든 설정은 여기에 정의"""
@@ -118,9 +122,10 @@ class Settings(BaseSettings):
     LANGCHAIN_TRACING_V2: bool = False
     LANGCHAIN_API_KEY: str = ""
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+    )
 
 settings = Settings()
 ```

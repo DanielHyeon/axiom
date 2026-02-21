@@ -32,34 +32,20 @@
 
 | 변수 | 설명 | 예시 |
 |------|------|------|
-| `ORACLE_SYNAPSE_BASE_URL` | Synapse API base URL | `http://synapse:8000/api/v1` |
-| `ORACLE_SYNAPSE_SERVICE_TOKEN` | Synapse 호출용 서비스 토큰 | `oracle-service-token` |
-| `ORACLE_TARGET_DB_URL` | Target DB 접속 URL | `postgresql://oracle_reader:pw@db:5432/business_db` |
-| `ORACLE_LLM_API_KEY` | OpenAI API 키 | `sk-...` |
+| `SYNAPSE_API_URL` | Synapse API base URL | `http://synapse:8000` |
+| `SYNAPSE_SCHEMA_EDIT_BASE` | Synapse Schema Edit base path | `/api/v3/synapse/schema-edit` |
+| `CORE_API_URL` | Core API base URL (Watch/Agent 프록시) | `http://core:8000` |
+| `SERVICE_TOKEN_ORACLE` | 내부 서비스 호출 토큰 | `local-oracle-token` |
+| `QUERY_HISTORY_DATABASE_URL` | Oracle query history PostgreSQL URL | `postgresql://oracle_rw:pw@db:5432/insolvency_os` |
 
 ### 2.2 선택 환경 변수 (기본값 있음)
 
 | 변수 | 기본값 | 설명 |
 |------|--------|------|
-| `ORACLE_LLM_PROVIDER` | `openai` | LLM 프로바이더 |
-| `ORACLE_LLM_MODEL` | `gpt-4o` | LLM 모델 |
-| `ORACLE_LLM_BASE_URL` | - | 호환 API base URL |
-| `ORACLE_EMBEDDING_PROVIDER` | `openai` | 임베딩 프로바이더 |
-| `ORACLE_EMBEDDING_MODEL` | `text-embedding-3-small` | 임베딩 모델 |
-| `ORACLE_SQL_TIMEOUT` | `30` | SQL 타임아웃 (초) |
-| `ORACLE_MAX_ROWS` | `10000` | 최대 결과 행 수 |
-| `ORACLE_ROW_LIMIT` | `1000` | API 응답 행 제한 |
-| `ORACLE_MAX_JOIN_DEPTH` | `5` | SQL JOIN 최대 깊이 |
-| `ORACLE_MAX_SUBQUERY_DEPTH` | `3` | 서브쿼리 최대 깊이 |
-| `ORACLE_VECTOR_TOP_K` | `10` | 벡터 검색 top_k |
-| `ORACLE_MAX_FK_HOPS` | `3` | FK 탐색 최대 홉 |
-| `ORACLE_JUDGE_ROUNDS` | `2` | 품질 게이트 심사 횟수 |
-| `ORACLE_CONF_THRESHOLD` | `0.90` | 캐시 신뢰도 임계값 |
-| `ORACLE_REDIS_URL` | - | Redis URL (선택) |
-| `ORACLE_LOG_LEVEL` | `INFO` | 로그 레벨 |
-| `ORACLE_HOST` | `0.0.0.0` | 바인드 호스트 |
-| `ORACLE_PORT` | `8000` | 서비스 포트 |
-| `ORACLE_WORKERS` | `4` | uvicorn 워커 수 |
+| `ENVIRONMENT` | `development` | 실행 환경 |
+| `JWT_SECRET_KEY` | `super-secret-key-for-local-dev` | JWT 검증 키 |
+| `JWT_ALGORITHM` | `HS256` | JWT 알고리즘 |
+| `ORACLE_DATASOURCES_JSON` | 내장 샘플 1건 | Oracle 메타 API 데이터소스 목록(JSON 배열) |
 
 ---
 
@@ -112,10 +98,11 @@ docker build -t axiom/oracle:latest .
 docker run -d \
     --name oracle \
     -p 8002:8000 \
-    -e ORACLE_SYNAPSE_BASE_URL=http://synapse:8000/api/v1 \
-    -e ORACLE_SYNAPSE_SERVICE_TOKEN=oracle-service-token \
-    -e ORACLE_TARGET_DB_URL=postgresql://oracle_reader:pw@db:5432/business_db \
-    -e ORACLE_LLM_API_KEY=sk-xxx \
+    -e SYNAPSE_API_URL=http://synapse:8000 \
+    -e SYNAPSE_SCHEMA_EDIT_BASE=/api/v3/synapse/schema-edit \
+    -e CORE_API_URL=http://core:8000 \
+    -e SERVICE_TOKEN_ORACLE=oracle-service-token \
+    -e QUERY_HISTORY_DATABASE_URL=postgresql://oracle_rw:pw@db:5432/insolvency_os \
     axiom/oracle:latest
 ```
 
@@ -185,9 +172,9 @@ metadata:
   namespace: axiom
 type: Opaque
 stringData:
-  ORACLE_SYNAPSE_SERVICE_TOKEN: "oracle-service-token"
-  ORACLE_TARGET_DB_URL: "postgresql://oracle_reader:pw@db:5432/business_db"
-  ORACLE_LLM_API_KEY: "sk-xxx"
+  SERVICE_TOKEN_ORACLE: "oracle-service-token"
+  QUERY_HISTORY_DATABASE_URL: "postgresql://oracle_rw:pw@db:5432/insolvency_os"
+  JWT_SECRET_KEY: "change-me"
 ```
 
 ### 4.3 ConfigMap
@@ -199,12 +186,11 @@ metadata:
   name: oracle-config
   namespace: axiom
 data:
-  ORACLE_SYNAPSE_BASE_URL: "http://synapse.axiom.svc:8000/api/v1"
-  ORACLE_LLM_PROVIDER: "openai"
-  ORACLE_LLM_MODEL: "gpt-4o"
-  ORACLE_SQL_TIMEOUT: "30"
-  ORACLE_MAX_ROWS: "10000"
-  ORACLE_LOG_LEVEL: "INFO"
+  SYNAPSE_API_URL: "http://synapse.axiom.svc:8000"
+  SYNAPSE_SCHEMA_EDIT_BASE: "/api/v3/synapse/schema-edit"
+  CORE_API_URL: "http://core.axiom.svc:8000"
+  ENVIRONMENT: "production"
+  JWT_ALGORITHM: "HS256"
 ```
 
 ---
@@ -276,11 +262,12 @@ services:
     ports:
       - "8002:8000"
     environment:
-      - ORACLE_SYNAPSE_BASE_URL=http://synapse:8000/api/v1
-      - ORACLE_SYNAPSE_SERVICE_TOKEN=oracle-service-token
-      - ORACLE_TARGET_DB_URL=postgresql://oracle_reader:password@postgres:5432/business_db
-      - ORACLE_LLM_API_KEY=${OPENAI_API_KEY}
-      - ORACLE_LOG_LEVEL=DEBUG
+      - SYNAPSE_API_URL=http://synapse:8000
+      - SYNAPSE_SCHEMA_EDIT_BASE=/api/v3/synapse/schema-edit
+      - CORE_API_URL=http://core:8000
+      - SERVICE_TOKEN_ORACLE=oracle-service-token
+      - QUERY_HISTORY_DATABASE_URL=postgresql://oracle_rw:password@postgres:5432/insolvency_os
+      - ENVIRONMENT=development
     depends_on:
       - synapse
       - postgres
@@ -305,6 +292,20 @@ services:
 volumes:
   pg_data:
 ```
+
+---
+
+## 8. 검증 루틴
+
+```bash
+cd services/oracle
+python3 -m venv venv
+./venv/bin/pip install -r requirements.txt
+PYTHONPATH=. ./venv/bin/pytest -q tests/unit
+```
+
+- `pytest.ini`의 `pythonpath = .` 설정으로 모듈 import 경로를 고정한다.
+- 로컬/CI에서 PostgreSQL이 없으면 `query_history`는 메모리 fallback으로 API 경로 검증을 계속 수행한다.
 
 ---
 

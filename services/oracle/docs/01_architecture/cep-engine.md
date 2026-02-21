@@ -45,6 +45,8 @@ K-AIR `robo-data-text2sql-main`에는 **SimpleCEP** 엔진이 내장되어 있�
 └─────────────────────────────────────────────────────────────┘
 ```
 
+> 위 다이어그램의 SQLite는 K-AIR 레거시 구현을 설명한다. Axiom 운영 저장소 표준은 PostgreSQL이다.
+
 **K-AIR 구현 상세**:
 
 | 컴포넌트 | 파일 | 설명 |
@@ -140,8 +142,8 @@ K-AIR `robo-data-text2sql-main`에는 **SimpleCEP** 엔진이 내장되어 있�
 | 단계 | 작업 | 상태 |
 |------|------|------|
 | 1 | Oracle 내 SimpleCEP를 그대로 이식 (호환성 유지) | 미착수 |
-| 2 | Core Watch 모듈 기본 구조 설계 | 미착수 |
-| 3 | 이벤트 룰 API를 Core Watch로 이동 | 미착수 |
+| 2 | Core Watch 모듈 기본 구조 설계 | 완료 (Core 서비스 기준) |
+| 3 | 이벤트 룰 API를 Core Watch로 이동 | 진행중 (Core 구현, Oracle 연계 미완) |
 | 4 | Oracle의 이벤트 API를 Core Watch proxy로 전환 | 미착수 |
 | 5 | Oracle 내 SimpleCEP 코드 제거 | 미착수 |
 

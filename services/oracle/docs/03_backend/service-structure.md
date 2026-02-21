@@ -1,5 +1,7 @@
 # 서비스 내부 구조
 
+> 상태: 목표 구조(설계) 문서. 현재 구현 스냅샷은 `app/api/text2sql.py`, `app/api/feedback.py`, `app/api/health.py` 기준으로 확인한다.
+
 ## 이 문서가 답하는 질문
 
 - Oracle 서비스의 디렉터리 구조와 모듈 구성은?
@@ -26,9 +28,9 @@ services/oracle/
 │   │   ├── react.py               # POST /text2sql/react (NDJSON)
 │   │   ├── direct_sql.py          # POST /text2sql/direct-sql
 │   │   ├── meta.py                # GET /text2sql/meta/*
-│   │   ├── feedback.py            # POST /text2sql/feedback
+│   │   ├── feedback.py            # POST /feedback (현재 구현), /text2sql/feedback (목표 경로)
 │   │   ├── history.py             # GET /text2sql/history
-│   │   └── events.py              # /text2sql/events/* (Core Watch 이관 예정)
+│   │   └── events.py              # /text2sql/events/* (Core Watch 프록시)
 │   │
 │   ├── pipelines/                 # 파이프라인 계층 (워크플로우 오케스트레이션)
 │   │   ├── __init__.py
@@ -175,6 +177,7 @@ services/oracle/
 
 ```python
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class OracleSettings(BaseSettings):
     """Oracle 서비스 설정. 환경 변수로 오버라이드 가능."""
@@ -207,9 +210,10 @@ class OracleSettings(BaseSettings):
     judge_rounds: int = 2
     conf_threshold: float = 0.90
 
-    class Config:
-        env_prefix = "ORACLE_"
-        env_file = ".env"
+    model_config = ConfigDict(
+        env_prefix="ORACLE_",
+        env_file=".env",
+    )
 ```
 
 ### 4.2 환경 변수 매핑

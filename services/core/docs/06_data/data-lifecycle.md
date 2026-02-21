@@ -75,27 +75,26 @@
 
 ## 3. 마이그레이션 전략
 
-### 3.1 Alembic 사용
+### 3.1 제약/인덱스 마이그레이션
 
 ```
-[결정] K-AIR의 init.sql 단일 파일 방식 대신 Alembic 마이그레이션을 사용한다.
-[근거] 95KB init.sql은 버전 관리가 불가능하고, 점진적 스키마 변경을 지원하지 않는다.
+[결정] 제약/인덱스 변경은 버전 스크립트로 관리한다.
+[근거] 현재 Core 저장소에는 Alembic 디렉터리가 없으므로, 운영 반영 가능한 독립 스크립트를 우선 사용한다.
 
 명령어:
-  alembic revision --autogenerate -m "Add watch_subscriptions table"
-  alembic upgrade head
-  alembic downgrade -1
+  DATABASE_URL=postgresql+asyncpg://... python3 services/core/scripts/migrate_constraints_v1.py
 
-마이그레이션 파일 위치: db/migrations/versions/
+스크립트 위치:
+  services/core/scripts/migrate_constraints_v1.py
 ```
 
 ### 3.2 마이그레이션 규칙
 
 ```
-[필수] 모든 스키마 변경은 Alembic 마이그레이션으로 관리한다.
-[필수] 마이그레이션은 순방향(upgrade)과 역방향(downgrade) 모두 작성한다.
-[필수] 대량 데이터 마이그레이션은 별도 스크립트로 분리한다 (Alembic에 넣지 않음).
-[금지] 프로덕션 DB에 직접 DDL 실행 (반드시 Alembic 경유).
+[필수] 모든 스키마 변경은 버전 스크립트 또는 정식 마이그레이션 도구를 통해 관리한다.
+[필수] 스크립트는 idempotent 하게 작성한다 (`IF NOT EXISTS`, `DO $$ ... $$`).
+[필수] 대량 데이터 마이그레이션은 별도 스크립트로 분리한다.
+[금지] 프로덕션 DB에 수동 DDL 실행 (스크립트 없이 직접 실행 금지).
 [금지] 마이그레이션에서 데이터 삭제 (DROP COLUMN 등은 별도 검토 후 적용).
 ```
 

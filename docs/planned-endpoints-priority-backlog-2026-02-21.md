@@ -232,3 +232,64 @@
 2. P1은 Synapse(Event-log/Extraction)와 Oracle Meta를 우선 연결하여 Core Gateway 프록시 경로를 실사용 가능 상태로 전환
 3. P2는 Vision/Weaver 확장 기능으로 묶어 병렬 추진
 
+---
+
+## 6. 상태 업데이트 (2026-02-22)
+
+### 6.0 P0 구현 상태
+
+- [x] `P0-CORE-WATCH-BASE` 완료
+  - 구현: `services/core/app/api/watch/routes.py`
+  - 테스트: `services/core/tests/integration/test_e2e_watch_api.py`
+- [x] `P0-CORE-WATCH-SUBSCRIPTION` 완료
+  - 구현: `services/core/app/api/watch/routes.py`, `services/core/app/services/watch_service.py`
+  - 테스트: `services/core/tests/integration/test_e2e_watch_api.py`
+- [x] `P0-CORE-PROCESS-ESSENTIAL` 완료
+  - 구현: `services/core/app/api/process/routes.py`, `services/core/app/services/process_service.py`
+  - 테스트:
+    - `services/core/tests/integration/test_e2e_process_lifecycle.py`
+    - `services/core/tests/integration/test_e2e_process_submit.py`
+
+### 6.1 P1 구현 상태
+
+- [x] `P1-SYNAPSE-EVENTLOG` 완료
+  - 구현: `services/synapse/app/api/event_logs.py`
+  - 테스트: `services/synapse/tests/unit/test_event_log_api.py`
+- [x] `P1-SYNAPSE-EXTRACTION` 완료
+  - 구현: `services/synapse/app/api/extraction.py`
+  - 테스트: `services/synapse/tests/unit/test_extraction_api_full.py`
+- [x] `P1-SYNAPSE-SCHEMA-EDIT` 완료
+  - 구현: `services/synapse/app/api/schema_edit.py`
+  - 테스트: `services/synapse/tests/unit/test_schema_edit_api.py`
+- [x] `P1-ORACLE-META` 완료
+  - 구현: `services/oracle/app/api/meta.py`
+  - 테스트: `services/oracle/tests/unit/test_meta_api.py`
+- [x] `P1-CORE-GATEWAY-PROXY` 완료 (EventLog/ProcessMining/Extraction/Schema-Edit/Graph/Ontology)
+  - 구현: `services/core/app/api/gateway/routes.py`
+  - 단위 테스트: `services/core/tests/unit/test_gateway_routes.py`
+  - 라이브 E2E:
+    - `services/core/tests/integration/test_e2e_gateway_eventlog_mining_live.py`
+    - `services/core/tests/integration/test_e2e_gateway_extraction_schema_live.py`
+    - `services/core/tests/integration/test_e2e_gateway_graph_ontology_live.py`
+
+### 6.2 잔여 우선순위
+
+- `P2-CORE-AGENT-MCP` 완료
+  - 구현: `services/core/app/api/agent/routes.py`, `services/core/app/services/agent_service.py`
+  - 테스트: `services/core/tests/integration/test_e2e_agent_api.py`
+- `P2-ORACLE-EVENTS` 완료 (Core Watch Proxy 기준)
+  - 구현: `services/oracle/app/api/events.py`
+  - 테스트: `services/oracle/tests/unit/test_events_api.py`
+- `P2-VISION-WHATIF-FULL` 완료
+  - 구현: `services/vision/app/api/what_if.py`, `services/vision/app/services/vision_runtime.py`
+  - 테스트: `services/vision/tests/unit/test_vision_p2_api_full.py`
+- `P2-VISION-OLAP` 완료
+  - 구현: `services/vision/app/api/olap.py`
+  - 테스트: `services/vision/tests/unit/test_vision_p2_api_full.py`
+- `P2-WEAVER-DATASOURCE-QUERY` 완료
+  - 구현: `services/weaver/app/api/datasource.py`, `services/weaver/app/api/query.py`
+  - 테스트: `services/weaver/tests/unit/test_weaver_p2_api_full.py`
+- `P2-WEAVER-METADATA-CATALOG` 완료
+  - 구현: `services/weaver/app/api/metadata_catalog.py`
+  - 테스트: `services/weaver/tests/unit/test_weaver_p2_api_full.py`
+- `P2` 잔여: 없음 (백로그 기준)

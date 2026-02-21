@@ -191,6 +191,7 @@ async def get_case_ontology(
 ```python
 # app/config.py
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
@@ -231,9 +232,10 @@ class Settings(BaseSettings):
     vector_search_min_score: float = 0.7
     fk_max_hops: int = 3
 
-    class Config:
-        env_file = ".env"
-        env_prefix = "SYNAPSE_"
+    model_config = ConfigDict(
+        env_file=".env",
+        env_prefix="SYNAPSE_",
+    )
 ```
 
 ---

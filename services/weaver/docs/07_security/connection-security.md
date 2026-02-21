@@ -202,6 +202,7 @@ class Settings(BaseSettings):
   - 읽기 전용 사용자로 연결
   - 인트로스펙션 완료 후 풀 해제
   - 연결 정보를 에러 메시지에 포함하지 않음
+  - 외부 서비스 오류 응답은 `***REDACTED***` 마스킹 후 반환
 ```
 
 ---
@@ -212,13 +213,10 @@ class Settings(BaseSettings):
 # Production CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "https://app.axiom.kr",
-        "https://canvas.axiom.kr",
-    ],
+    allow_origins=settings.weaver_cors_allowed_origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PUT", "DELETE"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_methods=settings.weaver_cors_allowed_methods,
+    allow_headers=settings.weaver_cors_allowed_headers,
 )
 ```
 
@@ -226,6 +224,7 @@ app.add_middleware(
 
 - `allow_origins=["*"]`는 **개발 환경에서도 사용하지 않는다**
 - 명시적으로 허용된 도메인만 CORS 허용
+- 환경변수 `WEAVER_CORS_ALLOWED_ORIGINS`에서 `*` 값은 런타임에서 자동 제거된다
 
 ---
 

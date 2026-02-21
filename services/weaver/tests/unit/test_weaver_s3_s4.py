@@ -13,6 +13,27 @@ async def test_schema_introspector_mapping():
     assert graph.nodes[0].source_table == "users"
     assert graph.nodes[0].properties[0].name == "id"
 
+
+@pytest.mark.asyncio
+async def test_schema_introspector_mapping_with_columns():
+    raw_schema = {
+        "tables": [
+            {
+                "name": "user_orders",
+                "columns": [
+                    {"name": "id", "type": "uuid", "nullable": False},
+                    {"name": "order_total", "type": "numeric", "nullable": False},
+                ],
+            }
+        ]
+    }
+    graph = await schema_introspector.introspect(raw_schema)
+
+    assert len(graph.nodes) == 1
+    assert graph.nodes[0].label == "UserOrders"
+    assert graph.nodes[0].source_table == "user_orders"
+    assert [p.name for p in graph.nodes[0].properties] == ["id", "order_total"]
+
 @pytest.mark.asyncio
 async def test_metadata_enrichment_llm_tags():
     node = NodeDefinition(

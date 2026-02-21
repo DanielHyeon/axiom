@@ -1,5 +1,8 @@
 # NL2SQL API 스펙
 
+> 구현 상태 태그: `Implemented (Mock-backed)`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - NL2SQL 관련 API 엔드포인트의 정확한 요청/응답 형식은?
@@ -14,11 +17,13 @@
 
 ## 1. 엔드포인트 요약
 
-| Method | Path | 설명 | 인증 |
-|--------|------|------|------|
-| POST | `/text2sql/ask` | NL2SQL 단일 변환+실행+시각화 | Required |
-| POST | `/text2sql/react` | ReAct 다단계 추론 (NDJSON 스트림) | Required |
-| POST | `/text2sql/direct-sql` | SQL 직접 실행 | Required + Admin |
+| Method | Path | 설명 | 인증 | 상태 | 근거 |
+|--------|------|------|------|------|------|
+| POST | `/text2sql/ask` | NL2SQL 단일 변환+실행 | Required | Implemented | `services/oracle/app/api/text2sql.py` |
+| POST | `/text2sql/react` | ReAct 다단계 추론 (NDJSON 스트림) | Required | Implemented | `services/oracle/app/api/text2sql.py` |
+| POST | `/text2sql/direct-sql` | SQL 직접 실행 | Required + Admin | Implemented | `services/oracle/app/api/text2sql.py` |
+
+> 현재 구현은 외부 DB/LLM 연동 전 단계의 mock 기반 동작을 포함한다.
 
 ### 외부 의존성
 

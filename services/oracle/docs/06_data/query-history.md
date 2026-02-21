@@ -3,7 +3,7 @@
 ## 이 문서가 답하는 질문
 
 - 쿼리 이력은 어디에 저장되는가?
-- K-AIR SQLite에서 Axiom PostgreSQL로 어떻게 전환하는가?
+- K-AIR(SQLite) 레거시와 Axiom(PostgreSQL) 스키마는 무엇이 다른가?
 - 이력 데이터의 보존 정책은?
 
 <!-- affects: 02_api, 03_backend -->
@@ -11,9 +11,9 @@
 
 ---
 
-## 1. 현재 상태: SQLite (K-AIR 원본)
+## 1. 레거시 참고: SQLite (K-AIR 원본)
 
-K-AIR `history.py`에서는 SQLite를 사용하여 쿼리 이력을 저장한다.
+K-AIR `history.py`는 과거 SQLite를 사용했다. Axiom Oracle의 저장소 표준은 PostgreSQL이다.
 
 ### 1.1 SQLite 스키마
 
@@ -62,7 +62,7 @@ CREATE INDEX idx_feedback_query ON query_feedback(query_id);
 
 ---
 
-## 2. 이관 대상: PostgreSQL (Axiom)
+## 2. 현재 표준: PostgreSQL (Axiom)
 
 ### 2.1 PostgreSQL 스키마
 
@@ -167,16 +167,16 @@ DROP TABLE IF EXISTS oracle.query_history_2023_01;
 
 ---
 
-## 4. 이관 절차
+## 4. 이관 절차 (레거시 참고)
 
-> 기준일: 2026-02-19
+> 기준일: 2026-02-21
 
 | 단계 | 작업 | 상태 | 완료 기준 |
 |------|------|------|----------|
 | 1 | PostgreSQL 스키마 생성 | 설계 완료 | DDL 리뷰 통과 + 테스트 DB 적용 |
-| 2 | Repository 패턴 구현 (SQLite/PG 추상화) | 설계 완료 | `HistoryRepository` 인터페이스 + PG 구현체 작성 |
+| 2 | Repository 패턴 구현 (SQLite/PG 추상화) | 부분 완료 | `query_history.py` mock 구현 + 실제 PostgreSQL 영속화 전환 |
 | 3 | 기존 SQLite 데이터 마이그레이션 스크립트 | 구현 예정 | Dry-run/실행 로그/롤백 스크립트 준비 |
-| 4 | PostgreSQL Repository로 전환 | 구현 예정 | Dual-write 1주 검증 후 Read 경로 전환 |
+| 4 | PostgreSQL Repository로 전환 | 구현 예정 | mock 저장소 제거 + Read/Write 경로 전환 |
 | 5 | SQLite 코드 제거 | 구현 예정 | 2주 무결성 검증 후 코드/의존성 제거 |
 
 ### 4.1 컷오버 전략

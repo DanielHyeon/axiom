@@ -19,9 +19,11 @@ class AuthService:
             role = "viewer"
         elif "staff" in token.lower():
             role = "staff"
-            
+
+        normalized = token.lower().strip()
+        user_id = uuid.uuid5(uuid.NAMESPACE_DNS, f"vision-user:{normalized}")
         return CurrentUser(
-            user_id=uuid.uuid4(),
+            user_id=user_id,
             tenant_id=uuid.UUID('12345678-1234-5678-1234-567812345678'),
             role=role
         )

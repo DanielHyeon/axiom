@@ -1,7 +1,7 @@
 # Axiom Core - API Gateway
 
-> 구현 상태 태그: `Partial`
-> 기준일: 2026-02-21
+> 구현 상태 태그: `Implemented` (Core↔Synapse Gateway 범위)
+> 기준일: 2026-02-22
 
 ## 이 문서가 답하는 질문
 
@@ -55,8 +55,12 @@ process-gpt-gs-main/gateway/
 | `/api/v1/vision/**` | Vision (프록시) | 분석 API | 180s |
 | `/api/v1/oracle/**` | Oracle (프록시) | NL2SQL API | 60s |
 | `/api/v1/synapse/**` | Synapse (프록시) | 온톨로지 API | 60s |
+| `/api/v1/extraction/**` | Synapse (프록시) | 문서 온톨로지 추출 API | 180s |
 | `/api/v1/event-logs/**` | Core -> Synapse | 이벤트 로그 수집 (업로드/DB연결) | 300s |
 | `/api/v1/process-mining/**` | Synapse (프록시) | 프로세스 마이닝 API | 180s |
+| `/api/v1/schema-edit/**` | Synapse (프록시) | 스키마 편집 API | 180s |
+| `/api/v1/graph/**` | Core -> Synapse | 그래프 검색/경로 탐색 프록시 | 180s |
+| `/api/v1/ontology/**` | Core -> Synapse | 온톨로지 CRUD/조회 프록시 | 180s |
 | `/api/v1/weaver/**` | Weaver (프록시) | 데이터 패브릭 API | 60s |
 
 > **복원력 참조**: 각 프록시 경로의 Circuit Breaker 설정, Fallback 전략, Retry 정책은 [resilience-patterns.md](../01_architecture/resilience-patterns.md) §2~4를 참조한다.
@@ -331,15 +335,15 @@ app.add_middleware(
 
 | 메서드 | 경로 | 설명 | Content-Type | 상태 | 근거(구현/티켓) |
 |--------|------|------|-------------|------|------------------|
-| POST | `/api/v1/event-logs/upload` | XES/CSV 파일 업로드 | `multipart/form-data` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/event-logs/db-connect` | DB 연결로 이벤트 로그 수집 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/event-logs` | 수집된 이벤트 로그 목록 조회 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/event-logs/{id}` | 이벤트 로그 상세 조회 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| DELETE | `/api/v1/event-logs/{id}` | 이벤트 로그 삭제 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/event-logs/{id}/preview` | 이벤트 로그 미리보기 (상위 100건) | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| PUT | `/api/v1/event-logs/{id}/column-mapping` | CSV 컬럼 매핑 설정/수정 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/event-logs/{id}/refresh` | 이벤트 로그 재수집/갱신 트리거 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/event-logs/export-bpm` | BPM 실행 이력을 이벤트 로그로 내보내기 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/event-logs/upload` | XES/CSV 파일 업로드 | `multipart/form-data` | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/event-logs/db-connect` | DB 연결로 이벤트 로그 수집 | `application/json` | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/event-logs` | 수집된 이벤트 로그 목록 조회 | - | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/event-logs/{log_id}` | 이벤트 로그 상세 조회 | - | Implemented | `services/core/app/api/gateway/routes.py` |
+| DELETE | `/api/v1/event-logs/{log_id}` | 이벤트 로그 삭제 | - | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/event-logs/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | - | Implemented | `services/core/app/api/gateway/routes.py` |
+| PUT | `/api/v1/event-logs/{log_id}/column-mapping` | CSV 컬럼 매핑 설정/수정 | `application/json` | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/event-logs/{log_id}/refresh` | 이벤트 로그 재수집/갱신 트리거 | `application/json` | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/event-logs/export-bpm` | BPM 실행 이력을 이벤트 로그로 내보내기 | `application/json` | Implemented | `services/core/app/api/gateway/routes.py` |
 
 #### 파일 업로드 요청/응답 예시
 
@@ -424,18 +428,144 @@ Content-Disposition: form-data; name="description"
 
 | 메서드 | 경로 | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|---------|------|------------------|
-| POST | `/api/v1/process-mining/discover` | 프로세스 모델 발견 | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/process-mining/conformance` | 적합성 검사 | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/process-mining/bottlenecks` | 병목 분석 (구 `/performance` 별칭도 유지) | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/process-mining/variants` | 프로세스 변형(Variant) 목록 조회 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/process-mining/bottlenecks` | 병목 분석 결과 조회 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/process-mining/tasks/{task_id}` | 비동기 작업 폴링 (마이닝 태스크 상태) | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/process-mining/results/{id}` | 마이닝 결과 조회 | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| GET | `/api/v1/process-mining/statistics/{log_id}` | 이벤트 로그 기본 통계 조회 | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/process-mining/bpmn/export` | 발견 모델을 BPMN으로 내보내기 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
-| POST | `/api/v1/process-mining/import-model` | 발견 모델을 BPM에 임포트 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/process-mining/discover` | 프로세스 모델 발견 | 180s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/process-mining/conformance` | 적합성 검사 | 180s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/process-mining/bottlenecks` | 병목 분석 태스크 시작 (`202 Accepted`) | 180s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/process-mining/performance` | 성능 분석 태스크 시작 (`202 Accepted`) | 180s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/variants` | 프로세스 변형(Variant) 목록 조회 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/bottlenecks` | 병목 분석 결과 조회 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/tasks/{task_id}` | 비동기 작업 폴링 (마이닝 태스크 상태) | 30s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/tasks/{task_id}/result` | 비동기 작업 결과 조회 | 30s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/results/{result_id}` | 마이닝 결과 조회 | 30s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/process-mining/statistics/{log_id}` | 이벤트 로그 기본 통계 조회 | 30s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/process-mining/bpmn/export` | 발견 모델을 BPMN으로 내보내기 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/process-mining/import-model` | 발견 모델을 BPM에 임포트 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
 
-> **참고**: `/api/v1/process-mining/performance`는 `/api/v1/process-mining/bottlenecks`의 레거시 별칭으로 유지된다. 신규 코드에서는 `/bottlenecks`(복수형)를 사용할 것. Synapse 서비스는 `/api/v1/...` 경로로 수신한다 (v3 아님).
+> **참고**: `/api/v1/process-mining/bottlenecks`와 `/api/v1/process-mining/performance`는 서로 다른 분석 태스크를 생성한다. 두 경로 모두 `202 Accepted`를 반환하며, 결과는 `/tasks/{task_id}` 폴링으로 조회한다.
+
+### 7.3.1 문서 추출 API (`/api/v1/extraction/*`)
+
+문서 추출 요청은 Synapse `/api/v3/synapse/extraction/*`로 프록시한다.
+
+| 메서드 | 경로 | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
+|--------|------|------|---------|------|------------------|
+| POST | `/api/v1/extraction/documents/{doc_id}/extract-ontology` | 비동기 추출 작업 시작 | 180s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/extraction/documents/{doc_id}/ontology-status` | 추출 진행 상태 조회 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/extraction/documents/{doc_id}/ontology-result` | 추출 결과 조회 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| PUT | `/api/v1/extraction/ontology/{entity_id}/confirm` | HITL 개별 확정 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/extraction/cases/{case_id}/ontology/review` | HITL 일괄 검토 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| GET | `/api/v1/extraction/cases/{case_id}/review-queue` | HITL 검토 대기열 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/extraction/documents/{doc_id}/retry` | 추출 재시도 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+| POST | `/api/v1/extraction/documents/{doc_id}/revert-extraction` | Saga 보상 롤백 | 60s | Implemented | `services/core/app/api/gateway/routes.py` |
+
+### 7.3.2 그래프 검색 API (`/api/v1/graph/*`)
+
+그래프 검색 요청은 Synapse `/api/v3/synapse/graph/*`로 프록시한다.
+
+| 메서드 | 경로 | 대상 Synapse 경로 | 타임아웃 | 상태 |
+|--------|------|-------------------|---------|------|
+| POST | `/api/v1/graph/search` | `/api/v3/synapse/graph/search` | 180s | Implemented |
+| POST | `/api/v1/graph/vector-search` | `/api/v3/synapse/graph/vector-search` | 180s | Implemented |
+| POST | `/api/v1/graph/fk-path` | `/api/v3/synapse/graph/fk-path` | 180s | Implemented |
+| POST | `/api/v1/graph/ontology-path` | `/api/v3/synapse/graph/ontology-path` | 180s | Implemented |
+| GET | `/api/v1/graph/tables/{table_name}/related` | `/api/v3/synapse/graph/tables/{table_name}/related` | 60s | Implemented |
+| GET | `/api/v1/graph/stats` | `/api/v3/synapse/graph/stats` | 60s | Implemented |
+
+요청 예시:
+
+```json
+// POST /api/v1/graph/search
+{
+  "query": "프로세스 효율성",
+  "case_id": "case-live-1",
+  "options": {
+    "vector_search": {"enabled": true, "table_top_k": 5, "min_score": 0.7},
+    "fk_traversal": {"enabled": true, "max_hops": 3}
+  }
+}
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "data": {
+    "query": "프로세스 효율성",
+    "tables": {
+      "vector_matched": [],
+      "fk_related": []
+    }
+  }
+}
+```
+
+### 7.3.3 스키마 편집 API (`/api/v1/schema-edit/*`)
+
+스키마 편집 요청은 Synapse `/api/v3/synapse/schema-edit/*`로 프록시한다.
+
+| 메서드 | 경로 | 대상 Synapse 경로 | 타임아웃 | 상태 |
+|--------|------|-------------------|---------|------|
+| GET | `/api/v1/schema-edit/tables` | `/api/v3/synapse/schema-edit/tables` | 180s | Implemented |
+| GET | `/api/v1/schema-edit/tables/{table_name}` | `/api/v3/synapse/schema-edit/tables/{table_name}` | 180s | Implemented |
+| PUT | `/api/v1/schema-edit/tables/{table_name}/description` | `/api/v3/synapse/schema-edit/tables/{table_name}/description` | 180s | Implemented |
+| PUT | `/api/v1/schema-edit/columns/{table_name}/{column_name}/description` | `/api/v3/synapse/schema-edit/columns/{table_name}/{column_name}/description` | 180s | Implemented |
+| GET | `/api/v1/schema-edit/relationships` | `/api/v3/synapse/schema-edit/relationships` | 180s | Implemented |
+| POST | `/api/v1/schema-edit/relationships` | `/api/v3/synapse/schema-edit/relationships` | 180s | Implemented |
+| DELETE | `/api/v1/schema-edit/relationships/{rel_id}` | `/api/v3/synapse/schema-edit/relationships/{rel_id}` | 180s | Implemented |
+| POST | `/api/v1/schema-edit/tables/{table_name}/embedding` | `/api/v3/synapse/schema-edit/tables/{table_name}/embedding` | 180s | Implemented |
+| POST | `/api/v1/schema-edit/batch-update-embeddings` | `/api/v3/synapse/schema-edit/batch-update-embeddings` | 180s | Implemented |
+
+### 7.3.4 온톨로지 API (`/api/v1/ontology/*`)
+
+온톨로지 요청은 Synapse `/api/v3/synapse/ontology/*`로 프록시한다.
+
+| 메서드 | 경로 | 대상 Synapse 경로 | 타임아웃 | 상태 |
+|--------|------|-------------------|---------|------|
+| GET | `/api/v1/ontology` | `/api/v3/synapse/ontology/` | 180s | Implemented |
+| POST | `/api/v1/ontology/extract-ontology` | `/api/v3/synapse/ontology/extract-ontology` | 180s | Implemented |
+| GET | `/api/v1/ontology/cases/{case_id}/ontology` | `/api/v3/synapse/ontology/cases/{case_id}/ontology` | 180s | Implemented |
+| GET | `/api/v1/ontology/cases/{case_id}/ontology/summary` | `/api/v3/synapse/ontology/cases/{case_id}/ontology/summary` | 180s | Implemented |
+| GET | `/api/v1/ontology/cases/{case_id}/ontology/{layer}` | `/api/v3/synapse/ontology/cases/{case_id}/ontology/{layer}` | 180s | Implemented |
+| POST | `/api/v1/ontology/nodes` | `/api/v3/synapse/ontology/nodes` | 180s | Implemented |
+| GET | `/api/v1/ontology/nodes/{node_id}` | `/api/v3/synapse/ontology/nodes/{node_id}` | 180s | Implemented |
+| PUT | `/api/v1/ontology/nodes/{node_id}` | `/api/v3/synapse/ontology/nodes/{node_id}` | 180s | Implemented |
+| DELETE | `/api/v1/ontology/nodes/{node_id}` | `/api/v3/synapse/ontology/nodes/{node_id}` | 180s | Implemented |
+| POST | `/api/v1/ontology/relations` | `/api/v3/synapse/ontology/relations` | 180s | Implemented |
+| DELETE | `/api/v1/ontology/relations/{relation_id}` | `/api/v3/synapse/ontology/relations/{relation_id}` | 180s | Implemented |
+| GET | `/api/v1/ontology/nodes/{node_id}/neighbors` | `/api/v3/synapse/ontology/nodes/{node_id}/neighbors` | 180s | Implemented |
+| GET | `/api/v1/ontology/nodes/{node_id}/path-to/{target_id}` | `/api/v3/synapse/ontology/nodes/{node_id}/path-to/{target_id}` | 180s | Implemented |
+
+요청 예시:
+
+```json
+// POST /api/v1/ontology/nodes
+{
+  "id": "node-uuid-001",
+  "case_id": "case-live-1",
+  "layer": "resource",
+  "labels": ["Company"],
+  "properties": {
+    "name": "ACME",
+    "verified": true
+  }
+}
+```
+
+응답 예시:
+
+```json
+{
+  "success": true,
+  "data": {
+    "id": "node-uuid-001",
+    "case_id": "case-live-1",
+    "layer": "resource",
+    "labels": ["Company"],
+    "properties": {"name": "ACME", "verified": true}
+  }
+}
+```
 
 #### 프로세스 마이닝 SSE 이벤트 유형
 
@@ -447,7 +577,7 @@ Content-Disposition: form-data; name="description"
 | `mining:bottleneck` | 병목 감지 | `{"event_log_id": "uuid", "bottlenecks": [...]}` |
 | `mining:error` | 마이닝 오류 | `{"event_log_id": "uuid", "error": "..."}` |
 
-### 7.4 에러 코드 (이벤트 로그/프로세스 마이닝 관련)
+### 7.4 에러 코드 (이벤트 로그/프로세스 마이닝/그래프/온톨로지)
 
 | HTTP | 코드 | 설명 | 사용자 표시 |
 |------|------|------|-----------|
@@ -455,6 +585,10 @@ Content-Disposition: form-data; name="description"
 | 400 | MISSING_REQUIRED_COLUMNS | CSV 필수 컬럼 누락 | "case_id, activity, timestamp 컬럼이 필요합니다" |
 | 413 | FILE_TOO_LARGE | 파일 크기 초과 (500MB) | "파일 크기가 제한을 초과합니다" |
 | 422 | INSUFFICIENT_CASES | 마이닝에 필요한 최소 케이스 수 미달 | "최소 10개 이상의 케이스가 필요합니다" |
+| 400 | INVALID_GRAPH_QUERY | 그래프 검색 요청 파라미터 오류 | "검색 요청을 확인해주세요" |
+| 400 | INVALID_ONTOLOGY_PAYLOAD | 온톨로지 요청 본문 검증 실패 | "온톨로지 요청 형식을 확인해주세요" |
+| 404 | ONTOLOGY_NODE_NOT_FOUND | 온톨로지 노드를 찾을 수 없음 | "온톨로지 노드를 찾을 수 없습니다" |
+| 404 | GRAPH_TABLE_NOT_FOUND | FK 탐색 시작 테이블 없음 | "시작 테이블을 찾을 수 없습니다" |
 | 502 | SYNAPSE_MINING_ERROR | Synapse 프로세스 마이닝 실행 오류 | "프로세스 마이닝 중 오류가 발생했습니다" |
 
 ### 7.5 속도 제한 (이벤트 로그/프로세스 마이닝)
@@ -463,6 +597,8 @@ Content-Disposition: form-data; name="description"
 |----------|------|------|------|
 | `/api/v1/event-logs/upload` | 5 | 분당/사용자 | 대용량 파일 업로드 리소스 보호 |
 | `/api/v1/process-mining/**` | 10 | 분당/사용자 | Synapse 컴퓨팅 리소스 보호 |
+| `/api/v1/graph/**` | 30 | 분당/사용자 | 그래프 검색 남용 방지 |
+| `/api/v1/ontology/**` | 20 | 분당/사용자 | 온톨로지 변경 API 보호 |
 
 <!-- affects: frontend, backend, llm -->
 <!-- requires-update: 04_frontend/process-mining-ui.md, 03_backend/worker-system.md -->

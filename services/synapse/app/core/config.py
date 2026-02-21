@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
@@ -8,8 +9,8 @@ class Settings(BaseSettings):
     NEO4J_USER: str = "neo4j"
     NEO4J_PASSWORD: str = "password"
     SERVICE_TOKEN_ORACLE: str = "local-oracle-token"
+    SCHEMA_EDIT_DATABASE_URL: str = "postgresql://arkos:arkos@localhost:5432/insolvency_os"
 
-    class Config:
-        env_file = ".env"
+    model_config = ConfigDict(env_file=".env")
 
 settings = Settings()

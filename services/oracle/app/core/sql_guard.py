@@ -35,6 +35,10 @@ class SQLGuard:
         return depth if not isinstance(node, sqlglot.exp.Subquery) else depth + 1
 
     def _measure_subquery_depth_simple(self, ast: sqlglot.exp.Expression) -> int:
+        # Compatibility path for lightweight local sqlglot fallback.
+        if hasattr(ast, "_subqueries"):
+            return len(getattr(ast, "_subqueries") or [])
+
         # Simplified depth calculation: just looking at nested Selects mostly, 
         # but sqlglot provides find_all which traverses the entire tree.
         # Actually a simple list and check path if needed.

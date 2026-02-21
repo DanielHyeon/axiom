@@ -33,17 +33,25 @@ services:
     environment:
       - APP_ENV=development
       - MINDSDB_URL=http://mindsdb:47334
+      - WEAVER_EXTERNAL_MODE=true
+      - WEAVER_METADATA_EXTERNAL_MODE=true
+      - WEAVER_METADATA_PG_MODE=true
+      - WEAVER_REQUEST_GUARD_REDIS_MODE=true
+      - REDIS_URL=redis://redis:6379/0
+      - POSTGRES_DSN=postgresql://sample_user:sample_password@sample_pg:5432/sample_enterprise
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=weaver_dev_password
       - ENCRYPTION_KEY=dev_encryption_key_32chars
-      - CORS_ORIGINS=["http://localhost:3000"]
+      - WEAVER_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
       - LOG_LEVEL=DEBUG
     depends_on:
       mindsdb:
         condition: service_started
       neo4j:
         condition: service_healthy
+      redis:
+        condition: service_started
     volumes:
       - ./app:/app/app  # Hot reload
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -82,6 +90,11 @@ services:
       - POSTGRES_PASSWORD=sample_password
     volumes:
       - ./tests/fixtures/sample_schema.sql:/docker-entrypoint-initdb.d/init.sql
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
 
 volumes:
   mindsdb_data:
@@ -164,11 +177,26 @@ CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--worker
 |------|--------|------|
 | `APP_ENV` | `development` | 환경 (`development` / `staging` / `production`) |
 | `LOG_LEVEL` | `INFO` | 로그 레벨 |
+| `JWT_SECRET_KEY` | `weaver-dev-secret-change-me` | JWT 서명 키 |
+| `JWT_ALGORITHM` | `HS256` | JWT 알고리즘 |
+| `JWT_ISSUER` | `` | JWT issuer 검증값(선택) |
+| `JWT_AUDIENCE` | `` | JWT audience 검증값(선택) |
 | `MINDSDB_URL` | `http://localhost:47334` | MindsDB 서버 URL |
-| `MINDSDB_TIMEOUT` | `120` | MindsDB 쿼리 타임아웃 (초) |
+| `MINDSDB_TIMEOUT` | `15` | MindsDB 쿼리 타임아웃 (초) |
+| `MINDSDB_USER` | `` | MindsDB HTTP Basic Auth 사용자 (설정 시 인증 사용) |
+| `MINDSDB_PASSWORD` | `` | MindsDB HTTP Basic Auth 비밀번호 |
+| `WEAVER_EXTERNAL_MODE` | `false` | `true`면 `/api/datasources`, `/api/query`가 MindsDB 실서버와 동기화 |
+| `WEAVER_METADATA_EXTERNAL_MODE` | `false` | `true`면 `/api/v1/metadata/*`가 Neo4j 저장소를 사용 |
+| `WEAVER_METADATA_PG_MODE` | `false` | `true`면 `/api/v1/metadata/*`의 스냅샷/용어사전/통계가 Postgres 저장소를 사용 |
+| `WEAVER_REQUEST_GUARD_REDIS_MODE` | `false` | `true`면 Rate Limit/Idempotency 저장소로 Redis 사용 |
+| `REDIS_URL` | `redis://localhost:6379/0` | Request guard용 Redis URL |
+| `WEAVER_REQUEST_GUARD_IDEMPOTENCY_TTL_SECONDS` | `600` | Idempotency-Key 캐시 TTL(초) |
+| `POSTGRES_DSN` | `` | Postgres 영속 저장 DSN (`WEAVER_METADATA_PG_MODE=true`일 때 필수) |
 | `NEO4J_URI` | `bolt://localhost:7687` | Neo4j 연결 URI |
 | `NEO4J_USER` | `neo4j` | Neo4j 사용자 |
-| `CORS_ORIGINS` | `["http://localhost:3000"]` | 허용된 CORS 도메인 |
+| `WEAVER_CORS_ALLOWED_ORIGINS` | `https://app.axiom.kr,https://canvas.axiom.kr` | 허용된 CORS 도메인(콤마 구분, `*`는 무시) |
+| `WEAVER_CORS_ALLOWED_METHODS` | `GET,POST,PUT,DELETE,OPTIONS` | 허용된 CORS 메서드(콤마 구분) |
+| `WEAVER_CORS_ALLOWED_HEADERS` | `Authorization,Content-Type,X-Request-Id,Idempotency-Key` | 허용된 CORS 헤더(콤마 구분) |
 
 ### 3.3 프로덕션 전용
 
@@ -247,6 +275,7 @@ SHOW HANDLERS;
 | 항목 | 확인 |
 |------|------|
 | Weaver 헬스체크 엔드포인트 등록 | |
+| Weaver `/metrics` 스크레이프 등록 | |
 | MindsDB 상태 모니터링 | |
 | Neo4j 연결 모니터링 | |
 | 로그 수집 (Loki/ELK) 설정 | |
@@ -261,52 +290,81 @@ SHOW HANDLERS;
 
 ---
 
-## 6. 헬스체크
+## 6. 외부 연동 E2E 검증
+
+Weaver 외부 모드(MindsDB + Neo4j + Postgres)를 실제로 붙여 검증한다.
+
+### 6.1 실행 조건
+
+- `WEAVER_RUN_E2E=1`
+- `MINDSDB_URL`, `POSTGRES_DSN`, `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD` 설정
+- MindsDB/Neo4j/Postgres 컨테이너가 기동 중이어야 한다.
+- (선택) 데이터소스 연결 타깃 오버라이드: `WEAVER_E2E_DS_HOST`, `WEAVER_E2E_DS_PORT`, `WEAVER_E2E_DS_DATABASE`, `WEAVER_E2E_DS_USER`, `WEAVER_E2E_DS_PASSWORD`
+
+### 6.2 실행 명령
+
+```bash
+cd services/weaver
+WEAVER_RUN_E2E=1 \
+MINDSDB_URL=http://localhost:47334 \
+POSTGRES_DSN=postgresql://sample_user:sample_password@localhost:5433/sample_enterprise \
+NEO4J_URI=bolt://localhost:7687 \
+NEO4J_USER=neo4j \
+NEO4J_PASSWORD=weaver_dev_password \
+PYTHONPATH=. pytest -q tests/integration/test_external_modes_e2e.py
+```
+
+### 6.3 Exit Gate (권장)
+
+운영/CI 게이트는 skip을 허용하지 않고 live 통과만 허용한다.
+
+```bash
+cd services/weaver
+WEAVER_RUN_E2E=1 \
+MINDSDB_URL=http://localhost:47334 \
+POSTGRES_DSN=postgresql://sample_user:sample_password@localhost:5433/sample_enterprise \
+NEO4J_URI=bolt://localhost:7687 \
+NEO4J_USER=neo4j \
+NEO4J_PASSWORD=weaver_dev_password \
+make integration-external-exit-gate LOOPS=2
+```
+
+- 실행 스크립트: `scripts/weaver_external_exit_gate.py`
+- 동작:
+- 필수 env 누락 시 즉시 실패
+- `tests/integration/test_external_modes_e2e.py`를 반복 실행
+- 테스트가 skip되면 실패 처리
+
+### 6.4 기대 결과
+
+- 데이터소스 생성/삭제가 MindsDB와 동기화된다.
+- `/api/query`가 MindsDB 실서버에서 실행된다.
+- metadata snapshot/glossary/stats가 Postgres 영속 저장소를 통해 조회된다.
+- tenant A/B 교차 접근이 차단된다(다른 tenant의 datasource/detail=404, glossary/snapshot 조회=0/404).
+
+## 7. 헬스체크
 
 ```python
 # Kubernetes liveness probe
 # GET /health/live → 200 OK (서버 동작 중)
 
 # Kubernetes readiness probe
-# GET /health/ready → MindsDB + Neo4j 연결 확인
+# GET /health/ready → 활성화된 외부 의존성(MindsDB/Postgres/Neo4j) 연결 확인
 
 @app.get("/health/live")
 async def liveness():
     return {"status": "alive"}
 
-@app.get("/health/ready")
-async def readiness(request: Request):
-    mindsdb_ok = False
-    neo4j_ok = False
-
-    try:
-        health = await request.app.state.mindsdb.health_check()
-        mindsdb_ok = health["status"] == "healthy"
-    except Exception:
-        pass
-
-    try:
-        await request.app.state.neo4j.execute_query("RETURN 1")
-        neo4j_ok = True
-    except Exception:
-        pass
-
-    if mindsdb_ok and neo4j_ok:
-        return {"status": "ready", "mindsdb": "ok", "neo4j": "ok"}
-    else:
-        return JSONResponse(
-            status_code=503,
-            content={
-                "status": "not_ready",
-                "mindsdb": "ok" if mindsdb_ok else "error",
-                "neo4j": "ok" if neo4j_ok else "error",
-            },
-        )
+# 설정이 꺼진 의존성은 "disabled"로 표시되고 readiness 판정에서 제외됨
+# settings.external_mode -> mindsdb
+# settings.metadata_pg_mode -> postgres
+# settings.metadata_external_mode -> neo4j
+# 하나라도 "down"이면 503 + {"status":"degraded"}
 ```
 
 ---
 
-## 7. 관련 문서
+## 8. 관련 문서
 
 | 문서 | 설명 |
 |------|------|

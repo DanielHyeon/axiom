@@ -1,9 +1,14 @@
 import pytest
+import pytest_asyncio
 from app.core.sql_guard import sql_guard, GuardConfig
 from app.main import app
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 
-client = TestClient(app)
+
+@pytest_asyncio.fixture
+async def ac():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
 
 def test_sql_guard_ast_auto_limit():
     sql = "SELECT * FROM sales_records"
@@ -25,16 +30,18 @@ def test_sql_guard_ast_deep_subqueries():
     assert res.status == "REJECT"
     assert any("서브쿼리" in v for v in res.violations)
 
-def test_text2sql_api_pydantic_validation():
+@pytest.mark.asyncio
+async def test_text2sql_api_pydantic_validation(ac: AsyncClient):
     payload = {
         "question": "A", # Too short, requires 2+ chars
         "datasource_id": "test"
     }
-    res = client.post("/text2sql/ask", json=payload)
+    res = await ac.post("/text2sql/ask", json=payload)
     # FastApi pydantic validation should return 422 Unprocessable Entity
     assert res.status_code == 422
 
-def test_text2sql_api_valid_payload():
+@pytest.mark.asyncio
+async def test_text2sql_api_valid_payload(ac: AsyncClient):
     payload = {
         "question": "Show me everything",
         "datasource_id": "test",
@@ -42,7 +49,7 @@ def test_text2sql_api_valid_payload():
             "row_limit": 50
         }
     }
-    res = client.post("/text2sql/ask", json=payload)
+    res = await ac.post("/text2sql/ask", json=payload)
     assert res.status_code == 200
     data = res.json()
     assert data["success"] == True

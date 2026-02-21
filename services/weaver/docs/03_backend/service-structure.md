@@ -328,8 +328,18 @@ async def weaver_error_handler(request, exc: WeaverError):
 | Service에서 직접 HTTP/DB 호출을 하지 않는가? | Infrastructure 계층만 |
 | Pydantic 모델로 입력/출력이 정의되어 있는가? | 타입 안전성 |
 | 에러가 WeaverError 계층으로 처리되는가? | 표준 에러 형식 |
+| Circuit Breaker open 상태가 도메인 예외로 변환되는가? | `MindsDBUnavailableError`, `PostgresStoreUnavailableError`로 일관 처리 |
 | 비밀번호가 로그에 노출되지 않는가? | 보안 |
 | 새로운 어댑터가 BaseAdapter를 구현하는가? | 인터페이스 준수 |
+
+### 장애 주입 회귀 테스트
+
+- `tests/unit/test_resilience.py`
+- 검증 항목:
+  - `with_retry` 재시도/최종 예외 전파
+  - `SimpleCircuitBreaker` open/timeout reset 경계
+  - `MindsDBClient` transient 오류 회복
+  - 연속 실패 시 breaker open + fail-fast 동작
 
 ---
 

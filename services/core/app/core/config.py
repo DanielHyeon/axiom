@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Axiom Core"
@@ -6,7 +7,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # DB configuration
-    DATABASE_URL: str = "sqlite+aiosqlite:///:memory:"
+    DATABASE_URL: str = "postgresql+asyncpg://arkos:arkos@localhost:5432/insolvency_os"
     
     # Redis configuration
     REDIS_URL: str = "redis://localhost:6379"
@@ -17,9 +18,17 @@ class Settings(BaseSettings):
     # LLM Defaults
     DEFAULT_LLM_PROVIDER: str = "openai"
     DEFAULT_LLM_MODEL: str = "gpt-4o"
+    LLM_COMPLETION_URL: str = ""
+    LLM_API_KEY: str = ""
+    LLM_TIMEOUT_SECONDS: float = 20.0
+
+    # Synapse gateway proxy
+    SYNAPSE_BASE_URL: str = "http://localhost:8002"
+    SYNAPSE_SERVICE_TOKEN: str = "local-oracle-token"
+
+    MCP_EXECUTE_PATH: str = "/tools/execute"
+    MCP_TIMEOUT_SECONDS: float = 15.0
     
-    class Config:
-        env_file = ".env"
-        case_sensitive = True
+    model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

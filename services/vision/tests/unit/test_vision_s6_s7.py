@@ -1,10 +1,10 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 
-client = TestClient(app)
 
-def test_vision_what_if_drops_viewer_roles():
+@pytest.mark.asyncio
+async def test_vision_what_if_drops_viewer_roles():
     payload = {
         "base_query": "SELECT *",
         "datasource_id": "ds_1",
@@ -14,11 +14,14 @@ def test_vision_what_if_drops_viewer_roles():
     # Simulate Viewer token
     headers = {"Authorization": "mock_token_viewer"}
     
-    res = client.post("/analytics/what-if", json=payload, headers=headers)
-    assert res.status_code == 403
-    assert "not permitted" in res.json()["detail"]
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res = await client.post("/analytics/what-if", json=payload, headers=headers)
+        assert res.status_code == 403
+        assert "not permitted" in res.json()["detail"]
 
-def test_vision_what_if_allows_admin_roles():
+
+@pytest.mark.asyncio
+async def test_vision_what_if_allows_admin_roles():
     payload = {
         "base_query": "SELECT *",
         "datasource_id": "ds_1",
@@ -28,6 +31,7 @@ def test_vision_what_if_allows_admin_roles():
     # Simulate Admin token
     headers = {"Authorization": "mock_token_admin"}
     
-    res = client.post("/analytics/what-if", json=payload, headers=headers)
-    assert res.status_code == 200
-    assert res.json()["status"] == "success"
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res = await client.post("/analytics/what-if", json=payload, headers=headers)
+        assert res.status_code == 200
+        assert res.json()["status"] == "success"

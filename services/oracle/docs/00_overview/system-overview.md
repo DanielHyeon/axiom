@@ -147,7 +147,7 @@ K-AIR `robo-data-text2sql-main`에서 이식하는 핵심 소스:
 | `app/core/enum_cache_bootstrap.py` | 513 | Enum 값 캐싱 |
 | `app/routers/feedback.py` | - | 피드백 수집 |
 | `app/routers/meta.py` | - | 메타데이터 탐색 |
-| `app/models/history.py` | - | 쿼리 이력 (SQLite) |
+| `app/models/history.py` | - | 쿼리 이력 (K-AIR 레거시: SQLite) |
 
 ---
 

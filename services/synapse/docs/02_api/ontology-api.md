@@ -1,5 +1,8 @@
 # 온톨로지 CRUD API
 
+> 구현 상태 태그: `Implemented`
+> 기준일: 2026-02-22
+
 ## 이 문서가 답하는 질문
 
 - 4계층 온톨로지 노드를 생성/조회/수정/삭제하는 API는?
@@ -38,6 +41,8 @@
 | DELETE | `/relations/{relation_id}` | 관계 삭제 |
 | GET | `/nodes/{node_id}/neighbors` | 인접 노드 조회 |
 | GET | `/nodes/{node_id}/path-to/{target_id}` | 두 노드 간 경로 |
+| GET | `/` | 호환 경로 (query `case_id`) |
+| POST | `/extract-ontology` | 엔티티/관계 일괄 인제스트 |
 
 ---
 

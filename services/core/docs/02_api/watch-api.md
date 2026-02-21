@@ -1,6 +1,6 @@
 # Axiom Core - Watch Agent API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -18,17 +18,17 @@
 
 | Method | Path | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|---------|------|------------------|
-| POST | `/api/v1/watches/subscriptions` | 이벤트 구독 생성 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| GET | `/api/v1/watches/subscriptions` | 내 구독 목록 조회 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| PUT | `/api/v1/watches/subscriptions/{id}` | 구독 수정 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| DELETE | `/api/v1/watches/subscriptions/{id}` | 구독 삭제 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| GET | `/api/v1/watches/alerts` | 알림 목록 조회 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| PUT | `/api/v1/watches/alerts/{id}/acknowledge` | 알림 확인 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| PUT | `/api/v1/watches/alerts/{id}/dismiss` | 알림 해제 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| PUT | `/api/v1/watches/alerts/read-all` | 전체 알림 읽음 처리 | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| GET | `/api/v1/watches/stream` | 실시간 알림 스트림 (SSE) | - | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| POST | `/api/v1/watches/rules` | CEP 룰 생성 (관리자) | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
-| GET | `/api/v1/watches/rules` | CEP 룰 목록 (관리자) | 10s | Planned | `docs/implementation-plans/core/90_sprint7-ticket-board.md` |
+| POST | `/api/v1/watches/subscriptions` | 이벤트 구독 생성 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| GET | `/api/v1/watches/subscriptions` | 내 구독 목록 조회 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| PUT | `/api/v1/watches/subscriptions/{id}` | 구독 수정 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| DELETE | `/api/v1/watches/subscriptions/{id}` | 구독 삭제 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| GET | `/api/v1/watches/alerts` | 알림 목록 조회 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| PUT | `/api/v1/watches/alerts/{id}/acknowledge` | 알림 확인 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| PUT | `/api/v1/watches/alerts/{id}/dismiss` | 알림 해제 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| PUT | `/api/v1/watches/alerts/read-all` | 전체 알림 읽음 처리 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| GET | `/api/v1/watches/stream` | 실시간 알림 스트림 (SSE) | - | Implemented | `services/core/app/api/watch/routes.py` |
+| POST | `/api/v1/watches/rules` | CEP 룰 생성 (관리자) | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| GET | `/api/v1/watches/rules` | CEP 룰 목록 (관리자) | 10s | Implemented | `services/core/app/api/watch/routes.py` |
 
 ---
 
@@ -218,6 +218,7 @@ Authorization: Bearer <jwt_token>
 | HTTP | 코드 | 설명 |
 |------|------|------|
 | 400 | INVALID_RULE | CEP 룰 형식이 잘못됨 |
+| 401 | UNAUTHORIZED | SSE 연결 시 `token` 쿼리 파라미터 누락 |
 | 404 | SUBSCRIPTION_NOT_FOUND | 구독을 찾을 수 없음 |
 | 404 | ALERT_NOT_FOUND | 알림을 찾을 수 없음 |
 | 409 | DUPLICATE_SUBSCRIPTION | 동일한 구독이 이미 존재 |

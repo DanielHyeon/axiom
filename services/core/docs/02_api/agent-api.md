@@ -1,6 +1,6 @@
 # Axiom Core - 에이전트 API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -18,16 +18,16 @@
 
 | Method | Path | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|---------|------|------------------|
-| POST | `/api/v1/agents/chat` | 에이전트 채팅 메시지 전송 | 120s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| POST | `/api/v1/agents/feedback` | 사용자 피드백 제출 | 60s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| GET | `/api/v1/agents/feedback/{workitem_id}` | 피드백 상태 조회 | 10s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| POST | `/api/v1/completion/complete` | LLM 완성 (범용) | 120s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| POST | `/api/v1/completion/vision-complete` | 비전 모델 완성 | 120s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| POST | `/api/v1/mcp/config` | MCP 서버 설정 | 30s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| GET | `/api/v1/mcp/tools` | 사용 가능한 MCP 도구 목록 | 10s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| POST | `/api/v1/mcp/execute-tool` | MCP 도구 실행 | 60s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| GET | `/api/v1/agents/knowledge` | 학습된 지식 조회 (Memory/DMN/Skill) | 10s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
-| DELETE | `/api/v1/agents/knowledge/{id}` | 학습된 지식 삭제 | 10s | Planned | `docs/implementation-plans/core/93_sprint4-ticket-board.md` |
+| POST | `/api/v1/agents/chat` | 에이전트 채팅 메시지 전송 | 120s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/agents/feedback` | 사용자 피드백 제출 | 60s | Implemented | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/agents/feedback/{workitem_id}` | 피드백 상태 조회 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/completion/complete` | LLM 완성 (범용) | 120s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/completion/vision-complete` | 비전 모델 완성 | 120s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/mcp/config` | MCP 서버 설정 | 30s | Implemented | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/mcp/tools` | 사용 가능한 MCP 도구 목록 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/mcp/execute-tool` | MCP 도구 실행 | 60s | Implemented | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/agents/knowledge` | 학습된 지식 조회 (Memory/DMN/Skill) | 10s | Implemented | `services/core/app/api/agent/routes.py` |
+| DELETE | `/api/v1/agents/knowledge/{id}` | 학습된 지식 삭제 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
 
 ---
 
@@ -52,6 +52,11 @@
   "priority": "low | medium | high"
 }
 ```
+
+유효성 규칙:
+- `feedback_type=correction`이면 `corrected_output`은 필수다.
+- `priority=high` 충돌 피드백은 자동 반영하지 않고 `422 KNOWLEDGE_CONFLICT_HIGH`를 반환한다.
+- `priority=high` 충돌 피드백도 이력은 저장되며, `GET /api/v1/agents/feedback/{workitem_id}`에서 `status=NEEDS_REVIEW`로 조회된다.
 
 #### 응답 (202 Accepted)
 
@@ -111,7 +116,7 @@ GET /api/v1/agents/feedback/{workitem_id}
       "url": "string (required) - MCP 서버 URL",
       "auth": {
         "type": "bearer | api_key | none",
-        "token": "string (optional)"
+        "token": "string (auth.type이 bearer/api_key일 때 required)"
       },
       "enabled": true,
       "tool_filter": ["allowed_tool_1", "allowed_tool_2"]

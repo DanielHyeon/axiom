@@ -1,6 +1,6 @@
 # 비정형 문서 추출 API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -29,14 +29,14 @@
 
 | Method | Path | 설명 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------------------|
-| POST | `/documents/{doc_id}/extract-ontology` | 비동기 추출 작업 시작 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/documents/{doc_id}/ontology-status` | 추출 진행 상태 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/documents/{doc_id}/ontology-result` | 추출 결과 조회 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| PUT | `/ontology/{entity_id}/confirm` | HITL: 개별 개체 확인/수정 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| POST | `/cases/{case_id}/ontology/review` | HITL: 일괄 검토 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| GET | `/cases/{case_id}/review-queue` | HITL: 검토 대기열 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| POST | `/documents/{doc_id}/retry` | 실패한 추출 재시도 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
-| POST | `/documents/{doc_id}/revert-extraction` | Saga 보상: 추출 결과 되돌리기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/documents/{doc_id}/extract-ontology` | 비동기 추출 작업 시작 | Implemented | `services/synapse/app/api/extraction.py` |
+| GET | `/documents/{doc_id}/ontology-status` | 추출 진행 상태 | Implemented | `services/synapse/app/api/extraction.py` |
+| GET | `/documents/{doc_id}/ontology-result` | 추출 결과 조회 | Implemented | `services/synapse/app/api/extraction.py` |
+| PUT | `/ontology/{entity_id}/confirm` | HITL: 개별 개체 확인/수정 | Implemented | `services/synapse/app/api/extraction.py` |
+| POST | `/cases/{case_id}/ontology/review` | HITL: 일괄 검토 | Implemented | `services/synapse/app/api/extraction.py` |
+| GET | `/cases/{case_id}/review-queue` | HITL: 검토 대기열 | Implemented | `services/synapse/app/api/extraction.py` |
+| POST | `/documents/{doc_id}/retry` | 실패한 추출 재시도 | Implemented | `services/synapse/app/api/extraction.py` |
+| POST | `/documents/{doc_id}/revert-extraction` | Saga 보상: 추출 결과 되돌리기 | Implemented | `services/synapse/app/api/extraction.py` |
 
 ---
 

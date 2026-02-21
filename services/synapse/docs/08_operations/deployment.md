@@ -53,7 +53,7 @@ services:
       SYNAPSE_NEO4J_USER: neo4j
       SYNAPSE_NEO4J_PASSWORD: ${NEO4J_PASSWORD}
       SYNAPSE_NEO4J_DATABASE: neo4j
-      SYNAPSE_DATABASE_URL: postgresql+asyncpg://axiom:${DB_PASSWORD}@postgresql:5432/axiom
+      SCHEMA_EDIT_DATABASE_URL: postgresql://axiom:${DB_PASSWORD}@postgresql:5432/axiom
       SYNAPSE_REDIS_URL: redis://redis:6379
       SYNAPSE_OPENAI_API_KEY: ${OPENAI_API_KEY}
       SYNAPSE_LLM_MODEL: gpt-4o
@@ -189,7 +189,7 @@ neo4j-admin database load --from-path=/backup/neo4j/ neo4j
 | `SYNAPSE_NEO4J_USER` | Y | - | Neo4j 사용자 |
 | `SYNAPSE_NEO4J_PASSWORD` | Y | - | Neo4j 비밀번호 |
 | `SYNAPSE_NEO4J_DATABASE` | N | neo4j | Neo4j 데이터베이스 |
-| `SYNAPSE_DATABASE_URL` | Y | - | PostgreSQL URL |
+| `SCHEMA_EDIT_DATABASE_URL` | Y | - | Schema Edit 저장소 PostgreSQL URL |
 | `SYNAPSE_REDIS_URL` | Y | - | Redis URL |
 | `SYNAPSE_OPENAI_API_KEY` | Y | - | OpenAI API 키 |
 | `SYNAPSE_LLM_MODEL` | N | gpt-4o | LLM 모델 |

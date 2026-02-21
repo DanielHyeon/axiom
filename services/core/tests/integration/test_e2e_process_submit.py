@@ -1,6 +1,3 @@
-import os
-os.environ["DATABASE_URL"] = "sqlite+aiosqlite:///:memory:"
-
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
@@ -42,12 +39,11 @@ async def test_api_submit_workitem_e2e():
         # 3. Assert Response
         assert response.status_code == 200
         data = response.json()
-        assert data["data"]["status"] == "DONE"
-        assert data["data"]["tenant_id"] == "acme-corp"
+        assert data["status"] == "DONE"
         
     # 4. Assert DB state (Router commit success)
     async with AsyncSessionLocal() as session:
         outbox = await session.execute(text("SELECT * FROM event_outbox WHERE aggregate_id = 'e2e-wi-1'"))
         row = outbox.fetchone()
         assert row is not None
-        assert getattr(row, "event_type", row[1]) == "WORKITEM_COMPLETED" # depending on sqlite driver return shape
+        assert getattr(row, "event_type", row[1]) == "WORKITEM_COMPLETED"

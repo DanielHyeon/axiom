@@ -1,6 +1,6 @@
 # 메타데이터 탐색 API
 
-> 구현 상태 태그: `Planned`
+> 구현 상태 태그: `Implemented (Synapse-backed)`
 > 기준일: 2026-02-21
 
 ## 이 문서가 답하는 질문
@@ -18,11 +18,13 @@
 
 | Method | Path | 설명 | 인증 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------|------------------|
-| GET | `/text2sql/meta/tables` | 테이블 목록 + 검색 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
-| GET | `/text2sql/meta/tables/{name}/columns` | 특정 테이블 컬럼 상세 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
-| GET | `/text2sql/meta/datasources` | 데이터소스 목록 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
-| PUT | `/text2sql/meta/tables/{name}/description` | 테이블 설명 수정 | Required + Admin | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
-| PUT | `/text2sql/meta/columns/{fqn}/description` | 컬럼 설명 수정 | Required + Admin | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
+| GET | `/text2sql/meta/tables` | 테이블 목록 + 검색 | Required | Implemented | `services/oracle/app/api/meta.py` |
+| GET | `/text2sql/meta/tables/{name}/columns` | 특정 테이블 컬럼 상세 | Required | Implemented | `services/oracle/app/api/meta.py` |
+| GET | `/text2sql/meta/datasources` | 데이터소스 목록 | Required | Implemented | `services/oracle/app/api/meta.py` |
+| PUT | `/text2sql/meta/tables/{name}/description` | 테이블 설명 수정 | Required + Admin | Implemented | `services/oracle/app/api/meta.py` |
+| PUT | `/text2sql/meta/columns/{fqn}/description` | 컬럼 설명 수정 | Required + Admin | Implemented | `services/oracle/app/api/meta.py` |
+
+> 구현 노트: 테이블/컬럼 메타데이터는 Synapse Schema Edit API를 백엔드로 사용한다.
 
 ---
 

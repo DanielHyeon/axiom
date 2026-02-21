@@ -3,9 +3,9 @@
 <!-- affects: api, frontend -->
 <!-- requires-update: 04_frontend/datasource-manager.md (Canvas), 06_data/neo4j-schema.md -->
 
-> **상태**: Planned (Experimental Spec)
-> **구현 상태 태그**: `Planned`
-> **구현 상태**: 계약/스키마 정의 완료, 런타임 구현은 Sprint 수행 후 활성화
+> **상태**: Active
+> **구현 상태 태그**: `Implemented`
+> **구현 상태**: 런타임 구현 완료 (API + 테스트 반영)
 > **정합성 기준**: `01_architecture/metadata-service.md`의 Business Glossary 상태와 동기화
 
 ## 이 문서가 답하는 질문
@@ -73,35 +73,35 @@ Weaver는 "Data Fabric"에서 **"Data Fabric + Metadata Service"**로 승격된�
 | 메서드 | 경로 | 설명 | 권한 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------|------------------|
 | **패브릭 스냅샷** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `admin` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `admin` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 | **비즈니스 용어 사전** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 | **테이블/컬럼 태깅** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 | **메타데이터 검색** |  |  |  |  |  |
-| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 | **메타데이터 통계** |  |  |  |  |  |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 
 ---
 
@@ -148,7 +148,12 @@ Authorization: Bearer {jwt_token}
   "description": "ERP 마이그레이션 전 스냅샷",
   "created_by": "user-uuid",
   "created_at": "2026-02-20T09:00:00Z",
-  "summary": null
+  "summary": {
+    "schemas": 3,
+    "tables": 45,
+    "columns": 312,
+    "fk_relations": 28
+  }
 }
 ```
 
@@ -156,6 +161,7 @@ Authorization: Bearer {jwt_token}
 - **비동기 작업**: 요청 즉시 202를 반환하고, 백그라운드에서 Neo4j 그래프 순회를 실행한다.
 - `version`은 해당 데이터소스 내에서 자동 증가한다.
 - `status`는 `creating` -> `ready` 또는 `creating` -> `failed`로 전이한다.
+- `summary`와 `graph_data`는 생성 시점의 datasource 카탈로그에서 계산된다.
 - 스냅샷 데이터는 Neo4j의 별도 서브그래프 또는 PostgreSQL JSON 컬럼에 저장한다.
 
 **에러 응답**:
@@ -411,6 +417,8 @@ Authorization: Bearer {jwt_token}
 
 특정 스냅샷의 메타데이터 그래프 상태로 복원한다.
 
+- 현재 구현은 스냅샷 `graph_data`를 datasource 카탈로그에 반영한다.
+
 ```
 POST /api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore
 Authorization: Bearer {jwt_token}
@@ -433,7 +441,7 @@ Authorization: Bearer {jwt_token}
 
 ```
 [주의] 메타데이터 그래프만 복원한다. 실제 데이터베이스 스키마에는 영향을 주지 않는다.
-[필수] admin 역할만 실행할 수 있다.
+[필수] `metadata:admin` 권한이 필요하다.
 [필수] 복원 완료 후 change_propagation 이벤트를 발행한다.
 [필수] 복원 전 현재 상태의 자동 스냅샷을 생성한다 (안전장치).
 ```
@@ -442,7 +450,7 @@ Authorization: Bearer {jwt_token}
 
 | HTTP 코드 | 에러 코드 | 설명 |
 |-----------|----------|------|
-| 403 | `ADMIN_REQUIRED` | admin 역할이 아닌 사용자의 요청 |
+| 403 | `FORBIDDEN` | `metadata:admin` 권한이 없는 요청 |
 | 404 | `SNAPSHOT_NOT_FOUND` | 지정한 스냅샷이 존재하지 않음 |
 | 409 | `RESTORE_IN_PROGRESS` | 이미 복원이 진행 중 |
 
@@ -467,14 +475,14 @@ Authorization: Bearer {jwt_token}
 
 ```
 [금지] 최신(latest) 스냅샷은 삭제할 수 없다.
-[필수] admin 역할만 삭제할 수 있다.
+[필수] `metadata:admin` 권한이 필요하다.
 ```
 
 **에러 응답**:
 
 | HTTP 코드 | 에러 코드 | 설명 |
 |-----------|----------|------|
-| 403 | `ADMIN_REQUIRED` | admin 역할이 아닌 사용자의 요청 |
+| 403 | `FORBIDDEN` | `metadata:admin` 권한이 없는 요청 |
 | 404 | `SNAPSHOT_NOT_FOUND` | 지정한 스냅샷이 존재하지 않음 |
 | 409 | `CANNOT_DELETE_LATEST` | 최신 스냅샷은 삭제 불가 |
 
@@ -1066,6 +1074,8 @@ GET /api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas
 Authorization: Bearer {jwt_token}
 ```
 
+현재 구현은 datasource 카탈로그(tenant 스코프) 기준으로 `schemas`를 계산한다.
+
 **성공 응답** (200 OK):
 
 ```json
@@ -1101,6 +1111,8 @@ Authorization: Bearer {jwt_token}
 GET /api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables
 Authorization: Bearer {jwt_token}
 ```
+
+`schema_name`이 존재하지 않으면 `404 SCHEMA_NOT_FOUND`를 반환한다.
 
 **성공 응답** (200 OK):
 
@@ -1146,6 +1158,8 @@ Authorization: Bearer {jwt_token}
 GET /api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns
 Authorization: Bearer {jwt_token}
 ```
+
+`table_name`이 존재하지 않으면 `404 TABLE_NOT_FOUND`를 반환한다.
 
 **성공 응답** (200 OK):
 
@@ -1764,31 +1778,19 @@ Core의 RBAC 모델(`07_security/auth-model.md`)을 확장하여 메타데이터
 | `metadata:write` | 메타데이터 카탈로그 쓰기 (용어 생성/수정, 태그 추가/삭제, 스냅샷 생성) |
 | `metadata:admin` | 메타데이터 관리 (스냅샷 복원/삭제) |
 
-### 8.2 역할별 권한 매트릭스
+### 8.2 역할별 권한 매트릭스 (현재 구현)
 
-| 엔드포인트 | viewer | staff | attorney | manager | admin |
-|-----------|:------:|:-----:|:--------:|:-------:|:-----:|
-| **패브릭 스냅샷** |
-| 스냅샷 생성 | X | X | X | O | O |
-| 스냅샷 목록/상세 조회 | O | O | O | O | O |
-| 스냅샷 Diff | O | O | O | O | O |
-| 스냅샷 복원 | X | X | X | X | O |
-| 스냅샷 삭제 | X | X | X | X | O |
-| **비즈니스 용어 사전** |
-| 용어 생성 | X | X | O | O | O |
-| 용어 목록/상세 조회 | O | O | O | O | O |
-| 용어 검색 | O | O | O | O | O |
-| 용어 수정 | X | X | O | O | O |
-| 용어 삭제 | X | X | X | O | O |
-| **태깅** |
-| 태그 추가 | X | X | O | O | O |
-| 태그 조회 | O | O | O | O | O |
-| 태그 삭제 | X | X | O | O | O |
-| 태그별 검색 | O | O | O | O | O |
-| **검색/통계** |
-| 통합 검색 | O | O | O | O | O |
-| 스키마 탐색 | O | O | O | O | O |
-| 통계 조회 | O | O | O | O | O |
+`app/core/auth.py` 기준 역할은 `admin`, `staff`, `analyst`, `viewer`를 사용한다.
+
+| 엔드포인트 | viewer | analyst | staff | admin |
+|-----------|:------:|:-------:|:-----:|:-----:|
+| 스냅샷 생성 (`metadata:write`) | X | X | O | O |
+| 스냅샷 목록/상세/Diff (`metadata:read`) | O | O | O | O |
+| 스냅샷 복원/삭제 (`metadata:admin`) | X | X | X | O |
+| 용어 생성/수정/삭제 (`metadata:write`) | X | X | O | O |
+| 용어 목록/검색/상세 (`metadata:read`) | O | O | O | O |
+| 태그 생성/삭제 (`metadata:write`) | X | X | O | O |
+| 태그 조회/검색/통계 (`metadata:read`) | O | O | O | O |
 
 ### 8.3 구현 예시
 
@@ -1845,18 +1847,11 @@ async def search_metadata(
 
 ## 9. 에러 코드
 
-모든 에러 응답은 Weaver의 공통 에러 형식을 따른다 (`datasource-api.md` 섹션 4 참조).
+모든 에러 응답은 Weaver 공통 `detail` 형식을 따른다 (`datasource-api.md` 섹션 4 참조).
 
 ```json
 {
-  "error": {
-    "code": "SNAPSHOT_NOT_FOUND",
-    "message": "Snapshot with id 'a1b2c3d4...' not found for datasource 'erp_db'",
-    "details": {
-      "datasource": "erp_db",
-      "snapshot_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890"
-    }
-  }
+  "detail": "SNAPSHOT_NOT_FOUND"
 }
 ```
 
@@ -1906,7 +1901,6 @@ async def search_metadata(
 |------|----------|------|
 | `UNAUTHORIZED` | 401 | 유효하지 않은 JWT 토큰 |
 | `FORBIDDEN` | 403 | 권한 부족 |
-| `ADMIN_REQUIRED` | 403 | admin 역할 필요 |
 | `INTERNAL_ERROR` | 500 | 서버 내부 오류 |
 
 ---

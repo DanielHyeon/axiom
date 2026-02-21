@@ -1,7 +1,7 @@
 import pm4py
 import pandas as pd
 from typing import Any, Dict, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 class DiscoveryResult(BaseModel):
     algorithm: str
@@ -10,8 +10,7 @@ class DiscoveryResult(BaseModel):
     initial_marking: Any
     final_marking: Any
 
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 async def discover_with_alpha(df: pd.DataFrame) -> DiscoveryResult:
     """

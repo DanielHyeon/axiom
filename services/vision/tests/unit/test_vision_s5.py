@@ -1,14 +1,15 @@
 import pytest
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 
-client = TestClient(app)
 
-def test_api_vision_readiness_probe_returns_up():
-    res = client.get("/health/ready")
-    assert res.status_code == 200
-    assert res.json()["status"] == "ready"
-    assert res.json()["dependencies"]["synapse"] == "up"
+@pytest.mark.asyncio
+async def test_api_vision_readiness_probe_returns_up():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        res = await client.get("/health/ready")
+        assert res.status_code == 200
+        assert res.json()["status"] == "ready"
+        assert res.json()["dependencies"]["synapse"] == "up"
 
 @pytest.mark.asyncio
 async def test_scenario_solver_detects_cost_regressions():

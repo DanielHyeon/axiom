@@ -1,11 +1,16 @@
 import pytest
 from app.core.auth import auth_service, CurrentUser
 from app.core.sql_exec import sql_executor
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 import uuid
 
-client = TestClient(app)
+
+@pytest_asyncio.fixture
+async def ac():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
 
 def test_auth_service_decodes_tenant_and_roles_safely():
     # Token extraction resolving valid objects
@@ -33,22 +38,24 @@ async def test_sql_execution_truncation_simulations():
     assert res.row_count > 10000 
     assert len(res.rows) == 10000 # Formally clamped locally 
 
-def test_api_text2sql_unauthorized_token_role():
+@pytest.mark.asyncio
+async def test_api_text2sql_unauthorized_token_role(ac: AsyncClient):
     # If the REST API endpoint denies role directly
     payload = {
         "sql": "SELECT *",
         "datasource_id": "mock"
     }
     # Direct-sql demands 'admin' role, supplying viewer token causes 403 Forbidden
-    res = client.post("/text2sql/direct-sql", json=payload, headers={"Authorization": "viewer_1"})
+    res = await ac.post("/text2sql/direct-sql", json=payload, headers={"Authorization": "viewer_1"})
     assert res.status_code == 403
     assert "not permitted" in res.json()["detail"]
     
-def test_api_text2sql_pass_roles():
+@pytest.mark.asyncio
+async def test_api_text2sql_pass_roles(ac: AsyncClient):
     payload = {
         "sql": "SELECT *",
         "datasource_id": "mock"
     }
-    res = client.post("/text2sql/direct-sql", json=payload, headers={"Authorization": "mock_admin"})
+    res = await ac.post("/text2sql/direct-sql", json=payload, headers={"Authorization": "mock_admin"})
     assert res.status_code == 200
     assert res.json()["success"] is True

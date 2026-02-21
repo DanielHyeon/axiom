@@ -1,6 +1,6 @@
 # 데이터소스 API
 
-> 구현 상태 태그: `Partial`
+> 구현 상태 태그: `Implemented`
 > 기준일: 2026-02-21
 
 <!-- affects: frontend, backend, data -->
@@ -19,19 +19,19 @@
 
 | 메서드 | 경로 | 설명 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------------------|
-| `GET` | `/api/datasources/types` | 지원 DB 타입 목록 + 설정 스키마 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/supported-engines` | 메타데이터 추출 지원 엔진 목록 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources` | 등록된 데이터소스 목록 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `POST` | `/api/datasources` | 새 데이터소스 생성 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}` | 특정 데이터소스 상세 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `DELETE` | `/api/datasources/{name}` | 데이터소스 삭제 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `PUT` | `/api/datasources/{name}/connection` | 연결 정보 업데이트 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/health` | 데이터소스 연결 상태 확인 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `POST` | `/api/datasources/{name}/test` | 연결 테스트 (생성 전 검증) | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/schemas` | 스키마 목록 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables` | 테이블 목록 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables/{table}/schema` | 테이블 스키마 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Planned | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/types` | 지원 DB 타입 목록 + 설정 스키마 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/supported-engines` | 메타데이터 추출 지원 엔진 목록 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources` | 등록된 데이터소스 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `POST` | `/api/datasources` | 새 데이터소스 생성 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}` | 특정 데이터소스 상세 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `DELETE` | `/api/datasources/{name}` | 데이터소스 삭제 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `PUT` | `/api/datasources/{name}/connection` | 연결 정보 업데이트 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/health` | 데이터소스 연결 상태 확인 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `POST` | `/api/datasources/{name}/test` | 연결 테스트 (생성 전 검증) | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/schemas` | 스키마 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables` | 테이블 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables/{table}/schema` | 테이블 스키마 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
 
 ---
 
@@ -57,7 +57,7 @@
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|------|------|
 | `name` | `string` | 필수 | 데이터소스 고유 이름 (영문, 숫자, 언더스코어만 허용) |
-| `engine` | `string` | 필수 | DB 엔진 타입 (`postgresql`, `mysql`, `mongodb`, `redis`, `elasticsearch`, `web`, `openai`, `neo4j`) |
+| `engine` | `string` | 필수 | DB 엔진 타입 (`postgresql`, `mysql`, `mongodb`, `oracle`, `neo4j`) |
 | `connection` | `object` | 필수 | 엔진별 연결 파라미터 (아래 참조) |
 | `description` | `string` | 선택 | 데이터소스 설명 (nullable) |
 
@@ -295,6 +295,8 @@
 }
 ```
 
+`deleted_metadata`는 삭제 시점 datasource 카탈로그에서 동적으로 집계된다.
+
 ---
 
 ### 3.7 PUT /api/datasources/{name}/connection
@@ -353,10 +355,10 @@
 
 ```json
 {
+  "name": "erp_db",
   "success": true,
-  "engine": "postgresql",
-  "server_version": "15.4",
-  "response_time_ms": 45
+  "response_time_ms": 45,
+  "checked_at": "2026-02-19T10:05:00Z"
 }
 ```
 
@@ -530,23 +532,23 @@
 
 ## 4. 공통 에러 형식
 
-모든 에러 응답은 아래 형식을 따른다.
+일반 검증 에러는 FastAPI 기본 에러(`detail`)를 사용한다. 외부 의존성(MindsDB/Neo4j/Postgres) 에러는 아래 형식으로 반환한다.
 
 ```json
 {
-  "error": {
-    "code": "DUPLICATE_NAME",
-    "message": "DataSource with name 'erp_db' already exists",
-    "details": null
+  "detail": {
+    "code": "MINDSDB_UNAVAILABLE",
+    "service": "mindsdb",
+    "message": "connection refused"
   }
 }
 ```
 
 | 필드 | 타입 | 설명 |
 |------|------|------|
-| `error.code` | `string` | 에러 코드 (프로그래밍용) |
-| `error.message` | `string` | 사람이 읽을 수 있는 에러 설명 |
-| `error.details` | `object` | 추가 정보 (nullable) |
+| `detail.code` | `string` | 외부 서비스 에러 코드 |
+| `detail.service` | `string` | 서비스 식별자 (`mindsdb`, `neo4j`, `postgres`) |
+| `detail.message` | `string` | 원인 메시지 |
 
 ---
 
@@ -556,15 +558,21 @@
 |------|----------|------|
 | 목록 조회 | `datasource:read` | 모든 인증된 사용자 |
 | 상세 조회 | `datasource:read` | - |
-| 생성 | `datasource:write` | 관리자 |
-| 삭제 | `datasource:delete` | 관리자 |
-| 연결 업데이트 | `datasource:write` | 관리자 |
+| 생성 | `datasource:write` | `admin`, `staff` |
+| 삭제 | `datasource:write` | `admin`, `staff` |
+| 연결 업데이트 | `datasource:write` | `admin`, `staff` |
 | 스키마/테이블 조회 | `datasource:read` | - |
 | 샘플 데이터 | `datasource:read` | 민감 데이터 마스킹 필요 |
 
+## 6. 운영 헤더 및 보호 정책
+
+- `X-Request-Id`: 요청 추적 헤더. 미지정 시 서버가 생성하여 응답 헤더로 반환한다.
+- `Idempotency-Key`: `POST/PUT/DELETE` write API 재시도 안전성 보장. 동일 키에 다른 payload를 보내면 `409 IDEMPOTENCY_KEY_REUSE_MISMATCH`.
+- Rate Limit: write API는 사용자+경로 기준 분당 60회 제한. 초과 시 `429`와 `detail.code=RATE_LIMITED`.
+
 ---
 
-## 6. 관련 문서
+## 7. 관련 문서
 
 | 문서 | 설명 |
 |------|------|

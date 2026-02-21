@@ -1,7 +1,6 @@
 import pytest
 import pandas as pd
 from datetime import datetime, timedelta
-import asyncio
 from app.mining.process_discovery import (
     discover_with_alpha, discover_with_heuristic, discover_with_inductive, generate_bpmn
 )

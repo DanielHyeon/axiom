@@ -1,11 +1,18 @@
 import pytest
 import json
-from fastapi.testclient import TestClient
+import pytest_asyncio
+from httpx import ASGITransport, AsyncClient
 from app.main import app
 
-client = TestClient(app)
 
-def test_react_agent_streaming_endpoint():
+@pytest_asyncio.fixture
+async def ac():
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+        yield client
+
+
+@pytest.mark.asyncio
+async def test_react_agent_streaming_endpoint(ac: AsyncClient):
     payload = {
         "question": "What were the project revenues last year?",
         "datasource_id": "mock_ds",
@@ -16,7 +23,7 @@ def test_react_agent_streaming_endpoint():
     }
     
     # We use stream requests to read chunked NDJSON outputs securely
-    with client.stream("POST", "/text2sql/react", json=payload) as response:
+    async with ac.stream("POST", "/text2sql/react", json=payload) as response:
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/x-ndjson"
         
@@ -26,7 +33,7 @@ def test_react_agent_streaming_endpoint():
         has_validate = False
         has_triage = False
         
-        for line in response.iter_lines():
+        async for line in response.aiter_lines():
             if not line.strip(): continue
             chunks_read += 1
             data = json.loads(line)
