@@ -1,0 +1,96 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vision-deployment
+  labels:
+    app: vision
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vision
+  template:
+    metadata:
+      labels:
+        app: vision
+    spec:
+      containers:
+      - name: vision
+        image: axiom/vision:latest
+        ports:
+        - containerPort: 8000
+        envFrom:
+        - configMapRef:
+            name: axiom-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: weaver-deployment
+  labels:
+    app: weaver
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: weaver
+  template:
+    metadata:
+      labels:
+        app: weaver
+    spec:
+      containers:
+      - name: weaver
+        image: axiom/weaver:latest
+        ports:
+        - containerPort: 8001
+        envFrom:
+        - configMapRef:
+            name: axiom-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: canvas-deployment
+  labels:
+    app: canvas
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: canvas
+  template:
+    metadata:
+      labels:
+        app: canvas
+    spec:
+      containers:
+      - name: canvas
+        image: axiom/canvas:latest
+        ports:
+        - containerPort: 80
+        envFrom:
+        - configMapRef:
+            name: axiom-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-bus-deployment
+  labels:
+    app: redis-bus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis-bus
+  template:
+    metadata:
+      labels:
+        app: redis-bus
+    spec:
+      containers:
+      - name: redis
+        image: redis:alpine
+        ports:
+        - containerPort: 6379

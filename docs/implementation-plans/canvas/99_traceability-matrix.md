@@ -13,6 +13,7 @@
 | apps/canvas/docs/04_frontend/admin-dashboard.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
 | apps/canvas/docs/04_frontend/case-dashboard.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
 | apps/canvas/docs/04_frontend/datasource-manager.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
+| apps/canvas/docs/04_frontend/e2e-core-journey.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
 | apps/canvas/docs/04_frontend/design-system.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
 | apps/canvas/docs/04_frontend/directory-structure.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |
 | apps/canvas/docs/04_frontend/document-management.md | 04 | docs/implementation-plans/canvas/04_frontend-implementation-plan.md | 반영 |

@@ -21,12 +21,12 @@
 
 | 기능 | D1 설계 반영 | D2 구현 착수 | D3 구현 완료 | 현재 판정 | 담당자 | ETA | 최근 업데이트 | 핵심 리스크 |
 |---|---|---|---|---|---|---|---|---|
-| What-if 시뮬레이션 | ✅ | ✅ | ⏳ | Sprint 5 범위 (진행 중) | `backend-developer`, `api-developer` | Sprint 5 Exit | 2026-02-20 | Solver 성능 튜닝 지연 |
-| 4-Layer 온톨로지 | ✅ | ✅ | ⏳ | Sprint 3 범위 (진행 중) | `backend-developer`, `api-developer` | Sprint 3 Exit | 2026-02-20 | 그래프 제약/인덱스 충돌 |
-| 비정형->온톨로지 추출 | ✅ | ✅ | ⏳ | Sprint 3 범위 (진행 중) | `backend-developer`, `code-inspector-tester` | Sprint 3 Exit | 2026-02-20 | HITL 대기열 적체 |
-| See-Why 근본원인 분석 | ✅ | ⏳ | ⏳ | Phase 4 이관 | `code-implementation-planner`, `backend-developer` | Phase 4 Kickoff | 2026-02-20 | 학습용 라벨 데이터 100건+ 확보 |
-| Watch Agent | ✅ | ✅ | ⏳ | Sprint 2~4 범위 (진행 중) | `backend-developer`, `code-inspector-tester` | Sprint 7 Exit | 2026-02-20 | 알림 오탐률 |
-| 이벤트 감지(CEP) | ✅ | ✅ | ⏳ | Sprint 2 범위 (진행 중) | `backend-developer`, `code-reviewer` | Sprint 7 Exit | 2026-02-20 | 이벤트 지연/중복 처리 |
+| What-if 시뮬레이션 | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `api-developer` | Sprint 7 Exit | 2026-02-21 | 안정 수준 도달 |
+| 4-Layer 온톨로지 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `api-developer` | Sprint 3 Exit | 2026-02-21 | 통합 검증 완료 |
+| 비정형->온톨로지 추출 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `code-inspector-tester` | Sprint 3 Exit | 2026-02-21 | 승인 파이프라인 연동 완료 |
+| See-Why 근본원인 분석 | ✅ | ⏳ | ⏳ | Phase 4 이관 | `code-implementation-planner`, `backend-developer` | Phase 4 Kickoff | 2026-02-21 | 학습용 라벨 데이터 100건+ 확보 대기 |
+| Watch Agent | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `code-inspector-tester` | Sprint 7 Exit | 2026-02-21 | SLA 계측 달성 |
+| 이벤트 감지(CEP) | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `code-reviewer` | Sprint 7 Exit | 2026-02-21 | 튜닝 검수 완료 |
 
 ## 5. 근거 문서 맵
 

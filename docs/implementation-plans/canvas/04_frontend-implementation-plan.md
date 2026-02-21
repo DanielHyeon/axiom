@@ -11,6 +11,7 @@
 - apps/canvas/docs/04_frontend/design-system.md
 - apps/canvas/docs/04_frontend/directory-structure.md
 - apps/canvas/docs/04_frontend/document-management.md
+- apps/canvas/docs/04_frontend/e2e-core-journey.md
 - apps/canvas/docs/04_frontend/feature-priority-matrix.md
 - apps/canvas/docs/04_frontend/implementation-guide.md
 - apps/canvas/docs/04_frontend/nl2sql-chat.md

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Mocked Core dependencies
+  redis-bus:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Axiom Services
+  vision-svc:
+    build:
+      context: ./services/vision
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis-bus:6379
+      - CORE_EVENT_BUS=redis
+    depends_on:
+      redis-bus:
+        condition: service_healthy
+
+  weaver-svc:
+    build:
+      context: ./services/weaver
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - NEO4J_URI=bolt://mock-graph-node:7687
+    depends_on:
+      - vision-svc
+
+  # Frontend Node
+  canvas-ui:
+    build:
+      context: ./apps/canvas
+      dockerfile: Dockerfile
+    ports:
+      - "5173:80" # Maps local 5173 to Nginx 80
+    depends_on:
+      - vision-svc
+      - weaver-svc

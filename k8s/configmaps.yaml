@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: axiom-config
+data:
+  REDIS_URL: "redis://redis-bus-service:6379"
+  CORE_EVENT_BUS: "redis"
+  NEO4J_URI: "bolt://mock-graph-node:7687"
+  VITE_API_URL: "https://api.axiom.production.internal"
+  VITE_CORE_EVENTS_WS: "wss://core.axiom.production.internal/events"
+  VITE_TENANT_ID_OVERRIDE: "prod-secure-tenant-999"
