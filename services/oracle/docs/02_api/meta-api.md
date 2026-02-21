@@ -1,5 +1,8 @@
 # 메타데이터 탐색 API
 
+> 구현 상태 태그: `Planned`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - 어떤 테이블과 컬럼이 NL2SQL에 사용 가능한지 어떻게 확인하는가?
@@ -13,13 +16,13 @@
 
 ## 1. 엔드포인트 요약
 
-| Method | Path | 설명 | 인증 |
-|--------|------|------|------|
-| GET | `/text2sql/meta/tables` | 테이블 목록 + 검색 | Required |
-| GET | `/text2sql/meta/tables/{name}/columns` | 특정 테이블 컬럼 상세 | Required |
-| GET | `/text2sql/meta/datasources` | 데이터소스 목록 | Required |
-| PUT | `/text2sql/meta/tables/{name}/description` | 테이블 설명 수정 | Required + Admin |
-| PUT | `/text2sql/meta/columns/{fqn}/description` | 컬럼 설명 수정 | Required + Admin |
+| Method | Path | 설명 | 인증 | 상태 | 근거(구현/티켓) |
+|--------|------|------|------|------|------------------|
+| GET | `/text2sql/meta/tables` | 테이블 목록 + 검색 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
+| GET | `/text2sql/meta/tables/{name}/columns` | 특정 테이블 컬럼 상세 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
+| GET | `/text2sql/meta/datasources` | 데이터소스 목록 | Required | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
+| PUT | `/text2sql/meta/tables/{name}/description` | 테이블 설명 수정 | Required + Admin | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
+| PUT | `/text2sql/meta/columns/{fqn}/description` | 컬럼 설명 수정 | Required + Admin | Planned | `docs/implementation-plans/oracle/95_sprint2-ticket-board.md` |
 
 ---
 

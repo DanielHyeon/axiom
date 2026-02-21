@@ -17,7 +17,7 @@
 - `D2 구현 착수`: 스프린트 티켓 배정 + 담당자 + 의존성 + 테스트 계획이 확정됨
 - `D3 구현 완료`: Gate 통과 + 계약 테스트 + 운영 지표 검증이 완료됨
 
-## 4. 항목별 체크리스트 (2026-02-20 기준)
+## 4. 항목별 체크리스트 (2026-02-21 기준)
 
 | 기능 | D1 설계 반영 | D2 구현 착수 | D3 구현 완료 | 현재 판정 | 담당자 | ETA | 최근 업데이트 | 핵심 리스크 |
 |---|---|---|---|---|---|---|---|---|
@@ -25,8 +25,8 @@
 | 4-Layer 온톨로지 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `api-developer` | Sprint 3 Exit | 2026-02-21 | 통합 검증 완료 |
 | 비정형->온톨로지 추출 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `code-inspector-tester` | Sprint 3 Exit | 2026-02-21 | 승인 파이프라인 연동 완료 |
 | See-Why 근본원인 분석 | ✅ | ⏳ | ⏳ | Phase 4 이관 | `code-implementation-planner`, `backend-developer` | Phase 4 Kickoff | 2026-02-21 | 학습용 라벨 데이터 100건+ 확보 대기 |
-| Watch Agent | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `code-inspector-tester` | Sprint 7 Exit | 2026-02-21 | SLA 계측 달성 |
-| 이벤트 감지(CEP) | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `code-reviewer` | Sprint 7 Exit | 2026-02-21 | 튜닝 검수 완료 |
+| Watch Agent | ✅ | ✅ | ⏳ | D2 진행 (재검증 필요) | `backend-developer`, `code-inspector-tester` | Re-baseline 필요 | 2026-02-21 | Watch API 런타임 구현/증적 불충분 |
+| 이벤트 감지(CEP) | ✅ | ✅ | ⏳ | D2 진행 (재검증 필요) | `backend-developer`, `code-reviewer` | Re-baseline 필요 | 2026-02-21 | CEP 지표/튜닝 런타임 증적 불충분 |
 
 ## 5. 근거 문서 맵
 
@@ -62,8 +62,8 @@
 | FM-002 | 4-Layer 온톨로지 | D3 | Synapse Gate S1/S2 잔여 항목 완료 | S3-PGM-006 | 계층 경계 충돌 0건 |
 | FM-003 | 비정형->온톨로지 | D3 | HITL 임계값/검토대기열/커밋 흐름 검증 완료 | S3-PGM-007 | 자동반영/검토대기 분기 정확성 통과 |
 | FM-004 | See-Why | D2 | Phase 4 착수 패키지 작성(데이터 100건+, 학습/평가 계획) | S7-PGM-007 | Phase 4 킥오프 승인 |
-| FM-005 | Watch Agent | D3 | Early Warning 폐루프 SLA 계측 완료 | S7-PGM-005 | detect->resolve 지표 대시보드 노출 |
-| FM-006 | 이벤트 감지(CEP) | D3 | CEP 오탐률/지연 지표 기준선 확정 및 튜닝 | S7-PGM-006 | 이벤트 지연/오탐률 목표 충족 |
+| FM-005 | Watch Agent | D2 | Early Warning 폐루프 SLA 계측 재검증 | S7-PGM-005 | detect->resolve 지표 대시보드 증적 재확인 |
+| FM-006 | 이벤트 감지(CEP) | D2 | CEP 오탐률/지연 지표 재검증 | S7-PGM-006 | 이벤트 지연/오탐률 목표 증적 재확인 |
 
 ## 6.1 운영 대시보드 갱신 규칙
 - 주기: 각 Sprint 주간 리뷰(최소 주 1회)

@@ -4,6 +4,7 @@
 <!-- requires-update: 04_frontend/datasource-manager.md (Canvas), 06_data/neo4j-schema.md -->
 
 > **상태**: Planned (Experimental Spec)
+> **구현 상태 태그**: `Planned`
 > **구현 상태**: 계약/스키마 정의 완료, 런타임 구현은 Sprint 수행 후 활성화
 > **정합성 기준**: `01_architecture/metadata-service.md`의 Business Glossary 상태와 동기화
 
@@ -69,38 +70,38 @@ Weaver는 "Data Fabric"에서 **"Data Fabric + Metadata Service"**로 승격된�
 
 ### 1.4 전체 엔드포인트 목록
 
-| 메서드 | 경로 | 설명 | 권한 |
-|--------|------|------|------|
-| **패브릭 스냅샷** |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `admin` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `admin` |
-| **비즈니스 용어 사전** |
-| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` |
-| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` |
-| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` |
-| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` |
-| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` |
-| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` |
-| **테이블/컬럼 태깅** |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` |
-| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` |
-| **메타데이터 검색** |
-| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` |
-| **메타데이터 통계** |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` |
-| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` |
+| 메서드 | 경로 | 설명 | 권한 | 상태 | 근거(구현/티켓) |
+|--------|------|------|------|------|------------------|
+| **패브릭 스냅샷** |  |  |  |  |  |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `admin` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `admin` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| **비즈니스 용어 사전** |  |  |  |  |  |
+| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| **테이블/컬럼 태깅** |  |  |  |  |  |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| **메타데이터 검색** |  |  |  |  |  |
+| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| **메타데이터 통계** |  |  |  |  |  |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 
 ---
 

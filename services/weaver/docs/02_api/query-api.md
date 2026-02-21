@@ -1,5 +1,8 @@
 # 쿼리 실행 API
 
+> 구현 상태 태그: `Partial`
+> 기준일: 2026-02-21
+
 <!-- affects: frontend, backend, llm -->
 <!-- requires-update: 03_backend/mindsdb-client.md -->
 
@@ -15,14 +18,14 @@
 
 ## 1. 엔드포인트 목록
 
-| 메서드 | 경로 | 설명 |
-|--------|------|------|
-| `POST` | `/api/query` | MindsDB SQL 쿼리 실행 |
-| `GET` | `/api/query/status` | MindsDB 서버 상태 확인 |
-| `POST` | `/api/query/materialized-table` | 쿼리 결과를 물리화 테이블로 생성 |
-| `GET` | `/api/query/models` | MindsDB ML 모델 목록 |
-| `GET` | `/api/query/jobs` | MindsDB 스케줄 작업 목록 |
-| `GET` | `/api/query/knowledge-bases` | MindsDB 지식 베이스 목록 |
+| 메서드 | 경로 | 설명 | 상태 | 근거(구현/티켓) |
+|--------|------|------|------|------------------|
+| `POST` | `/api/query` | MindsDB SQL 쿼리 실행 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/status` | MindsDB 서버 상태 확인 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/query/materialized-table` | 쿼리 결과를 물리화 테이블로 생성 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/models` | MindsDB ML 모델 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/jobs` | MindsDB 스케줄 작업 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/query/knowledge-bases` | MindsDB 지식 베이스 목록 | Planned | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
 
 ---
 

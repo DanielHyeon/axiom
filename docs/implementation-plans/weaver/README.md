@@ -23,4 +23,5 @@
 - docs/implementation-plans/weaver/99_decisions-implementation-plan.md
 - docs/implementation-plans/weaver/89_agent-utilization-plan.md
 - docs/implementation-plans/weaver/99_traceability-matrix.md
+- docs/implementation-plans/weaver/88_sprint8-ticket-board.md
 - docs/implementation-plans/weaver/README.md

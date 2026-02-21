@@ -1,5 +1,8 @@
 # 스키마 편집 API
 
+> 구현 상태 태그: `Planned`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - 테이블/컬럼의 설명(description)을 어떻게 편집하는가?
@@ -24,17 +27,17 @@
 
 ## 2. 엔드포인트 목록
 
-| Method | Path | 설명 | K-AIR 대응 |
-|--------|------|------|-----------|
-| GET | `/tables` | 전체 테이블 목록 | (이식) |
-| GET | `/tables/{table_name}` | 테이블 상세 + 컬럼 | (이식) |
-| PUT | `/tables/{table_name}/description` | 테이블 설명 수정 | `/schema-edit/tables/{name}/description` |
-| PUT | `/columns/{table_name}/{column_name}/description` | 컬럼 설명 수정 | (이식) |
-| GET | `/relationships` | FK 관계 목록 | `/schema-edit/relationships` |
-| POST | `/relationships` | FK 관계 추가 | `/schema-edit/relationships` |
-| DELETE | `/relationships/{rel_id}` | FK 관계 삭제 | (이식) |
-| POST | `/tables/{table_name}/embedding` | 테이블 임베딩 재생성 | 신규 |
-| POST | `/batch-update-embeddings` | 전체 임베딩 일괄 재생성 | 신규 |
+| Method | Path | 설명 | K-AIR 대응 | 상태 | 근거(구현/티켓) |
+|--------|------|------|-----------|------|------------------|
+| GET | `/tables` | 전체 테이블 목록 | (이식) | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/tables/{table_name}` | 테이블 상세 + 컬럼 | (이식) | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| PUT | `/tables/{table_name}/description` | 테이블 설명 수정 | `/schema-edit/tables/{name}/description` | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| PUT | `/columns/{table_name}/{column_name}/description` | 컬럼 설명 수정 | (이식) | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/relationships` | FK 관계 목록 | `/schema-edit/relationships` | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/relationships` | FK 관계 추가 | `/schema-edit/relationships` | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| DELETE | `/relationships/{rel_id}` | FK 관계 삭제 | (이식) | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/tables/{table_name}/embedding` | 테이블 임베딩 재생성 | 신규 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/batch-update-embeddings` | 전체 임베딩 일괄 재생성 | 신규 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
 
 ---
 

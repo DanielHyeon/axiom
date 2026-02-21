@@ -22,4 +22,5 @@
 - docs/implementation-plans/synapse/99_decisions-implementation-plan.md
 - docs/implementation-plans/synapse/89_agent-utilization-plan.md
 - docs/implementation-plans/synapse/99_traceability-matrix.md
+- docs/implementation-plans/synapse/88_sprint8-ticket-board.md
 - docs/implementation-plans/synapse/README.md

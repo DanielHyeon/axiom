@@ -1,5 +1,8 @@
 # Event Log 관리 API
 
+> 구현 상태 태그: `Planned`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - 이벤트 로그를 어떻게 생성/조회/삭제하는가?
@@ -28,16 +31,16 @@
 
 ## 2. 엔드포인트 목록
 
-| Method | Path | 설명 | 동기/비동기 |
-|--------|------|------|-----------|
-| POST | `/ingest` | 이벤트 로그 인제스트 (CSV/XES/DB) | 비동기 |
-| GET | `/` | 이벤트 로그 목록 조회 | 동기 |
-| GET | `/{log_id}` | 이벤트 로그 상세 조회 | 동기 |
-| DELETE | `/{log_id}` | 이벤트 로그 삭제 | 동기 |
-| GET | `/{log_id}/statistics` | 이벤트 로그 통계 | 동기 |
-| GET | `/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | 동기 |
-| PUT | `/{log_id}/column-mapping` | 컬럼 매핑 수정 | 동기 |
-| POST | `/{log_id}/refresh` | 이벤트 로그 재인제스트 (DB 소스) | 비동기 |
+| Method | Path | 설명 | 동기/비동기 | 상태 | 근거(구현/티켓) |
+|--------|------|------|-----------|------|------------------|
+| POST | `/ingest` | 이벤트 로그 인제스트 (CSV/XES/DB) | 비동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/` | 이벤트 로그 목록 조회 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/{log_id}` | 이벤트 로그 상세 조회 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| DELETE | `/{log_id}` | 이벤트 로그 삭제 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/{log_id}/statistics` | 이벤트 로그 통계 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| GET | `/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| PUT | `/{log_id}/column-mapping` | 컬럼 매핑 수정 | 동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
+| POST | `/{log_id}/refresh` | 이벤트 로그 재인제스트 (DB 소스) | 비동기 | Planned | `docs/implementation-plans/synapse/94_sprint3-ticket-board.md` |
 
 ---
 

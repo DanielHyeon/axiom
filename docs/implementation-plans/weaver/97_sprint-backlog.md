@@ -39,3 +39,11 @@
 - 완료 기준:
   - 릴리스 블로커 0건
   - 번호 문서(00~99) 최신화 완료
+
+## Sprint F: API 정합 복구 (Sprint 8)
+1. Datasource API 1차/확장 경로 구현
+2. Query API 1차 경로 구현
+3. Metadata Catalog API 핵심 경로(snapshots/search/stats) 1차 구현
+- 완료 기준:
+  - `docs/implementation-plans/weaver/88_sprint8-ticket-board.md` 항목 완료
+  - Weaver `02_api` 문서와 런타임 경로 정합성 확보

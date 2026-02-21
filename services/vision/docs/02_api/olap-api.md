@@ -2,6 +2,7 @@
 
 > **최종 수정일**: 2026-02-19
 > **상태**: Draft
+> **구현 상태 태그**: `Planned`
 > **Phase**: 3.6
 > **근거**: 01_architecture/olap-engine.md, ADR-002, ADR-003
 
@@ -29,18 +30,18 @@
 
 ## 엔드포인트 목록
 
-| Method | Path | 설명 |
-|--------|------|------|
-| POST | `/cubes/schema/upload` | 큐브 스키마 XML 업로드 |
-| GET | `/cubes` | 사용 가능한 큐브 목록 |
-| GET | `/cubes/{cube_name}` | 큐브 메타데이터 상세 |
-| POST | `/pivot/query` | 피벗 쿼리 실행 |
-| POST | `/pivot/nl-query` | 자연어 → 피벗 쿼리 |
-| GET | `/pivot/drillthrough` | 드릴스루 (원본 레코드) |
-| POST | `/etl/analyze` | ETL 대상 분석 |
-| POST | `/etl/sync` | ETL 동기화 실행 |
-| GET | `/etl/status` | ETL 동기화 상태 |
-| POST | `/etl/airflow/trigger-dag` | Airflow DAG 트리거 |
+| Method | Path | 설명 | 상태 | 근거(구현/티켓) |
+|--------|------|------|------|------------------|
+| POST | `/cubes/schema/upload` | 큐브 스키마 XML 업로드 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/cubes` | 사용 가능한 큐브 목록 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/cubes/{cube_name}` | 큐브 메타데이터 상세 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/pivot/query` | 피벗 쿼리 실행 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/pivot/nl-query` | 자연어 → 피벗 쿼리 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/pivot/drillthrough` | 드릴스루 (원본 레코드) | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/etl/analyze` | ETL 대상 분석 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/etl/sync` | ETL 동기화 실행 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/etl/status` | ETL 동기화 상태 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/etl/airflow/trigger-dag` | Airflow DAG 트리거 | Planned | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
 
 ---
 

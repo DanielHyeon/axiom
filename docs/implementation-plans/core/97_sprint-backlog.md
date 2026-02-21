@@ -39,3 +39,11 @@
 - 완료 기준:
   - 릴리스 블로커 0건
   - 번호 문서(00~99) 최신화 완료
+
+## Sprint F: API 정합 복구 (Sprint 8)
+1. Watch API 핵심 경로(Alerts/Subscriptions/Rules) 구현
+2. Process API 필수 라이프사이클 경로 보강
+3. Gateway event-log/process-mining 프록시 경로 복구
+- 완료 기준:
+  - `docs/implementation-plans/core/88_sprint8-ticket-board.md` 항목 완료
+  - API 문서 상태/근거 컬럼과 런타임 경로 불일치 고위험 항목 0건

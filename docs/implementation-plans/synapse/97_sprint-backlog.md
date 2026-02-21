@@ -39,3 +39,11 @@
 - 완료 기준:
   - 릴리스 블로커 0건
   - 번호 문서(00~99) 최신화 완료
+
+## Sprint F: API 정합 복구 (Sprint 8)
+1. Event-Log API 1차 구현(ingest/list/detail/preview/statistics)
+2. Extraction API 1차 구현 + HITL 경로 구현
+3. Schema-edit API 기본 경로 구현
+- 완료 기준:
+  - `docs/implementation-plans/synapse/88_sprint8-ticket-board.md` 항목 완료
+  - Synapse `02_api` 문서 상태와 런타임 경로 정합성 확보

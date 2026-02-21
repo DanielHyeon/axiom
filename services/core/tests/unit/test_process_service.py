@@ -26,7 +26,19 @@ async def test_submit_workitem_transitions():
 
 @pytest.mark.asyncio
 async def test_approve_hitl():
-    db_mock = None
+    db_mock = AsyncMock()
+    
+    class MockWorkItem:
+        status = WorkItemStatus.IN_PROGRESS
+        result_data = {}
+        version = 1
+
+    class MockResult:
+        def scalar_one_or_none(self):
+            return MockWorkItem()
+
+    db_mock.execute.return_value = MockResult()
+
     # Test rejection requires feedback
     with pytest.raises(ValueError, match="Feedback is required"):
         await ProcessService.approve_hitl(db=db_mock, item_id="uuid-456", approved=False, feedback="")

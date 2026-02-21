@@ -77,6 +77,17 @@
   - Critical/High 취약점 0
   - 운영 리허설 완료
 
+### Sprint 8 (API Alignment Recovery)
+- 목표: 문서-구현 API 정합성 복구 및 우선순위 엔드포인트 구현 착수
+- 범위: Core/Synapse/Oracle/Vision/Weaver API 갭 P0/P1
+- 핵심 산출물:
+  - 서비스별 `88_sprint8-ticket-board.md` 기준 P0 티켓 구현/검증
+  - API 문서 상태(Implemented/Partial/Planned)와 근거(코드/티켓) 동기화
+  - 프로그램 실행 티켓 문서 `11_sprint8-execution-tickets.md` 기준 통합 추적
+- 통과 기준:
+  - P0 엔드포인트 계약 테스트 통과
+  - 서비스별 스프린트 보드 진행률 및 근거 링크 최신화
+
 ## 3. 크로스 의존성 차단 규칙
 - Oracle은 Synapse API 가용 전 독립 완료로 인정하지 않음
 - Canvas E2E 완료는 Core/Oracle/Synapse/Vision/Weaver 계약 테스트 통과가 선행

@@ -60,3 +60,19 @@
 - API 문서는 구현 상태를 `Implemented / Experimental / Planned`로 명시하고 코드 상태와 동기화한다.
 - 이벤트 계약은 `docs/domain-contract-registry.md`를 기준으로 버전/호환성/승인을 관리한다.
 - K-AIR 미구현/저성숙 항목 추적은 `10_feature-maturity-checklist.md`를 프로그램 공통 SSOT로 사용한다.
+
+## 7. 스프린트 로드맵 연동
+- 마스터 스프린트 로드맵 SSOT: `docs/implementation-plans/program/01_sprint-backlog-master.md`
+- 스프린트 실행 티켓 SSOT:
+  - Sprint 1: `docs/implementation-plans/program/02_sprint1-execution-tickets.md`
+  - Sprint 2: `docs/implementation-plans/program/03_sprint2-execution-tickets.md`
+  - Sprint 3: `docs/implementation-plans/program/04_sprint3-execution-tickets.md`
+  - Sprint 4: `docs/implementation-plans/program/05_sprint4-execution-tickets.md`
+  - Sprint 5: `docs/implementation-plans/program/06_sprint5-execution-tickets.md`
+  - Sprint 6: `docs/implementation-plans/program/07_sprint6-execution-tickets.md`
+  - Sprint 7: `docs/implementation-plans/program/08_sprint7-execution-tickets.md`
+  - Sprint 8: `docs/implementation-plans/program/11_sprint8-execution-tickets.md`
+- Sprint 8 정렬 원칙:
+  - 목표: API 문서-구현 정합성 복구 및 P0/P1 엔드포인트 우선 구현
+  - 서비스 보드: `docs/implementation-plans/{core|synapse|oracle|vision|weaver}/88_sprint8-ticket-board.md`
+  - 완료 기준: API 상태/근거 컬럼 동기화 + P0 계약 테스트 통과

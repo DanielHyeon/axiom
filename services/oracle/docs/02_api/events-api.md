@@ -1,5 +1,8 @@
 # 이벤트 룰 CRUD API
 
+> 구현 상태 태그: `Planned`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - 이벤트 감시 룰을 어떻게 등록/수정/삭제하는가?
@@ -23,18 +26,18 @@
 
 ## 2. 엔드포인트 요약
 
-| Method | Path | 설명 | 이관 후 |
-|--------|------|------|--------|
-| POST | `/text2sql/events/rules` | 이벤트 룰 생성 | Core Watch |
-| GET | `/text2sql/events/rules` | 이벤트 룰 목록 | Core Watch |
-| GET | `/text2sql/events/rules/{id}` | 이벤트 룰 상세 | Core Watch |
-| PUT | `/text2sql/events/rules/{id}` | 이벤트 룰 수정 | Core Watch |
-| DELETE | `/text2sql/events/rules/{id}` | 이벤트 룰 삭제 | Core Watch |
-| POST | `/text2sql/events/scheduler/start` | 스케줄러 시작 | Core Watch |
-| POST | `/text2sql/events/scheduler/stop` | 스케줄러 중지 | Core Watch |
-| GET | `/text2sql/events/scheduler/status` | 스케줄러 상태 | Core Watch |
-| GET | `/text2sql/events/stream/alarms` | SSE 알림 스트림 | Core Watch |
-| POST | `/text2sql/watch-agent/chat` | 감시 에이전트 대화 | Core Watch |
+| Method | Path | 설명 | 이관 후 | 상태 | 근거(구현/티켓) |
+|--------|------|------|--------|------|------------------|
+| POST | `/text2sql/events/rules` | 이벤트 룰 생성 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| GET | `/text2sql/events/rules` | 이벤트 룰 목록 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| GET | `/text2sql/events/rules/{id}` | 이벤트 룰 상세 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| PUT | `/text2sql/events/rules/{id}` | 이벤트 룰 수정 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| DELETE | `/text2sql/events/rules/{id}` | 이벤트 룰 삭제 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| POST | `/text2sql/events/scheduler/start` | 스케줄러 시작 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| POST | `/text2sql/events/scheduler/stop` | 스케줄러 중지 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| GET | `/text2sql/events/scheduler/status` | 스케줄러 상태 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| GET | `/text2sql/events/stream/alarms` | SSE 알림 스트림 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
+| POST | `/text2sql/watch-agent/chat` | 감시 에이전트 대화 | Core Watch | Planned | `docs/implementation-plans/oracle/90_sprint7-ticket-board.md` |
 
 ---
 

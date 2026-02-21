@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.core.middleware import TenantMiddleware, RequestIdMiddleware
 from app.api import health
 from app.api.process.routes import router as process_router
+from app.api.watch.routes import router as watch_router
 
 app = FastAPI(title="Axiom Core", version="1.0.0")
 
@@ -24,3 +25,4 @@ app.add_middleware(TenantMiddleware)
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(process_router, prefix="/api/v1")
+app.include_router(watch_router, prefix="/api/v1")

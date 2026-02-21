@@ -1,5 +1,8 @@
 # Axiom Core - API Gateway
 
+> 구현 상태 태그: `Partial`
+> 기준일: 2026-02-21
+
 ## 이 문서가 답하는 질문
 
 - API Gateway는 어떤 엔드포인트를 라우팅하는가?
@@ -326,17 +329,17 @@ app.add_middleware(
 
 이벤트 로그 수집 요청은 Core에서 검증/파싱 후 Synapse로 라우팅한다.
 
-| 메서드 | 경로 | 설명 | Content-Type |
-|--------|------|------|-------------|
-| POST | `/api/v1/event-logs/upload` | XES/CSV 파일 업로드 | `multipart/form-data` |
-| POST | `/api/v1/event-logs/db-connect` | DB 연결로 이벤트 로그 수집 | `application/json` |
-| GET | `/api/v1/event-logs` | 수집된 이벤트 로그 목록 조회 | - |
-| GET | `/api/v1/event-logs/{id}` | 이벤트 로그 상세 조회 | - |
-| DELETE | `/api/v1/event-logs/{id}` | 이벤트 로그 삭제 | - |
-| GET | `/api/v1/event-logs/{id}/preview` | 이벤트 로그 미리보기 (상위 100건) | - |
-| PUT | `/api/v1/event-logs/{id}/column-mapping` | CSV 컬럼 매핑 설정/수정 | `application/json` |
-| POST | `/api/v1/event-logs/{id}/refresh` | 이벤트 로그 재수집/갱신 트리거 | `application/json` |
-| POST | `/api/v1/event-logs/export-bpm` | BPM 실행 이력을 이벤트 로그로 내보내기 | `application/json` |
+| 메서드 | 경로 | 설명 | Content-Type | 상태 | 근거(구현/티켓) |
+|--------|------|------|-------------|------|------------------|
+| POST | `/api/v1/event-logs/upload` | XES/CSV 파일 업로드 | `multipart/form-data` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/event-logs/db-connect` | DB 연결로 이벤트 로그 수집 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/event-logs` | 수집된 이벤트 로그 목록 조회 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/event-logs/{id}` | 이벤트 로그 상세 조회 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| DELETE | `/api/v1/event-logs/{id}` | 이벤트 로그 삭제 | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/event-logs/{id}/preview` | 이벤트 로그 미리보기 (상위 100건) | - | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| PUT | `/api/v1/event-logs/{id}/column-mapping` | CSV 컬럼 매핑 설정/수정 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/event-logs/{id}/refresh` | 이벤트 로그 재수집/갱신 트리거 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/event-logs/export-bpm` | BPM 실행 이력을 이벤트 로그로 내보내기 | `application/json` | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
 
 #### 파일 업로드 요청/응답 예시
 
@@ -419,18 +422,18 @@ Content-Disposition: form-data; name="description"
 
 프로세스 마이닝 요청은 Synapse로 직접 프록시한다.
 
-| 메서드 | 경로 | 설명 | 타임아웃 |
-|--------|------|------|---------|
-| POST | `/api/v1/process-mining/discover` | 프로세스 모델 발견 | 180s |
-| POST | `/api/v1/process-mining/conformance` | 적합성 검사 | 180s |
-| POST | `/api/v1/process-mining/bottlenecks` | 병목 분석 (구 `/performance` 별칭도 유지) | 180s |
-| GET | `/api/v1/process-mining/variants` | 프로세스 변형(Variant) 목록 조회 | 60s |
-| GET | `/api/v1/process-mining/bottlenecks` | 병목 분석 결과 조회 | 60s |
-| GET | `/api/v1/process-mining/tasks/{task_id}` | 비동기 작업 폴링 (마이닝 태스크 상태) | 30s |
-| GET | `/api/v1/process-mining/results/{id}` | 마이닝 결과 조회 | 30s |
-| GET | `/api/v1/process-mining/statistics/{log_id}` | 이벤트 로그 기본 통계 조회 | 30s |
-| POST | `/api/v1/process-mining/bpmn/export` | 발견 모델을 BPMN으로 내보내기 | 60s |
-| POST | `/api/v1/process-mining/import-model` | 발견 모델을 BPM에 임포트 | 60s |
+| 메서드 | 경로 | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
+|--------|------|------|---------|------|------------------|
+| POST | `/api/v1/process-mining/discover` | 프로세스 모델 발견 | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/process-mining/conformance` | 적합성 검사 | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/process-mining/bottlenecks` | 병목 분석 (구 `/performance` 별칭도 유지) | 180s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/process-mining/variants` | 프로세스 변형(Variant) 목록 조회 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/process-mining/bottlenecks` | 병목 분석 결과 조회 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/process-mining/tasks/{task_id}` | 비동기 작업 폴링 (마이닝 태스크 상태) | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/process-mining/results/{id}` | 마이닝 결과 조회 | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| GET | `/api/v1/process-mining/statistics/{log_id}` | 이벤트 로그 기본 통계 조회 | 30s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/process-mining/bpmn/export` | 발견 모델을 BPMN으로 내보내기 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
+| POST | `/api/v1/process-mining/import-model` | 발견 모델을 BPM에 임포트 | 60s | Planned | `docs/implementation-plans/core/96_sprint1-ticket-board.md` |
 
 > **참고**: `/api/v1/process-mining/performance`는 `/api/v1/process-mining/bottlenecks`의 레거시 별칭으로 유지된다. 신규 코드에서는 `/bottlenecks`(복수형)를 사용할 것. Synapse 서비스는 `/api/v1/...` 경로로 수신한다 (v3 아님).
 

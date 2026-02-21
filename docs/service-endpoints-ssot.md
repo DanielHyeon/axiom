@@ -1,7 +1,8 @@
 # Axiom Service Endpoints SSOT
 
-> 기준일: 2026-02-19
-> 상태: Accepted
+> 기준일: 2026-02-21
+> 상태: Needs Sync
+> 비고: `docker-compose.yml`, `k8s/` 매니페스트와 포트/서비스 구성이 불일치하여 재동기화 필요
 
 ## 목적
 
