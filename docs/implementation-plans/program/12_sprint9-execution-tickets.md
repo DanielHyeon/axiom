@@ -114,3 +114,35 @@
   - 시나리오: process initiate/submit -> pending 2 -> `POST /api/v1/events/sync/run-once` -> pending 0
 - [x] DLQ 주입/재처리 재현
   - 시나리오: `axiom:dlq:events` 1건 주입 -> reprocess 성공 -> depth 0
+
+## Next Action (Critical 잔여 1건: G-001)
+
+### S13-VIS-RCA-002 (Synapse 실연동 고도화)
+- 목적: `GET /root-cause/process-bottleneck`가 fallback 수준을 넘어 Synapse 실데이터 기반으로 원인/권고를 생성
+- 작업:
+  - Synapse 병목/변형/성능 API 응답을 Vision 원인 템플릿으로 정규화
+  - `SYNAPSE_UNAVAILABLE` 외 오류코드 분기(`PROCESS_MODEL_NOT_FOUND`, `INSUFFICIENT_PROCESS_DATA`) 세분화
+  - 결과에 `data_range`, `case_count`, `source_log_id`를 포함해 추적성 강화
+- 완료 기준:
+  - Synapse 정상/장애/데이터부족 3경로 테스트 통과
+  - API 응답이 문서 스키마와 주요 필드 기준으로 정합
+
+### S13-VIS-RCA-003 (실엔진 계산 경로 도입)
+- 목적: Root-Cause 계산이 고정 템플릿이 아닌 실계산 경로를 갖도록 개선
+- 작업:
+  - SHAP/기여도 계산 모듈 분리(`root_cause_engine.py` 등)
+  - 반사실 계산에 변수별 영향치 테이블(또는 모델 결과)을 반영
+  - 결과 신뢰도 산식과 근거 필드(`confidence_basis`) 추가
+- 완료 기준:
+  - 동일 입력 반복 시 결정적(deterministic) 결과 재현
+  - 기존 템플릿 대비 최소 2개 케이스에서 결과 차등 발생 확인
+
+### S13-VIS-RCA-004 (회귀/운영 검증 고정)
+- 목적: G-001의 회귀 방지와 운영 관측성을 확보
+- 작업:
+  - 단위/통합 테스트에 `causal-timeline`, `impact`, `graph`, `process-bottleneck` 확장 케이스 추가
+  - 실패율/지연 지표를 health/metrics에 반영 가능한 형태로 노출
+  - 문서(`root-cause-api.md`, gap-analysis) 상태 태그를 구현 기준으로 동기화
+- 완료 기준:
+  - 테스트 파일 기준 회귀 시나리오 0 fail
+  - 문서-코드 상태 불일치 0건

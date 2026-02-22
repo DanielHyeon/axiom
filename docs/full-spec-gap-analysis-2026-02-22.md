@@ -219,6 +219,9 @@
 ## 5. 권고 티켓 분해 (즉시 생성 권장)
 
 1. `VIS-RCA-001` Root-Cause API 최소 구현
+1. `S13-VIS-RCA-002` Root-Cause process-bottleneck Synapse 실연동 고도화
+1. `S13-VIS-RCA-003` Root-Cause SHAP/Counterfactual 실엔진 계산 경로 도입
+1. `S13-VIS-RCA-004` Root-Cause 회귀/운영 검증 지표 고정
 2. `CAN-AUTH-001` Canvas real auth/refresh 적용
 3. `PGM-SSOT-001` SSOT-Compose-K8s 동기화
 4. `ORA-NL2SQL-REAL-001` Oracle mock 제거 1차
