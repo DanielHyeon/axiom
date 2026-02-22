@@ -125,6 +125,7 @@ async def update_scenario(
     item["started_at"] = None
     item["completed_at"] = None
     item["result"] = None
+    vision_runtime.save_scenario(case_id, item)
     return item
 
 

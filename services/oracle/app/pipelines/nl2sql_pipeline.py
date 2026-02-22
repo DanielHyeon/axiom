@@ -18,11 +18,13 @@ class NL2SQLPipeline:
         "event_logs": ["id", "event_type", "occurred_at", "severity", "case_id"],
     }
 
-    async def _load_schema_catalog(self, tenant_id: str) -> list[TableSchema]:
+    async def _load_schema_catalog(self, tenant_id: str) -> tuple[list[TableSchema], str]:
         catalog: list[TableSchema] = []
+        schema_source = "fallback"
         try:
             payload = await synapse_client.list_schema_tables(tenant_id=tenant_id)
             rows = payload.get("data", {}).get("tables", [])
+            schema_source = "synapse"
         except Exception:
             rows = []
         for item in rows:
@@ -41,8 +43,8 @@ class NL2SQLPipeline:
             if cols:
                 catalog.append(TableSchema(name=table_name, columns=cols))
         if catalog:
-            return catalog
-        return [TableSchema(name=name, columns=cols) for name, cols in self._FALLBACK_SCHEMAS.items()]
+            return catalog, schema_source
+        return [TableSchema(name=name, columns=cols) for name, cols in self._FALLBACK_SCHEMAS.items()], "fallback"
 
     @staticmethod
     def _match_table(question_lower: str, tables: list[TableSchema]) -> TableSchema:
@@ -79,9 +81,7 @@ class NL2SQLPipeline:
                 conditions.append("severity = 'warning'")
         if "risk_level" in table.columns and ("high risk" in question_lower or "고위험" in question_lower):
             conditions.append("risk_level = 'HIGH'")
-        if not conditions:
-            return ""
-        return " WHERE " + " AND ".join(conditions)
+        return "" if not conditions else " WHERE " + " AND ".join(conditions)
 
     def _generate_sql(self, question: str, schemas: list[TableSchema]) -> str:
         question_lower = question.lower().strip()
@@ -101,7 +101,7 @@ class NL2SQLPipeline:
         dialect = options.get("dialect", "postgres")
 
         tenant_id = str(user.tenant_id) if user else ""
-        schema_catalog = await self._load_schema_catalog(tenant_id=tenant_id)
+        schema_catalog, schema_source = await self._load_schema_catalog(tenant_id=tenant_id)
         generated_sql = self._generate_sql(question, schema_catalog)
 
         guard_cfg = GuardConfig(row_limit=row_limit, dialect=dialect)
@@ -126,9 +126,11 @@ class NL2SQLPipeline:
                 "result": exec_res.model_dump(),
                 "metadata": {
                     "execution_time_ms": exec_res.execution_time_ms,
+                    "execution_backend": exec_res.backend,
                     "guard_status": guard_res.status,
                     "guard_fixes": guard_res.fixes,
-                    "schema_source": "synapse_or_fallback",
+                    "schema_source": schema_source,
+                    "tables_used": [self._match_table(question.lower().strip(), schema_catalog).name],
                 },
             },
         }

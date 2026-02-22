@@ -72,7 +72,7 @@ def override_repo(monkeypatch):
 async def test_ask_includes_query_id_and_history_list(override_repo, ac: AsyncClient):
     ask_payload = {
         "question": "Show me everything",
-        "datasource_id": "test",
+        "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
     ask_res = await ac.post("/text2sql/ask", json=ask_payload)
@@ -97,7 +97,7 @@ async def test_history_detail_not_found(override_repo, ac: AsyncClient):
 async def test_feedback_submit_and_validation(override_repo, ac: AsyncClient):
     ask_payload = {
         "question": "Show me everything",
-        "datasource_id": "test",
+        "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
     ask_res = await ac.post("/text2sql/ask", json=ask_payload)

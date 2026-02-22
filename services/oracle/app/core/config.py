@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     SYNAPSE_SCHEMA_EDIT_BASE: str = "/api/v3/synapse/schema-edit"
     CORE_API_URL: str = "http://localhost:8001"
     SERVICE_TOKEN_ORACLE: str = "local-oracle-token"
+    WEAVER_QUERY_API_URL: str = "http://localhost:8001/api/query"
+    WEAVER_BEARER_TOKEN: str = ""
+    ORACLE_SQL_EXECUTION_MODE: str = "hybrid"
+    ORACLE_SQL_EXECUTION_TIMEOUT_SEC: int = 15
     ORACLE_DATASOURCES_JSON: str = (
         '[{"id":"ds_business_main","name":"Business Main DB","type":"postgresql",'
         '"host":"localhost","database":"insolvency_os","status":"active"}]'

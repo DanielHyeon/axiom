@@ -27,7 +27,7 @@ def test_sql_guard_blocks_destructive_keywords():
 async def test_text2sql_ask_endpoint(ac: AsyncClient):
     payload = {
         "question": "Show me everything",
-        "datasource_id": "test",
+        "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000}
     }
     res = await ac.post("/text2sql/ask", json=payload)
@@ -35,7 +35,9 @@ async def test_text2sql_ask_endpoint(ac: AsyncClient):
     data = res.json()
     assert data["success"] == True
     assert "data" in data
-    assert data["data"]["sql"] == "SELECT * FROM sales_records LIMIT 1000"
+    assert data["data"]["sql"].startswith("SELECT ")
+    assert " FROM " in data["data"]["sql"]
+    assert data["data"]["metadata"]["execution_backend"] in ["mock", "weaver"]
 
 @pytest.mark.asyncio
 async def test_nl2sql_pipeline_failure_route():

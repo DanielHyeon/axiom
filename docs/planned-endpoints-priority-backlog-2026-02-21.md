@@ -287,26 +287,26 @@
   - 상태: In Progress (자동검증 1차 완료)
   - 범위: `docs/service-endpoints-ssot.md`와 `docker-compose.yml`, `k8s/*.yaml` 정합화
 - `P1-FULLSPEC-ORACLE-NL2SQL-REAL`
-  - 상태: Planned
+  - 상태: In Progress (mock-to-real 1차 완료)
   - 범위: NL2SQL mock pipeline 제거 및 실제 SQL 생성/실행 경로 강화
 - `P1-FULLSPEC-VISION-PERSISTENCE`
-  - 상태: Planned
+  - 상태: In Progress (영속화 1차 완료)
   - 범위: what-if/olap/etl 상태의 in-memory 저장소를 영속 저장소로 전환
 - `P1-FULLSPEC-CORE-AGENT-PERSISTENCE`
-  - 상태: Planned
+  - 상태: In Progress (영속화 1차 완료)
   - 범위: Agent feedback/knowledge/MCP 상태 DB 영속화
 - `P1-FULLSPEC-SYNAPSE-CONFORMANCE`
   - 상태: Planned
   - 범위: conformance checker stub 제거 및 실제 계산 경로 연결
 - `P1-FULLSPEC-OUTBOX-STREAMS`
-  - 상태: Planned
+  - 상태: Implemented (1차 운영 경로 완료)
   - 범위: Outbox -> Redis Streams publisher/consumer 운영 경로 명시 및 증적화
 - `P2-FULLSPEC-SELF-VERIFICATION`
-  - 상태: Planned
+  - 상태: Implemented (1차 정책 런타임 적용)
   - 범위: 20% 샘플링 self-check validator, fail routing, KPI 수집
 - `P2-FULLSPEC-4SOURCE-LINEAGE`
-  - 상태: Planned
+  - 상태: Implemented (1차 계약 강제)
   - 범위: `source_origin/lineage_path/idempotency_key` 필수 메타 강제
 - `P2-FULLSPEC-DOMAIN-CONTRACT-ENFORCEMENT`
-  - 상태: Planned
+  - 상태: Implemented (1차 런타임 검증)
   - 범위: Domain Event Contract Registry 런타임 검증(이벤트명/버전/키 규칙)

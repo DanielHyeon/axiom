@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import asc, desc, func, select
 from app.models.base_models import ProcessDefinition, ProcessRoleBinding, WorkItem
 from app.core.events import EventPublisher
+from app.core.event_contract_registry import EventContractError
+from app.core.self_verification import self_verification_harness
 
 
 class ProcessDomainError(Exception):
@@ -262,13 +264,16 @@ class ProcessService:
             version=1,
         )
         db.add(workitem)
-        await EventPublisher.publish(
-            session=db,
-            event_type="PROCESS_INITIATED",
-            aggregate_type="process",
-            aggregate_id=proc_inst_id,
-            payload={"proc_def_id": proc_def_id, "workitem_id": workitem_id},
-        )
+        try:
+            await EventPublisher.publish(
+                session=db,
+                event_type="PROCESS_INITIATED",
+                aggregate_type="process",
+                aggregate_id=proc_inst_id,
+                payload={"proc_def_id": proc_def_id, "workitem_id": workitem_id},
+            )
+        except EventContractError as err:
+            raise ProcessDomainError(422, err.code, err.message)
         return {
             "proc_inst_id": proc_inst_id,
             "status": "RUNNING",
@@ -309,10 +314,47 @@ class ProcessService:
         if workitem.status == WorkItemStatus.SUBMITTED and not force_complete:
             raise ProcessDomainError(422, "INVALID_STATE_TRANSITION", "SUBMITTED requires approve-hitl")
 
+        verification_outcome = self_verification_harness.evaluate(
+            workitem_id=item_id,
+            payload=submit_data if isinstance(submit_data, dict) else {},
+            agent_mode=workitem.agent_mode,
+        )
+        if verification_outcome.decision == "FAIL_ROUTE":
+            workitem.status = WorkItemStatus.SUBMITTED
+            body = submit_data.get("result_data", submit_data)
+            if not isinstance(body, dict):
+                body = {"value": body}
+            body["self_verification"] = verification_outcome.as_dict()
+            workitem.result_data = body
+            workitem.version += 1
+            try:
+                await EventPublisher.publish(
+                    session=db,
+                    event_type="WORKITEM_SELF_VERIFICATION_FAILED",
+                    aggregate_type="workitem",
+                    aggregate_id=item_id,
+                    payload={"reason": verification_outcome.reason, "result": body},
+                )
+            except EventContractError as err:
+                raise ProcessDomainError(422, err.code, err.message)
+            return {
+                "workitem_id": item_id,
+                "status": WorkItemStatus.SUBMITTED,
+                "next_workitems": [],
+                "process_status": "RUNNING",
+                "is_process_completed": False,
+                "self_verification": verification_outcome.as_dict(),
+            }
+
         # Basic state transition logic
         next_status = WorkItemStatus.DONE
         workitem.status = next_status
-        workitem.result_data = submit_data.get("result_data", submit_data)
+        body = submit_data.get("result_data", submit_data)
+        if not isinstance(body, dict):
+            body = {"value": body}
+        if verification_outcome.decision == "PASS":
+            body["self_verification"] = verification_outcome.as_dict()
+        workitem.result_data = body
         workitem.version += 1
         next_workitems: list[dict] = []
         process_status = "COMPLETED"
@@ -345,13 +387,16 @@ class ProcessService:
             is_process_completed = False
 
         # Insert event into outbox atomically
-        await EventPublisher.publish(
-            session=db,
-            event_type="WORKITEM_COMPLETED",
-            aggregate_type="workitem",
-            aggregate_id=item_id,
-            payload={"result": workitem.result_data}
-        )
+        try:
+            await EventPublisher.publish(
+                session=db,
+                event_type="WORKITEM_COMPLETED",
+                aggregate_type="workitem",
+                aggregate_id=item_id,
+                payload={"result": workitem.result_data}
+            )
+        except EventContractError as err:
+            raise ProcessDomainError(422, err.code, err.message)
         
         # Explicit commit expected to be handled by caller/router
         

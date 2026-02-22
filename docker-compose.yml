@@ -1,6 +1,18 @@
-version: '3.8'
-
 services:
+  postgres-db:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=insolvency_os
+      - POSTGRES_USER=arkos
+      - POSTGRES_PASSWORD=arkos
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U arkos -d insolvency_os" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Mocked Core dependencies
   redis-bus:
     image: redis:alpine
@@ -22,8 +34,27 @@ services:
     environment:
       - REDIS_URL=redis://redis-bus:6379
       - CORE_EVENT_BUS=redis
+      - VISION_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
     depends_on:
       redis-bus:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+
+  core-svc:
+    build:
+      context: ./services/core
+      dockerfile: Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://arkos:arkos@postgres-db:5432/insolvency_os
+      - CORE_AGENT_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - REDIS_URL=redis://redis-bus:6379
+    depends_on:
+      redis-bus:
+        condition: service_healthy
+      postgres-db:
         condition: service_healthy
 
   weaver-svc:
@@ -36,6 +67,7 @@ services:
       - NEO4J_URI=bolt://mock-graph-node:7687
     depends_on:
       - vision-svc
+      - core-svc
 
   # Frontend Node
   canvas-ui:

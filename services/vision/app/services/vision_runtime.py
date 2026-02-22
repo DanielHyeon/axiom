@@ -2,19 +2,25 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from itertools import count
+import os
 from typing import Any
 
+from app.services.vision_state_store import VisionStateStore
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
 class VisionRuntime:
-    def __init__(self) -> None:
-        self.what_if_by_case: dict[str, dict[str, dict[str, Any]]] = {}
-        self.cubes: dict[str, dict[str, Any]] = {}
-        self.etl_jobs: dict[str, dict[str, Any]] = {}
-        self.root_cause_by_case: dict[str, dict[str, Any]] = {}
+    def __init__(self, store: VisionStateStore | None = None) -> None:
+        self.store = store or VisionStateStore(
+            os.getenv("VISION_STATE_DATABASE_URL", "postgresql://arkos:arkos@localhost:5432/insolvency_os")
+        )
+        loaded = self.store.load_state()
+        self.what_if_by_case: dict[str, dict[str, dict[str, Any]]] = loaded.get("what_if_by_case", {})
+        self.cubes: dict[str, dict[str, Any]] = loaded.get("cubes", {})
+        self.etl_jobs: dict[str, dict[str, Any]] = loaded.get("etl_jobs", {})
+        self.root_cause_by_case: dict[str, dict[str, Any]] = loaded.get("root_cause_by_case", {})
         self._id_seq = count(1)
 
     def _new_id(self, prefix: str) -> str:
@@ -25,6 +31,7 @@ class VisionRuntime:
         self.cubes.clear()
         self.etl_jobs.clear()
         self.root_cause_by_case.clear()
+        self.store.clear()
 
     def scenarios(self, case_id: str) -> dict[str, dict[str, Any]]:
         return self.what_if_by_case.setdefault(case_id, {})
@@ -50,7 +57,15 @@ class VisionRuntime:
             "result": None,
         }
         self.scenarios(case_id)[scenario_id] = scenario
+        self.store.upsert_scenario(case_id, scenario_id, scenario)
         return scenario
+
+    def save_scenario(self, case_id: str, scenario: dict[str, Any]) -> None:
+        scenario_id = str(scenario.get("id") or "")
+        if not scenario_id:
+            return
+        self.scenarios(case_id)[scenario_id] = scenario
+        self.store.upsert_scenario(case_id, scenario_id, scenario)
 
     def list_scenarios(self, case_id: str) -> list[dict[str, Any]]:
         items = list(self.scenarios(case_id).values())
@@ -65,6 +80,7 @@ class VisionRuntime:
         if scenario_id not in bucket:
             return False
         del bucket[scenario_id]
+        self.store.delete_scenario(case_id, scenario_id)
         return True
 
     def compute_scenario(self, case_id: str, scenario_id: str) -> dict[str, Any]:
@@ -162,6 +178,7 @@ class VisionRuntime:
         scenario["result"] = result
         scenario["updated_at"] = completed_at
         scenario["completed_at"] = completed_at
+        self.store.upsert_scenario(case_id, scenario_id, scenario)
         return result
 
     def create_cube(self, cube_name: str, fact_table: str, dimensions: list[str], measures: list[str]) -> dict[str, Any]:
@@ -177,7 +194,35 @@ class VisionRuntime:
             "row_count": 1000,
         }
         self.cubes[cube_name] = cube
+        self.store.upsert_cube(cube_name, cube)
         return cube
+
+    def queue_etl_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        job_id = self._new_id("etl-")
+        now = _now()
+        job = {
+            "job_id": job_id,
+            "status": "queued",
+            "created_at": now,
+            "updated_at": now,
+            "payload": payload,
+        }
+        self.etl_jobs[job_id] = job
+        self.store.upsert_etl_job(job_id, job)
+        return job
+
+    def get_etl_job(self, job_id: str) -> dict[str, Any] | None:
+        return self.etl_jobs.get(job_id)
+
+    def complete_etl_job_if_queued(self, job_id: str) -> dict[str, Any] | None:
+        job = self.get_etl_job(job_id)
+        if not job:
+            return None
+        if job["status"] == "queued":
+            job["status"] = "completed"
+            job["updated_at"] = _now()
+            self.store.upsert_etl_job(job_id, job)
+        return job
 
     def create_root_cause_analysis(self, case_id: str, payload: dict[str, Any], requested_by: str) -> dict[str, Any]:
         analysis_id = self._new_id("rca-")
@@ -241,6 +286,7 @@ class VisionRuntime:
             "explanation": "핵심 근본원인은 부채비율 상승, EBITDA 저하, 금리환경 악화의 결합입니다.",
         }
         self.root_cause_by_case[case_id] = analysis
+        self.store.upsert_root_cause_analysis(case_id, analysis)
         return analysis
 
     def get_root_cause_analysis(self, case_id: str) -> dict[str, Any] | None:
@@ -259,6 +305,7 @@ class VisionRuntime:
             }
             analysis["completed_at"] = _now()
             analysis["updated_at"] = analysis["completed_at"]
+            self.store.upsert_root_cause_analysis(case_id, analysis)
         return analysis
 
     def get_root_causes(self, case_id: str) -> dict[str, Any] | None:

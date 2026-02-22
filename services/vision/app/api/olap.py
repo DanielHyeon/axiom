@@ -186,27 +186,16 @@ async def etl_analyze(payload: dict[str, Any], user: CurrentUser = Depends(get_c
 @router.post("/etl/sync", status_code=status.HTTP_202_ACCEPTED)
 async def etl_sync(payload: dict[str, Any], user: CurrentUser = Depends(get_current_user)):
     _ensure_auth(user)
-    job_id = _new_id("etl-")
-    now = _now()
-    vision_runtime.etl_jobs[job_id] = {
-        "job_id": job_id,
-        "status": "queued",
-        "created_at": now,
-        "updated_at": now,
-        "payload": payload,
-    }
-    return {"job_id": job_id, "status": "queued"}
+    job = vision_runtime.queue_etl_job(payload)
+    return {"job_id": job["job_id"], "status": job["status"]}
 
 
 @router.get("/etl/status")
 async def etl_status(job_id: str = Query(...), user: CurrentUser = Depends(get_current_user)):
     _ensure_auth(user)
-    job = vision_runtime.etl_jobs.get(job_id)
+    job = vision_runtime.complete_etl_job_if_queued(job_id)
     if not job:
         raise HTTPException(status_code=404, detail="etl job not found")
-    if job["status"] == "queued":
-        job["status"] = "completed"
-        job["updated_at"] = _now()
     return {"job_id": job_id, "status": job["status"], "updated_at": job["updated_at"]}
 
 

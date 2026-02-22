@@ -34,7 +34,7 @@ def test_sql_guard_ast_deep_subqueries():
 async def test_text2sql_api_pydantic_validation(ac: AsyncClient):
     payload = {
         "question": "A", # Too short, requires 2+ chars
-        "datasource_id": "test"
+        "datasource_id": "ds_business_main"
     }
     res = await ac.post("/text2sql/ask", json=payload)
     # FastApi pydantic validation should return 422 Unprocessable Entity
@@ -44,7 +44,7 @@ async def test_text2sql_api_pydantic_validation(ac: AsyncClient):
 async def test_text2sql_api_valid_payload(ac: AsyncClient):
     payload = {
         "question": "Show me everything",
-        "datasource_id": "test",
+        "datasource_id": "ds_business_main",
         "options": {
             "row_limit": 50
         }
@@ -55,3 +55,13 @@ async def test_text2sql_api_valid_payload(ac: AsyncClient):
     assert data["success"] == True
     assert data["data"]["metadata"]["guard_status"] == "FIX"
     assert "LIMIT 50" in " ".join(data["data"]["metadata"]["guard_fixes"])
+
+@pytest.mark.asyncio
+async def test_text2sql_api_rejects_unknown_datasource(ac: AsyncClient):
+    payload = {
+        "question": "Show me everything",
+        "datasource_id": "unknown_ds",
+    }
+    res = await ac.post("/text2sql/ask", json=payload)
+    assert res.status_code == 404
+    assert res.json()["detail"] == "DATASOURCE_NOT_FOUND"

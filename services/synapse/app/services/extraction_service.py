@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from typing import Any
 
+from app.core.ingestion_contract import IngestionContractError, validate_4source_ingestion_metadata
 
 TARGET_ENTITY_TYPES = [
     "COMPANY",
@@ -54,6 +55,7 @@ class ExtractionDocState:
     relations: list[dict[str, Any]]
     attempts: int
     auto_commit_threshold: float
+    ingestion_metadata: dict[str, Any]
 
 
 class ExtractionService:
@@ -142,6 +144,10 @@ class ExtractionService:
         case_id = payload.get("case_id")
         if not case_id:
             raise ExtractionDomainError(400, "MISSING_CASE_ID", "case_id is required")
+        try:
+            ingestion_metadata = validate_4source_ingestion_metadata(payload)
+        except IngestionContractError as err:
+            raise ExtractionDomainError(422, err.code, err.message)
         options = payload.get("options", {})
         self._validate_options(options)
         auto_threshold = float(options.get("auto_commit_threshold", 0.75))
@@ -175,6 +181,7 @@ class ExtractionService:
             relations=relations,
             attempts=1,
             auto_commit_threshold=auto_threshold,
+            ingestion_metadata=ingestion_metadata,
         )
         self._docs[self._key(tenant_id, doc_id)] = state
         return {
@@ -193,6 +200,7 @@ class ExtractionService:
             "doc_id": state.doc_id,
             "status": state.status,
             "progress": {"current_step": "hitl_queue", "steps": state.steps},
+            "ingestion_metadata": state.ingestion_metadata,
             "started_at": state.started_at,
             "updated_at": state.updated_at,
         }
@@ -248,6 +256,7 @@ class ExtractionService:
         return {
             "task_id": state.task_id,
             "doc_id": state.doc_id,
+            "ingestion_metadata": state.ingestion_metadata,
             "extraction_summary": summary,
             "entities": entities,
             "relations": relations,

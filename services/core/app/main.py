@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from app.core.database import init_database
 from app.core.middleware import TenantMiddleware, RequestIdMiddleware
 from app.api import health
 from app.api.agent.routes import router as agent_router
+from app.api.events.routes import router as events_router
 from app.api.gateway.routes import router as gateway_router
 from app.api.process.routes import router as process_router
 from app.api.watch.routes import router as watch_router
@@ -30,3 +32,9 @@ app.include_router(process_router, prefix="/api/v1")
 app.include_router(watch_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1")
 app.include_router(gateway_router, prefix="/api/v1")
+app.include_router(events_router, prefix="/api/v1")
+
+
+@app.on_event("startup")
+async def startup_event():
+    await init_database()

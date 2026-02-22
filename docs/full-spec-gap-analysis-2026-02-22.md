@@ -45,23 +45,27 @@
   - 단위 테스트 추가: `services/vision/tests/unit/test_root_cause_api.py:1`
 - 판정: Partial (최소 API만 구현, causal-timeline/impact/graph/process-bottleneck 미구현)
 
-### G-002. Self-Verification Harness 전사 정책 미구현 (Not Implemented)
+### G-002. Self-Verification Harness 전사 정책 1차 구현 (Implemented)
 - 설계 근거
   - `docs/architecture-self-verification.md:1`
   - `docs/architecture-self-verification.md:7`
   - `docs/architecture-self-verification.md:23`
 - 코드 근거
-  - `20% 샘플링 validator`, `fail routing 자동화`, `self-check KPI`를 수행하는 공통 런타임 모듈/잡/메트릭 경로 부재
-- 판정: Not Implemented
+  - Self-Verification 런타임/샘플링: `services/core/app/core/self_verification.py:1`
+  - submit 경로 fail-routing: `services/core/app/services/process_service.py:300`
+  - 통합 검증: `services/core/tests/integration/test_e2e_process_submit.py:1`
+- 판정: Implemented (1차, Core process 경로 기준)
 
-### G-003. 4-Source Ingestion lineage 필수 메타 강제 부재 (Not Implemented)
+### G-003. 4-Source Ingestion lineage 필수 메타 1차 강제 (Implemented)
 - 설계 근거
   - `docs/architecture-4source-ingestion.md:1`
   - `docs/architecture-4source-ingestion.md:48`
   - `docs/architecture-4source-ingestion.md:49`
 - 코드 근거
-  - 서비스 런타임에서 `source_origin`, `lineage_path`, `idempotency_key`를 ingestion 결과에 공통 강제/검증하는 계층 부재
-- 판정: Not Implemented
+  - lineage 계약 검증기: `services/synapse/app/core/ingestion_contract.py:1`
+  - extraction 시작 시 필수 검증/422 reject: `services/synapse/app/services/extraction_service.py:141`
+  - 위반 케이스 테스트: `services/synapse/tests/unit/test_extraction_api_full.py:106`
+- 판정: Implemented (1차, Synapse extraction 경로 기준)
 
 ### G-004. SSOT 배포 아키텍처와 실제 Compose/K8s 불일치 지속 (Partial)
 - 설계 근거
@@ -123,21 +127,23 @@
 
 ## 2.3 Medium
 
-### G-010. Outbox는 insert까지 구현됐으나 Redis Streams 송신 worker/consumer 운영 증적 부족 (Partial)
+### G-010. Outbox -> Redis Streams 운영 경로 1차 구현 (Implemented)
 - 설계 근거
   - `services/core/docs/99_decisions/ADR-004-redis-streams-event-bus.md:92`
   - `services/core/docs/06_data/outbox-checklist.md:7`
 - 코드 근거
-  - Outbox insert: `services/core/app/core/events.py:6`, `services/core/app/core/events.py:28`
-  - 호출 지점: `services/core/app/services/process_service.py:347`
-  - 하지만 Core 앱 내 Redis Streams publisher/consumer 실행 경로는 직접 확인 어려움(운영 워커 엔트리 부재)
-- 판정: Partial
+  - Outbox insert: `services/core/app/core/events.py:1`
+  - Sync worker(run-once/loop): `services/core/app/workers/sync.py:1`
+  - 운영 API(backlog/retry/dlq/reprocess): `services/core/app/api/events/routes.py:1`
+  - Docker Compose 실검증: run-once 이후 pending 감소 및 DLQ 재처리 성공 재현
+- 판정: Implemented (1차, Core 이벤트 운영 경로 기준)
 
 ### G-011. Legacy Read-only 정책을 강제 검증하는 가드/정책 엔진 부재 (Partial)
 - 설계 근거
   - `docs/legacy-data-isolation-policy.md:10`
 - 코드 근거
-  - 정책 문서는 존재하나 서비스 공통에서 read-only 연결 강제/위반 차단을 일관 적용하는 중앙 가드 계층 확인 어려움
+  - 정책 위반 탐지 메트릭 추가: `services/core/app/core/events.py:1` (`core_legacy_write_violations_total`)
+  - 다만 read-only 연결 강제/위반 차단을 전 서비스에 공통 적용하는 중앙 가드는 여전히 부재
 - 판정: Partial
 
 ---
@@ -181,6 +187,8 @@
 - 완료조건: 메모리 리셋 없이 상태 유지 + 실패 재처리 가능
 
 ## 4.3 Phase C (P1~P2, 3~5주): 아키텍처 정책 구현
+상태: `PGM-SV-001`, `PGM-4SRC-001`, `CORE-EVT-001` 1차 구현 완료 (Sprint 11).
+
 1. Self-Verification Harness 구현
 - 작업: 20% 샘플링 validator, fail routing, HITL queue 연결, KPI 수집
 - 완료조건: `self-check pass/fail`, `HITL routing rate` 대시보드 노출
@@ -194,6 +202,8 @@
 - 완료조건: 비등록 이벤트 DB 반영 차단
 
 ## 4.4 Phase D (P2, 2~3주): 이벤트 파이프라인 운영 완성
+상태: `CORE-OUTBOX-001` 1차 구현 완료 (Sprint 12), 운영 지표/재처리 API 포함.
+
 1. Outbox -> Redis Streams 퍼블리셔 워커 명시적 운영 경로 추가
 2. Consumer Group, 재처리, DLQ, 관측 지표 구성
 3. 정책 위반(legacy write) 탐지 규칙 추가
@@ -222,5 +232,5 @@
 
 ## 6. 요약
 - "엔드포인트 존재 여부" 관점의 미구현은 크게 줄었음.
-- "full spec(실연동/운영/정책)" 관점에서는 여전히 핵심 갭 11건(Critical 4, High 5, Medium 2).
+- "full spec(실연동/운영/정책)" 관점에서 잔여 핵심 갭은 8건(Critical 2, High 5, Medium 1)으로 축소됨.
 - 우선순위는 `Root-Cause + Auth + SSOT` -> `mock 제거` -> `Self-Verification/4-source/contract enforcement` 순으로 진행하는 것이 리스크 대비 효과가 가장 큼.

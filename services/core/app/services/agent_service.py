@@ -1,10 +1,12 @@
 import uuid
 from datetime import datetime, timedelta, timezone
+import os
 from typing import Any
 
 import httpx
 
 from app.core.config import settings
+from app.services.agent_state_store import AgentStateStore
 
 
 class AgentDomainError(Exception):
@@ -20,15 +22,20 @@ def _now() -> str:
 
 
 class AgentService:
-    def __init__(self) -> None:
-        self._feedback_by_tenant: dict[str, dict[str, dict[str, Any]]] = {}
-        self._mcp_by_tenant: dict[str, dict[str, Any]] = {}
-        self._knowledge_by_tenant: dict[str, dict[str, dict[str, Any]]] = {}
+    def __init__(self, store: AgentStateStore | None = None) -> None:
+        self.store = store or AgentStateStore(
+            os.getenv("CORE_AGENT_STATE_DATABASE_URL", settings.DATABASE_URL)
+        )
+        loaded = self.store.load_state()
+        self._feedback_by_tenant: dict[str, dict[str, dict[str, Any]]] = loaded.get("feedback_by_tenant", {})
+        self._mcp_by_tenant: dict[str, dict[str, Any]] = loaded.get("mcp_by_tenant", {})
+        self._knowledge_by_tenant: dict[str, dict[str, dict[str, Any]]] = loaded.get("knowledge_by_tenant", {})
 
     def clear(self) -> None:
         self._feedback_by_tenant.clear()
         self._mcp_by_tenant.clear()
         self._knowledge_by_tenant.clear()
+        self.store.clear()
 
     def _feedback_bucket(self, tenant_id: str) -> dict[str, dict[str, Any]]:
         return self._feedback_by_tenant.setdefault(tenant_id, {})
@@ -77,6 +84,7 @@ class AgentService:
             records = list(bucket.get(workitem_id, {}).get("records", []))
             records.append(review_record)
             bucket[workitem_id] = {"latest": review_record, "records": records}
+            self.store.upsert_feedback(tenant_id, workitem_id, bucket[workitem_id])
             raise AgentDomainError(422, "KNOWLEDGE_CONFLICT_HIGH", "high-conflict feedback requires manual review")
 
         record = {
@@ -97,15 +105,18 @@ class AgentService:
         records = list(bucket.get(workitem_id, {}).get("records", []))
         records.append(record)
         bucket[workitem_id] = {"latest": record, "records": records}
+        self.store.upsert_feedback(tenant_id, workitem_id, bucket[workitem_id])
 
         knowledge_id = f"kn-{uuid.uuid4()}"
-        self._knowledge_bucket(tenant_id)[knowledge_id] = {
+        knowledge_payload = {
             "id": knowledge_id,
             "type": "MEMORY",
             "title": f"Feedback:{workitem_id}",
             "content": content,
             "created_at": _now(),
         }
+        self._knowledge_bucket(tenant_id)[knowledge_id] = knowledge_payload
+        self.store.upsert_knowledge(tenant_id, knowledge_id, knowledge_payload)
         return {
             "feedback_id": feedback_id,
             "status": "PROCESSING",
@@ -158,6 +169,7 @@ class AgentService:
                 }
             )
         self._mcp_by_tenant[tenant_id] = {"servers": normalized}
+        self.store.upsert_mcp(tenant_id, self._mcp_by_tenant[tenant_id])
         return {
             "tenant_id": tenant_id,
             "servers_count": len(normalized),
@@ -272,6 +284,7 @@ class AgentService:
         if knowledge_id not in bucket:
             raise AgentDomainError(404, "KNOWLEDGE_NOT_FOUND", "knowledge not found")
         del bucket[knowledge_id]
+        self.store.delete_knowledge(tenant_id, knowledge_id)
         return {"deleted": True, "id": knowledge_id}
 
     def _execute_tool_external(

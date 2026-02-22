@@ -30,7 +30,7 @@ async def test_health_readiness_probe(ac: AsyncClient):
 async def test_feedback_submit_endpoint(ac: AsyncClient):
     ask_payload = {
         "question": "Show me everything",
-        "datasource_id": "test",
+        "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
     ask_res = await ac.post("/text2sql/ask", json=ask_payload)

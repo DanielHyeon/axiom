@@ -47,3 +47,36 @@ async def test_api_submit_workitem_e2e():
         row = outbox.fetchone()
         assert row is not None
         assert getattr(row, "event_type", row[1]) == "WORKITEM_COMPLETED"
+
+
+@pytest.mark.asyncio
+async def test_api_submit_workitem_self_verification_fail_routing():
+    async with AsyncSessionLocal() as session:
+        wi = WorkItem(id="e2e-wi-sv-1", status="TODO", tenant_id="acme-corp", agent_mode="SELF_VERIFY")
+        session.add(wi)
+        await session.commit()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://test") as ac:
+        payload = {
+            "item_id": "e2e-wi-sv-1",
+            "result_data": {
+                "extracted": True,
+                "self_verification": {"enabled": True, "risk_level": "high", "force_fail": True},
+            },
+        }
+        headers = {"X-Tenant-Id": "acme-corp"}
+
+        response = await ac.post("/api/v1/process/submit", json=payload, headers=headers)
+        assert response.status_code == 200
+        data = response.json()
+        assert data["status"] == "SUBMITTED"
+        assert data["self_verification"]["decision"] == "FAIL_ROUTE"
+
+    async with AsyncSessionLocal() as session:
+        outbox = await session.execute(
+            text("SELECT * FROM event_outbox WHERE aggregate_id = 'e2e-wi-sv-1' ORDER BY created_at DESC LIMIT 1")
+        )
+        row = outbox.fetchone()
+        assert row is not None
+        assert getattr(row, "event_type", row[1]) == "WORKITEM_SELF_VERIFICATION_FAILED"

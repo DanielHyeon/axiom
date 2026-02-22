@@ -70,3 +70,47 @@
     - `docs/full-spec-gap-analysis-2026-02-22.md`
     - `docs/planned-endpoints-priority-backlog-2026-02-21.md`
     - `docs/implementation-plans/program/10_feature-maturity-checklist.md`
+
+## Sprint 10~12 Exit Checklist (2026-02-22 업데이트)
+
+### Sprint 10 (Mock-to-Real 1차)
+- [x] `ORA-NL2SQL-REAL-001` Oracle SQL 실행 경로를 mock-only에서 hybrid/weaver 연동으로 확장
+  - 구현: `services/oracle/app/core/sql_exec.py`, `services/oracle/app/pipelines/nl2sql_pipeline.py`, `services/oracle/app/api/text2sql.py`
+  - 검증: `services/oracle/tests/unit/test_oracle_sprint1.py`, `services/oracle/tests/unit/test_oracle_sprint5.py`
+- [x] `VIS-STATE-001` Vision runtime 상태 영속화(PostgreSQL 우선 + fallback)
+  - 구현: `services/vision/app/services/vision_state_store.py`, `services/vision/app/services/vision_runtime.py`
+  - 검증: `services/vision/tests/unit/test_vision_runtime_persistence.py`
+- [x] `CORE-AGENT-001` Core Agent 상태 영속화(PostgreSQL 우선 + fallback)
+  - 구현: `services/core/app/services/agent_state_store.py`, `services/core/app/services/agent_service.py`
+  - 검증: `services/core/tests/unit/test_agent_service_persistence.py`
+
+### Sprint 11 (Policy Enforcement 1차)
+- [x] `PGM-SV-001` Self-Verification 샘플링/실패 라우팅 런타임 반영
+  - 구현: `services/core/app/core/self_verification.py`, `services/core/app/services/process_service.py`
+  - 검증: `services/core/tests/integration/test_e2e_process_submit.py`
+- [x] `PGM-4SRC-001` 4-Source lineage 계약 필수 필드 강제
+  - 구현: `services/synapse/app/core/ingestion_contract.py`, `services/synapse/app/services/extraction_service.py`
+  - 검증: `services/synapse/tests/unit/test_extraction_api_full.py` (lineage 누락 422 케이스 포함)
+- [x] `CORE-EVT-001` Domain Contract Registry 런타임 강제
+  - 구현: `services/core/app/core/event_contract_registry.py`, `services/core/app/core/events.py`
+  - 검증: `services/core/tests/integration/test_outbox.py`
+
+### Sprint 12 (Event Ops Completion)
+- [x] `CORE-OUTBOX-001` Outbox -> Redis Streams 워커/운영 API 경로 명시화
+  - 구현: `services/core/app/workers/sync.py`, `services/core/app/api/events/routes.py`, `services/core/app/main.py`
+  - 검증: `services/core/tests/integration/test_event_ops.py`
+- [x] DLQ/재처리/관측 지표 구성
+  - 구현: `services/core/app/core/observability.py`, `services/core/app/api/health.py`
+  - 검증: `GET /api/v1/metrics`, `POST /api/v1/events/dlq/{stream}/reprocess`
+- [x] legacy write 위반 탐지 메트릭 반영
+  - 구현: `services/core/app/core/events.py` (`core_legacy_write_violations_total`)
+  - 검증: `services/core/tests/integration/test_event_ops.py`
+
+### Docker Compose 운영 검증 증적
+- [x] `core-svc` 재빌드 후 `event_outbox` 자동 생성 확인
+  - 구현: `services/core/app/core/database.py` (`init_database`), `services/core/app/main.py` (startup hook)
+  - 검증: `GET /api/v1/events/outbox/backlog` 200, `pending/failed` 정상 조회
+- [x] run-once 동기화 및 backlog 감소 재현
+  - 시나리오: process initiate/submit -> pending 2 -> `POST /api/v1/events/sync/run-once` -> pending 0
+- [x] DLQ 주입/재처리 재현
+  - 시나리오: `axiom:dlq:events` 1건 주입 -> reprocess 성공 -> depth 0

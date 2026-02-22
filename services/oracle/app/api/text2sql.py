@@ -6,6 +6,7 @@ import structlog
 from app.pipelines.nl2sql_pipeline import nl2sql_pipeline
 from app.core.auth import auth_service, CurrentUser
 from app.core.query_history import query_history_repo
+from app.core.synapse_client import synapse_client
 
 logger = structlog.get_logger()
 
@@ -38,9 +39,16 @@ class DirectSqlRequest(BaseModel):
     sql: str
     datasource_id: str
 
+def _validate_datasource_id(datasource_id: str) -> None:
+    for item in synapse_client.list_datasources():
+        if item.get("id") == datasource_id:
+            return
+    raise HTTPException(status_code=404, detail="DATASOURCE_NOT_FOUND")
+
 @router.post("/ask")
 async def ask_question(request_payload: AskRequest, user: CurrentUser = Depends(get_current_user)):
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
+    _validate_datasource_id(request_payload.datasource_id)
     result = await nl2sql_pipeline.execute(
         request_payload.question, 
         request_payload.datasource_id, 
@@ -74,6 +82,7 @@ from app.pipelines.react_agent import react_agent, ReactSession
 @router.post("/react")
 async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depends(get_current_user)):
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
+    _validate_datasource_id(request_payload.datasource_id)
     session = ReactSession(
         question=request_payload.question,
         datasource_id=request_payload.datasource_id,
@@ -90,13 +99,18 @@ async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depend
 async def direct_sql(payload: DirectSqlRequest, user: CurrentUser = Depends(get_current_user)):
     # Mocking admin only execution
     auth_service.requires_role(user, ["admin"])
+    _validate_datasource_id(payload.datasource_id)
     from app.core.sql_exec import sql_executor
     res = await sql_executor.execute_sql(payload.sql, payload.datasource_id, user)
     response = {
         "success": True,
         "data": {
             "result": res.model_dump(),
-            "metadata": {"execution_time_ms": res.execution_time_ms, "guard_status": "PASS"}
+            "metadata": {
+                "execution_time_ms": res.execution_time_ms,
+                "guard_status": "PASS",
+                "execution_backend": res.backend,
+            },
         }
     }
     try:

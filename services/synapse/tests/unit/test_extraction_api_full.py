@@ -7,6 +7,16 @@ from app.services.extraction_service import extraction_service
 
 AUTH = {"Authorization": "Bearer local-oracle-token"}
 
+INGESTION_META = {
+    "ingestion_metadata": {
+        "source_origin": "git://repo/commit/abc123",
+        "lineage_path": ["S2", "docs", "doc-1"],
+        "idempotency_key": "ingest-doc-1-v1",
+        "source_family": "legacy_code",
+        "source_ref": "doc-1",
+    }
+}
+
 
 @pytest_asyncio.fixture
 async def ac():
@@ -22,6 +32,7 @@ def setup_function():
 async def test_extraction_full_flow(ac: AsyncClient):
     payload = {
         "case_id": "case-100",
+        **INGESTION_META,
         "options": {
             "extract_entities": True,
             "extract_relations": True,
@@ -115,10 +126,22 @@ async def test_extraction_validation_errors(ac: AsyncClient):
 
     start = await ac.post(
         "/api/v3/synapse/extraction/documents/doc-2/extract-ontology",
-        json={"case_id": "case-200", "options": {"auto_commit_threshold": 0.75}},
+        json={
+            "case_id": "case-200",
+            **INGESTION_META,
+            "options": {"auto_commit_threshold": 0.75},
+        },
         headers=AUTH,
     )
     assert start.status_code == 202
+
+    missing_lineage = await ac.post(
+        "/api/v3/synapse/extraction/documents/doc-3/extract-ontology",
+        json={"case_id": "case-201", "options": {"auto_commit_threshold": 0.75}},
+        headers=AUTH,
+    )
+    assert missing_lineage.status_code == 422
+    assert missing_lineage.json()["detail"]["code"] == "INGESTION_LINEAGE_REQUIRED"
 
     result = await ac.get(
         "/api/v3/synapse/extraction/documents/doc-2/ontology-result",
