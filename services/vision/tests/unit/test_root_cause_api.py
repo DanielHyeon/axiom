@@ -1,5 +1,6 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
+import os
 
 from app.main import app
 from app.services.vision_runtime import vision_runtime
@@ -79,3 +80,57 @@ async def test_root_cause_minimum_lifecycle() -> None:
         )
         assert counterfactual_res.status_code == 200
         assert counterfactual_res.json()["risk_reduction_pct"] >= 0
+
+        timeline_res = await client.get(
+            f"/api/v3/cases/{case_id}/causal-timeline",
+            headers=_headers("mock_token_viewer"),
+        )
+        assert timeline_res.status_code == 200
+        assert len(timeline_res.json()["timeline"]) >= 1
+
+        impact_res = await client.get(
+            f"/api/v3/cases/{case_id}/root-cause-impact",
+            headers=_headers("mock_token_viewer"),
+        )
+        assert impact_res.status_code == 200
+        assert len(impact_res.json()["contributions"]) >= 1
+
+        graph_res = await client.get(
+            f"/api/v3/cases/{case_id}/causal-graph",
+            headers=_headers("mock_token_viewer"),
+        )
+        assert graph_res.status_code == 200
+        assert len(graph_res.json()["nodes"]) >= 2
+
+
+@pytest.mark.asyncio
+async def test_process_bottleneck_requires_synapse_when_configured() -> None:
+    case_id = "case-rca-002"
+    old_synapse = os.environ.get("SYNAPSE_BASE_URL")
+    os.environ["SYNAPSE_BASE_URL"] = "http://127.0.0.1:65535"
+    try:
+        async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
+            run_res = await client.post(
+                f"/api/v3/cases/{case_id}/root-cause-analysis",
+                json={"analysis_depth": "full", "max_root_causes": 3},
+                headers=_headers("mock_token_staff"),
+            )
+            assert run_res.status_code == 202
+            status_res = await client.get(
+                f"/api/v3/cases/{case_id}/root-cause-analysis/status",
+                headers=_headers("mock_token_viewer"),
+            )
+            assert status_res.status_code == 200
+
+            bottleneck_res = await client.get(
+                f"/api/v3/cases/{case_id}/root-cause/process-bottleneck",
+                params={"process_id": "pm-1"},
+                headers=_headers("mock_token_viewer"),
+            )
+            assert bottleneck_res.status_code == 502
+            assert bottleneck_res.json()["detail"]["code"] == "SYNAPSE_UNAVAILABLE"
+    finally:
+        if old_synapse is None:
+            os.environ.pop("SYNAPSE_BASE_URL", None)
+        else:
+            os.environ["SYNAPSE_BASE_URL"] = old_synapse

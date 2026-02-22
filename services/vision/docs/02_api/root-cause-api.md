@@ -2,25 +2,29 @@
 
 > **최종 수정일**: 2026-02-22
 > **상태**: Draft
-> **구현 상태 태그**: `Partial (Phase A 최소 API 구현)`
+> **구현 상태 태그**: `Partial (Phase A+B API 경로 구현)`
 > **Phase**: 4 (출시 후)
 > **근거**: 01_architecture/root-cause-engine.md, ADR-004
 > **최신 근거**: `docs/full-spec-gap-analysis-2026-02-22.md`
 
 ### 2026-02-22 구현 메모
-- 최소 골격 구현 완료:
+- API 경로 구현 완료:
   - `POST /root-cause-analysis`
   - `GET /root-cause-analysis/status`
   - `GET /root-causes`
+  - `GET /causal-timeline`
   - `POST /counterfactual`
+  - `GET /root-cause-impact`
+  - `GET /causal-graph`
+  - `GET /root-cause/process-bottleneck`
 - 코드 경로:
   - `services/vision/app/api/root_cause.py`
   - `services/vision/app/services/vision_runtime.py`
 - 테스트:
   - `services/vision/tests/unit/test_root_cause_api.py`
 - 잔여:
-  - `/causal-timeline`, `/root-cause-impact`, `/causal-graph`, `/root-cause/process-bottleneck`
-  - Synapse 의존 병목 분석(502 처리/연동) 및 실엔진 계산 고도화
+  - Synapse 의존 병목 분석의 실데이터 연동/모델 고도화
+  - DoWhy/SHAP 기반 실엔진 계산 및 정확도 보강
 
 ---
 

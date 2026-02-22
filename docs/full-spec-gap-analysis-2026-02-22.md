@@ -40,10 +40,10 @@
   - `services/vision/docs/02_api/root-cause-api.md:48`
 - 코드 근거
   - Root-Cause 라우터 등록: `services/vision/app/main.py:4`, `services/vision/app/main.py:11`
-  - 최소 API 구현: `services/vision/app/api/root_cause.py:1`
-  - 런타임 처리 추가: `services/vision/app/services/vision_runtime.py:221`
-  - 단위 테스트 추가: `services/vision/tests/unit/test_root_cause_api.py:1`
-- 판정: Partial (최소 API만 구현, causal-timeline/impact/graph/process-bottleneck 미구현)
+  - 확장 API 구현(`causal-timeline`, `root-cause-impact`, `causal-graph`, `process-bottleneck`): `services/vision/app/api/root_cause.py:1`
+  - 런타임 처리 확장: `services/vision/app/services/vision_runtime.py:227`
+  - 단위 테스트 확장: `services/vision/tests/unit/test_root_cause_api.py:1`
+- 판정: Partial (API 경로는 구현 완료, Synapse 실연동/실엔진 계산 고도화는 잔여)
 
 ### G-002. Self-Verification Harness 전사 정책 1차 구현 (Implemented)
 - 설계 근거

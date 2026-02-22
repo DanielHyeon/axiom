@@ -103,3 +103,61 @@ async def run_counterfactual(
         return vision_runtime.run_counterfactual(case_id, payload.model_dump())
     except KeyError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/causal-timeline")
+async def get_causal_timeline(case_id: str, user: CurrentUser = Depends(get_current_user)):
+    _ensure_read_permission(user)
+    try:
+        return vision_runtime.get_causal_timeline(case_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/root-cause-impact")
+async def get_root_cause_impact(case_id: str, user: CurrentUser = Depends(get_current_user)):
+    _ensure_read_permission(user)
+    try:
+        return vision_runtime.get_root_cause_impact(case_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/causal-graph")
+async def get_causal_graph(case_id: str, user: CurrentUser = Depends(get_current_user)):
+    _ensure_read_permission(user)
+    try:
+        return vision_runtime.get_causal_graph(case_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/root-cause/process-bottleneck")
+async def get_process_bottleneck_root_cause(
+    case_id: str,
+    process_id: str,
+    bottleneck_activity: str | None = None,
+    max_causes: int = 5,
+    include_explanation: bool = True,
+    user: CurrentUser = Depends(get_current_user),
+):
+    _ensure_read_permission(user)
+    try:
+        return vision_runtime.get_process_bottleneck_root_cause(
+            case_id=case_id,
+            process_id=process_id,
+            bottleneck_activity=bottleneck_activity,
+            max_causes=max_causes,
+            include_explanation=include_explanation,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        if str(exc) == "SYNAPSE_UNAVAILABLE":
+            raise HTTPException(
+                status_code=502,
+                detail={"code": "SYNAPSE_UNAVAILABLE", "message": "process mining service unavailable"},
+            ) from exc
+        raise HTTPException(status_code=500, detail="internal error") from exc
+    except KeyError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
