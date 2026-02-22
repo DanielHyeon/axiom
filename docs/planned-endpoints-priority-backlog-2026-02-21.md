@@ -272,24 +272,41 @@
     - `services/core/tests/integration/test_e2e_gateway_extraction_schema_live.py`
     - `services/core/tests/integration/test_e2e_gateway_graph_ontology_live.py`
 
-### 6.2 잔여 우선순위
+### 6.2 잔여 우선순위 (Full Spec 기준, 2026-02-22 갱신)
 
-- `P2-CORE-AGENT-MCP` 완료
-  - 구현: `services/core/app/api/agent/routes.py`, `services/core/app/services/agent_service.py`
-  - 테스트: `services/core/tests/integration/test_e2e_agent_api.py`
-- `P2-ORACLE-EVENTS` 완료 (Core Watch Proxy 기준)
-  - 구현: `services/oracle/app/api/events.py`
-  - 테스트: `services/oracle/tests/unit/test_events_api.py`
-- `P2-VISION-WHATIF-FULL` 완료
-  - 구현: `services/vision/app/api/what_if.py`, `services/vision/app/services/vision_runtime.py`
-  - 테스트: `services/vision/tests/unit/test_vision_p2_api_full.py`
-- `P2-VISION-OLAP` 완료
-  - 구현: `services/vision/app/api/olap.py`
-  - 테스트: `services/vision/tests/unit/test_vision_p2_api_full.py`
-- `P2-WEAVER-DATASOURCE-QUERY` 완료
-  - 구현: `services/weaver/app/api/datasource.py`, `services/weaver/app/api/query.py`
-  - 테스트: `services/weaver/tests/unit/test_weaver_p2_api_full.py`
-- `P2-WEAVER-METADATA-CATALOG` 완료
-  - 구현: `services/weaver/app/api/metadata_catalog.py`
-  - 테스트: `services/weaver/tests/unit/test_weaver_p2_api_full.py`
-- `P2` 잔여: 없음 (백로그 기준)
+아래 항목은 라우트 존재/단위 테스트 통과와 별개로, `실연동·운영·아키텍처 정책` 기준에서 잔여다.  
+근거: `docs/full-spec-gap-analysis-2026-02-22.md`
+
+- `P0-FULLSPEC-VISION-ROOTCAUSE`
+  - 상태: In Progress (최소 API 1차 완료)
+  - 범위: `/api/v3/cases/{case_id}/root-cause-analysis*`, `/counterfactual` 최소 구현
+- `P0-FULLSPEC-CANVAS-AUTH`
+  - 상태: In Progress (인증 1차 완료)
+  - 범위: mock 인증 경로 제거, refresh token 실구현, ProtectedRoute 강제 인증
+- `P0-FULLSPEC-SSOT-SYNC`
+  - 상태: In Progress (자동검증 1차 완료)
+  - 범위: `docs/service-endpoints-ssot.md`와 `docker-compose.yml`, `k8s/*.yaml` 정합화
+- `P1-FULLSPEC-ORACLE-NL2SQL-REAL`
+  - 상태: Planned
+  - 범위: NL2SQL mock pipeline 제거 및 실제 SQL 생성/실행 경로 강화
+- `P1-FULLSPEC-VISION-PERSISTENCE`
+  - 상태: Planned
+  - 범위: what-if/olap/etl 상태의 in-memory 저장소를 영속 저장소로 전환
+- `P1-FULLSPEC-CORE-AGENT-PERSISTENCE`
+  - 상태: Planned
+  - 범위: Agent feedback/knowledge/MCP 상태 DB 영속화
+- `P1-FULLSPEC-SYNAPSE-CONFORMANCE`
+  - 상태: Planned
+  - 범위: conformance checker stub 제거 및 실제 계산 경로 연결
+- `P1-FULLSPEC-OUTBOX-STREAMS`
+  - 상태: Planned
+  - 범위: Outbox -> Redis Streams publisher/consumer 운영 경로 명시 및 증적화
+- `P2-FULLSPEC-SELF-VERIFICATION`
+  - 상태: Planned
+  - 범위: 20% 샘플링 self-check validator, fail routing, KPI 수집
+- `P2-FULLSPEC-4SOURCE-LINEAGE`
+  - 상태: Planned
+  - 범위: `source_origin/lineage_path/idempotency_key` 필수 메타 강제
+- `P2-FULLSPEC-DOMAIN-CONTRACT-ENFORCEMENT`
+  - 상태: Planned
+  - 범위: Domain Event Contract Registry 런타임 검증(이벤트명/버전/키 규칙)

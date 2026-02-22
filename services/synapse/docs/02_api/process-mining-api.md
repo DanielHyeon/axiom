@@ -1,5 +1,9 @@
 # Process Mining API
 
+> 구현 상태 태그: `Partial (Conformance Stub 포함)`
+> 기준일: 2026-02-22
+> 최신 근거: `docs/full-spec-gap-analysis-2026-02-22.md`
+
 ## 이 문서가 답하는 질문
 
 - 이벤트 로그에서 프로세스 모델을 발견하는 API는?
@@ -41,6 +45,8 @@
 | GET | `/results/{task_id}` | 비동기 작업 결과 조회 (별칭: `/tasks/{task_id}/result`) | 동기 |
 | POST | `/bpmn/export` | BPMN XML 내보내기 | 동기 |
 | GET | `/statistics/{log_id}` | 이벤트 로그 통계 | 동기 |
+
+> 참고: `/conformance` 경로의 내부 checker는 현재 stub 구현이 포함되어 있어 full-spec 기준 `Partial`로 관리한다.
 
 ---
 

@@ -1,25 +1,99 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '@/stores/authStore';
+import type { User, UserRole } from '@/types/auth.types';
+
+interface LoginResponse {
+    access_token?: string;
+    refresh_token?: string;
+    accessToken?: string;
+    refreshToken?: string;
+    user?: Partial<User>;
+}
+
+const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:8000').replace(/\/$/, '');
+const authFallbackMock = import.meta.env.VITE_AUTH_FALLBACK_MOCK !== 'false';
+
+const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
+    const parts = token.split('.');
+    if (parts.length < 2) {
+        return null;
+    }
+    try {
+        const normalized = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+        const json = atob(normalized);
+        return JSON.parse(json);
+    } catch {
+        return null;
+    }
+};
+
+const toUserFromToken = (accessToken: string, emailFallback: string): User => {
+    const payload = decodeJwtPayload(accessToken);
+    const role = String(payload?.role || 'viewer') as UserRole;
+    const permissions = Array.isArray(payload?.permissions) ? (payload?.permissions as string[]) : [];
+    const caseRolesValue = payload?.case_roles;
+    const caseRoles =
+        caseRolesValue && typeof caseRolesValue === 'object' ? (caseRolesValue as Record<string, 'owner' | 'reviewer' | 'viewer'>) : {};
+    return {
+        id: String(payload?.sub || 'unknown-user'),
+        email: String(payload?.email || emailFallback),
+        tenantId: String(payload?.tenant_id || '12345678-1234-5678-1234-567812345678'),
+        role,
+        permissions,
+        caseRoles,
+    };
+};
 
 export function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
     const login = useAuthStore((state) => state.login);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const handleLogin = (e: React.FormEvent) => {
+    const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Mock login
-        login('mock-access-token', 'mock-refresh-token', {
-            id: 'usr-1',
-            email,
-            tenantId: 'tnt-1',
-            role: 'admin',
-            caseRoles: {},
-            permissions: ['case:read', 'document:write'],
-        });
-        navigate('/');
+        setError(null);
+        setIsSubmitting(true);
+        const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/';
+
+        try {
+            const response = await axios.post<LoginResponse>(`${coreBaseUrl}/api/v1/auth/login`, {
+                email,
+                password,
+            });
+            const payload = response.data || {};
+            const accessToken = payload.access_token || payload.accessToken;
+            const refreshToken = payload.refresh_token || payload.refreshToken;
+            if (!accessToken || !refreshToken) {
+                throw new Error('Invalid login response');
+            }
+            const user = payload.user ? ({ ...toUserFromToken(accessToken, email), ...payload.user } as User) : toUserFromToken(accessToken, email);
+            login(accessToken, refreshToken, user);
+            navigate(redirectTo, { replace: true });
+            return;
+        } catch (err: any) {
+            if (!authFallbackMock) {
+                const reason = err?.response?.data?.detail || err?.message || '로그인에 실패했습니다.';
+                setError(String(reason));
+                return;
+            }
+            login('mock_token_admin', 'mock_refresh_token_admin', {
+                id: 'usr-1',
+                email,
+                tenantId: '12345678-1234-5678-1234-567812345678',
+                role: 'admin',
+                caseRoles: {},
+                permissions: ['case:read', 'case:write', 'document:write', 'watch:manage', 'olap:query', 'nl2sql:query'],
+            });
+            navigate(redirectTo, { replace: true });
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     return (
@@ -57,10 +131,12 @@ export function LoginPage() {
                     </div>
                     <button
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full rounded-md bg-white text-black hover:bg-neutral-200 px-4 py-2 text-sm font-medium transition-colors mt-2"
                     >
-                        Sign In
+                        {isSubmitting ? 'Signing In...' : 'Sign In'}
                     </button>
+                    {error && <p className="text-sm text-red-400">{error}</p>}
                 </form>
             </div>
         </div>

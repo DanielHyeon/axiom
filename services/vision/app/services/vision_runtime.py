@@ -14,6 +14,7 @@ class VisionRuntime:
         self.what_if_by_case: dict[str, dict[str, dict[str, Any]]] = {}
         self.cubes: dict[str, dict[str, Any]] = {}
         self.etl_jobs: dict[str, dict[str, Any]] = {}
+        self.root_cause_by_case: dict[str, dict[str, Any]] = {}
         self._id_seq = count(1)
 
     def _new_id(self, prefix: str) -> str:
@@ -23,6 +24,7 @@ class VisionRuntime:
         self.what_if_by_case.clear()
         self.cubes.clear()
         self.etl_jobs.clear()
+        self.root_cause_by_case.clear()
 
     def scenarios(self, case_id: str) -> dict[str, dict[str, Any]]:
         return self.what_if_by_case.setdefault(case_id, {})
@@ -176,6 +178,128 @@ class VisionRuntime:
         }
         self.cubes[cube_name] = cube
         return cube
+
+    def create_root_cause_analysis(self, case_id: str, payload: dict[str, Any], requested_by: str) -> dict[str, Any]:
+        analysis_id = self._new_id("rca-")
+        now = _now()
+        max_root_causes = min(max(int(payload.get("max_root_causes", 5)), 1), 10)
+        root_cause_templates = [
+            {
+                "rank": 1,
+                "variable": "debt_ratio",
+                "variable_label": "부채비율",
+                "shap_value": 0.35,
+                "contribution_pct": 35.0,
+                "actual_value": 1.50,
+                "critical_threshold": 1.00,
+                "description": "부채비율이 임계치를 상회해 현금흐름 압박이 발생했습니다.",
+                "causal_chain": ["차입 증가", "이자비용 상승", "현금흐름 악화"],
+                "confidence": 0.89,
+            },
+            {
+                "rank": 2,
+                "variable": "ebitda",
+                "variable_label": "EBITDA",
+                "shap_value": 0.28,
+                "contribution_pct": 28.0,
+                "actual_value": 600000000,
+                "critical_threshold": 1500000000,
+                "description": "EBITDA 저하가 상환여력 부족으로 연결되었습니다.",
+                "causal_chain": ["원가 상승", "마진 축소", "현금부족"],
+                "confidence": 0.85,
+            },
+            {
+                "rank": 3,
+                "variable": "interest_rate_env",
+                "variable_label": "금리 환경",
+                "shap_value": 0.18,
+                "contribution_pct": 18.0,
+                "actual_value": 5.5,
+                "critical_threshold": None,
+                "description": "외부 금리 상승이 이자비용 증가를 유발했습니다.",
+                "causal_chain": ["기준금리 상승", "변동금리 부담 증가"],
+                "confidence": 0.78,
+            },
+        ][:max_root_causes]
+        analysis = {
+            "analysis_id": analysis_id,
+            "case_id": case_id,
+            "status": "ANALYZING",
+            "progress": {
+                "step": "computing_shap_values",
+                "step_label": "요인 기여도 계산 중",
+                "pct": 65,
+            },
+            "started_at": now,
+            "updated_at": now,
+            "completed_at": None,
+            "requested_by": requested_by,
+            "request": payload,
+            "causal_graph_version": "v2.1",
+            "overall_confidence": 0.82,
+            "root_causes": root_cause_templates,
+            "explanation": "핵심 근본원인은 부채비율 상승, EBITDA 저하, 금리환경 악화의 결합입니다.",
+        }
+        self.root_cause_by_case[case_id] = analysis
+        return analysis
+
+    def get_root_cause_analysis(self, case_id: str) -> dict[str, Any] | None:
+        return self.root_cause_by_case.get(case_id)
+
+    def get_root_cause_status(self, case_id: str) -> dict[str, Any] | None:
+        analysis = self.get_root_cause_analysis(case_id)
+        if not analysis:
+            return None
+        if analysis["status"] == "ANALYZING":
+            analysis["status"] = "COMPLETED"
+            analysis["progress"] = {
+                "step": "generating_explanation",
+                "step_label": "설명 생성 완료",
+                "pct": 100,
+            }
+            analysis["completed_at"] = _now()
+            analysis["updated_at"] = analysis["completed_at"]
+        return analysis
+
+    def get_root_causes(self, case_id: str) -> dict[str, Any] | None:
+        analysis = self.get_root_cause_analysis(case_id)
+        if not analysis or analysis["status"] != "COMPLETED":
+            return None
+        return {
+            "case_id": case_id,
+            "analysis_id": analysis["analysis_id"],
+            "analyzed_at": analysis["completed_at"],
+            "causal_graph_version": analysis["causal_graph_version"],
+            "overall_confidence": analysis["overall_confidence"],
+            "root_causes": analysis["root_causes"],
+            "explanation": analysis["explanation"],
+        }
+
+    def run_counterfactual(self, case_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+        analysis = self.get_root_cause_analysis(case_id)
+        if not analysis or analysis["status"] != "COMPLETED":
+            raise KeyError("root cause analysis not ready")
+        actual_value = float(payload["actual_value"])
+        counterfactual_value = float(payload["counterfactual_value"])
+        if actual_value == 0:
+            delta_pct = 0.0
+        else:
+            delta_pct = ((actual_value - counterfactual_value) / abs(actual_value)) * 100.0
+        failure_probability_before = 0.78
+        impact = max(0.0, min(0.6, delta_pct / 200.0))
+        failure_probability_after = round(max(0.01, failure_probability_before - impact), 3)
+        return {
+            "analysis_id": analysis["analysis_id"],
+            "case_id": case_id,
+            "variable": payload["variable"],
+            "actual_value": actual_value,
+            "counterfactual_value": counterfactual_value,
+            "question": payload.get("question"),
+            "estimated_failure_probability_before": failure_probability_before,
+            "estimated_failure_probability_after": failure_probability_after,
+            "risk_reduction_pct": round((failure_probability_before - failure_probability_after) * 100.0, 2),
+            "computed_at": _now(),
+        }
 
 
 vision_runtime = VisionRuntime()

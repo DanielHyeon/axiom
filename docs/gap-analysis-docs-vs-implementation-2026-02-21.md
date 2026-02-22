@@ -1,5 +1,10 @@
 # 문서-구현 갭 분석 보고서
 
+> 상태: **보관(Outdated Snapshot)**
+> 
+> 본 문서는 2026-02-21 시점 스냅샷으로, 이후 Core/Oracle/Synapse/Weaver/Vision 라우트 구현 진척을 반영하지 않는다.
+> 최신 기준 보고서는 `docs/full-spec-gap-analysis-2026-02-22.md`를 사용한다.
+
 기준일: 2026-02-21  
 작성 범위: `docs/`, `services/*/docs`, `apps/canvas/docs` vs 실제 런타임 코드(`services/*/app`, `apps/canvas/src`) 및 테스트(`services/*/tests`, `apps/canvas/tests`)
 
@@ -255,4 +260,3 @@
 - Synapse 구현 엔트리: `services/synapse/app/main.py`
 - Vision 구현 엔트리: `services/vision/app/main.py`
 - Weaver 구현 엔트리: `services/weaver/app/main.py`
-

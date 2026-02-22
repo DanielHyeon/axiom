@@ -11,12 +11,14 @@ import { OlapPivot } from './pages/analytics/OlapPivot';
 import { WhatIfBuilder } from './pages/analytics/WhatIfBuilder';
 import { OntologyBrowser } from './pages/ontology/OntologyBrowser';
 import { WatchAlerts } from './pages/watch/WatchAlerts';
+import { LoginPage } from './pages/auth/LoginPage';
 
 export const App: React.FC = () => {
   return (
     <GlobalErrorBoundary>
       <BrowserRouter>
         <Routes>
+          <Route path="/login" element={<LoginPage />} />
           {/* Wrapping MVP inside Auth Interceptor */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<MainLayout />}>

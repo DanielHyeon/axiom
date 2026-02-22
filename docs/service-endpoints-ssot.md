@@ -1,57 +1,54 @@
 # Axiom Service Endpoints SSOT
 
-> 기준일: 2026-02-21
-> 상태: Needs Sync
-> 비고: `docker-compose.yml`, `k8s/` 매니페스트와 포트/서비스 구성이 불일치하여 재동기화 필요
+> 기준일: 2026-02-22
+> 상태: Synced (현재 배포 파일 기준)
+> 기준 파일: `docker-compose.yml`, `k8s/deployments.yaml`, `k8s/services.yaml`, `k8s/configmaps.yaml`
 
 ## 목적
 
-로컬 개발 환경에서 서비스별 호스트 포트, Canvas 환경 변수, 프록시 설정의 단일 기준(SSOT)을 정의한다.
+로컬/클러스터 환경에서 실제 배포 중인 서비스의 포트와 Canvas 환경 변수 기준을 단일 문서로 관리한다.
 
-## 정책
+## 1. 현재 배포 프로파일 (Runtime-Active)
 
-- 컨테이너 내부 포트는 서비스 문서 기본값을 유지한다 (`core/oracle/synapse/weaver=8000`, `vision=8400`).
-- 로컬 호스트 바인딩 포트는 아래 표를 따른다.
-- Canvas는 서비스 직접 호출 대신 환경 변수(`VITE_*_URL`)만 사용한다.
+현재 저장소의 Compose/K8s 매니페스트 기준으로 활성화된 서비스는 아래 4개다.
 
-## 로컬 호스트 포트 매핑 (SSOT)
+| 서비스 | 컨테이너 포트 | 호스트 포트(로컬) | Base URL |
+|---|---:|---:|---|
+| Vision | 8000 | 8000 | `http://localhost:8000` |
+| Weaver | 8001 | 8001 | `http://localhost:8001` |
+| Canvas | 80 | 5173 | `http://localhost:5173` |
+| Redis Bus | 6379 | 6379 | `redis://localhost:6379` |
 
-| 서비스 | 컨테이너 내부 포트 | 호스트 포트 | Base URL |
-|------|----------------|---------|---------|
-| Core | 8000 | 8000 | `http://localhost:8000/api/v1` |
-| Weaver | 8000 | 8001 | `http://localhost:8001/api/v1` |
-| Oracle | 8000 | 8002 | `http://localhost:8002/api/v1` |
-| Synapse | 8000 | 8003 | `http://localhost:8003/api/v1` |
-| Vision | 8400 | 8400 | `http://localhost:8400/api/v1` |
-| Canvas | 3000 | 3000 | `http://localhost:3000` |
-
-## Canvas 환경 변수 (SSOT)
+## 2. Canvas 환경 변수 (현재 프로파일)
 
 ```bash
-VITE_CORE_URL=http://localhost:8000
+# .env.development (현재 Compose 프로파일)
+VITE_VISION_URL=http://localhost:8000
 VITE_WEAVER_URL=http://localhost:8001
-VITE_ORACLE_URL=http://localhost:8002
-VITE_SYNAPSE_URL=http://localhost:8003
-VITE_VISION_URL=http://localhost:8400
 VITE_WS_URL=ws://localhost:8000/ws
 ```
 
-## 변경 규칙
+참고:
+- `VITE_CORE_URL`, `VITE_ORACLE_URL`, `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않는다.
+- 필요한 경우 별도 실행(로컬 개별 기동/추가 매니페스트) 후 환경 변수를 개별 주입한다.
 
-- 포트 변경 시 본 문서를 먼저 수정하고, 이후 각 서비스 `08_operations/*` 및 Canvas 문서를 동기화한다.
-- 서비스 경계 변경(직접 DB 접근/서비스 경유 등)은 ADR 반영 후에만 수정한다.
+## 3. 확장 목표 프로파일 (Runtime-Target)
 
-## 런타임 배포 아키텍처 연동 (추가됨)
+아래는 전 서비스 통합 운영 시 목표 포트 맵이다. 현재 매니페스트에는 완전 반영되지 않았다.
 
-Axiom은 로컬, 통합 테스트 및 상용 환경 배포를 위해 다음 아키텍처를 공식(SSOT)으로 정의한다.
+| 서비스 | 목표 호스트 포트 | 목표 Base URL |
+|---|---:|---|
+| Core | 8000 | `http://localhost:8000/api/v1` |
+| Weaver | 8001 | `http://localhost:8001/api/v1` |
+| Oracle | 8002 | `http://localhost:8002/api/v1` |
+| Synapse | 8003 | `http://localhost:8003/api/v1` |
+| Vision | 8400 | `http://localhost:8400/api/v1` |
+| Canvas | 3000 | `http://localhost:3000` |
 
-### 1. Docker Compose 로컬 오케스트레이션 (`docker-compose.yml`)
-- **목적**: E2E 테스트 및 코 파일럿 테스트용 로컬 통로 제공
-- **대상**: `vision-svc` (8000), `weaver-svc` (8001), `canvas-ui` (5173 -> 80), `redis-bus` (6379)
-- **실행**: 프로젝트 루트에서 `docker-compose up -d --build` 수행 시 모든 모듈이 연결됨.
+## 4. 변경 규칙
 
-### 2. K8s (Amazon EKS) 클러스터 아키텍처 (`k8s/`)
-- **매니페스트 목적**: 상용 100% 릴리스를 위한 Pod 레벨 설정 및 외부 부하 분산 제공
-- `deployments.yaml`: Vision, Weaver, Canvas의 ReplicaSet(고가용성) 설정. `axiom/vision`, `axiom/weaver`, `axiom/canvas` 이미지 사용.
-- `services.yaml`: 프론트엔드용 외부 접근 `LoadBalancer` (Port 80) 및 백엔드용 보호 계층 `ClusterIP` 통신 정의.
-- `configmaps.yaml`: `.env.production` 설정을 `axiom-config`로 래핑하여 모든 컨테이너에 환경 변수 동기화 주입.
+1. 포트/서비스 변경 시 `docker-compose.yml` 또는 `k8s/*.yaml`을 먼저 수정한다.
+2. 이후 본 문서를 같은 커밋에서 동기화한다.
+3. Canvas 문서(`apps/canvas/docs/01_architecture/api-integration.md`, `apps/canvas/docs/08_operations/build-deploy.md`)의 로컬 예시도 함께 갱신한다.
+4. full-spec 진행 항목은 `docs/full-spec-gap-analysis-2026-02-22.md`를 기준으로 추적한다.
+5. 변경 후 `python3 tools/validate_ssot.py`로 Runtime-Active 정합성을 검증한다.

@@ -6,8 +6,11 @@ import { createApiClient } from './createApiClient';
 const getEnvUrl = (key: string): string => {
     const url = import.meta.env[key];
     if (!url) {
-        console.warn(`Environment variable ${key} is not defined. API calls to this service will fail.`);
-        return '';
+        if (key === 'VITE_CORE_URL') {
+            return 'http://localhost:8000';
+        }
+        console.warn(`Environment variable ${key} is not defined. API calls to this service may fail.`);
+        return 'http://localhost:8000';
     }
     return url;
 };

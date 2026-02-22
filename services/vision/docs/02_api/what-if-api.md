@@ -2,9 +2,10 @@
 
 > **최종 수정일**: 2026-02-21
 > **상태**: Active
-> **구현 상태 태그**: `Implemented`
+> **구현 상태 태그**: `Partial (In-memory-backed)`
 > **Phase**: 3.2
 > **근거**: 01_architecture/what-if-engine.md
+> **최신 근거**: `docs/full-spec-gap-analysis-2026-02-22.md`
 
 ---
 
@@ -47,18 +48,18 @@
 
 | Method | Path | 설명 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------------------|
-| POST | `/what-if` | 시나리오 생성 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| GET | `/what-if` | 시나리오 목록 조회 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| GET | `/what-if/{scenario_id}` | 시나리오 상세 조회 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| PUT | `/what-if/{scenario_id}` | 시나리오 수정 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| DELETE | `/what-if/{scenario_id}` | 시나리오 삭제 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| POST | `/what-if/{scenario_id}/compute` | 시나리오 계산 실행 (비동기) | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| GET | `/what-if/{scenario_id}/status` | 계산 상태 조회 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| GET | `/what-if/{scenario_id}/result` | 계산 결과 조회 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| GET | `/what-if/compare` | 다중 시나리오 비교 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| POST | `/what-if/{scenario_id}/sensitivity` | 민감도 분석 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| POST | `/what-if/{scenario_id}/breakeven` | 전환점 분석 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
-| POST | `/what-if/process-simulation` | 프로세스 시간축 시뮬레이션 | Implemented | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/what-if` | 시나리오 생성 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/what-if` | 시나리오 목록 조회 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/what-if/{scenario_id}` | 시나리오 상세 조회 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| PUT | `/what-if/{scenario_id}` | 시나리오 수정 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| DELETE | `/what-if/{scenario_id}` | 시나리오 삭제 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/what-if/{scenario_id}/compute` | 시나리오 계산 실행 (비동기) | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/what-if/{scenario_id}/status` | 계산 상태 조회 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/what-if/{scenario_id}/result` | 계산 결과 조회 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| GET | `/what-if/compare` | 다중 시나리오 비교 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/what-if/{scenario_id}/sensitivity` | 민감도 분석 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/what-if/{scenario_id}/breakeven` | 전환점 분석 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
+| POST | `/what-if/process-simulation` | 프로세스 시간축 시뮬레이션 | Partial | `docs/implementation-plans/vision/92_sprint5-ticket-board.md` |
 
 ---
 

@@ -71,8 +71,13 @@
   - Sprint 5: `docs/implementation-plans/program/06_sprint5-execution-tickets.md`
   - Sprint 6: `docs/implementation-plans/program/07_sprint6-execution-tickets.md`
   - Sprint 7: `docs/implementation-plans/program/08_sprint7-execution-tickets.md`
-  - Sprint 8: `docs/implementation-plans/program/11_sprint8-execution-tickets.md`
+- Sprint 8: `docs/implementation-plans/program/11_sprint8-execution-tickets.md`
+- Sprint 9: `docs/implementation-plans/program/12_sprint9-execution-tickets.md`
 - Sprint 8 정렬 원칙:
   - 목표: API 문서-구현 정합성 복구 및 P0/P1 엔드포인트 우선 구현
   - 서비스 보드: `docs/implementation-plans/{core|synapse|oracle|vision|weaver}/88_sprint8-ticket-board.md`
   - 완료 기준: API 상태/근거 컬럼 동기화 + P0 계약 테스트 통과
+- Sprint 9~12 정렬 원칙:
+  - 목표: Full Spec 갭(Critical/High) 해소를 우선하며, 엔드포인트 존재 여부보다 실연동/운영성/정책 강제를 완료 조건으로 사용
+  - 기준 보고서: `docs/full-spec-gap-analysis-2026-02-22.md`
+  - 실행 보드: Sprint 9는 `docs/implementation-plans/program/12_sprint9-execution-tickets.md`를 SSOT로 사용

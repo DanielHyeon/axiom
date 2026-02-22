@@ -1,9 +1,26 @@
 # 근본원인 분석 API (Phase 4)
 
-> **최종 수정일**: 2026-02-20
+> **최종 수정일**: 2026-02-22
 > **상태**: Draft
+> **구현 상태 태그**: `Partial (Phase A 최소 API 구현)`
 > **Phase**: 4 (출시 후)
 > **근거**: 01_architecture/root-cause-engine.md, ADR-004
+> **최신 근거**: `docs/full-spec-gap-analysis-2026-02-22.md`
+
+### 2026-02-22 구현 메모
+- 최소 골격 구현 완료:
+  - `POST /root-cause-analysis`
+  - `GET /root-cause-analysis/status`
+  - `GET /root-causes`
+  - `POST /counterfactual`
+- 코드 경로:
+  - `services/vision/app/api/root_cause.py`
+  - `services/vision/app/services/vision_runtime.py`
+- 테스트:
+  - `services/vision/tests/unit/test_root_cause_api.py`
+- 잔여:
+  - `/causal-timeline`, `/root-cause-impact`, `/causal-graph`, `/root-cause/process-bottleneck`
+  - Synapse 의존 병목 분석(502 처리/연동) 및 실엔진 계산 고도화
 
 ---
 

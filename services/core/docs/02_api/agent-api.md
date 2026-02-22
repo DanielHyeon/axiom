@@ -1,7 +1,8 @@
 # Axiom Core - 에이전트 API
 
-> 구현 상태 태그: `Implemented`
+> 구현 상태 태그: `Partial (In-memory-backed)`
 > 기준일: 2026-02-21
+> 최신 근거: `docs/full-spec-gap-analysis-2026-02-22.md`
 
 ## 이 문서가 답하는 질문
 
@@ -18,16 +19,16 @@
 
 | Method | Path | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|---------|------|------------------|
-| POST | `/api/v1/agents/chat` | 에이전트 채팅 메시지 전송 | 120s | Implemented | `services/core/app/api/agent/routes.py` |
-| POST | `/api/v1/agents/feedback` | 사용자 피드백 제출 | 60s | Implemented | `services/core/app/api/agent/routes.py` |
-| GET | `/api/v1/agents/feedback/{workitem_id}` | 피드백 상태 조회 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
-| POST | `/api/v1/completion/complete` | LLM 완성 (범용) | 120s | Implemented | `services/core/app/api/agent/routes.py` |
-| POST | `/api/v1/completion/vision-complete` | 비전 모델 완성 | 120s | Implemented | `services/core/app/api/agent/routes.py` |
-| POST | `/api/v1/mcp/config` | MCP 서버 설정 | 30s | Implemented | `services/core/app/api/agent/routes.py` |
-| GET | `/api/v1/mcp/tools` | 사용 가능한 MCP 도구 목록 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
-| POST | `/api/v1/mcp/execute-tool` | MCP 도구 실행 | 60s | Implemented | `services/core/app/api/agent/routes.py` |
-| GET | `/api/v1/agents/knowledge` | 학습된 지식 조회 (Memory/DMN/Skill) | 10s | Implemented | `services/core/app/api/agent/routes.py` |
-| DELETE | `/api/v1/agents/knowledge/{id}` | 학습된 지식 삭제 | 10s | Implemented | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/agents/chat` | 에이전트 채팅 메시지 전송 | 120s | Partial | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/agents/feedback` | 사용자 피드백 제출 | 60s | Partial | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/agents/feedback/{workitem_id}` | 피드백 상태 조회 | 10s | Partial | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/completion/complete` | LLM 완성 (범용) | 120s | Partial | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/completion/vision-complete` | 비전 모델 완성 | 120s | Partial | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/mcp/config` | MCP 서버 설정 | 30s | Partial | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/mcp/tools` | 사용 가능한 MCP 도구 목록 | 10s | Partial | `services/core/app/api/agent/routes.py` |
+| POST | `/api/v1/mcp/execute-tool` | MCP 도구 실행 | 60s | Partial | `services/core/app/api/agent/routes.py` |
+| GET | `/api/v1/agents/knowledge` | 학습된 지식 조회 (Memory/DMN/Skill) | 10s | Partial | `services/core/app/api/agent/routes.py` |
+| DELETE | `/api/v1/agents/knowledge/{id}` | 학습된 지식 삭제 | 10s | Partial | `services/core/app/api/agent/routes.py` |
 
 ---
 

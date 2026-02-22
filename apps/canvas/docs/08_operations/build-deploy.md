@@ -56,10 +56,10 @@ export default defineConfig({
     port: 3000,
     proxy: {
       // 개발 시 API 프록시
-      '/api/core':    { target: 'http://localhost:8000', rewrite: (p) => p.replace('/api/core', '/api/v1') },
-      '/api/vision':  { target: 'http://localhost:8400', rewrite: (p) => p.replace('/api/vision', '/api/v1') },
-      '/api/oracle':  { target: 'http://localhost:8002', rewrite: (p) => p.replace('/api/oracle', '/api/v1') },
-      '/api/synapse': { target: 'http://localhost:8003', rewrite: (p) => p.replace('/api/synapse', '/api/v1') },
+      '/api/core':    { target: 'http://localhost:8000', rewrite: (p) => p.replace('/api/core', '/api/v1') }, // Core 별도 실행 시
+      '/api/vision':  { target: 'http://localhost:8000', rewrite: (p) => p.replace('/api/vision', '/api/v1') },
+      '/api/oracle':  { target: 'http://localhost:8002', rewrite: (p) => p.replace('/api/oracle', '/api/v1') }, // Oracle 별도 실행 시
+      '/api/synapse': { target: 'http://localhost:8003', rewrite: (p) => p.replace('/api/synapse', '/api/v1') }, // Synapse 별도 실행 시
       '/api/weaver':  { target: 'http://localhost:8001', rewrite: (p) => p.replace('/api/weaver', '/api/v1') },
     },
   },
@@ -140,6 +140,7 @@ ARG VITE_ORACLE_URL
 ARG VITE_SYNAPSE_URL
 ARG VITE_WEAVER_URL
 ARG VITE_WS_URL
+ARG VITE_AUTH_FALLBACK_MOCK
 RUN npm run build
 
 # === 2단계: 서빙 ===
@@ -159,6 +160,9 @@ EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]
 ```
+
+운영 원칙:
+- 스테이징/프로덕션 빌드에서는 `VITE_AUTH_FALLBACK_MOCK=false`를 강제한다.
 
 ### 2.2 Nginx 설정
 
@@ -273,7 +277,7 @@ server {
 | 변수 | Development | Staging | Production |
 |------|-------------|---------|------------|
 | `VITE_CORE_URL` | `http://localhost:8000` | `https://api-stg.axiom.kr/core` | `https://api.axiom.kr/core` |
-| `VITE_VISION_URL` | `http://localhost:8400` | `https://api-stg.axiom.kr/vision` | `https://api.axiom.kr/vision` |
+| `VITE_VISION_URL` | `http://localhost:8000` | `https://api-stg.axiom.kr/vision` | `https://api.axiom.kr/vision` |
 | `VITE_ORACLE_URL` | `http://localhost:8002` | `https://api-stg.axiom.kr/oracle` | `https://api.axiom.kr/oracle` |
 | `VITE_SYNAPSE_URL` | `http://localhost:8003` | `https://api-stg.axiom.kr/synapse` | `https://api.axiom.kr/synapse` |
 | `VITE_WEAVER_URL` | `http://localhost:8001` | `https://api-stg.axiom.kr/weaver` | `https://api.axiom.kr/weaver` |

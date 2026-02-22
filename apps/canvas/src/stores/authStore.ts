@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import axios from 'axios';
 import type { User } from '@/types/auth.types';
 
 interface AuthState {
@@ -14,6 +15,10 @@ interface AuthState {
     logout: () => void;
     refreshAccessToken: () => Promise<string>;
 }
+
+let refreshInFlight: Promise<string> | null = null;
+
+const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:8000').replace(/\/$/, '');
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -39,18 +44,31 @@ export const useAuthStore = create<AuthState>()(
                     return Promise.reject('No refresh token');
                 }
 
-                try {
-                    // TODO: CAN-S1-004 Call actual endpoint when API is ready
-                    // const response = await coreApi.post('/auth/refresh', { refreshToken });
-                    // const newAccess = response.data.accessToken;
-                    // set({ accessToken: newAccess });
-                    // return newAccess;
-
-                    throw new Error('Not implemented yet in actual backend');
-                } catch (error) {
-                    logout();
-                    return Promise.reject(error);
+                if (refreshInFlight) {
+                    return refreshInFlight;
                 }
+
+                refreshInFlight = axios
+                    .post(`${coreBaseUrl}/api/v1/auth/refresh`, { refresh_token: refreshToken })
+                    .then((response) => {
+                        const payload = response.data || {};
+                        const newAccess = payload.access_token || payload.accessToken;
+                        const newRefresh = payload.refresh_token || payload.refreshToken || refreshToken;
+                        if (!newAccess) {
+                            throw new Error('Invalid refresh response: access token missing');
+                        }
+                        set({ accessToken: newAccess, refreshToken: newRefresh });
+                        return newAccess as string;
+                    })
+                    .catch((error) => {
+                        logout();
+                        throw error;
+                    })
+                    .finally(() => {
+                        refreshInFlight = null;
+                    });
+
+                return refreshInFlight;
             },
         }),
         {

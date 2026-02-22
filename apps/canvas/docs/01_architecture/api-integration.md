@@ -261,12 +261,14 @@ interface ApiResponse<T> {
 
 ```bash
 # .env.development
-VITE_CORE_URL=http://localhost:8000
-VITE_VISION_URL=http://localhost:8400
-VITE_ORACLE_URL=http://localhost:8002
-VITE_SYNAPSE_URL=http://localhost:8003
+VITE_VISION_URL=http://localhost:8000
 VITE_WEAVER_URL=http://localhost:8001
 VITE_WS_URL=ws://localhost:8000/ws
+VITE_AUTH_FALLBACK_MOCK=true
+# 선택: Core/Oracle/Synapse를 별도 실행할 때만 설정
+# VITE_CORE_URL=http://localhost:8000
+# VITE_ORACLE_URL=http://localhost:8002
+# VITE_SYNAPSE_URL=http://localhost:8003
 VITE_YJS_WS_URL=ws://localhost:1234              # Yjs WebSocket (y-websocket)
 
 # .env.staging
@@ -288,7 +290,14 @@ VITE_WS_URL=wss://api.axiom.kr/ws
 VITE_YJS_WS_URL=wss://yjs.axiom.kr               # Yjs WebSocket (y-websocket)
 ```
 
-### 5.2 K-AIR 환경 설정 차이
+### 5.2 인증 호출 원칙 (Sprint 9)
+
+- 로그인은 Core `POST /api/v1/auth/login`을 우선 호출한다.
+- 액세스 토큰 만료 시 Core `POST /api/v1/auth/refresh`로 재발급을 시도한다.
+- 개발 환경에서만 `VITE_AUTH_FALLBACK_MOCK=true`일 때 mock fallback을 허용한다.
+- Full Spec 검증/스테이징/프로덕션에서는 `VITE_AUTH_FALLBACK_MOCK=false`를 강제한다.
+
+### 5.3 K-AIR 환경 설정 차이
 
 | K-AIR | Canvas |
 |-------|--------|

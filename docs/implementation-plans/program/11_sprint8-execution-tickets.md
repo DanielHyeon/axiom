@@ -24,3 +24,21 @@
 - [ ] Core Gateway event-log/process-mining 프록시 동작 확인
 - [ ] 관련 API 문서의 상태 태그/근거 컬럼 최신화
 
+## 2026-02-22 상태 메모 (보고서 기준)
+
+- 참조 보고서: `docs/full-spec-gap-analysis-2026-02-22.md`
+- 해석 기준: Sprint 8의 `API 복구` 목표와 `full spec` 목표를 분리해 관리한다.
+
+### 1차 API 복구 기준
+- [x] Core Watch API 핵심 경로 구현
+- [x] Core Process 필수 경로 구현
+- [x] Synapse Event-Log/Extraction API 구현
+- [x] Oracle Meta API 구현
+- [x] Core Gateway event-log/process-mining 프록시 구현
+
+### Full Spec 잔여(후속 스프린트 이관)
+- [ ] Canvas 실제 인증/실연동 기준의 Watch 호출 검증
+- [ ] Vision Root-Cause API 구현
+- [ ] Oracle/Vision/Core Agent mock/in-memory 경로 실연동 전환
+- [ ] Self-Verification/4-Source Lineage/Domain Contract Enforcement 구현
+- [ ] SSOT vs Compose/K8s 완전 동기화

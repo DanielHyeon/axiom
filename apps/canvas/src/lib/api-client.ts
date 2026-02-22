@@ -1,5 +1,6 @@
 import axios from 'axios';
-import type { AxiosInstance, AxiosError } from 'axios';
+import type { AxiosInstance, AxiosError, InternalAxiosRequestConfig } from 'axios';
+import { useAuthStore } from '@/stores/authStore';
 
 // Configure overarching Backend communication routes
 export const apiClient: AxiosInstance = axios.create({
@@ -13,11 +14,13 @@ export const apiClient: AxiosInstance = axios.create({
 // Request Interceptor: Inject JWT and Multi-tenant bindings
 apiClient.interceptors.request.use(
     (config) => {
-        // In actual implementation, fetch from secure Session store
-        const mockToken = localStorage.getItem('axiom_token') || 'mock_token_admin';
-        const tenantId = localStorage.getItem('tenant_id') || '12345678-1234-5678-1234-567812345678';
+        const state = useAuthStore.getState();
+        const token = state.accessToken;
+        const tenantId = state.user?.tenantId || '12345678-1234-5678-1234-567812345678';
 
-        config.headers['Authorization'] = `Bearer ${mockToken}`;
+        if (token) {
+            config.headers['Authorization'] = `Bearer ${token}`;
+        }
         config.headers['X-Tenant-Id'] = tenantId;
 
         return config;
@@ -28,11 +31,22 @@ apiClient.interceptors.request.use(
 // Response Interceptor: Catch application boundaries
 apiClient.interceptors.response.use(
     (response) => response,
-    (error: AxiosError) => {
+    async (error: AxiosError) => {
+        const original = error.config as (InternalAxiosRequestConfig & { _retry?: boolean }) | undefined;
         if (error.response) {
             if (error.response.status === 401) {
-                console.error("401 Unauthorized: Redirecting to Login");
-                // window.location.href = '/login';
+                if (original && !original._retry && !original.url?.includes('/auth/')) {
+                    original._retry = true;
+                    try {
+                        const newToken = await useAuthStore.getState().refreshAccessToken();
+                        if (original.headers) {
+                            original.headers.Authorization = `Bearer ${newToken}`;
+                        }
+                        return apiClient(original);
+                    } catch {
+                        return Promise.reject(error);
+                    }
+                }
             } else if (error.response.status === 403) {
                 console.error("403 Forbidden: Insufficient clearance for action");
             } else if (error.response.status >= 500) {

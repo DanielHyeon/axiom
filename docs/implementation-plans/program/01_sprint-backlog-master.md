@@ -88,6 +88,36 @@
   - P0 엔드포인트 계약 테스트 통과
   - 서비스별 스프린트 보드 진행률 및 근거 링크 최신화
 
+### Sprint 9 (Full Spec P0 Start)
+- 목표: Full Spec Critical 갭 착수 (Root-Cause/Auth/SSOT 운영 정합)
+- 범위: Vision Root-Cause 최소 API, Canvas 실제 인증 1차, SSOT 정합 자동 점검
+- 핵심 산출물:
+  - `docs/implementation-plans/program/12_sprint9-execution-tickets.md` 기준 P0 티켓 수행
+  - Critical 갭 항목의 코드/문서 상태 동기화
+  - Full Spec 리그레션 템플릿(Critical) 수립
+- 통과 기준:
+  - Root-Cause 최소 엔드포인트 동작 + 테스트 통과
+  - Canvas 인증 만료/갱신 E2E 시나리오 통과
+  - SSOT 불일치 자동 검출 가능
+
+### Sprint 10 (Mock-to-Real 1차)
+- 목표: mock/in-memory 핵심 경로의 실연동 전환 시작
+- 범위: Oracle NL2SQL, Vision runtime state, Core Agent/MCP 영속화 1차
+- 통과 기준:
+  - mock 기반 고정 응답 의존 경로 축소가 코드/테스트로 증명됨
+
+### Sprint 11 (Policy Enforcement 1차)
+- 목표: Self-Verification/4-Source/Contract Registry 정책 런타임 적용
+- 범위: `PGM-SV-001`, `PGM-4SRC-001`, `CORE-EVT-001`
+- 통과 기준:
+  - 필수 정책 위반 시 reject 또는 fail-routing이 재현됨
+
+### Sprint 12 (Event Ops Completion)
+- 목표: 이벤트 파이프라인 운영 완성 및 위반 탐지 폐루프 마감
+- 범위: `CORE-OUTBOX-001`, DLQ/재처리/관측 지표, legacy write 탐지
+- 통과 기준:
+  - Outbox backlog SLA, DLQ 재처리 성공률, legacy 위반 탐지 지표 확인
+
 ## 3. 크로스 의존성 차단 규칙
 - Oracle은 Synapse API 가용 전 독립 완료로 인정하지 않음
 - Canvas E2E 완료는 Core/Oracle/Synapse/Vision/Weaver 계약 테스트 통과가 선행

@@ -17,16 +17,16 @@
 - `D2 구현 착수`: 스프린트 티켓 배정 + 담당자 + 의존성 + 테스트 계획이 확정됨
 - `D3 구현 완료`: Gate 통과 + 계약 테스트 + 운영 지표 검증이 완료됨
 
-## 4. 항목별 체크리스트 (2026-02-21 기준)
+## 4. 항목별 체크리스트 (2026-02-22 기준)
 
 | 기능 | D1 설계 반영 | D2 구현 착수 | D3 구현 완료 | 현재 판정 | 담당자 | ETA | 최근 업데이트 | 핵심 리스크 |
 |---|---|---|---|---|---|---|---|---|
-| What-if 시뮬레이션 | ✅ | ✅ | ✅ | D3 완료 (Sprint 7) | `backend-developer`, `api-developer` | Sprint 7 Exit | 2026-02-21 | 안정 수준 도달 |
+| What-if 시뮬레이션 | ✅ | ✅ | ⏳ | D2 진행 (full-spec 재검증 필요) | `backend-developer`, `api-developer` | Re-baseline 필요 | 2026-02-22 | Vision 런타임이 mock/in-memory 중심으로 운영 증적 불충분 |
 | 4-Layer 온톨로지 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `api-developer` | Sprint 3 Exit | 2026-02-21 | 통합 검증 완료 |
 | 비정형->온톨로지 추출 | ✅ | ✅ | ✅ | D3 완료 (Sprint 3) | `backend-developer`, `code-inspector-tester` | Sprint 3 Exit | 2026-02-21 | 승인 파이프라인 연동 완료 |
-| See-Why 근본원인 분석 | ✅ | ⏳ | ⏳ | Phase 4 이관 | `code-implementation-planner`, `backend-developer` | Phase 4 Kickoff | 2026-02-21 | 학습용 라벨 데이터 100건+ 확보 대기 |
-| Watch Agent | ✅ | ✅ | ⏳ | D2 진행 (재검증 필요) | `backend-developer`, `code-inspector-tester` | Re-baseline 필요 | 2026-02-21 | Watch API 런타임 구현/증적 불충분 |
-| 이벤트 감지(CEP) | ✅ | ✅ | ⏳ | D2 진행 (재검증 필요) | `backend-developer`, `code-reviewer` | Re-baseline 필요 | 2026-02-21 | CEP 지표/튜닝 런타임 증적 불충분 |
+| See-Why 근본원인 분석 | ✅ | ✅ | ⏳ | D2 진행 (최소 API 구현 완료, 확장 API 잔여) | `backend-developer`, `api-developer` | Sprint 10 재기준화 | 2026-02-22 | causal-timeline/impact/graph/bottleneck 및 Synapse 연동 미구현 |
+| Watch Agent | ✅ | ✅ | ⏳ | D2 진행 (API 구현 + Canvas 인증 1차 반영, 운영 재검증 필요) | `backend-developer`, `code-inspector-tester` | Re-baseline 필요 | 2026-02-22 | refresh 만료/회전 E2E 및 운영 SLA 증적 보강 필요 |
+| 이벤트 감지(CEP) | ✅ | ✅ | ⏳ | D2 진행 (재검증 필요) | `backend-developer`, `code-reviewer` | Re-baseline 필요 | 2026-02-22 | Outbox 이후 Redis Streams 운영 증적 불충분 |
 
 ## 5. 근거 문서 맵
 
