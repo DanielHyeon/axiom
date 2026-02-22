@@ -1,6 +1,0 @@
-pyproject.toml
-src/app/__init__.py
-src/axiom_synapse.egg-info/PKG-INFO
-src/axiom_synapse.egg-info/SOURCES.txt
-src/axiom_synapse.egg-info/dependency_links.txt
-src/axiom_synapse.egg-info/top_level.txt

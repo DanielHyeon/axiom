@@ -141,6 +141,8 @@ llm-service/ragdata/
 __pycache__/
 *.py[cod]
 *.pyo
+*.egg-info/
+*.egg
 
 # Java / JVM
 *.class
