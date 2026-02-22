@@ -1,7 +1,9 @@
 # Axiom Core - JWT 인증 모델
 
-> **최종 수정일**: 2026-02-20
-> **상태**: Draft
+> **최종 수정일**: 2026-02-22
+> **상태**: Implemented (Core 내 인증·갱신·보호 경로 적용 완료)
+
+**구현 근거**: `app/core/security.py` (JWT 발급/검증, get_current_user, ROLE_PERMISSIONS), `app/api/auth/routes.py` (login, refresh, Redis 블랙리스트), `app/main.py` (보호 라우터에 Depends(get_current_user)). User·Tenant 모델: `app/models/base_models.py`.
 
 ## 이 문서가 답하는 질문
 

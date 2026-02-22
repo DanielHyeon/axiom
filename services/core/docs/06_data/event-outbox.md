@@ -64,6 +64,7 @@ CONSUMER_GROUPS = {
     ],
     "axiom:workers": [
         "worker_group",     # OCR/Extract/Generate Workers
+        "event_log_group",  # EventLog Worker (이벤트 로그 파싱·Synapse 전달)
     ],
 }
 
@@ -74,14 +75,27 @@ STREAM_CONFIG = {
 }
 ```
 
-### 2.2 장애 복구
+### 2.2 Sync Worker 발행 포맷 (app/workers/sync.py와 일치)
+
+Event Outbox의 PENDING 행을 Sync Worker가 폴링하여 Redis Streams로 발행한다.
+
+- **스트림 라우팅**: `event_type` 접두사 기준  
+  - `WATCH_*` → `axiom:watches`  
+  - `WORKER_*` → `axiom:workers`  
+  - 그 외 → `axiom:events`
+- **메시지 필드** (모든 스트림 공통):  
+  `event_id`, `event_type`, `aggregate_type`, `aggregate_id`, `tenant_id`, `payload`(JSON 문자열)  
+  `maxlen=10000`, `approximate=True` 로 발행.
+- **DLQ**: 발행 실패 시 `axiom:dlq:events` 에 동일 필드 + `target_stream`, `error` 저장.
+
+### 2.3 장애 복구 (Pending 메시지)
 
 ```python
 # Pending 메시지 자동 복구 (5분 이상 ACK되지 않은 메시지)
 
 async def recover_pending_messages(stream_key: str, group: str):
     """처리되지 않은 메시지를 다른 Consumer에게 재할당"""
-    redis = await get_redis()
+    redis = get_redis()
 
     # Pending 메시지 조회
     pending = await redis.xpending_range(

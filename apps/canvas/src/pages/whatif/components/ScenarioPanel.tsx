@@ -8,11 +8,13 @@ import { useWhatIfMock } from '@/features/whatif/hooks/useWhatIfMock';
 
 interface ScenarioPanelProps {
     scenarioId: string;
+    onRunAnalysis?: (scenarioId: string) => Promise<void>;
 }
 
-export function ScenarioPanel({ scenarioId }: ScenarioPanelProps) {
+export function ScenarioPanel({ scenarioId, onRunAnalysis }: ScenarioPanelProps) {
     const { parameters, scenarios, updateParameter, updateScenarioStatus } = useWhatIfStore();
-    const { runAnalysis } = useWhatIfMock();
+    const { runAnalysis: mockRunAnalysis } = useWhatIfMock();
+    const runAnalysis = onRunAnalysis ?? mockRunAnalysis;
 
     const scenario = scenarios.find(s => s.id === scenarioId);
     const isComputing = scenario?.status === 'COMPUTING';

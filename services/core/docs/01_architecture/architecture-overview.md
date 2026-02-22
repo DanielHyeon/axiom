@@ -105,32 +105,34 @@
 
 ```python
 # Presentation Layer - app/api/
-app/api/auth/          # JWT 인증 엔드포인트
-app/api/cases/         # 케이스 CRUD
-app/api/process/       # BPM 실행 API
-app/api/agents/        # 에이전트 관리 API
-app/api/watches/       # Watch 구독/알림 API
+app/api/auth/          # JWT 인증 엔드포인트 (login, refresh) — Implemented
+app/api/users/         # 사용자 API (GET /me) — Implemented
+app/api/cases/         # 케이스 CRUD — 미구현 (Gateway가 Synapse 등으로 프록시)
+app/api/process/       # BPM 실행 API — Implemented
+app/api/agents/        # 에이전트 관리 API — Implemented
+app/api/watches/       # Watch 구독/알림 API — Implemented
 
 # Application Layer - app/services/
 app/services/process_service.py    # BPM 실행 조율
 app/services/agent_service.py      # 에이전트 실행 조율
 app/services/watch_service.py      # CEP 룰 관리/알림 조율
-app/services/document_service.py   # 문서 처리 조율
+app/services/document_service.py   # 문서 처리 조율 — 미구현
 
 # Domain Layer - app/bpm/, app/orchestrator/
-app/bpm/engine.py                  # BPM 엔진 코어
-app/bpm/saga.py                    # Saga 보상 트랜잭션
-app/bpm/extractor.py               # BPMN 추출기
-app/orchestrator/langgraph_flow.py # 9노드 LangGraph 오케스트레이터
-app/orchestrator/agent_loop.py     # 에이전트 지식 학습 루프
+app/bpm/models.py                 # BPM Pydantic 모델 — Implemented
+app/bpm/engine.py                 # BPM 엔진 코어 (process_service 위임) — Implemented
+app/bpm/saga.py                   # Saga 보상 트랜잭션 (스텁) — Implemented
+app/bpm/extractor.py              # BPMN 추출기 (PDF→BPMN/DMN) — 예정
+app/orchestrator/langgraph_flow.py # 9노드 LangGraph 오케스트레이터 (스텁) — 구조 생성
+app/orchestrator/agent_loop.py     # 에이전트 지식 학습 루프 (스텁) — 구조 생성
 
 # Infrastructure Layer - app/core/, app/workers/
 app/core/config.py                 # 환경 설정
-app/core/security.py               # JWT + RBAC
+app/core/security.py               # JWT + RBAC — Implemented
 app/core/middleware.py             # 멀티테넌트 ContextVar
 app/core/database.py               # SQLAlchemy 세션
 app/core/redis_client.py           # Redis 연결
-app/workers/                       # 비동기 워커들
+app/workers/                       # 비동기 워커 (sync 구현, watch_cep 등 예정)
 ```
 
 ---

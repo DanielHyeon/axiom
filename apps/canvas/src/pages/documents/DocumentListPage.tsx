@@ -1,7 +1,8 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DataTable } from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { ROUTES } from '@/lib/routes/routes';
 import type { ColumnDef } from '@tanstack/react-table';
 
 type Document = {
@@ -14,15 +15,23 @@ type Document = {
     lastModified: string;
 };
 
+const MOCK_DOC_IDS = [
+    'd4e5f6a7-b8c9-4d0e-1f2a-3b4c5d6e7f8a',
+    'e5f6a7b8-c9d0-4e1f-2a3b-4c5d6e7f8a9b',
+    'f6a7b8c9-d0e1-4f2a-3b4c-5d6e7f8a9b0c',
+    'a7b8c9d0-e1f2-4a3b-4c5d-6e7f8a9b0c1d',
+];
+
 const mockDocuments: Document[] = [
-    { id: 'doc-1', name: '이해관계자목록v3', type: '참여자목록', status: 'in_review', version: 'v3', isAiGenerated: true, lastModified: '2시간 전' },
-    { id: 'doc-2', name: '실행 계획서', type: '실행계획', status: 'changes_requested', version: 'v5', isAiGenerated: false, lastModified: '1일 전' },
-    { id: 'doc-3', name: '자산 보고서', type: '자산보고', status: 'approved', version: 'v2', isAiGenerated: true, lastModified: '3일 전' },
-    { id: 'doc-4', name: '1차 회의록', type: '회의록', status: 'draft', version: 'v1', isAiGenerated: false, lastModified: '방금' },
+    { id: MOCK_DOC_IDS[0], name: '이해관계자목록v3', type: '참여자목록', status: 'in_review', version: 'v3', isAiGenerated: true, lastModified: '2시간 전' },
+    { id: MOCK_DOC_IDS[1], name: '실행 계획서', type: '실행계획', status: 'changes_requested', version: 'v5', isAiGenerated: false, lastModified: '1일 전' },
+    { id: MOCK_DOC_IDS[2], name: '자산 보고서', type: '자산보고', status: 'approved', version: 'v2', isAiGenerated: true, lastModified: '3일 전' },
+    { id: MOCK_DOC_IDS[3], name: '1차 회의록', type: '회의록', status: 'draft', version: 'v1', isAiGenerated: false, lastModified: '방금' },
 ];
 
 export function DocumentListPage() {
     const navigate = useNavigate();
+    const { caseId } = useParams<{ caseId?: string }>();
 
     const columns: ColumnDef<Document>[] = [
         {
@@ -81,7 +90,11 @@ export function DocumentListPage() {
                 <DataTable
                     columns={columns}
                     data={mockDocuments}
-                    onRowClick={(row) => navigate(`/documents/${row.id}`)}
+                    onRowClick={(row) =>
+                        caseId
+                            ? navigate(ROUTES.CASES.DOCUMENT(caseId, row.id))
+                            : navigate(`/documents/${row.id}`)
+                    }
                 />
             </div>
         </div>

@@ -33,7 +33,7 @@ test.describe('Canvas E2E Core Journey Smoke Test', () => {
         // Using side nav link or direct goto to verify Role Guard doesn't kick us out
         // Assuming standard login grants adequate roles in the mock session.
         // If not, we might be redirected. For smoke, we just go to the URL.
-        await page.goto('/nl2sql');
+        await page.goto('/analysis/nl2sql');
         await expect(page.locator('h2').filter({ hasText: 'NL2SQL' })).toBeVisible();
     });
 });

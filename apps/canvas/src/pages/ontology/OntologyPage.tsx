@@ -5,8 +5,8 @@ import { GraphViewer } from './components/GraphViewer';
 import { SearchPanel } from './components/SearchPanel';
 import { LayerFilter } from './components/LayerFilter';
 import { NodeDetail } from './components/NodeDetail';
-import { Share2, Map } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { PathHighlighter } from './components/PathHighlighter';
+import { Share2 } from 'lucide-react';
 
 export function OntologyPage() {
     const { filters, isTableMode } = useOntologyStore();
@@ -52,21 +52,11 @@ export function OntologyPage() {
                 </div>
             </div>
 
-            {/* Path Finding Banner */}
-            {pathNodeIds.length > 0 && (
-                <div className="bg-blue-900/20 border-b border-blue-900/50 px-4 py-2 flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2 text-blue-200">
-                        <Map size={16} />
-                        {pathModeSource ?
-                            "경로의 도착 노드를 선택하세요." :
-                            `최단 경로 탐색 결과 (${pathNodeIds.length}단계)`
-                        }
-                    </div>
-                    <Button variant="ghost" size="sm" onClick={clearPath} className="h-7 text-blue-400 hover:text-blue-300">
-                        탐색 종료
-                    </Button>
-                </div>
-            )}
+            <PathHighlighter
+                pathNodeIds={pathNodeIds}
+                pathModeSource={pathModeSource}
+                onClear={clearPath}
+            />
 
             {/* Main Content Area */}
             <div className="flex-1 flex overflow-hidden">

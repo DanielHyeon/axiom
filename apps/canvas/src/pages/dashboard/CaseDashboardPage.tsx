@@ -1,58 +1,74 @@
+import { useMemo, useState } from 'react';
 import { useCases } from '@/features/case-dashboard/hooks/useCases';
+import { useCaseStats } from '@/features/case-dashboard/hooks/useCaseStats';
+import { useDashboardConfig } from '@/features/case-dashboard/hooks/useDashboardConfig';
+import { StatsCard } from '@/features/case-dashboard/components/StatsCard';
+import { RoleGreeting } from '@/features/case-dashboard/components/RoleGreeting';
+import { QuickActionsPanel } from '@/features/case-dashboard/components/QuickActionsPanel';
+import { MyWorkitemsPanel } from '@/features/case-dashboard/components/MyWorkitemsPanel';
+import { ApprovalQueuePanel } from '@/features/case-dashboard/components/ApprovalQueuePanel';
+import { CaseTable } from '@/features/case-dashboard/components/CaseTable';
+import { CaseFilters, type CaseStatusFilter } from '@/features/case-dashboard/components/CaseFilters';
+import { CaseTimeline } from '@/features/case-dashboard/components/CaseTimeline';
+import { CaseDistributionChart } from '@/features/case-dashboard/components/CaseDistributionChart';
+import { useAuthStore } from '@/stores/authStore';
 
 export function CaseDashboardPage() {
-    const { data: cases, isLoading, error } = useCases();
+  const [statusFilter, setStatusFilter] = useState<CaseStatusFilter>('ALL');
+  const { data: cases, isLoading, error } = useCases();
+  const filteredCases = useMemo(() => {
+    if (!cases) return [];
+    if (statusFilter === 'ALL') return cases;
+    return cases.filter((c) => c.status === statusFilter);
+  }, [cases, statusFilter]);
+  const stats = useCaseStats(cases);
+  const role = useAuthStore((s) => s.user?.role);
+  const panels = useDashboardConfig(role);
+  const showMyWorkitems = panels.includes('myWorkitems');
+  const showApprovalQueue = panels.includes('approvalQueue');
 
-    return (
-        <div className="p-6">
-            <h1 className="text-3xl font-bold tracking-tight mb-8">대시보드</h1>
+  return (
+    <div className="p-6">
+      <RoleGreeting
+        userName={useAuthStore((s) => s.user?.email)}
+        role={role}
+        workCount={stats.inReview}
+      />
 
-            <div className="bg-neutral-900 border border-neutral-800 rounded-lg p-6">
-                <h2 className="text-xl font-semibold mb-4 text-white">내 할당 업무 (My Workitems)</h2>
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <StatsCard label="전체 케이스" value={stats.total} />
+        <StatsCard label="진행 중" value={stats.inProgress} />
+        <StatsCard label="검토 중" value={stats.inReview} />
+        <StatsCard label="이번주 마감" value={stats.dueThisWeek} />
+      </div>
 
-                {isLoading && (
-                    <div className="space-y-3 animate-pulse">
-                        <div className="h-12 bg-neutral-800 rounded w-full"></div>
-                        <div className="h-12 bg-neutral-800 rounded w-full"></div>
-                        <div className="h-12 bg-neutral-800 rounded w-full"></div>
-                    </div>
-                )}
+      <div className="mb-4">
+        <CaseFilters status={statusFilter} onStatusChange={setStatusFilter} />
+      </div>
 
-                {error && (
-                    <div className="p-4 bg-red-900/50 border border-red-500 rounded text-red-200">
-                        데이터를 불러오는 중 오류가 발생했습니다.
-                    </div>
-                )}
+      <div className="mb-6">
+        <QuickActionsPanel />
+      </div>
 
-                {cases && (
-                    <div className="grid gap-4">
-                        {cases.map((c) => (
-                            <div
-                                key={c.id}
-                                className="p-4 rounded-lg border border-neutral-800 bg-neutral-950 hover:bg-neutral-800/50 cursor-pointer transition-colors flex items-center justify-between"
-                            >
-                                <div>
-                                    <h3 className="font-medium text-lg text-white mb-1">{c.title}</h3>
-                                    <p className="text-sm text-neutral-400">ID: {c.id} • 생성일: {new Date(c.createdAt).toLocaleDateString()}</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${c.priority === 'HIGH' || c.priority === 'CRITICAL' ? 'bg-red-500/20 text-red-500' : 'bg-blue-500/20 text-blue-500'
-                                        }`}>
-                                        {c.priority}
-                                    </span>
-                                    <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${c.status === 'COMPLETED' ? 'bg-green-500/20 text-green-500' :
-                                            c.status === 'IN_PROGRESS' ? 'bg-yellow-500/20 text-yellow-500' :
-                                                'bg-neutral-500/20 text-neutral-400'
-                                        }`}>
-                                        {c.status.replace('_', ' ')}
-                                    </span>
-                                </div>
-                            </div>
-                        ))}
-                        {cases.length === 0 && <p className="text-neutral-500 text-sm">할당된 케이스가 없습니다.</p>}
-                    </div>
-                )}
-            </div>
+      <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+        {(showMyWorkitems || showApprovalQueue) && (
+          <div className="space-y-4 lg:col-span-2">
+            {showMyWorkitems && (
+              <MyWorkitemsPanel cases={filteredCases} isLoading={isLoading} error={error ?? null} />
+            )}
+            {showApprovalQueue && <ApprovalQueuePanel />}
+          </div>
+        )}
+        <div className="space-y-4">
+          <CaseTimeline />
+          <CaseDistributionChart cases={filteredCases} />
         </div>
-    );
+      </div>
+
+      <div>
+        <h2 className="mb-3 text-lg font-semibold text-white">케이스 요약</h2>
+        <CaseTable data={filteredCases.slice(0, 5)} />
+      </div>
+    </div>
+  );
 }

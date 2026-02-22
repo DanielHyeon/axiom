@@ -15,8 +15,8 @@ test.describe('NL2SQL E2E', () => {
 
     test('should render NL2SQL chat interface and execute a mock query', async ({ page }) => {
         // 1. Navigate to NL2SQL page
-        await page.goto('/nl2sql');
-        await expect(page).toHaveURL(/.*\/nl2sql/);
+        await page.goto('/analysis/nl2sql');
+        await expect(page).toHaveURL(/.*\/analysis\/nl2sql/);
 
         // 2. Verify layout
         await expect(page.locator('h2').filter({ hasText: 'NL2SQL' })).toBeVisible();

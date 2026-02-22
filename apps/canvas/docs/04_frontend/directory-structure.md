@@ -18,11 +18,8 @@
 apps/canvas/
 ├── public/                          # 정적 파일 (favicon, robots.txt)
 ├── src/
-│   ├── app/                         # 앱 설정 (진입점, 프로바이더)
-│   │   ├── App.tsx                  # 루트 컴포넌트
-│   │   ├── providers.tsx            # 프로바이더 조합
-│   │   ├── router.tsx               # React Router 설정
-│   │   └── queryClient.ts           # TanStack Query 설정
+│   ├── App.tsx                      # 루트 컴포넌트 (라우트 정의 포함)
+│   ├── main.tsx                     # 진입점 (QueryClientProvider 래핑)
 │   │
 │   ├── features/                    # ★ 기능별 모듈 (핵심)
 │   │   ├── case-dashboard/          # 1. 케이스 대시보드
@@ -170,25 +167,33 @@ apps/canvas/
 │   │   │   └── CaseDashboardPage.tsx
 │   │   ├── cases/
 │   │   │   ├── CaseListPage.tsx
-│   │   │   └── CaseDetailPage.tsx
+│   │   │   ├── CaseDetailPage.tsx
+│   │   │   ├── CaseDocumentsListPage.tsx
+│   │   │   └── CaseDocumentEditorPage.tsx
 │   │   ├── documents/
-│   │   │   ├── DocumentListPage.tsx
-│   │   │   ├── DocumentEditorPage.tsx
 │   │   │   └── DocumentReviewPage.tsx
-│   │   ├── analysis/
-│   │   │   ├── WhatIfPage.tsx
-│   │   │   ├── OlapPivotPage.tsx
+│   │   ├── whatif/
+│   │   │   └── WhatIfPage.tsx
+│   │   ├── olap/
+│   │   │   └── OlapPivotPage.tsx
+│   │   ├── nl2sql/
 │   │   │   └── Nl2SqlPage.tsx
+│   │   ├── ontology/
+│   │   │   └── OntologyBrowser.tsx
 │   │   ├── data/
-│   │   │   ├── OntologyPage.tsx
 │   │   │   └── DatasourcePage.tsx
 │   │   ├── process-designer/
-│   │   │   ├── ProcessDesignerListPage.tsx
+│   │   │   └── ProcessDesignerListPage.tsx
+│   │   ├── process/
 │   │   │   └── ProcessDesignerPage.tsx
 │   │   ├── watch/
 │   │   │   └── WatchDashboardPage.tsx
 │   │   ├── settings/
-│   │   │   └── SettingsPage.tsx
+│   │   │   ├── SettingsPage.tsx
+│   │   │   ├── SettingsSystemPage.tsx
+│   │   │   ├── SettingsLogsPage.tsx
+│   │   │   ├── SettingsUsersPage.tsx
+│   │   │   └── SettingsConfigPage.tsx
 │   │   ├── auth/
 │   │   │   ├── LoginPage.tsx
 │   │   │   └── CallbackPage.tsx
@@ -196,85 +201,46 @@ apps/canvas/
 │   │       ├── NotFoundPage.tsx
 │   │       └── ErrorPage.tsx
 │   │
-│   ├── shared/                      # 공유 컴포넌트/유틸
-│   │   ├── ui/                      # Shadcn/ui 컴포넌트
-│   │   │   ├── button.tsx
-│   │   │   ├── card.tsx
-│   │   │   ├── dialog.tsx
-│   │   │   ├── dropdown-menu.tsx
-│   │   │   ├── input.tsx
-│   │   │   ├── select.tsx
-│   │   │   ├── sheet.tsx
-│   │   │   ├── skeleton.tsx
-│   │   │   ├── table.tsx
-│   │   │   ├── tabs.tsx
-│   │   │   ├── toast.tsx
-│   │   │   └── tooltip.tsx
-│   │   ├── components/              # 커스텀 공유 컴포넌트
-│   │   │   ├── DataTable/
-│   │   │   ├── Chart/
-│   │   │   ├── StatusBadge.tsx
-│   │   │   ├── EmptyState.tsx
-│   │   │   ├── LoadingSkeleton.tsx
-│   │   │   ├── ErrorFallback.tsx
-│   │   │   ├── ConfirmDialog.tsx
-│   │   │   ├── SearchInput.tsx
-│   │   │   ├── DateRangePicker.tsx
-│   │   │   └── Breadcrumb.tsx
-│   │   ├── hooks/                   # 공유 훅
-│   │   │   ├── useDebounce.ts
-│   │   │   ├── useLocalStorage.ts
-│   │   │   ├── useMediaQuery.ts
-│   │   │   └── useKeyboardShortcut.ts
-│   │   └── utils/                   # 공유 유틸리티
-│   │       ├── cn.ts                # clsx + twMerge
-│   │       ├── format.ts            # 날짜, 숫자, 통화 포맷
-│   │       ├── validators.ts        # Zod 스키마
-│   │       └── constants.ts         # 상수
+│   ├── components/                  # 전역 컴포넌트 (에러 경계, 보호 라우트, UI)
+│   │   ├── GlobalErrorBoundary.tsx
+│   │   ├── PageErrorBoundary.tsx
+│   │   ├── ProtectedRoute.tsx
+│   │   ├── ServiceStatusBanner.tsx
+│   │   └── ui/                      # Shadcn/ui (button, card, input, select 등)
 │   │
-│   ├── layouts/                     # 레이아웃 컴포넌트
-│   │   ├── RootLayout.tsx           # 최상위 레이아웃
-│   │   ├── DashboardLayout.tsx      # 사이드바 포함 레이아웃
-│   │   ├── Sidebar/
-│   │   │   ├── Sidebar.tsx
-│   │   │   ├── SidebarNav.tsx
-│   │   │   └── SidebarItem.tsx
-│   │   ├── Header/
-│   │   │   ├── Header.tsx
-│   │   │   ├── UserMenu.tsx
-│   │   │   └── NotificationBell.tsx
-│   │   └── AuthLayout.tsx           # 인증 페이지 레이아웃
+│   ├── shared/                      # 공유 컴포넌트/유틸 (EmptyState, AuthGuard 등)
+│   │   └── components/
+│   │
+│   ├── layouts/                     # 레이아웃
+│   │   ├── RootLayout.tsx           # 최상위 (Outlet만)
+│   │   ├── MainLayout.tsx           # 사이드바 + 헤더 + Outlet (대시보드용)
+│   │   ├── Sidebar.tsx
+│   │   ├── DashboardLayout.tsx      # (선택 사용)
+│   │   ├── AuthLayout.tsx           # (선택 사용)
+│   │   └── components/
+│   │       ├── Header.tsx
+│   │       ├── UserMenu.tsx
+│   │       └── NotificationBell.tsx
 │   │
 │   ├── stores/                      # 전역 Zustand 스토어
-│   │   ├── authStore.ts
-│   │   ├── uiStore.ts
-│   │   └── themeStore.ts
+│   │   └── authStore.ts
 │   │
-│   ├── lib/                         # 라이브러리 설정/래퍼
-│   │   ├── api/
-│   │   │   ├── createApiClient.ts
-│   │   │   ├── clients.ts           # 5개 서비스 인스턴스
-│   │   │   ├── errors.ts            # AppError
-│   │   │   ├── wsManager.ts         # WebSocket
-│   │   │   └── sseManager.ts        # SSE
-│   │   └── i18n/
-│   │       ├── i18n.ts              # 설정
-│   │       ├── ko.json              # 한국어
-│   │       └── en.json              # 영어
-│   │
-│   ├── styles/                      # 글로벌 스타일
-│   │   ├── globals.css              # Tailwind directives + CSS vars
-│   │   └── themes/
-│   │       ├── light.css
-│   │       └── dark.css
+│   ├── lib/                         # 라이브러리 설정/API
+│   │   ├── queryClient.ts           # TanStack Query 전역 설정
+│   │   ├── routes/
+│   │   │   ├── routes.ts            # ROUTES 상수
+│   │   │   └── params.ts            # useCaseParams 등
+│   │   └── api/
+│   │       ├── watchStream.ts       # Watch SSE (EventSource)
+│   │       ├── streamManager.ts     # POST 스트림 (LLM/ReAct)
+│   │       ├── wsManager.ts         # (deprecated re-export → watchStream)
+│   │       └── ...                  # 각 도메인 API 클라이언트
 │   │
 │   ├── types/                       # 공유 TypeScript 타입
-│   │   ├── api.types.ts             # ApiResponse, PaginationMeta
-│   │   ├── auth.types.ts            # User, Role, Permission
-│   │   └── common.types.ts          # 공용 타입
+│   │   └── auth.types.ts
 │   │
-│   ├── main.tsx                     # 진입점
-│   └── vite-env.d.ts                # Vite 타입 선언
+│   ├── index.css                    # 글로벌 스타일 (Tailwind)
+│   └── vite-env.d.ts
 │
 ├── docs/                            # 기술 문서 (현재 디렉토리)
 │   ├── 00_overview/
@@ -318,7 +284,7 @@ apps/canvas/
 | 특정 Feature 전용 API | `features/{name}/api/` | 해당 Feature의 서버 통신 |
 | 라우트 페이지 컴포넌트 | `pages/{section}/` | React.lazy로 코드 분할 |
 | 2개 이상 Feature에서 사용 | `shared/components/` | 비즈니스 로직 없는 순수 UI |
-| Shadcn/ui 기본 컴포넌트 | `shared/ui/` | `npx shadcn-ui add`로 자동 생성 |
+| Shadcn/ui 기본 컴포넌트 | `components/ui/` | `npx shadcn-ui add`로 자동 생성 |
 | 전역 상태 스토어 | `stores/` | Feature 간 공유 상태 |
 | Feature 전용 스토어 | `features/{name}/stores/` | 해당 Feature 내부 상태 |
 | Axios/WS/SSE 설정 | `lib/api/` | 인프라 계층 |
@@ -379,9 +345,9 @@ src/                                src/
   - 근거: 관련 파일 co-location, Feature 삭제/추가 용이
   - 재평가: 팀원이 구조에 혼란을 느끼면 가이드 워크숍 진행
 
-- `shared/ui/`와 `shared/components/` 분리
+- `components/ui/`와 `shared/components/` 분리
   - 근거: Shadcn/ui 자동 생성 파일과 커스텀 확장을 구분
-  - 규칙: `shared/ui/`는 절대 직접 수정하지 않음 (Shadcn CLI로만 관리)
+  - 규칙: `components/ui/`는 Shadcn CLI로 추가·갱신, 직접 수정 최소화
 
 ---
 
@@ -391,3 +357,4 @@ src/                                src/
 |------|------|--------|------|
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
 | 2026-02-20 | 1.1 | Axiom Team | process-designer feature 모듈 및 페이지 추가 |
+| 2026-02-22 | 1.2 | Axiom Team | 현재 구현 반영: src/ 직하위 App·main, layouts(RootLayout·MainLayout·Sidebar·components), components/·components/ui/, lib/queryClient·watchStream·streamManager, 설정 하위 페이지, pages 경로 정리 |

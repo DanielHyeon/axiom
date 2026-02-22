@@ -19,6 +19,7 @@ interface ProcessDesignerState {
     nodes: CanvasNode[];
     selectedNodeId: string | null;
     addNode: (node: Omit<CanvasNode, 'id'>) => void;
+    setNodes: (nodes: CanvasNode[]) => void;
     updateNodePosition: (id: string, x: number, y: number) => void;
     setSelectedNode: (id: string | null) => void;
 }
@@ -32,6 +33,7 @@ export const useProcessDesignerStore = create<ProcessDesignerState>((set) => ({
     addNode: (node) => set((state) => ({
         nodes: [...state.nodes, { ...node, id: crypto.randomUUID() }]
     })),
+    setNodes: (nodes) => set({ nodes }),
     updateNodePosition: (id, x, y) => set((state) => ({
         nodes: state.nodes.map(n => n.id === id ? { ...n, x, y } : n)
     })),

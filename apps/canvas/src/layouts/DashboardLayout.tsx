@@ -14,7 +14,7 @@ export const DashboardLayout = () => {
                 <nav className="flex-1 p-4 space-y-2">
                     <Link to="/" className="block p-2 rounded hover:bg-neutral-800 transition">Dashboard</Link>
                     <Link to="/documents" className="block p-2 rounded hover:bg-neutral-800 transition">Documents</Link>
-                    <Link to="/nl2sql" className="block p-2 rounded hover:bg-neutral-800 transition">NL2SQL Chat</Link>
+                    <Link to="/analysis/nl2sql" className="block p-2 rounded hover:bg-neutral-800 transition">NL2SQL Chat</Link>
                     <Link to="/analysis/olap" className="block p-2 rounded hover:bg-neutral-800 transition">OLAP Pivot</Link>
                     <Link to="/cases/demo/scenarios" className="block p-2 rounded hover:bg-neutral-800 transition">What-If Builder</Link>
                 </nav>

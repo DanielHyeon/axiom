@@ -14,44 +14,48 @@
 
 ## 1. 전체 라우트 맵
 
+현재 구현: `BrowserRouter` + `Routes` in `App.tsx`. 최상위 `RootLayout` → 인증 구간 `ProtectedRoute` → 대시보드 `MainLayout` (사이드바·헤더).
+
 ```
 /                                    → 리다이렉트 → /dashboard
 │
-├── /auth                            (AuthLayout - 사이드바 없음)
-│   ├── /login                       → LoginPage
-│   └── /callback                    → CallbackPage (OAuth 콜백)
+├── /login                           (RootLayout, 사이드바 없음) → LoginPage
+├── /auth/callback                   → CallbackPage (OAuth 콜백)
 │
-├── /dashboard                       (DashboardLayout - 사이드바 있음)
+├── /dashboard                       (MainLayout - 사이드바 있음)
 │   └── index                        → CaseDashboardPage          [Core API]
 │
-├── /cases                           (DashboardLayout)
+├── /cases                           (MainLayout)
 │   ├── index                        → CaseListPage               [Core API]
 │   └── /:caseId
-│       ├── index                    → CaseDetailPage             [Core API]
+│       ├── index                    → CaseDetailPage              [Core API]
 │       ├── /documents
-│       │   ├── index                → DocumentListPage           [Core API]
-│       │   ├── /:docId              → DocumentEditorPage         [Core API]
+│       │   ├── index                → CaseDocumentsListPage      [Core API]
+│       │   ├── /:docId              → CaseDocumentEditorPage     [Core API]
 │       │   └── /:docId/review       → DocumentReviewPage         [Core API]
-│       └── /scenarios
-│           └── index                → WhatIfPage                 [Vision API]
+│       └── /scenarios               → WhatIfPage                 [Vision API]
 │
-├── /analysis                        (DashboardLayout)
+├── /analysis                        (MainLayout)
 │   ├── /olap                        → OlapPivotPage              [Vision API]
 │   └── /nl2sql                      → Nl2SqlPage                 [Oracle API]
 │
-├── /data                            (DashboardLayout)
-│   ├── /ontology                    → OntologyPage               [Synapse API]
+├── /data                            (MainLayout)
+│   ├── /ontology                    → OntologyBrowser            [Synapse API]
 │   └── /datasources                 → DatasourcePage             [Weaver API]
 │
-├── /process-designer                (DashboardLayout)
-│   ├── index                        → ProcessDesignerListPage    [Synapse API]
-│   └── /:boardId                    → ProcessDesignerPage        [Synapse API + Yjs WS]
+├── /process-designer                (MainLayout)
+│   ├── index                        → ProcessDesignerListPage     [Synapse API]
+│   └── /:boardId                    → ProcessDesignerPage         [Synapse API + Yjs WS]
 │
-├── /watch                           (DashboardLayout)
-│   └── index                        → WatchDashboardPage         [Core WS]
+├── /watch                           (MainLayout)
+│   └── index                        → WatchDashboardPage         [Core SSE]
 │
-├── /settings                        (DashboardLayout)
-│   └── index                        → SettingsPage
+├── /settings                        (MainLayout)
+│   ├── index                        → 리다이렉트 → /settings/system
+│   ├── /system                      → SettingsSystemPage
+│   ├── /logs                        → SettingsLogsPage
+│   ├── /users                       → SettingsUsersPage
+│   └── /config                      → SettingsConfigPage
 │
 └── /*                               → NotFoundPage (404)
 ```
@@ -60,129 +64,50 @@
 
 ## 2. 라우트 설정 코드
 
+구현 위치: `src/App.tsx`. `createBrowserRouter` 미사용, `BrowserRouter` + `Routes` + `Route` 조합.
+
+- **RootLayout**: 최상위, `<Outlet />`만 렌더. Auth/Protected 자식 분기.
+- **ProtectedRoute**: 인증 검사 후 자식 렌더 또는 로그인 리다이렉트.
+- **MainLayout**: 사이드바 + 헤더 + `<Outlet />` (페이지 영역에 PageErrorBoundary 적용).
+
 ```typescript
-// app/router.tsx
+// src/App.tsx (요지)
 
-import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { lazy, Suspense } from 'react';
-import { RootLayout } from '@/layouts/RootLayout';
-import { DashboardLayout } from '@/layouts/DashboardLayout';
-import { AuthLayout } from '@/layouts/AuthLayout';
-import { AuthGuard } from '@/shared/components/AuthGuard';
-import { LoadingSkeleton } from '@/shared/components/LoadingSkeleton';
-import { ErrorPage } from '@/pages/errors/ErrorPage';
-import { NotFoundPage } from '@/pages/errors/NotFoundPage';
+<GlobalErrorBoundary>
+  <BrowserRouter>
+    <Routes>
+      <Route element={<RootLayout />}>
+        <Route path="/login" element={<Navigate to={ROUTES.AUTH.LOGIN} replace />} />
+        <Route path={ROUTES.AUTH.LOGIN} element={<SuspensePage><LoginPage /></SuspensePage>} />
+        <Route path={ROUTES.AUTH.CALLBACK} element={<SuspensePage><CallbackPage /></SuspensePage>} />
 
-// Lazy-loaded pages (라우트별 코드 분할)
-const LoginPage = lazy(() => import('@/pages/auth/LoginPage'));
-const CallbackPage = lazy(() => import('@/pages/auth/CallbackPage'));
-const CaseDashboardPage = lazy(() => import('@/pages/dashboard/CaseDashboardPage'));
-const CaseListPage = lazy(() => import('@/pages/cases/CaseListPage'));
-const CaseDetailPage = lazy(() => import('@/pages/cases/CaseDetailPage'));
-const DocumentListPage = lazy(() => import('@/pages/documents/DocumentListPage'));
-const DocumentEditorPage = lazy(() => import('@/pages/documents/DocumentEditorPage'));
-const DocumentReviewPage = lazy(() => import('@/pages/documents/DocumentReviewPage'));
-const WhatIfPage = lazy(() => import('@/pages/analysis/WhatIfPage'));
-const OlapPivotPage = lazy(() => import('@/pages/analysis/OlapPivotPage'));
-const Nl2SqlPage = lazy(() => import('@/pages/analysis/Nl2SqlPage'));
-const OntologyPage = lazy(() => import('@/pages/data/OntologyPage'));
-const DatasourcePage = lazy(() => import('@/pages/data/DatasourcePage'));
-const WatchDashboardPage = lazy(() => import('@/pages/watch/WatchDashboardPage'));
-const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage'));
-const ProcessDesignerPage = lazy(() => import('@/pages/process-designer/ProcessDesignerPage'));
-const SettingsPage = lazy(() => import('@/pages/settings/SettingsPage'));
-
-function SuspenseWrapper({ children }: { children: React.ReactNode }) {
-  return (
-    <Suspense fallback={<LoadingSkeleton />}>
-      {children}
-    </Suspense>
-  );
-}
-
-export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    errorElement: <ErrorPage />,
-    children: [
-      // Root redirect
-      { index: true, element: <Navigate to="/dashboard" replace /> },
-
-      // Auth routes (no sidebar)
-      {
-        path: 'auth',
-        element: <AuthLayout />,
-        children: [
-          { path: 'login', element: <SuspenseWrapper><LoginPage /></SuspenseWrapper> },
-          { path: 'callback', element: <SuspenseWrapper><CallbackPage /></SuspenseWrapper> },
-        ],
-      },
-
-      // Protected routes (sidebar)
-      {
-        element: <AuthGuard><DashboardLayout /></AuthGuard>,
-        children: [
-          // Dashboard
-          {
-            path: 'dashboard',
-            element: <SuspenseWrapper><CaseDashboardPage /></SuspenseWrapper>,
-          },
-
-          // Cases (nested)
-          {
-            path: 'cases',
-            children: [
-              { index: true, element: <SuspenseWrapper><CaseListPage /></SuspenseWrapper> },
-              {
-                path: ':caseId',
-                children: [
-                  { index: true, element: <SuspenseWrapper><CaseDetailPage /></SuspenseWrapper> },
-                  {
-                    path: 'documents',
-                    children: [
-                      { index: true, element: <SuspenseWrapper><DocumentListPage /></SuspenseWrapper> },
-                      { path: ':docId', element: <SuspenseWrapper><DocumentEditorPage /></SuspenseWrapper> },
-                      { path: ':docId/review', element: <SuspenseWrapper><DocumentReviewPage /></SuspenseWrapper> },
-                    ],
-                  },
-                  { path: 'scenarios', element: <SuspenseWrapper><WhatIfPage /></SuspenseWrapper> },
-                ],
-              },
-            ],
-          },
-
-          // Analysis
-          { path: 'analysis/olap', element: <SuspenseWrapper><OlapPivotPage /></SuspenseWrapper> },
-          { path: 'analysis/nl2sql', element: <SuspenseWrapper><Nl2SqlPage /></SuspenseWrapper> },
-
-          // Data
-          { path: 'data/ontology', element: <SuspenseWrapper><OntologyPage /></SuspenseWrapper> },
-          { path: 'data/datasources', element: <SuspenseWrapper><DatasourcePage /></SuspenseWrapper> },
-
-          // Process Designer (비즈니스 프로세스 디자이너)
-          {
-            path: 'process-designer',
-            children: [
-              { index: true, element: <SuspenseWrapper><ProcessDesignerListPage /></SuspenseWrapper> },
-              { path: ':boardId', element: <SuspenseWrapper><ProcessDesignerPage /></SuspenseWrapper> },
-            ],
-          },
-
-          // Watch
-          { path: 'watch', element: <SuspenseWrapper><WatchDashboardPage /></SuspenseWrapper> },
-
-          // Settings
-          { path: 'settings', element: <SuspenseWrapper><SettingsPage /></SuspenseWrapper> },
-        ],
-      },
-
-      // 404
-      { path: '*', element: <NotFoundPage /> },
-    ],
-  },
-]);
+        <Route element={<ProtectedRoute />}>
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
+            <Route path="dashboard" element={<SuspensePage><CaseDashboardPage /></SuspensePage>} />
+            <Route path="cases" ... />
+            <Route path="analysis/olap" ... />
+            <Route path="analysis/nl2sql" ... />
+            <Route path="data/ontology" ... />
+            <Route path="data/datasources" ... />
+            <Route path="process-designer" ... />
+            <Route path="watch" ... />
+            <Route path="settings" element={<SuspensePage><SettingsPage /></SuspensePage>}>
+              <Route path="system" ... />
+              <Route path="logs" ... />
+              <Route path="users" ... />
+              <Route path="config" ... />
+            </Route>
+            <Route path="*" element={<NotFoundPage />} />
+          </Route>
+        </Route>
+      </Route>
+    </Routes>
+  </BrowserRouter>
+</GlobalErrorBoundary>
 ```
+
+페이지 컴포넌트는 `React.lazy()`로 로드하며, `SuspensePage`(Suspense + fallback)로 감쌌다. 라우트 상수는 `lib/routes/routes.ts`의 `ROUTES` 사용.
 
 ---
 
@@ -222,8 +147,8 @@ router.beforeEach((to, from, next) => {
 });
 
 // === Canvas (React Router v6) ===
-// 1. 라우트 중첩으로 레이아웃 자동 적용 (meta.layout 불필요)
-// 2. AuthGuard 컴포넌트가 navigation guard 대체
+// 1. 라우트 중첩으로 레이아웃 자동 적용 (RootLayout → MainLayout)
+// 2. ProtectedRoute가 navigation guard 대체
 // 3. lazy() + Suspense로 코드 분할 (동일 패턴)
 ```
 
@@ -343,6 +268,10 @@ export const ROUTES = {
   },
   WATCH: '/watch',
   SETTINGS: '/settings',
+  SETTINGS_SYSTEM: '/settings/system',
+  SETTINGS_LOGS: '/settings/logs',
+  SETTINGS_USERS: '/settings/users',
+  SETTINGS_CONFIG: '/settings/config',
 } as const;
 ```
 
@@ -369,7 +298,7 @@ export const ROUTES = {
 
 ## 필수 (Required)
 
-- 모든 인증 필요 라우트는 `AuthGuard` 내부에 배치
+- 모든 인증 필요 라우트는 `ProtectedRoute` 내부에 배치
 - 모든 페이지는 `React.lazy()`로 동적 import
 - URL 파라미터 변경 시 문서 업데이트 필수
 
@@ -386,5 +315,6 @@ export const ROUTES = {
 | 날짜 | 버전 | 작성자 | 내용 |
 |------|------|--------|------|
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-02-20 | 1.1 | Axiom Team | process-designer 라우트 추가 |
 | 2026-02-20 | 1.2 | Axiom Team | 라우트 파라미터 타입 안전성(§5), 라우트 상수 관리(§6) 추가 |
-| 2026-02-20 | 1.1 | Axiom Team | process-designer 라우트 추가 (/process-designer, /process-designer/:boardId) |
+| 2026-02-22 | 1.3 | Axiom Team | 현재 구현 반영: RootLayout/MainLayout/ProtectedRoute, BrowserRouter, 설정 하위 /system·/logs·/users·/config, 페이지명(CaseDocumentsListPage 등) |

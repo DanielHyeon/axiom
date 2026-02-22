@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Alert, AlertSeverity } from '../types/watch';
 import { fetchAlerts, markAlertAsRead, markAllAlertsAsRead } from '@/lib/api/watch';
+import { subscribeWatchStream } from '@/lib/api/watchStream';
 import { useAuthStore } from '@/stores/authStore';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK_DATA === 'true';
@@ -40,6 +41,24 @@ const INITIAL_ALERTS: Alert[] = [
 export function useAlerts() {
     const [alerts, setAlerts] = useState<Alert[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [loadError, setLoadError] = useState<Error | null>(null);
+
+    const refetchAlerts = useCallback(() => {
+        if (USE_MOCK) return;
+        setLoadError(null);
+        setIsLoading(true);
+        fetchAlerts()
+            .then((data) => {
+                const fetched = (data as { data?: unknown })?.data ?? data;
+                setAlerts(Array.isArray(fetched) ? fetched : []);
+            })
+            .catch((e) => {
+                console.error('Failed to load alerts:', e);
+                setLoadError(e instanceof Error ? e : new Error(String(e)));
+                setAlerts([]);
+            })
+            .finally(() => setIsLoading(false));
+    }, []);
 
     // Initial load
     useEffect(() => {
@@ -49,21 +68,9 @@ export function useAlerts() {
                 setIsLoading(false);
             }, 800);
             return () => clearTimeout(timer);
-        } else {
-            fetchAlerts().then(data => {
-                // Backend return format mapped to frontend format if necessary
-                // Assumes data wrapper is stripped in createApiClient interceptor
-                const fetched = (data as any).data || data;
-                setAlerts(fetched);
-            }).catch(e => {
-                console.error("Failed to load alerts:", e);
-                // Graceful fallback to empty array on fail
-                setAlerts([]);
-            }).finally(() => {
-                setIsLoading(false);
-            });
         }
-    }, []);
+        refetchAlerts();
+    }, [refetchAlerts]);
 
     // WebSocket / SSE Simulation
     useEffect(() => {
@@ -95,45 +102,28 @@ export function useAlerts() {
             return () => clearInterval(interval);
         } else {
             const token = useAuthStore.getState().accessToken;
+            const baseUrl = import.meta.env.VITE_CORE_URL ?? 'http://localhost:8000';
             if (!token) return;
 
-            const baseUrl = import.meta.env.VITE_CORE_URL;
-            const eventSource = new EventSource(`${baseUrl}/api/v1/watches/stream?token=${token}`);
-
-            eventSource.addEventListener('alert', (event) => {
-                try {
-                    const data = JSON.parse(event.data);
-
+            return subscribeWatchStream(baseUrl, token, {
+                onAlert: (data: Record<string, unknown>) => {
                     const newAlert: Alert = {
-                        id: data.alert_id,
-                        title: data.message,
-                        description: data.details || `이벤트 발생: ${data.event_type}`,
-                        severity: (data.severity || 'info').toLowerCase(),
-                        timestamp: data.triggered_at || new Date().toISOString(),
-                        isRead: data.status === 'acknowledged',
-                        metadata: data.metadata,
-                        sourceNodeId: data.case_id
+                        id: (data.alert_id as string) ?? '',
+                        title: (data.message as string) ?? '',
+                        description: (data.details as string) ?? `이벤트: ${(data.event_type as string) ?? ''}`,
+                        severity: ((data.severity as string) ?? 'info').toLowerCase() as AlertSeverity,
+                        timestamp: (data.triggered_at as string) ?? new Date().toISOString(),
+                        isRead: (data.status as string) === 'acknowledged',
+                        metadata: data.metadata as Record<string, string> | undefined,
+                        sourceNodeId: data.case_id as string | undefined
                     };
-
                     setAlerts(prev => [newAlert, ...prev]);
                     window.dispatchEvent(new CustomEvent('axiom:new_alert', { detail: newAlert }));
-                } catch (err) {
-                    console.error("Failed to parse incoming SSE alert", err);
-                }
-            });
-
-            eventSource.addEventListener('alert_update', (event) => {
-                try {
-                    const data = JSON.parse(event.data);
+                },
+                onAlertUpdate: (data) => {
                     setAlerts(prev => prev.map(a => a.id === data.alert_id ? { ...a, isRead: data.status === 'acknowledged' } : a));
-                } catch (err) {
-                    console.error("Failed to parse SSE alert update", err);
                 }
             });
-
-            return () => {
-                eventSource.close();
-            };
         }
     }, [isLoading]);
 
@@ -176,6 +166,8 @@ export function useAlerts() {
     return {
         alerts,
         isLoading,
+        loadError,
+        refetchAlerts,
         getFilteredAlerts,
         markAsRead,
         markAllAsRead

@@ -32,26 +32,11 @@
 
 ### 1.2 기본 설정
 
-```typescript
-// app/queryClient.ts
+**구현 위치**: `apps/canvas/src/lib/queryClient.ts`  
+전역 옵션 상세는 [04_frontend/query-client.md](../04_frontend/query-client.md) 참고.
 
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,        // 기본 5분
-      gcTime: 30 * 60 * 1000,           // 기본 30분
-      retry: 3,
-      retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
-      refetchOnWindowFocus: true,
-      refetchOnReconnect: true,
-      refetchOnMount: true,
-    },
-    mutations: {
-      retry: 1,
-    },
-  },
-});
-```
+- **queries**: staleTime 5분, gcTime 30분, retry 3회(지수 백오프), refetchOnWindowFocus/Reconnect/Mount true.
+- **mutations**: retry 0 (필요 시 useMutation 단위로 지정).
 
 ---
 

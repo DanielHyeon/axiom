@@ -5,12 +5,27 @@ import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 export function AlertFeed() {
-    const { getFilteredAlerts, markAsRead } = useAlerts();
+    const { getFilteredAlerts, markAsRead, loadError, refetchAlerts } = useAlerts();
     const { filters, setSearchQuery } = useWatchStore();
 
     const filteredAlerts = useMemo(() => {
         return getFilteredAlerts(filters.query, filters.severity);
     }, [getFilteredAlerts, filters]);
+
+    if (loadError) {
+        return (
+            <div className="flex flex-col h-full bg-[#161616] border border-neutral-800 rounded-lg overflow-hidden flex-1 p-4">
+                <p className="text-amber-400 text-sm mb-2">알림 목록을 불러오지 못했습니다. {loadError.message}</p>
+                <button
+                    type="button"
+                    onClick={() => refetchAlerts()}
+                    className="text-sm px-3 py-1.5 rounded border border-neutral-600 text-neutral-300 hover:bg-neutral-800 w-fit"
+                >
+                    다시 시도
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="flex flex-col h-full bg-[#161616] border border-neutral-800 rounded-lg overflow-hidden flex-1">

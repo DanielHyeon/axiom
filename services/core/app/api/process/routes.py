@@ -197,6 +197,23 @@ async def list_definitions_endpoint(
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
+@router.get("/definitions/{proc_def_id}")
+async def get_definition_endpoint(
+    proc_def_id: str,
+    db: AsyncSession = Depends(get_session),
+):
+    try:
+        return await ProcessService.get_definition(
+            db=db,
+            tenant_id=get_current_tenant_id(),
+            proc_def_id=proc_def_id,
+        )
+    except ProcessDomainError as e:
+        raise HTTPException(status_code=e.status_code, detail={"code": e.code, "message": e.message})
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
 @router.post("/definitions", status_code=status.HTTP_201_CREATED)
 async def create_definitions_endpoint(
     req: DefinitionCreateRequest,

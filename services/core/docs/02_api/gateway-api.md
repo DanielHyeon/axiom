@@ -67,13 +67,15 @@ process-gpt-gs-main/gateway/
 
 ### 2.2 공개 경로 (인증 불필요)
 
-| 경로 | 설명 |
-|------|------|
-| `/api/v1/auth/login` | 로그인 (JWT 발급) |
-| `/api/v1/auth/refresh` | 토큰 갱신 |
-| `/api/v1/health` | 헬스체크 |
-| `/api/v1/docs` | OpenAPI 문서 (개발 환경만) |
-| `/api/v1/redoc` | ReDoc 문서 (개발 환경만) |
+| 경로 | 설명 | 구현 |
+|------|------|------|
+| `/api/v1/auth/login` | 로그인 (JWT 발급) | Implemented — `app/api/auth/routes.py` |
+| `/api/v1/auth/refresh` | 토큰 갱신 | Implemented — `app/api/auth/routes.py` |
+| `/api/v1/health/*` | 헬스체크 (startup, live, ready, metrics) | Implemented — `app/api/health.py` |
+| `/api/v1/docs` | OpenAPI 문서 (개발 환경만) | FastAPI 기본 |
+| `/api/v1/redoc` | ReDoc 문서 (개발 환경만) | FastAPI 기본 |
+
+보호 경로(process, watch, agent, gateway, events, users)는 `Depends(get_current_user)` 적용. 속도 제한 미들웨어는 미구현(선택).
 
 ### 2.3 SSE/WebSocket 경로
 

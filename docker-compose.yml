@@ -54,6 +54,12 @@ services:
         condition: service_healthy
       postgres-db:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8003/health/live')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   vision-svc:
     build:
@@ -72,7 +78,13 @@ services:
       postgres-db:
         condition: service_healthy
       synapse-svc:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   core-svc:
     build:
@@ -91,7 +103,13 @@ services:
       postgres-db:
         condition: service_healthy
       synapse-svc:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8002/api/v1/health/ready')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   weaver-svc:
     build:
@@ -102,9 +120,18 @@ services:
     environment:
       - NEO4J_URI=bolt://neo4j-db:7687
     depends_on:
-      - vision-svc
-      - core-svc
-      - neo4j-db
+      vision-svc:
+        condition: service_healthy
+      core-svc:
+        condition: service_healthy
+      neo4j-db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   oracle-svc:
     build:
@@ -121,11 +148,17 @@ services:
       postgres-db:
         condition: service_healthy
       synapse-svc:
-        condition: service_started
+        condition: service_healthy
       core-svc:
-        condition: service_started
+        condition: service_healthy
       weaver-svc:
-        condition: service_started
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8004/health/ready')\" || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
 
   # Frontend Node
   canvas-ui:

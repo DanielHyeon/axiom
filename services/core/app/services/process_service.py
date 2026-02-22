@@ -8,6 +8,7 @@ from app.models.base_models import ProcessDefinition, ProcessRoleBinding, WorkIt
 from app.core.events import EventPublisher
 from app.core.event_contract_registry import EventContractError
 from app.core.self_verification import self_verification_harness
+from app.bpm.engine import get_initial_activity, get_next_activities_after
 
 
 class ProcessDomainError(Exception):
@@ -224,6 +225,31 @@ class ProcessService:
         }
 
     @staticmethod
+    async def get_definition(db: AsyncSession, tenant_id: str, proc_def_id: str) -> dict:
+        result = await db.execute(
+            select(ProcessDefinition).where(
+                ProcessDefinition.id == proc_def_id,
+                ProcessDefinition.tenant_id == tenant_id,
+            )
+        )
+        row = result.scalar_one_or_none()
+        if not row:
+            raise ProcessDomainError(404, "DEFINITION_NOT_FOUND", "Process definition not found")
+        return {
+            "proc_def_id": row.id,
+            "name": row.name,
+            "description": row.description,
+            "version": row.version,
+            "type": row.type,
+            "source": row.source,
+            "definition": row.definition,
+            "bpmn_xml": row.bpmn_xml,
+            "confidence": row.confidence,
+            "needs_review": row.needs_review,
+            "created_at": row.created_at.isoformat() if row.created_at else None,
+        }
+
+    @staticmethod
     async def initiate_process(
         db: AsyncSession,
         proc_def_id: str,
@@ -235,29 +261,32 @@ class ProcessService:
         if not role_bindings:
             raise ProcessDomainError(400, "MISSING_ROLE_BINDINGS", "role_bindings is required")
 
-        proc_def = await db.execute(
+        result = await db.execute(
             select(ProcessDefinition).where(
                 ProcessDefinition.id == proc_def_id,
                 ProcessDefinition.tenant_id == (input_data or {}).get("tenant_id", "default"),
             )
         )
-        if not proc_def.scalar_one_or_none():
+        proc_def_row = result.scalar_one_or_none()
+        if not proc_def_row:
             raise ProcessDomainError(404, "PROCESS_DEFINITION_NOT_FOUND", "process definition not found")
 
-        proc_inst_id = str(uuid.uuid4())
-        workitem_id = str(uuid.uuid4())
-        seed_activity = (input_data or {}).get("initial_activity_name", "Initial Review")
+        definition = getattr(proc_def_row, "definition", None) or {}
+        initial_spec = get_initial_activity(definition)
+        seed_activity = (input_data or {}).get("initial_activity_name") or initial_spec["activity_name"]
         tenant_id = (input_data or {}).get("tenant_id", "default")
         assignee_id = next((item.get("user_id") for item in role_bindings if item.get("user_id")), None)
         await ProcessService.bind_roles(db=db, proc_inst_id=proc_inst_id, role_bindings=role_bindings, tenant_id=tenant_id)
 
+        proc_inst_id = str(uuid.uuid4())
+        workitem_id = str(uuid.uuid4())
         workitem = WorkItem(
             id=workitem_id,
             proc_inst_id=proc_inst_id,
             activity_name=seed_activity,
-            activity_type="humanTask",
+            activity_type=initial_spec["activity_type"],
             assignee_id=assignee_id,
-            agent_mode="MANUAL",
+            agent_mode=initial_spec["agent_mode"],
             status=WorkItemStatus.TODO,
             tenant_id=tenant_id,
             result_data={"proc_def_id": proc_def_id, "input": input_data or {}},
@@ -361,30 +390,43 @@ class ProcessService:
         is_process_completed = True
 
         if not force_complete:
-            next_item = WorkItem(
-                id=str(uuid.uuid4()),
-                proc_inst_id=workitem.proc_inst_id,
-                activity_name="데이터 수치 검증",
-                activity_type="serviceTask",
-                assignee_id=None,
-                agent_mode="SUPERVISED",
-                status=WorkItemStatus.TODO,
-                tenant_id=workitem.tenant_id,
-                result_data={},
-                version=1,
-            )
-            db.add(next_item)
-            next_workitems = [
-                {
+            definition: dict = {}
+            proc_def_id = (workitem.result_data or {}).get("proc_def_id")
+            if proc_def_id:
+                def_result = await db.execute(
+                    select(ProcessDefinition).where(
+                        ProcessDefinition.id == proc_def_id,
+                        ProcessDefinition.tenant_id == workitem.tenant_id,
+                    )
+                )
+                proc_def_row = def_result.scalar_one_or_none()
+                if proc_def_row:
+                    definition = getattr(proc_def_row, "definition", None) or {}
+            next_specs = get_next_activities_after(definition, workitem.activity_name)
+            for spec in next_specs:
+                next_item = WorkItem(
+                    id=str(uuid.uuid4()),
+                    proc_inst_id=workitem.proc_inst_id,
+                    activity_name=spec["activity_name"],
+                    activity_type=spec["activity_type"],
+                    assignee_id=None,
+                    agent_mode=spec["agent_mode"],
+                    status=WorkItemStatus.TODO,
+                    tenant_id=workitem.tenant_id,
+                    result_data={"proc_def_id": proc_def_id, "input": (workitem.result_data or {}).get("input", {})},
+                    version=1,
+                )
+                db.add(next_item)
+                next_workitems.append({
                     "workitem_id": next_item.id,
                     "activity_name": next_item.activity_name,
                     "activity_type": next_item.activity_type,
                     "agent_mode": next_item.agent_mode,
                     "status": next_item.status,
-                }
-            ]
-            process_status = "RUNNING"
-            is_process_completed = False
+                })
+            if next_workitems:
+                process_status = "RUNNING"
+                is_process_completed = False
 
         # Insert event into outbox atomically
         try:

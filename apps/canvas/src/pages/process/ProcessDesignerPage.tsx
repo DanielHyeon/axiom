@@ -1,7 +1,12 @@
 import { useState, useRef, useEffect } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Stage, Layer, Rect, Text, Group } from 'react-konva';
 import { useProcessDesignerStore } from '@/stores/processDesignerStore';
-import type { CanvasItemType } from '@/stores/processDesignerStore';
+import type { CanvasNode, CanvasItemType } from '@/stores/processDesignerStore';
+import { ROUTES } from '@/lib/routes/routes';
+
+const BOARD_STORAGE_PREFIX = 'process-board-';
 
 // --- Types & Constants ---
 const ITEM_COLORS: Record<CanvasItemType, string> = {
@@ -20,7 +25,10 @@ const ITEM_LABELS: Record<CanvasItemType, string> = {
 
 // --- Components ---
 export function ProcessDesignerPage() {
-    const { nodes, selectedNodeId, addNode, updateNodePosition, setSelectedNode } = useProcessDesignerStore();
+    const { boardId } = useParams<{ boardId: string }>();
+    const [searchParams] = useSearchParams();
+    const fromOntology = searchParams.get('fromOntology');
+    const { nodes, selectedNodeId, addNode, setNodes, updateNodePosition, setSelectedNode } = useProcessDesignerStore();
     const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,6 +40,33 @@ export function ProcessDesignerPage() {
             });
         }
     }, []);
+
+    useEffect(() => {
+        if (!boardId) return;
+        const raw = localStorage.getItem(BOARD_STORAGE_PREFIX + boardId);
+        if (!raw) return;
+        try {
+            const parsed = JSON.parse(raw) as unknown;
+            if (Array.isArray(parsed) && parsed.length > 0) {
+                const valid = parsed.every(
+                    (n): n is CanvasNode =>
+                        n != null &&
+                        typeof n === 'object' &&
+                        typeof (n as CanvasNode).id === 'string' &&
+                        typeof (n as CanvasNode).x === 'number' &&
+                        typeof (n as CanvasNode).y === 'number'
+                );
+                if (valid) setNodes(parsed as CanvasNode[]);
+            }
+        } catch {
+            // ignore invalid stored data
+        }
+    }, [boardId, setNodes]);
+
+    const handleSaveBoard = () => {
+        if (!boardId) return;
+        localStorage.setItem(BOARD_STORAGE_PREFIX + boardId, JSON.stringify(nodes));
+    };
 
     const handleDragStart = (e: React.DragEvent, type: CanvasItemType) => {
         e.dataTransfer.setData('nodeType', type);
@@ -60,12 +95,34 @@ export function ProcessDesignerPage() {
     const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
     return (
-        <div className="flex h-[calc(100vh-4rem)] bg-neutral-950 text-white overflow-hidden border-t border-neutral-800">
-
+        <div className="flex flex-col h-[calc(100vh-4rem)] bg-neutral-950 text-white overflow-hidden border-t border-neutral-800">
+            {fromOntology && (
+                <div className="shrink-0 text-xs text-blue-300 bg-blue-950/50 border-b border-blue-800 px-3 py-1.5">
+                    온톨로지 연동: <span className="font-mono">{fromOntology}</span>
+                </div>
+            )}
+            <div className="flex flex-1 min-h-0">
             {/* 1. Toolbox */}
             <div className="w-64 border-r border-neutral-800 bg-neutral-900 flex flex-col">
-                <div className="p-4 border-b border-neutral-800 font-bold text-sm text-neutral-300">
-                    도구 상자 (Toolbox)
+                <div className="p-4 border-b border-neutral-800 font-bold text-sm text-neutral-300 flex items-center justify-between gap-2">
+                    <span>도구 상자 (Toolbox)</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                        {boardId && (
+                            <button
+                                type="button"
+                                onClick={handleSaveBoard}
+                                className="rounded bg-emerald-600 text-white px-2 py-1 text-xs font-medium"
+                            >
+                                저장
+                            </button>
+                        )}
+                        <Link
+                            to={ROUTES.PROCESS_DESIGNER.LIST}
+                            className="text-xs text-neutral-400 hover:text-white"
+                        >
+                            목록
+                        </Link>
+                    </div>
                 </div>
                 <div className="p-4 space-y-3 flex-1 overflow-auto">
                     {(Object.keys(ITEM_COLORS) as CanvasItemType[]).map((type) => (
@@ -183,6 +240,7 @@ export function ProcessDesignerPage() {
                         </div>
                     )}
                 </div>
+            </div>
             </div>
         </div>
     );

@@ -12,8 +12,11 @@ class Settings(BaseSettings):
     # Redis configuration
     REDIS_URL: str = "redis://localhost:6379"
     
-    # JWT Auth
+    # JWT Auth (07_security/auth-model.md)
     JWT_SECRET_KEY: str = "axiom-dev-secret-key-do-not-use-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_ACCESS_EXPIRE_SECONDS: int = 900  # 15 min
+    JWT_REFRESH_EXPIRE_DAYS: int = 7
     
     # LLM Defaults
     DEFAULT_LLM_PROVIDER: str = "openai"
@@ -28,7 +31,12 @@ class Settings(BaseSettings):
 
     MCP_EXECUTE_PATH: str = "/tools/execute"
     MCP_TIMEOUT_SECONDS: float = 15.0
-    
+
+    # Seed dev user (only when SEED_DEV_USER=1 and no users exist)
+    SEED_DEV_USER: bool = False
+    SEED_DEV_EMAIL: str = "admin@local.axiom"
+    SEED_DEV_PASSWORD: str = "admin"
+
     model_config = ConfigDict(env_file=".env", case_sensitive=True)
 
 settings = Settings()

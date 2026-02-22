@@ -14,7 +14,9 @@ import {
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { usePivotConfig } from '@/features/olap/store/usePivotConfig';
-import { useOlapMock } from '@/features/olap/hooks/useOlapMock';
+import { useOlapVision } from '@/features/olap/hooks/useOlapVision';
+import { DrilldownBreadcrumb } from '@/features/olap/components/DrilldownBreadcrumb';
+import { ChartSwitcher, type ChartViewType } from '@/features/olap/components/ChartSwitcher';
 import { DimensionPalette } from './components/DimensionPalette';
 import { PivotBuilder } from './components/PivotBuilder';
 import { DraggableItem } from './components/DraggableItem';
@@ -29,10 +31,11 @@ export function OlapPivotPage() {
     cubeId, setCubeId, addFieldToZone,
     clearAll
   } = usePivotConfig();
-  const { cubes, executeQuery, isQuerying, queryResult, error } = useOlapMock();
+  const { cubes, executeQuery, isQuerying, queryResult, error } = useOlapVision();
   const activeCube = cubes.find(c => c.id === cubeId) || null;
 
   const [activeItem, setActiveItem] = useState<{ item: Dimension | Measure, type: 'dimension' | 'measure' } | null>(null);
+  const [chartViewType, setChartViewType] = useState<ChartViewType>('table');
 
   // Auto-run query if config changes and valid? We use explicit "run query" button as per spec.
 
@@ -162,6 +165,10 @@ export function OlapPivotPage() {
                 )}
               </div>
 
+              <div className="mb-2">
+                <DrilldownBreadcrumb />
+              </div>
+
               {isQuerying ? (
                 <div className="absolute inset-0 bg-black/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
                   <Loader2 className="animate-spin text-indigo-500 mb-2" size={32} />
@@ -176,9 +183,17 @@ export function OlapPivotPage() {
               )}
 
               {queryResult && !error && (
-                <div className="border border-neutral-800 rounded-md overflow-hidden bg-neutral-900">
-                  <DataTable columns={tableColumns} data={tableData} />
-                </div>
+                <ChartSwitcher
+                  viewType={chartViewType}
+                  onViewChange={setChartViewType}
+                  headers={queryResult.headers}
+                  data={queryResult.data}
+                  tableComponent={
+                    <div className="border border-neutral-800 rounded-md overflow-hidden bg-neutral-900">
+                      <DataTable columns={tableColumns} data={tableData} />
+                    </div>
+                  }
+                />
               )}
 
               {!queryResult && !error && !isQuerying && (

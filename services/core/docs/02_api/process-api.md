@@ -27,6 +27,7 @@
 | POST | `/api/v1/process/rework` | 재작업 요청 | 필수 | 30s | Implemented | `services/core/app/api/process/routes.py` |
 | POST | `/api/v1/process/approve-hitl` | HITL 승인/거부 | 필수 | 30s | Implemented | `services/core/app/api/process/routes.py` |
 | GET | `/api/v1/process/definitions` | 프로세스 정의 목록 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
+| GET | `/api/v1/process/definitions/{proc_def_id}` | 프로세스 정의 단건 조회 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
 | POST | `/api/v1/process/definitions` | 프로세스 정의 생성 | 필수 | 120s | Implemented | `services/core/app/api/process/routes.py` |
 
 ---

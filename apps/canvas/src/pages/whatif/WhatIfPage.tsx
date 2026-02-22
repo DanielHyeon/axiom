@@ -1,13 +1,30 @@
 // src/pages/whatif/WhatIfPage.tsx
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { useWhatIfStore } from '@/features/whatif/store/useWhatIfStore';
+import { useWhatIfVision } from '@/features/whatif/hooks/useWhatIfVision';
+import type { ScenarioResult } from '@/features/whatif/types/whatif';
 import { ScenarioPanel } from './components/ScenarioPanel';
+import { ScenarioComparison } from './components/ScenarioComparison';
 import { TornadoChart } from './components/TornadoChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingDown, TrendingUp, Clock, Activity, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+
+function mapVisionResultToStore(visionResult: Record<string, unknown> | undefined): ScenarioResult {
+  const summary = (visionResult?.summary as Record<string, unknown>) ?? {};
+  const npv = Number(summary.npv_at_wacc) || 0;
+  const score = Number(visionResult?.feasibility_score) || 0;
+  return {
+    totalSavings: npv,
+    savingsChangePct: 0,
+    satisfactionScore: score,
+    satisfactionChangePt: 0,
+    durationYears: 0,
+    durationChangePct: 0,
+  };
+}
 
 export function WhatIfPage() {
     const { caseId } = useParams<{ caseId: string }>();
@@ -16,13 +33,27 @@ export function WhatIfPage() {
         scenarios,
         activeScenarioId,
         setActiveScenarioId,
-        setScenarios
+        setScenarios,
+        updateScenarioStatus,
+        setScenarioResult,
     } = useWhatIfStore();
+    const vision = useWhatIfVision(caseId ?? undefined);
 
-    // Initialize a mock scenario if none exists
+    // Sync Vision scenarios to store when caseId and Vision data load
     useEffect(() => {
         if (caseId) setCaseId(caseId);
-        if (scenarios.length === 0) {
+        if (caseId && vision.scenarios.length > 0) {
+            const mapped = vision.scenarios.map((v) => ({
+                id: v.id,
+                name: v.scenario_name,
+                status: v.status as 'DRAFT' | 'READY' | 'COMPUTING' | 'COMPLETED' | 'FAILED',
+                parameters: (v.parameters as Record<string, number>) ?? {},
+                result: v.result ? mapVisionResultToStore(v.result) : undefined,
+                sensitivity: [],
+            }));
+            setScenarios(mapped);
+            if (!activeScenarioId && mapped[0]) setActiveScenarioId(mapped[0].id);
+        } else if (!caseId && scenarios.length === 0) {
             const mockId = 'scen-1';
             setScenarios([{
                 id: mockId,
@@ -32,7 +63,27 @@ export function WhatIfPage() {
             }]);
             setActiveScenarioId(mockId);
         }
-    }, [caseId, scenarios.length, setCaseId, setScenarios, setActiveScenarioId]);
+    }, [caseId, vision.scenarios, scenarios.length, setCaseId, setScenarios, setActiveScenarioId, activeScenarioId]);
+
+    const handleCompare = useCallback(() => {
+        if (!caseId) return;
+        const completed = scenarios.filter((s) => s.status === 'COMPLETED');
+        const ids = completed.map((s) => s.id);
+        if (ids.length >= 2) vision.fetchCompare(ids);
+    }, [caseId, scenarios, vision.fetchCompare]);
+
+    const onRunAnalysisVision = useCallback(
+        async (scenarioId: string) => {
+            updateScenarioStatus(scenarioId, 'COMPUTING');
+            const result = await vision.runCompute(scenarioId);
+            if (result) {
+                setScenarioResult(scenarioId, mapVisionResultToStore(result), []);
+            } else {
+                updateScenarioStatus(scenarioId, 'FAILED');
+            }
+        },
+        [vision.runCompute, updateScenarioStatus, setScenarioResult]
+    );
 
     const activeScenario = scenarios.find(s => s.id === activeScenarioId);
     const isComputing = activeScenario?.status === 'COMPUTING';
@@ -43,7 +94,10 @@ export function WhatIfPage() {
 
             {/* Left Sidebar: Parameter Sliders */}
             {activeScenarioId ? (
-                <ScenarioPanel scenarioId={activeScenarioId} />
+                <ScenarioPanel
+                    scenarioId={activeScenarioId}
+                    onRunAnalysis={caseId ? onRunAnalysisVision : undefined}
+                />
             ) : (
                 <div className="w-80 border-r border-neutral-800 bg-[#161616] p-4 flex items-center justify-center">
                     <Loader2 className="animate-spin text-neutral-500" />
@@ -63,7 +117,9 @@ export function WhatIfPage() {
                         </span>
                     </div>
                     <div>
-                        <Button variant="outline" size="sm" className="h-8">시나리오 비교 (Compare)</Button>
+                        <Button variant="outline" size="sm" className="h-8" onClick={handleCompare}>
+                            시나리오 비교 (Compare)
+                        </Button>
                     </div>
                 </div>
 
@@ -82,6 +138,10 @@ export function WhatIfPage() {
                                 수십만 건의 경로 데이터를 기반으로 변경된 매개변수에 대한 결괏값을 시뮬레이션하고 있습니다.
                             </p>
                         </div>
+                    )}
+
+                    {vision.compareResult && vision.compareResult.items.length > 0 && (
+                        <ScenarioComparison items={vision.compareResult.items} />
                     )}
 
                     {!hasResult && !isComputing && (
