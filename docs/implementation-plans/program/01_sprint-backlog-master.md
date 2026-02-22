@@ -118,6 +118,29 @@
 - 통과 기준:
   - Outbox backlog SLA, DLQ 재처리 성공률, legacy 위반 탐지 지표 확인
 
+### Sprint 13 (Vision Root-Cause Fullspec Completion)
+- 목표: Critical `G-001`(Vision Root-Cause) 완전 구현
+- 범위: `S13-VIS-RCA-002`, `S13-VIS-RCA-003`, `S13-VIS-RCA-004`
+- 핵심 산출물:
+  - Synapse 실연동 병목 RCA + 오류코드 세분화(`SYNAPSE_UNAVAILABLE`, `PROCESS_MODEL_NOT_FOUND`, `INSUFFICIENT_PROCESS_DATA`)
+  - SHAP/Counterfactual 실계산 경로 + `confidence_basis` 응답
+  - Root-Cause 운영 지표(`/health/ready`, `/metrics`) 및 compose 회귀 스크립트
+- 통과 기준:
+  - `services/vision/tests/unit/test_root_cause_api.py` 회귀 통과
+  - `tools/run_compose_s13_regression.sh` 시나리오 통과
+
+### Sprint 14 (Packaging/Compose/CI Stabilization) — 완료
+- 목표: 서비스별 import/실행 안정성 표준화(`src` + editable install)
+- 범위: Synapse/Core/Vision/Weaver/Oracle 패키징 정렬, Compose 서비스 확장, CI 반영
+- 핵심 산출물:
+  - 각 서비스 `pyproject.toml` + `src/app` 브리지 + `pip install -e .` Docker 적용
+  - `docker-compose.yml`에 `neo4j-db`, `synapse-svc`, `oracle-svc` 포함
+  - CI에서 editable install 기반 테스트(`synapse-unit-ci.yml`, weaver gate 정렬)
+- 통과 기준:
+  - compose 환경에서 core/vision/weaver/synapse/oracle 헬스 응답 정상
+  - Synapse unit tests venv/compose 양쪽 통과
+- 완료: 2026-02-22 (증적: `12_sprint9-execution-tickets.md` Sprint 14 Exit Checklist 및 S14 실행 결과)
+
 ## 3. 크로스 의존성 차단 규칙
 - Oracle은 Synapse API 가용 전 독립 완료로 인정하지 않음
 - Canvas E2E 완료는 Core/Oracle/Synapse/Vision/Weaver 계약 테스트 통과가 선행

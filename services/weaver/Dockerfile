@@ -8,6 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application source
 COPY . .
+RUN pip install --no-cache-dir -e .
 
 # Expose Weaver port (8001 to prevent conflict with Vision)
 EXPOSE 8001

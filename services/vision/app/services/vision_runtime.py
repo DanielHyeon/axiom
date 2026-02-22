@@ -7,10 +7,18 @@ from typing import Any
 
 import httpx
 
+from app.services.root_cause_engine import run_counterfactual_engine, run_root_cause_engine
 from app.services.vision_state_store import VisionStateStore
 
 def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
+
+
+class VisionRuntimeError(Exception):
+    def __init__(self, code: str, message: str):
+        super().__init__(message)
+        self.code = code
+        self.message = message
 
 
 class VisionRuntime:
@@ -24,6 +32,8 @@ class VisionRuntime:
         self.etl_jobs: dict[str, dict[str, Any]] = loaded.get("etl_jobs", {})
         self.root_cause_by_case: dict[str, dict[str, Any]] = loaded.get("root_cause_by_case", {})
         self._id_seq = count(1)
+        self._root_cause_metrics: dict[str, Any] = {}
+        self._reset_root_cause_metrics()
 
     def _new_id(self, prefix: str) -> str:
         return f"{prefix}{int(datetime.now(timezone.utc).timestamp() * 1000)}-{next(self._id_seq)}"
@@ -34,6 +44,81 @@ class VisionRuntime:
         self.etl_jobs.clear()
         self.root_cause_by_case.clear()
         self.store.clear()
+        self._reset_root_cause_metrics()
+
+    def _reset_root_cause_metrics(self) -> None:
+        self._root_cause_metrics = {
+            "calls_total": 0,
+            "success_total": 0,
+            "error_total": 0,
+            "latency_ms_total": 0.0,
+            "operations": {},
+        }
+
+    def record_root_cause_call(self, operation: str, success: bool, latency_ms: float) -> None:
+        metrics = self._root_cause_metrics
+        metrics["calls_total"] += 1
+        metrics["latency_ms_total"] += max(latency_ms, 0.0)
+        if success:
+            metrics["success_total"] += 1
+        else:
+            metrics["error_total"] += 1
+
+        op = metrics["operations"].setdefault(
+            operation,
+            {"calls_total": 0, "success_total": 0, "error_total": 0, "latency_ms_total": 0.0},
+        )
+        op["calls_total"] += 1
+        op["latency_ms_total"] += max(latency_ms, 0.0)
+        if success:
+            op["success_total"] += 1
+        else:
+            op["error_total"] += 1
+
+    def get_root_cause_operational_metrics(self) -> dict[str, Any]:
+        metrics = self._root_cause_metrics
+        calls_total = int(metrics["calls_total"])
+        error_total = int(metrics["error_total"])
+        avg_latency_ms = 0.0 if calls_total == 0 else round(float(metrics["latency_ms_total"]) / calls_total, 3)
+        failure_rate = 0.0 if calls_total == 0 else round(error_total / calls_total, 6)
+        operations = {}
+        for name, item in metrics["operations"].items():
+            op_calls = int(item["calls_total"])
+            operations[name] = {
+                "calls_total": op_calls,
+                "error_total": int(item["error_total"]),
+                "avg_latency_ms": 0.0 if op_calls == 0 else round(float(item["latency_ms_total"]) / op_calls, 3),
+            }
+        return {
+            "calls_total": calls_total,
+            "success_total": int(metrics["success_total"]),
+            "error_total": error_total,
+            "failure_rate": failure_rate,
+            "avg_latency_ms": avg_latency_ms,
+            "operations": operations,
+        }
+
+    def render_root_cause_metrics_prometheus(self) -> str:
+        snapshot = self.get_root_cause_operational_metrics()
+        lines = [
+            "# HELP vision_root_cause_calls_total Total root cause API calls",
+            "# TYPE vision_root_cause_calls_total counter",
+            f"vision_root_cause_calls_total {snapshot['calls_total']}",
+            "# HELP vision_root_cause_errors_total Total root cause API errors",
+            "# TYPE vision_root_cause_errors_total counter",
+            f"vision_root_cause_errors_total {snapshot['error_total']}",
+            "# HELP vision_root_cause_failure_rate Root cause API failure rate",
+            "# TYPE vision_root_cause_failure_rate gauge",
+            f"vision_root_cause_failure_rate {snapshot['failure_rate']}",
+            "# HELP vision_root_cause_avg_latency_ms Average root cause API latency milliseconds",
+            "# TYPE vision_root_cause_avg_latency_ms gauge",
+            f"vision_root_cause_avg_latency_ms {snapshot['avg_latency_ms']}",
+        ]
+        for op_name, op in snapshot["operations"].items():
+            lines.append(f'vision_root_cause_operation_calls_total{{operation="{op_name}"}} {op["calls_total"]}')
+            lines.append(f'vision_root_cause_operation_errors_total{{operation="{op_name}"}} {op["error_total"]}')
+            lines.append(f'vision_root_cause_operation_avg_latency_ms{{operation="{op_name}"}} {op["avg_latency_ms"]}')
+        return "\n".join(lines) + "\n"
 
     def scenarios(self, case_id: str) -> dict[str, dict[str, Any]]:
         return self.what_if_by_case.setdefault(case_id, {})
@@ -229,45 +314,7 @@ class VisionRuntime:
     def create_root_cause_analysis(self, case_id: str, payload: dict[str, Any], requested_by: str) -> dict[str, Any]:
         analysis_id = self._new_id("rca-")
         now = _now()
-        max_root_causes = min(max(int(payload.get("max_root_causes", 5)), 1), 10)
-        root_cause_templates = [
-            {
-                "rank": 1,
-                "variable": "debt_ratio",
-                "variable_label": "부채비율",
-                "shap_value": 0.35,
-                "contribution_pct": 35.0,
-                "actual_value": 1.50,
-                "critical_threshold": 1.00,
-                "description": "부채비율이 임계치를 상회해 현금흐름 압박이 발생했습니다.",
-                "causal_chain": ["차입 증가", "이자비용 상승", "현금흐름 악화"],
-                "confidence": 0.89,
-            },
-            {
-                "rank": 2,
-                "variable": "ebitda",
-                "variable_label": "EBITDA",
-                "shap_value": 0.28,
-                "contribution_pct": 28.0,
-                "actual_value": 600000000,
-                "critical_threshold": 1500000000,
-                "description": "EBITDA 저하가 상환여력 부족으로 연결되었습니다.",
-                "causal_chain": ["원가 상승", "마진 축소", "현금부족"],
-                "confidence": 0.85,
-            },
-            {
-                "rank": 3,
-                "variable": "interest_rate_env",
-                "variable_label": "금리 환경",
-                "shap_value": 0.18,
-                "contribution_pct": 18.0,
-                "actual_value": 5.5,
-                "critical_threshold": None,
-                "description": "외부 금리 상승이 이자비용 증가를 유발했습니다.",
-                "causal_chain": ["기준금리 상승", "변동금리 부담 증가"],
-                "confidence": 0.78,
-            },
-        ][:max_root_causes]
+        engine_result = run_root_cause_engine(case_id=case_id, payload=payload)
         analysis = {
             "analysis_id": analysis_id,
             "case_id": case_id,
@@ -283,9 +330,11 @@ class VisionRuntime:
             "requested_by": requested_by,
             "request": payload,
             "causal_graph_version": "v2.1",
-            "overall_confidence": 0.82,
-            "root_causes": root_cause_templates,
-            "explanation": "핵심 근본원인은 부채비율 상승, EBITDA 저하, 금리환경 악화의 결합입니다.",
+            "overall_confidence": engine_result["overall_confidence"],
+            "predicted_failure_probability": engine_result["predicted_failure_probability"],
+            "confidence_basis": engine_result["confidence_basis"],
+            "root_causes": engine_result["root_causes"],
+            "explanation": engine_result["explanation"],
         }
         self.root_cause_by_case[case_id] = analysis
         self.store.upsert_root_cause_analysis(case_id, analysis)
@@ -320,6 +369,7 @@ class VisionRuntime:
             "analyzed_at": analysis["completed_at"],
             "causal_graph_version": analysis["causal_graph_version"],
             "overall_confidence": analysis["overall_confidence"],
+            "confidence_basis": analysis.get("confidence_basis"),
             "root_causes": analysis["root_causes"],
             "explanation": analysis["explanation"],
         }
@@ -330,13 +380,12 @@ class VisionRuntime:
             raise KeyError("root cause analysis not ready")
         actual_value = float(payload["actual_value"])
         counterfactual_value = float(payload["counterfactual_value"])
-        if actual_value == 0:
-            delta_pct = 0.0
-        else:
-            delta_pct = ((actual_value - counterfactual_value) / abs(actual_value)) * 100.0
-        failure_probability_before = 0.78
-        impact = max(0.0, min(0.6, delta_pct / 200.0))
-        failure_probability_after = round(max(0.01, failure_probability_before - impact), 3)
+        computed = run_counterfactual_engine(
+            analysis=analysis,
+            variable=payload["variable"],
+            actual_value=actual_value,
+            counterfactual_value=counterfactual_value,
+        )
         return {
             "analysis_id": analysis["analysis_id"],
             "case_id": case_id,
@@ -344,9 +393,10 @@ class VisionRuntime:
             "actual_value": actual_value,
             "counterfactual_value": counterfactual_value,
             "question": payload.get("question"),
-            "estimated_failure_probability_before": failure_probability_before,
-            "estimated_failure_probability_after": failure_probability_after,
-            "risk_reduction_pct": round((failure_probability_before - failure_probability_after) * 100.0, 2),
+            "estimated_failure_probability_before": computed["estimated_failure_probability_before"],
+            "estimated_failure_probability_after": computed["estimated_failure_probability_after"],
+            "risk_reduction_pct": computed["risk_reduction_pct"],
+            "confidence_basis": computed["confidence_basis"],
             "computed_at": _now(),
         }
 
@@ -391,7 +441,6 @@ class VisionRuntime:
         analysis = self.get_root_cause_analysis(case_id)
         if not analysis or analysis["status"] != "COMPLETED":
             raise KeyError("root cause analysis not ready")
-        total = sum(max(float(item.get("contribution_pct", 0.0)), 0.0) for item in analysis["root_causes"])
         contributions = []
         for item in analysis["root_causes"]:
             pct = float(item.get("contribution_pct", 0.0))
@@ -399,16 +448,21 @@ class VisionRuntime:
                 {
                     "variable": item["variable"],
                     "label": item["variable_label"],
-                    "shap_value": round(pct / 100.0, 3),
+                    "shap_value": round(float(item.get("shap_value", 0.0)), 4),
                     "feature_value": item.get("actual_value"),
-                    "direction": "positive",
+                    "direction": item.get("direction", "positive"),
                     "description": f"실패 확률 기여도 {pct:.1f}%",
                 }
             )
+        base = round(
+            max(0.01, float(analysis.get("predicted_failure_probability", 0.70)) - sum(c["shap_value"] for c in contributions)),
+            3,
+        )
         return {
             "case_id": case_id,
-            "base_value": 0.50,
-            "predicted_value": round(0.50 + min(total / 100.0, 0.49), 3),
+            "base_value": base,
+            "predicted_value": round(base + sum(c["shap_value"] for c in contributions), 3),
+            "confidence_basis": analysis.get("confidence_basis"),
             "contributions": contributions,
         }
 
@@ -487,26 +541,30 @@ class VisionRuntime:
             for idx, item in enumerate(selected, start=1)
         ]
 
-        synapse_base = os.getenv("SYNAPSE_BASE_URL", "").strip()
-        synapse_log_id = os.getenv("VISION_BOTTLENECK_LOG_ID", "log-1")
         synapse_status = "fallback"
-        if synapse_base:
-            try:
-                params = {"case_id": case_id, "log_id": synapse_log_id, "sort_by": "bottleneck_score_desc"}
-                with httpx.Client(timeout=5.0) as client:
-                    resp = client.get(f"{synapse_base.rstrip('/')}/api/v3/synapse/process-mining/bottlenecks", params=params)
-                if resp.status_code >= 500:
-                    raise RuntimeError("synapse unavailable")
-                synapse_status = "connected"
-            except Exception as exc:
-                raise RuntimeError("SYNAPSE_UNAVAILABLE") from exc
+        source_log_id = process_id
+        data_range = None
+        case_count = None
+        bottleneck_score = 0.82
+        bottleneck_name = bottleneck_activity or "승인"
+        if os.getenv("SYNAPSE_BASE_URL", "").strip():
+            synapse = self._fetch_synapse_process_context(case_id=case_id, process_id=process_id)
+            synapse_status = "connected"
+            source_log_id = synapse["source_log_id"]
+            data_range = synapse["data_range"]
+            case_count = synapse["case_count"]
+            bottleneck_score = synapse["bottleneck_score"]
+            bottleneck_name = bottleneck_activity or synapse["bottleneck_activity"] or "승인"
 
-        result = {
+        return {
             "case_id": case_id,
             "process_model_id": process_id,
-            "bottleneck_activity": bottleneck_activity or "승인",
-            "bottleneck_score": 0.82,
+            "source_log_id": source_log_id,
+            "bottleneck_activity": bottleneck_name,
+            "bottleneck_score": bottleneck_score,
             "analyzed_at": _now(),
+            "data_range": data_range,
+            "case_count": case_count,
             "overall_confidence": analysis["overall_confidence"],
             "root_causes": root_causes,
             "recommendations": [
@@ -517,7 +575,60 @@ class VisionRuntime:
             "explanation": analysis["explanation"] if include_explanation else None,
             "synapse_status": synapse_status,
         }
-        return result
+
+    def _fetch_synapse_process_context(self, case_id: str, process_id: str) -> dict[str, Any]:
+        synapse_base = os.getenv("SYNAPSE_BASE_URL", "").strip().rstrip("/")
+        log_id = os.getenv("VISION_BOTTLENECK_LOG_ID", process_id).strip() or process_id
+        params = {"case_id": case_id, "log_id": log_id, "sort_by": "bottleneck_score_desc"}
+
+        try:
+            with httpx.Client(timeout=5.0) as client:
+                bottlenecks_resp = client.get(f"{synapse_base}/api/v3/synapse/process-mining/bottlenecks", params=params)
+                variants_resp = client.get(
+                    f"{synapse_base}/api/v3/synapse/process-mining/variants",
+                    params={"case_id": case_id, "log_id": log_id, "limit": 5},
+                )
+                performance_resp = client.post(
+                    f"{synapse_base}/api/v3/synapse/process-mining/performance",
+                    json={"case_id": case_id, "log_id": log_id, "options": {"include_bottlenecks": True}},
+                )
+        except Exception as exc:  # pragma: no cover - network branch
+            raise VisionRuntimeError("SYNAPSE_UNAVAILABLE", "process mining service unavailable") from exc
+
+        for resp in (bottlenecks_resp, variants_resp, performance_resp):
+            if resp.status_code >= 500:
+                raise VisionRuntimeError("SYNAPSE_UNAVAILABLE", "process mining service unavailable")
+            if resp.status_code == 404:
+                code = ((resp.json().get("detail") or {}).get("code") if resp.headers.get("content-type", "").startswith("application/json") else None)
+                if code == "LOG_NOT_FOUND":
+                    raise VisionRuntimeError("PROCESS_MODEL_NOT_FOUND", "process model not found")
+            if resp.status_code == 400:
+                detail = resp.json().get("detail") if resp.headers.get("content-type", "").startswith("application/json") else {}
+                code = (detail or {}).get("code")
+                if code in {"INSUFFICIENT_PROCESS_DATA", "EMPTY_EVENT_LOG"}:
+                    raise VisionRuntimeError("INSUFFICIENT_PROCESS_DATA", "insufficient process data")
+
+        if bottlenecks_resp.status_code >= 400:
+            raise VisionRuntimeError("SYNAPSE_UNAVAILABLE", "process mining service unavailable")
+
+        bottlenecks_data = bottlenecks_resp.json().get("data", {})
+        bottlenecks = bottlenecks_data.get("bottlenecks") or []
+        top = bottlenecks[0] if bottlenecks else {}
+        overall = bottlenecks_data.get("overall_process") or {}
+        period = bottlenecks_data.get("analysis_period") or {}
+        case_count = int(overall.get("total_sla_violations", 0)) if overall else None
+        if performance_resp.status_code < 400:
+            performance_task = performance_resp.json().get("data", {})
+            if isinstance(performance_task, dict) and performance_task.get("task_id"):
+                # async task 기반이므로 case_count는 bottleneck payload 기반이 없으면 None 유지
+                pass
+        return {
+            "source_log_id": log_id,
+            "bottleneck_activity": top.get("activity"),
+            "bottleneck_score": float(top.get("bottleneck_score", 0.82)),
+            "data_range": {"from": period.get("start"), "to": period.get("end")} if period else None,
+            "case_count": case_count,
+        }
 
 
 vision_runtime = VisionRuntime()

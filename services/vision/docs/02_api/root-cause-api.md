@@ -2,7 +2,7 @@
 
 > **최종 수정일**: 2026-02-22
 > **상태**: Draft
-> **구현 상태 태그**: `Partial (Phase A+B API 경로 구현)`
+> **구현 상태 태그**: `Implemented (S13-VIS-RCA-002~004 반영)`
 > **Phase**: 4 (출시 후)
 > **근거**: 01_architecture/root-cause-engine.md, ADR-004
 > **최신 근거**: `docs/full-spec-gap-analysis-2026-02-22.md`
@@ -22,9 +22,10 @@
   - `services/vision/app/services/vision_runtime.py`
 - 테스트:
   - `services/vision/tests/unit/test_root_cause_api.py`
-- 잔여:
-  - Synapse 의존 병목 분석의 실데이터 연동/모델 고도화
-  - DoWhy/SHAP 기반 실엔진 계산 및 정확도 보강
+- 추가 반영(S13):
+  - `S13-VIS-RCA-002`: Synapse 병목/변형/성능 API 정규화 연동 + 오류코드 세분화
+  - `S13-VIS-RCA-003`: 결정적 Root-Cause 실계산 엔진 분리(`root_cause_engine.py`) 및 `confidence_basis` 도입
+  - `S13-VIS-RCA-004`: `/health/ready`, `/metrics`에 Root-Cause 실패율/평균지연 지표 노출
 
 ---
 
@@ -57,7 +58,11 @@
 | `GET /api/v3/synapse/process-mining/variants` | 프로세스 변형 데이터 조회 | 인과 변수 구성 시 |
 | `POST /api/v3/synapse/process-mining/performance` | 시간축 성능 분석 데이터 | 병목 시계열 분석 시 |
 
-- **Synapse 불가 시**: 502 `SYNAPSE_UNAVAILABLE` 반환. 프로세스 병목 외 재무 근본원인 분석(§1~§7)은 Synapse 독립적으로 정상 동작한다.
+- **Synapse 오류 코드**:
+  - 502 `SYNAPSE_UNAVAILABLE`
+  - 404 `PROCESS_MODEL_NOT_FOUND`
+  - 422 `INSUFFICIENT_PROCESS_DATA`
+  - 프로세스 병목 외 재무 근본원인 분석(§1~§7)은 Synapse 독립적으로 정상 동작한다.
 - **API 스펙**: Synapse [process-mining-api.md](../../../synapse/docs/02_api/process-mining-api.md) 참조.
 
 ---
@@ -164,6 +169,12 @@
   "analyzed_at": "2026-02-19T11:01:30Z",
   "causal_graph_version": "v2.1",
   "overall_confidence": 0.82,
+  "confidence_basis": {
+    "model": "deterministic-risk-engine-v1",
+    "deterministic_seed": 14321,
+    "feature_count": 5,
+    "top_k": 3
+  },
   "root_causes": [
     {
       "rank": 1,
@@ -300,20 +311,22 @@
 
 ```json
 {
+  "analysis_id": "550e8400-e29b-41d4-a716-446655440030",
   "case_id": "550e8400-e29b-41d4-a716-446655440000",
   "variable": "debt_ratio",
   "actual_value": 1.50,
   "counterfactual_value": 0.80,
-  "actual_outcome": "실패 (확률 95%)",
-  "counterfactual_outcome": "실패 회피 가능 (확률 53%)",
-  "probability_change": -0.42,
-  "probability_change_label": "실패 확률 42% 감소",
-  "explanation": "부채비율이 150%가 아닌 80%였다면, 연간 이자비용이 약 25억원 감소하여 현금흐름이 양(+)으로 유지되었을 가능성이 높습니다. 다만, EBITDA 하락이 동시에 발생했으므로 실패 회피는 확정적이지 않으며, 추가적인 비용 절감이 필요했을 것입니다.",
-  "confidence": 0.78,
-  "caveats": [
-    "반사실 분석은 다른 변수가 동일하다는 가정 하에 수행됨",
-    "실제로는 부채비율 변화가 다른 변수에도 영향을 미칠 수 있음"
-  ]
+  "question": "부채비율이 80%였다면 실패를 피할 수 있었는가?",
+  "estimated_failure_probability_before": 0.81,
+  "estimated_failure_probability_after": 0.56,
+  "risk_reduction_pct": 25.0,
+  "confidence_basis": {
+    "method": "variable-sensitivity-table-v1",
+    "variable": "debt_ratio",
+    "sensitivity": 0.312,
+    "directional_change": 0.4667
+  },
+  "computed_at": "2026-02-22T11:30:00Z"
 }
 ```
 
@@ -328,40 +341,40 @@
 ```json
 {
   "case_id": "550e8400-e29b-41d4-a716-446655440000",
-  "base_value": 0.50,
-  "base_label": "평균 실패 확률 50%",
-  "predicted_value": 0.95,
-  "predicted_label": "이 사건 실패 확률 95%",
+  "base_value": 0.12,
+  "predicted_value": 0.81,
+  "confidence_basis": {
+    "model": "deterministic-risk-engine-v1",
+    "deterministic_seed": 14321,
+    "feature_count": 5,
+    "top_k": 3
+  },
   "contributions": [
     {
       "variable": "debt_ratio",
       "label": "부채비율",
-      "shap_value": 0.18,
+      "shap_value": 0.312,
       "feature_value": 1.50,
       "direction": "positive",
-      "description": "실패 확률을 18%p 증가시킴"
+      "description": "실패 확률 기여도 38.5%"
     },
     {
       "variable": "ebitda",
       "label": "EBITDA",
-      "shap_value": 0.14,
+      "shap_value": 0.2141,
       "feature_value": 600000000,
       "direction": "positive",
-      "description": "실패 확률을 14%p 증가시킴"
+      "description": "실패 확률 기여도 26.4%"
     },
     {
       "variable": "interest_rate_env",
       "label": "금리 환경",
-      "shap_value": 0.08,
+      "shap_value": 0.1634,
       "feature_value": 5.5,
       "direction": "positive",
-      "description": "실패 확률을 8%p 증가시킴"
+      "description": "실패 확률 기여도 20.2%"
     }
-  ],
-  "visualization_data": {
-    "force_plot": { },
-    "summary_plot": { }
-  }
+  ]
 }
 ```
 
@@ -448,14 +461,12 @@ GET /api/v3/cases/{case_id}/root-cause/process-bottleneck?process_id=a1b2c3d4-..
 {
   "case_id": "550e8400-e29b-41d4-a716-446655440000",
   "process_model_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+  "source_log_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
   "bottleneck_activity": "재고확인",
   "bottleneck_score": 0.87,
   "analyzed_at": "2026-02-20T10:30:00Z",
-  "data_range": {
-    "from": "2025-12-01T00:00:00Z",
-    "to": "2026-02-20T00:00:00Z",
-    "case_count": 1247
-  },
+  "data_range": {"from": "2025-12-01T00:00:00Z", "to": "2026-02-20T00:00:00Z"},
+  "case_count": 1247,
   "overall_confidence": 0.82,
   "root_causes": [
     {
@@ -537,15 +548,32 @@ GET /api/v3/cases/{case_id}/root-cause/process-bottleneck?process_id=a1b2c3d4-..
 | 필드 | 타입 | Nullable | 설명 |
 |------|------|:--------:|------|
 | `bottleneck_activity` | string | N | 분석 대상 병목 활동명 |
+| `source_log_id` | string | N | 분석에 사용된 Synapse 로그 ID |
 | `bottleneck_score` | decimal | N | Synapse 병목 점수 (0.0~1.0) |
-| `data_range` | object | N | 분석에 사용된 데이터 범위 |
-| `data_range.case_count` | integer | N | 분석 대상 케이스 수 |
+| `data_range` | object | Y | 분석에 사용된 데이터 범위(Synapse 미연결 시 null) |
+| `case_count` | integer | Y | 분석 대상 케이스 수(Synapse 미연결 시 null) |
 | `root_causes` | array | N | 근본원인 목록 (기여도 내림차순) |
 | `root_causes[].related_activity` | string | Y | 관련 활동명. 특정 활동과 무관한 원인은 null |
 | `root_causes[].normal_range` | string | Y | 정상 범위 참고값 |
 | `recommendations` | array | N | 개선 권고사항 목록 |
 | `explanation` | string | Y | LLM 생성 서술문 (include_explanation=false면 null) |
 | `causal_graph` | object | N | 인과 그래프 시각화 데이터 (React Flow 용) |
+
+---
+
+## 9. 운영 지표(회귀 검증)
+
+- `GET /health/ready`
+  - `root_cause_operational.calls_total`
+  - `root_cause_operational.error_total`
+  - `root_cause_operational.failure_rate`
+  - `root_cause_operational.avg_latency_ms`
+- `GET /metrics` (Prometheus)
+  - `vision_root_cause_calls_total`
+  - `vision_root_cause_errors_total`
+  - `vision_root_cause_failure_rate`
+  - `vision_root_cause_avg_latency_ms`
+  - `vision_root_cause_operation_*` (`operation` label 포함)
 
 ---
 
@@ -559,7 +587,7 @@ GET /api/v3/cases/{case_id}/root-cause/process-bottleneck?process_id=a1b2c3d4-..
 | 409 | `ANALYSIS_IN_PROGRESS` | 이미 분석 중 | "분석이 이미 진행 중입니다" |
 | 504 | `ANALYSIS_TIMEOUT` | 분석 타임아웃 | "분석 시간이 초과되었습니다" |
 | 404 | `PROCESS_MODEL_NOT_FOUND` | Synapse 프로세스 모델 없음 | "프로세스 모델을 찾을 수 없습니다" |
-| 400 | `INSUFFICIENT_PROCESS_DATA` | 프로세스 데이터 부족 (케이스 50건 미만) | "프로세스 분석에 필요한 데이터가 부족합니다 (최소 50건 필요)" |
+| 422 | `INSUFFICIENT_PROCESS_DATA` | 프로세스 데이터 부족 (케이스 수/로그 데이터 부족) | "프로세스 분석에 필요한 데이터가 부족합니다" |
 | 502 | `SYNAPSE_UNAVAILABLE` | Synapse 서비스 연결 실패 | "프로세스 마이닝 서비스에 연결할 수 없습니다" |
 
 <!-- affects: 04_frontend, 05_llm/causal-explanation.md, 00_overview/system-overview.md -->

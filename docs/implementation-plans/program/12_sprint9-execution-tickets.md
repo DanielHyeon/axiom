@@ -146,3 +146,43 @@
 - 완료 기준:
   - 테스트 파일 기준 회귀 시나리오 0 fail
   - 문서-코드 상태 불일치 0건
+
+## S13 실행 결과 (2026-02-22)
+
+- [x] `S13-VIS-RCA-002` Synapse 실연동 고도화
+  - 구현: `services/vision/app/services/vision_runtime.py`, `services/vision/app/api/root_cause.py`
+  - 검증: `services/vision/tests/unit/test_root_cause_api.py` (정상/장애/데이터부족 경로)
+- [x] `S13-VIS-RCA-003` 실엔진 계산 경로 도입
+  - 구현: `services/vision/app/services/root_cause_engine.py`, `services/vision/app/services/vision_runtime.py`
+  - 검증: `services/vision/tests/unit/test_root_cause_api.py` (결정적 결과 + 케이스별 차등)
+- [x] `S13-VIS-RCA-004` 회귀/운영 검증 고정
+  - 구현: `services/vision/app/main.py` (`/health/ready`, `/metrics`), `services/vision/app/api/root_cause.py` (호출 지표 계측)
+  - 검증: `services/vision/tests/unit/test_root_cause_api.py` (운영 지표 노출/누적 검증)
+  - Compose 통합 회귀 스크립트: `tools/run_compose_s13_regression.sh` (core/vision 연계 시나리오 자동 검증)
+
+## Sprint 14 Exit Checklist (Packaging/Compose/CI Stabilization)
+
+- [x] 각 서비스 `pyproject.toml` + `src/app` 브리지 + Docker에서 `pip install -e .`
+  - 구현: `services/synapse`, `services/core`, `services/vision`, `services/weaver`, `services/oracle` — `pyproject.toml`, `src/app/__init__.py`, Dockerfile `RUN pip install -e .`
+  - 검증: venv/compose에서 `pytest tests/unit -q` (PYTHONPATH 없이) 통과
+- [x] `docker-compose.yml`에 `neo4j-db`, `synapse-svc`, `oracle-svc` 포함
+  - 구현: `docker-compose.yml` (neo4j-db healthcheck, synapse-svc, oracle-svc 환경변수/의존성)
+  - 검증: `docker compose up -d` 후 core/vision/weaver/synapse/oracle 헬스 응답 정상
+- [x] CI에서 editable install 기반 테스트
+  - 구현: `.github/workflows/synapse-unit-ci.yml` (pip install -e services/synapse, postgres/neo4j services)
+  - 구현: `.github/workflows/weaver-external-exit-gate.yml` (pip install -e services/weaver, PYTHONPATH 제거)
+  - 검증: Synapse unit 35 passed (venv + compose run)
+
+## S14 실행 결과 (2026-02-22)
+
+- [x] 패키징 정렬 (Synapse/Core/Vision/Weaver/Oracle)
+  - Synapse: `pyproject.toml`(where=src), `src/app/__init__.py` 브리지, Dockerfile `pip install -e .`, requirements.txt 오타 수정
+  - Core/Vision/Weaver/Oracle: `pyproject.toml`, `src/app/__init__.py`, Dockerfile `pip install -e .` 추가
+- [x] Compose 확장
+  - neo4j-db, synapse-svc 추가; vision-svc/core-svc에 SYNAPSE_BASE_URL; weaver NEO4J_URI → neo4j-db; oracle-svc 추가(8004)
+- [x] CI 반영
+  - synapse-unit-ci.yml 신규 (postgres/neo4j services, pip install -e, pytest tests/unit)
+  - weaver-external-exit-gate.yml 수정 (pip install -e, PYTHONPATH 제거)
+- [x] 통과 기준 충족
+  - compose 기동 후 core(8002)/vision(8000)/weaver(8001)/synapse(8003)/oracle(8004) 헬스 정상
+  - Synapse unit tests: venv 및 `docker compose run --rm synapse-svc pytest tests/unit -q` 35 passed

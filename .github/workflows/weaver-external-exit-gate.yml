@@ -51,6 +51,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r services/weaver/requirements.txt
+          pip install -e services/weaver
           pip install pytest pytest-asyncio
 
       - name: Wait For Infra
@@ -102,7 +103,7 @@ jobs:
 
       - name: Run Unit Tests
         working-directory: services/weaver
-        run: PYTHONPATH=. pytest -q tests/unit
+        run: pytest -q tests/unit
 
       - name: Run External Exit Gate
         working-directory: services/weaver

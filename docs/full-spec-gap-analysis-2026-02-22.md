@@ -22,8 +22,8 @@
 - 그러나 "full spec" 기준(실연동/운영성/아키텍처 정책 준수)으로는 주요 영역이 아직 `Partial` 또는 `Not Implemented`.
 - 가장 큰 갭은 `Self-Verification Harness`, `4-Source Lineage 강제`, `mock/in-memory 실행 경로의 실연동 전환`.
 
-### 1.4 Sprint 9 델타 (2026-02-22)
-- `G-001 Root-Cause`: `Not Implemented -> Partial` (최소 API 4종 + 테스트 추가)
+### 1.4 Sprint 9~13 델타 (2026-02-22)
+- `G-001 Root-Cause`: `Not Implemented -> Partial -> Implemented` (최소 API 4종 -> Synapse 실연동/실계산/운영지표 완료)
 - `G-004 SSOT 정합`: `Partial` 유지, 단 수동점검에서 자동검증(`tools/validate_ssot.py`)으로 개선
 - `G-009 Canvas auth`: `Partial` 유지, 단 `ProtectedRoute` 우회 제거 + refresh flow 1차 구현으로 리스크 축소
 
@@ -33,17 +33,18 @@
 
 ## 2.1 Critical
 
-### G-001. Vision Root-Cause API 설계 대비 부분구현 (Partial)
+### G-001. Vision Root-Cause API 설계 대비 구현 완료 (Implemented)
 - 설계 근거
   - `services/vision/docs/02_api/root-cause-api.md:1`
   - `services/vision/docs/02_api/root-cause-api.md:4`
   - `services/vision/docs/02_api/root-cause-api.md:48`
 - 코드 근거
-  - Root-Cause 라우터 등록: `services/vision/app/main.py:4`, `services/vision/app/main.py:11`
+  - Root-Cause 라우터 + 운영 지표 노출(`/health/ready`, `/metrics`): `services/vision/app/main.py:1`
   - 확장 API 구현(`causal-timeline`, `root-cause-impact`, `causal-graph`, `process-bottleneck`): `services/vision/app/api/root_cause.py:1`
-  - 런타임 처리 확장: `services/vision/app/services/vision_runtime.py:227`
-  - 단위 테스트 확장: `services/vision/tests/unit/test_root_cause_api.py:1`
-- 판정: Partial (API 경로는 구현 완료, Synapse 실연동/실엔진 계산 고도화는 잔여)
+  - 실계산 엔진 분리(SHAP/반사실 결정적 계산): `services/vision/app/services/root_cause_engine.py:1`
+  - 런타임 처리/에러 세분화/운영메트릭 집계: `services/vision/app/services/vision_runtime.py:1`
+  - 단위 테스트 확장(정상/장애/데이터부족/결정성/운영메트릭): `services/vision/tests/unit/test_root_cause_api.py:1`
+- 판정: Implemented (S13-VIS-RCA-002~004 완료)
 
 ### G-002. Self-Verification Harness 전사 정책 1차 구현 (Implemented)
 - 설계 근거
@@ -236,5 +237,5 @@
 
 ## 6. 요약
 - "엔드포인트 존재 여부" 관점의 미구현은 크게 줄었음.
-- "full spec(실연동/운영/정책)" 관점에서 잔여 핵심 갭은 7건(Critical 1, High 5, Medium 1)으로 축소됨.
+- "full spec(실연동/운영/정책)" 관점에서 잔여 핵심 갭은 6건(High 5, Medium 1)으로 축소됨.
 - 우선순위는 `Root-Cause + Auth + SSOT` -> `mock 제거` -> `Self-Verification/4-source/contract enforcement` 순으로 진행하는 것이 리스크 대비 효과가 가장 큼.

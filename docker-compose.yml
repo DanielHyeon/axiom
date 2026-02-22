@@ -24,7 +24,37 @@ services:
       timeout: 5s
       retries: 3
 
+  neo4j-db:
+    image: neo4j:5.18
+    environment:
+      - NEO4J_AUTH=neo4j/password
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    healthcheck:
+      test: [ "CMD-SHELL", "cypher-shell -u neo4j -p password 'RETURN 1' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+
   # Axiom Services
+  synapse-svc:
+    build:
+      context: ./services/synapse
+      dockerfile: Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - NEO4J_URI=bolt://neo4j-db:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=password
+      - SCHEMA_EDIT_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+    depends_on:
+      neo4j-db:
+        condition: service_healthy
+      postgres-db:
+        condition: service_healthy
+
   vision-svc:
     build:
       context: ./services/vision
@@ -35,11 +65,14 @@ services:
       - REDIS_URL=redis://redis-bus:6379
       - CORE_EVENT_BUS=redis
       - VISION_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - SYNAPSE_BASE_URL=http://synapse-svc:8003
     depends_on:
       redis-bus:
         condition: service_healthy
       postgres-db:
         condition: service_healthy
+      synapse-svc:
+        condition: service_started
 
   core-svc:
     build:
@@ -51,11 +84,14 @@ services:
       - DATABASE_URL=postgresql+asyncpg://arkos:arkos@postgres-db:5432/insolvency_os
       - CORE_AGENT_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
       - REDIS_URL=redis://redis-bus:6379
+      - SYNAPSE_BASE_URL=http://synapse-svc:8003
     depends_on:
       redis-bus:
         condition: service_healthy
       postgres-db:
         condition: service_healthy
+      synapse-svc:
+        condition: service_started
 
   weaver-svc:
     build:
@@ -64,10 +100,32 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - NEO4J_URI=bolt://mock-graph-node:7687
+      - NEO4J_URI=bolt://neo4j-db:7687
     depends_on:
       - vision-svc
       - core-svc
+      - neo4j-db
+
+  oracle-svc:
+    build:
+      context: ./services/oracle
+      dockerfile: Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - SYNAPSE_API_URL=http://synapse-svc:8003
+      - CORE_API_URL=http://core-svc:8002
+      - WEAVER_QUERY_API_URL=http://weaver-svc:8001/api/query
+      - QUERY_HISTORY_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      synapse-svc:
+        condition: service_started
+      core-svc:
+        condition: service_started
+      weaver-svc:
+        condition: service_started
 
   # Frontend Node
   canvas-ui:
