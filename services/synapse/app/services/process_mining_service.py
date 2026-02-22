@@ -6,6 +6,7 @@ from statistics import median
 from typing import Any
 from xml.sax.saxutils import escape
 
+from app.mining.conformance_checker import check_conformance
 from app.services.event_log_service import EventLogDomainError, event_log_service
 
 
@@ -498,55 +499,12 @@ class ProcessMiningService:
         self._set_running(task)
 
         designed = self._resolve_reference_activities(tenant_id, reference_model, events)
-        case_paths = self._build_case_paths(events)
-        conformant = 0
-        diagnostics = []
-        skipped_stats: Counter[str] = Counter()
-        unexpected_stats: Counter[str] = Counter()
-        for instance_case_id, items in case_paths.items():
-            trace = [item["activity"] for item in items]
-            missing = [activity for activity in designed if activity not in trace]
-            extra = [activity for activity in trace if activity not in designed]
-            is_fit = not missing and not extra
-            if is_fit:
-                conformant += 1
-            if include_case_diagnostics and len(diagnostics) < max_diag:
-                deviations = []
-                for activity in missing[:3]:
-                    skipped_stats[activity] += 1
-                    deviations.append(
-                        {
-                            "position": trace.index(trace[-1]) if trace else 0,
-                            "expected": activity,
-                            "actual": None,
-                            "type": "skipped_activity",
-                            "description": f"'{activity}' 활동이 누락됨",
-                        }
-                    )
-                for activity in extra[:3]:
-                    unexpected_stats[activity] += 1
-                    deviations.append(
-                        {
-                            "position": trace.index(activity),
-                            "expected": None,
-                            "actual": activity,
-                            "type": "unexpected_activity",
-                            "description": f"설계에 없는 '{activity}' 활동이 발생",
-                        }
-                    )
-                fitness = round(max(0.0, 1.0 - ((len(missing) + len(extra)) / max(1, len(trace) + len(designed)))), 3)
-                diagnostics.append(
-                    {
-                        "instance_case_id": instance_case_id,
-                        "is_fit": is_fit,
-                        "trace_fitness": fitness,
-                        "trace": trace,
-                        "deviations": deviations,
-                    }
-                )
-
-        total_cases = len(case_paths)
-        conformance_rate = conformant / max(1, total_cases)
+        checker = check_conformance(
+            events=events,
+            designed_activities=designed,
+            include_case_diagnostics=include_case_diagnostics,
+            max_diagnostics_cases=max_diag,
+        )
         result = {
             "reference_model": {
                 "type": reference_model.get("type"),
@@ -554,22 +512,19 @@ class ProcessMiningService:
                 "name": f"reference-{reference_model.get('type', 'model')}",
             },
             "metrics": {
-                "fitness": round(conformance_rate, 3),
-                "precision": round(min(1.0, conformance_rate + 0.07), 3),
-                "generalization": round(max(0.0, conformance_rate - 0.03), 3),
-                "simplicity": 0.75,
+                "fitness": checker.fitness,
+                "precision": checker.precision,
+                "generalization": checker.generalization,
+                "simplicity": checker.simplicity,
             },
             "summary": {
-                "total_cases": total_cases,
-                "conformant_cases": conformant,
-                "non_conformant_cases": max(0, total_cases - conformant),
-                "conformance_rate": round(conformance_rate, 3),
+                "total_cases": checker.total_cases,
+                "conformant_cases": checker.conformant_cases,
+                "non_conformant_cases": max(0, checker.total_cases - checker.conformant_cases),
+                "conformance_rate": checker.fitness,
             },
-            "case_diagnostics": diagnostics if include_case_diagnostics else [],
-            "deviation_statistics": {
-                "skipped_activities": dict(skipped_stats),
-                "unexpected_activities": dict(unexpected_stats),
-            },
+            "case_diagnostics": [item.model_dump() for item in checker.case_diagnostics] if include_case_diagnostics else [],
+            "deviation_statistics": checker.deviation_statistics,
             "completed_at": _utcnow(),
         }
         self._set_completed(task, result)
