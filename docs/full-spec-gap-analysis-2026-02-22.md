@@ -67,16 +67,17 @@
   - 위반 케이스 테스트: `services/synapse/tests/unit/test_extraction_api_full.py:106`
 - 판정: Implemented (1차, Synapse extraction 경로 기준)
 
-### G-004. SSOT 배포 아키텍처와 실제 Compose/K8s 불일치 지속 (Partial)
+### G-004. SSOT 배포 아키텍처 Runtime-Active 정합 구현 (Implemented)
 - 설계 근거
   - `docs/service-endpoints-ssot.md:21`
   - `docs/service-endpoints-ssot.md:25`
   - `docs/service-endpoints-ssot.md:48`
 - 코드/배포 근거
-  - Compose는 Vision/Weaver/Canvas/Redis 중심: `docker-compose.yml:16`, `docker-compose.yml:29`, `docker-compose.yml:41`
-  - K8s도 Vision/Weaver/Canvas/Redis 중심: `k8s/deployments.yaml:4`, `k8s/deployments.yaml:29`, `k8s/deployments.yaml:54`, `k8s/deployments.yaml:79`
-  - 정합 자동검증 경로 추가: `tools/validate_ssot.py:1`
-- 판정: Partial (Active/Target 이중 프로파일 운영 중이며 full-stack target은 미반영)
+  - Compose runtime-active 서비스: `docker-compose.yml:1`
+  - K8s runtime-active 서비스(Core/Postgres 포함) 반영: `k8s/deployments.yaml:1`, `k8s/services.yaml:1`
+  - SSOT 동기화 및 매핑 검증 강화: `docs/service-endpoints-ssot.md:1`, `tools/validate_ssot.py:1`
+  - 검증 결과: `python3 tools/validate_ssot.py` 통과
+- 판정: Implemented (Runtime-Active 프로파일 기준)
 
 ## 2.2 High
 
@@ -232,5 +233,5 @@
 
 ## 6. 요약
 - "엔드포인트 존재 여부" 관점의 미구현은 크게 줄었음.
-- "full spec(실연동/운영/정책)" 관점에서 잔여 핵심 갭은 8건(Critical 2, High 5, Medium 1)으로 축소됨.
+- "full spec(실연동/운영/정책)" 관점에서 잔여 핵심 갭은 7건(Critical 1, High 5, Medium 1)으로 축소됨.
 - 우선순위는 `Root-Cause + Auth + SSOT` -> `mock 제거` -> `Self-Verification/4-source/contract enforcement` 순으로 진행하는 것이 리스크 대비 효과가 가장 큼.

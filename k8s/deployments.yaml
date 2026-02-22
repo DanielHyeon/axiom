@@ -1,6 +1,60 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  name: postgres-db-deployment
+  labels:
+    app: postgres-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres-db
+  template:
+    metadata:
+      labels:
+        app: postgres-db
+    spec:
+      containers:
+      - name: postgres-db
+        image: postgres:16-alpine
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_DB
+          value: insolvency_os
+        - name: POSTGRES_USER
+          value: arkos
+        - name: POSTGRES_PASSWORD
+          value: arkos
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: core-deployment
+  labels:
+    app: core
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: core
+  template:
+    metadata:
+      labels:
+        app: core
+    spec:
+      containers:
+      - name: core
+        image: axiom/core:latest
+        ports:
+        - containerPort: 8002
+        envFrom:
+        - configMapRef:
+            name: axiom-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
   name: vision-deployment
   labels:
     app: vision

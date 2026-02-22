@@ -10,10 +10,12 @@
 
 ## 1. 현재 배포 프로파일 (Runtime-Active)
 
-현재 저장소의 Compose/K8s 매니페스트 기준으로 활성화된 서비스는 아래 4개다.
+현재 저장소의 Compose/K8s 매니페스트 기준으로 활성화된 서비스는 아래 6개다.
 
 | 서비스 | 컨테이너 포트 | 호스트 포트(로컬) | Base URL |
 |---|---:|---:|---|
+| Postgres DB | 5432 | 5432 | `postgresql://localhost:5432/insolvency_os` |
+| Core | 8002 | 8002 | `http://localhost:8002` |
 | Vision | 8000 | 8000 | `http://localhost:8000` |
 | Weaver | 8001 | 8001 | `http://localhost:8001` |
 | Canvas | 80 | 5173 | `http://localhost:5173` |
@@ -29,7 +31,7 @@ VITE_WS_URL=ws://localhost:8000/ws
 ```
 
 참고:
-- `VITE_CORE_URL`, `VITE_ORACLE_URL`, `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않는다.
+- `VITE_ORACLE_URL`, `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않는다.
 - 필요한 경우 별도 실행(로컬 개별 기동/추가 매니페스트) 후 환경 변수를 개별 주입한다.
 
 ## 3. 확장 목표 프로파일 (Runtime-Target)
@@ -38,7 +40,7 @@ VITE_WS_URL=ws://localhost:8000/ws
 
 | 서비스 | 목표 호스트 포트 | 목표 Base URL |
 |---|---:|---|
-| Core | 8000 | `http://localhost:8000/api/v1` |
+| Core | 8002 | `http://localhost:8002/api/v1` |
 | Weaver | 8001 | `http://localhost:8001/api/v1` |
 | Oracle | 8002 | `http://localhost:8002/api/v1` |
 | Synapse | 8003 | `http://localhost:8003/api/v1` |

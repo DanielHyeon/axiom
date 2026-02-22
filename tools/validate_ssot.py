@@ -13,6 +13,8 @@ K8S_SERVICES_PATH = ROOT / "k8s" / "services.yaml"
 
 
 SERVICE_NAME_MAP = {
+    "Postgres DB": {"compose": "postgres-db", "k8s": "postgres-db-service"},
+    "Core": {"compose": "core-svc", "k8s": "core-service"},
     "Vision": {"compose": "vision-svc", "k8s": "vision-service"},
     "Weaver": {"compose": "weaver-svc", "k8s": "weaver-service"},
     "Canvas": {"compose": "canvas-ui", "k8s": "canvas-service"},
@@ -142,6 +144,15 @@ def main() -> int:
             failures.append(
                 f"[k8s] service port mismatch for {service_name}: ssot_container={ports['container_port']} k8s={k8s_port}"
             )
+
+    expected_compose = {mapping["compose"] for mapping in SERVICE_NAME_MAP.values()}
+    expected_k8s = {mapping["k8s"] for mapping in SERVICE_NAME_MAP.values()}
+    for compose_name in sorted(expected_compose):
+        if compose_name not in compose:
+            failures.append(f"[compose] mapped service not found: {compose_name}")
+    for k8s_name in sorted(expected_k8s):
+        if k8s_name not in k8s:
+            failures.append(f"[k8s] mapped service not found: {k8s_name}")
 
     if failures:
         print("SSOT validation failed:")
