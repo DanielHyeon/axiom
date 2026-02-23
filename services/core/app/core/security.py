@@ -12,7 +12,8 @@ from passlib.context import CryptContext
 from app.core.config import settings
 from app.core.middleware import get_current_tenant_id
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# bcrypt 72-byte limit: truncate_error=False so passlib truncates instead of raising (Docker/env 호환)
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
 security_scheme = HTTPBearer(auto_error=False)
 
 # 역할별 기본 권한 (auth-model §2.3 요약; admin은 모든 권한으로 별도 처리)
@@ -27,12 +28,20 @@ ROLE_PERMISSIONS: dict[str, list[str]] = {
 }
 
 
+# bcrypt allows at most 72 bytes; truncate to avoid ValueError in some environments
+def _truncate_for_bcrypt(s: str, max_bytes: int = 72) -> str:
+    b = s.encode("utf-8")
+    if len(b) <= max_bytes:
+        return s
+    return b[:max_bytes].decode("utf-8", errors="ignore") or s[:1]
+
+
 def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+    return pwd_context.hash(_truncate_for_bcrypt(plain))
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    return pwd_context.verify(_truncate_for_bcrypt(plain), hashed)
 
 
 def _payload_for_access(user_id: str, email: str, tenant_id: str, role: str, permissions: list[str], case_roles: dict[str, str]) -> dict[str, Any]:
