@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useWatchRules } from '@/features/watch/hooks/useWatchRules';
@@ -26,8 +27,10 @@ export function AlertRuleEditor() {
         try {
             await addRule(payload);
             reset({ name: '', event_type: EVENT_TYPES[0], active: true });
+            toast.success('알림 규칙이 생성되었습니다.');
         } catch (err) {
             console.error('Create rule failed', err);
+            toast.error('알림 규칙 생성에 실패했습니다.');
         }
     };
 
@@ -35,8 +38,10 @@ export function AlertRuleEditor() {
         try {
             await updateRuleById(rule.rule_id, { active: !rule.active });
             if (editingId === rule.rule_id) setEditingId(null);
+            toast.success('알림 규칙이 업데이트되었습니다.');
         } catch (err) {
             console.error('Update rule failed', err);
+            toast.error('알림 규칙 업데이트에 실패했습니다.');
         }
     };
 
@@ -44,8 +49,10 @@ export function AlertRuleEditor() {
         try {
             await removeRule(ruleId);
             if (editingId === ruleId) setEditingId(null);
+            toast.success('알림 규칙이 삭제되었습니다.');
         } catch (err) {
             console.error('Delete rule failed', err);
+            toast.error('알림 규칙 삭제에 실패했습니다.');
         }
     };
 

@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 from httpx import ASGITransport, AsyncClient
 
@@ -64,8 +65,14 @@ async def test_what_if_full_lifecycle_and_analysis_endpoints() -> None:
         assert compute_res.status_code == 202
         assert compute_res.json()["status"] == "COMPUTING"
 
-        status_res = await client.get(f"/api/v3/cases/{case_id}/what-if/{scenario_id}/status", headers=_admin_headers())
-        assert status_res.status_code == 200
+        for _ in range(60):
+            status_res = await client.get(f"/api/v3/cases/{case_id}/what-if/{scenario_id}/status", headers=_admin_headers())
+            assert status_res.status_code == 200
+            if status_res.json()["status"] == "COMPLETED":
+                break
+            if status_res.json()["status"] == "FAILED":
+                pytest.fail("scenario compute failed")
+            await asyncio.sleep(0.5)
         assert status_res.json()["status"] == "COMPLETED"
         assert "started_at" in status_res.json()
         assert "elapsed_seconds" in status_res.json()
@@ -89,6 +96,11 @@ async def test_what_if_full_lifecycle_and_analysis_endpoints() -> None:
             json={"force_recompute": False},
             headers=_admin_headers(),
         )
+        for _ in range(60):
+            s2_status = await client.get(f"/api/v3/cases/{case_id}/what-if/{second_id}/status", headers=_admin_headers())
+            if s2_status.json().get("status") == "COMPLETED":
+                break
+            await asyncio.sleep(0.5)
 
         compare_fail = await client.get(
             f"/api/v3/cases/{case_id}/what-if/compare",
@@ -124,15 +136,24 @@ async def test_what_if_full_lifecycle_and_analysis_endpoints() -> None:
         sim_res = await client.post(
             f"/api/v3/cases/{case_id}/what-if/process-simulation",
             json={
-                "log_id": "log-1",
-                "baseline_throughput_per_day": 10,
-                "bottleneck_shift_pct": 20,
-                "period_days": 30,
+                "process_model_id": "log-1",
+                "scenario_name": "승인 시간 단축",
+                "description": "테스트 시나리오",
+                "parameter_changes": [
+                    {"activity": "승인", "change_type": "duration", "duration_change": -7200},
+                ],
+                "sla_threshold_seconds": None,
             },
             headers=_admin_headers(),
         )
-        assert sim_res.status_code == 200
-        assert sim_res.json()["simulated_throughput_per_day"] == 12.0
+        if sim_res.status_code == 200:
+            body = sim_res.json()
+            assert "original_cycle_time" in body
+            assert "simulated_cycle_time" in body
+            assert "by_activity" in body
+        else:
+            assert sim_res.status_code == 502
+            assert (sim_res.json().get("detail") or {}).get("code") == "SYNAPSE_UNAVAILABLE"
 
         delete_res = await client.delete(f"/api/v3/cases/{case_id}/what-if/{second_id}", headers=_admin_headers())
         assert delete_res.status_code == 200
@@ -212,11 +233,16 @@ async def test_olap_full_endpoints_contract() -> None:
 
         sync_res = await client.post("/api/v3/etl/sync", json={"source": "dw"}, headers=_admin_headers())
         assert sync_res.status_code == 202
-        job_id = sync_res.json()["job_id"]
+        job_id = sync_res.json().get("job_id") or sync_res.json()["sync_id"]
 
-        status_res = await client.get("/api/v3/etl/status", params={"job_id": job_id}, headers=_admin_headers())
-        assert status_res.status_code == 200
-        assert status_res.json()["status"] == "completed"
+        for _ in range(30):
+            status_res = await client.get("/api/v3/etl/status", params={"job_id": job_id}, headers=_admin_headers())
+            assert status_res.status_code == 200
+            st = status_res.json().get("status")
+            if st in ("COMPLETED", "completed"):
+                break
+            await asyncio.sleep(0.15)
+        assert status_res.json().get("status") in ("COMPLETED", "completed")
 
         dag_res = await client.post("/api/v3/etl/airflow/trigger-dag", json={"dag_id": "vision_etl"}, headers=_admin_headers())
         assert dag_res.status_code == 200

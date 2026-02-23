@@ -4,6 +4,8 @@ from httpx import ASGITransport, AsyncClient
 
 from app.main import app
 
+from tests.unit.conftest import make_admin_token
+
 
 @pytest_asyncio.fixture
 async def ac():
@@ -12,7 +14,7 @@ async def ac():
 
 
 def _admin_headers():
-    return {"Authorization": "mock_admin"}
+    return {"Authorization": f"Bearer {make_admin_token()}"}
 
 
 @pytest.mark.asyncio

@@ -81,7 +81,18 @@ class SynapseClient:
 
     async def reflect_cache(self, question: str, sql: str, confidence: float, datasource_id: str) -> Dict[str, Any]:
         logger.info("synapse_api_request", action="reflect_cache")
-        return {"success": True}
+        payload: Dict[str, Any] = {
+            "question": question or "",
+            "sql": sql or "",
+            "confidence": float(confidence),
+            "datasource_id": datasource_id or "",
+        }
+        return await self._request_with_retry(
+            "POST",
+            "/api/v3/synapse/graph/query-cache",
+            tenant_id="",
+            json=payload,
+        )
 
     def list_datasources(self) -> list[dict[str, Any]]:
         try:

@@ -1,3 +1,4 @@
+from neo4j.exceptions import Neo4jError
 from app.core.neo4j_client import Neo4jClient
 import structlog
 
@@ -54,7 +55,8 @@ class Neo4jBootstrap:
         for layer in layers:
             constraints.append(f"CREATE CONSTRAINT {layer.lower()}_id_unique IF NOT EXISTS FOR (n:{layer}) REQUIRE n.id IS UNIQUE")
             constraints.append(f"CREATE CONSTRAINT {layer.lower()}_case_id IF NOT EXISTS FOR (n:{layer}) REQUIRE n.case_id IS NOT NULL")
-        await self._execute_batch(constraints, "ontology_constraints")
+        # Property-existence constraints require Neo4j Enterprise; skip on Community
+        await self._execute_batch(constraints, "ontology_constraints", optional=True)
 
     async def _create_ontology_indexes(self):
         layers = ["Resource", "Process", "Measure", "KPI"]
@@ -76,12 +78,19 @@ class Neo4jBootstrap:
         async with self.neo4j.session() as session:
             await session.run("MERGE (v:SchemaVersion {service: 'synapse'}) SET v.version = $version, v.updated_at = datetime()", version=self.SCHEMA_VERSION)
 
-    async def _execute_batch(self, queries: list, batch_name: str):
+    async def _execute_batch(self, queries: list, batch_name: str, optional: bool = False):
         async with self.neo4j.session() as session:
+            ok = 0
             for query in queries:
                 try:
                     await session.run(query)
+                    ok += 1
+                except Neo4jError as e:
+                    logger.error("schema_query_failed", batch=batch_name, query=query[:100], error=str(e))
+                    if not optional:
+                        raise
                 except Exception as e:
                     logger.error("schema_query_failed", batch=batch_name, query=query[:100], error=str(e))
-                    raise
-        logger.info("schema_batch_complete", batch=batch_name, count=len(queries))
+                    if not optional:
+                        raise
+        logger.info("schema_batch_complete", batch=batch_name, count=ok, total=len(queries))

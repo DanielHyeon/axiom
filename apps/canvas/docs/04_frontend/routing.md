@@ -14,7 +14,7 @@
 
 ## 1. 전체 라우트 맵
 
-현재 구현: `BrowserRouter` + `Routes` in `App.tsx`. 최상위 `RootLayout` → 인증 구간 `ProtectedRoute` → 대시보드 `MainLayout` (사이드바·헤더).
+현재 구현: **Data Router** — `createBrowserRouter` in `src/lib/routes/routeConfig.tsx`, `App.tsx`에서 `RouterProvider`로 주입. 최상위 `RootLayout` → 인증 구간 `ProtectedRoute` → 대시보드 `MainLayout` (사이드바·헤더). (Phase G 완료)
 
 ```
 /                                    → 리다이렉트 → /dashboard
@@ -64,7 +64,7 @@
 
 ## 2. 라우트 설정 코드
 
-구현 위치: `src/App.tsx`. `createBrowserRouter` 미사용, `BrowserRouter` + `Routes` + `Route` 조합.
+구현 위치: **`src/lib/routes/routeConfig.tsx`** (라우트 정의), **`src/App.tsx`** (`RouterProvider router={router}`). `createBrowserRouter` 사용, 페이지 단위 `React.lazy` + `Suspense` 조합.
 
 - **RootLayout**: 최상위, `<Outlet />`만 렌더. Auth/Protected 자식 분기.
 - **ProtectedRoute**: 인증 검사 후 자식 렌더 또는 로그인 리다이렉트.
@@ -72,39 +72,41 @@
 
 ```typescript
 // src/App.tsx (요지)
-
 <GlobalErrorBoundary>
-  <BrowserRouter>
-    <Routes>
-      <Route element={<RootLayout />}>
-        <Route path="/login" element={<Navigate to={ROUTES.AUTH.LOGIN} replace />} />
-        <Route path={ROUTES.AUTH.LOGIN} element={<SuspensePage><LoginPage /></SuspensePage>} />
-        <Route path={ROUTES.AUTH.CALLBACK} element={<SuspensePage><CallbackPage /></SuspensePage>} />
-
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<MainLayout />}>
-            <Route index element={<Navigate to={ROUTES.DASHBOARD} replace />} />
-            <Route path="dashboard" element={<SuspensePage><CaseDashboardPage /></SuspensePage>} />
-            <Route path="cases" ... />
-            <Route path="analysis/olap" ... />
-            <Route path="analysis/nl2sql" ... />
-            <Route path="data/ontology" ... />
-            <Route path="data/datasources" ... />
-            <Route path="process-designer" ... />
-            <Route path="watch" ... />
-            <Route path="settings" element={<SuspensePage><SettingsPage /></SuspensePage>}>
-              <Route path="system" ... />
-              <Route path="logs" ... />
-              <Route path="users" ... />
-              <Route path="config" ... />
-            </Route>
-            <Route path="*" element={<NotFoundPage />} />
-          </Route>
-        </Route>
-      </Route>
-    </Routes>
-  </BrowserRouter>
+  <RouterProvider router={router} />
 </GlobalErrorBoundary>
+
+// src/lib/routes/routeConfig.tsx (요지)
+export const router = createBrowserRouter([
+  { path: '/', element: <RootLayout />,
+    children: [
+      { path: 'auth/login', element: <SuspensePage><LoginPage /></SuspensePage> },
+      { path: 'auth/callback', element: <SuspensePage><CallbackPage /></SuspensePage> },
+      { element: <ProtectedRoute />,
+        children: [
+          { element: <MainLayout />,
+            children: [
+              { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+              { path: 'dashboard', element: <SuspensePage><CaseDashboardPage /></SuspensePage> },
+              { path: 'cases', children: [...] },
+              { path: 'analysis/olap', ... }, { path: 'analysis/nl2sql', ... },
+              { path: 'data/ontology', ... }, { path: 'data/datasources', ... },
+              { path: 'process-designer', children: [...] },
+              { path: 'watch', ... },
+              { path: 'settings', element: <SuspensePage><SettingsPage /></SuspensePage>,
+                children: [
+                  { index: true, element: <Navigate to={ROUTES.SETTINGS_SYSTEM} replace /> },
+                  { path: 'system', ... }, { path: 'logs', ... }, { path: 'users', ... }, { path: 'config', ... }
+                ]
+              },
+              { path: '*', element: <NotFoundPage /> },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+]);
 ```
 
 페이지 컴포넌트는 `React.lazy()`로 로드하며, `SuspensePage`(Suspense + fallback)로 감쌌다. 라우트 상수는 `lib/routes/routes.ts`의 `ROUTES` 사용.

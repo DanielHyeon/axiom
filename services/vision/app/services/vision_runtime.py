@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from itertools import count
 import os
@@ -7,6 +9,23 @@ from typing import Any
 
 import httpx
 
+# ETL: 허용 MV 목록 (etl-pipeline.md 기준). REFRESH MATERIALIZED VIEW CONCURRENTLY만 허용.
+ALLOWED_MV_VIEWS = frozenset({
+    "mv_business_fact",
+    "mv_cashflow_fact",
+    "dim_case_type",
+    "dim_org",
+    "dim_time",
+    "dim_stakeholder_type",
+})
+
+from app.engines.scenario_solver import (
+    SolverConvergenceError,
+    SolverInfeasibleError,
+    SolverTimeoutError,
+    solve_scenario_result,
+    SOLVER_TIMEOUT_SECONDS,
+)
 from app.services.root_cause_engine import run_counterfactual_engine, run_root_cause_engine
 from app.services.vision_state_store import VisionStateStore
 
@@ -19,6 +38,10 @@ class VisionRuntimeError(Exception):
         super().__init__(message)
         self.code = code
         self.message = message
+
+
+class PivotQueryTimeoutError(Exception):
+    """피벗 쿼리 30초 타임아웃 (504 QUERY_TIMEOUT)."""
 
 
 class VisionRuntime:
@@ -170,105 +193,79 @@ class VisionRuntime:
         self.store.delete_scenario(case_id, scenario_id)
         return True
 
-    def compute_scenario(self, case_id: str, scenario_id: str) -> dict[str, Any]:
+    def set_scenario_computing(self, case_id: str, scenario_id: str) -> None:
+        """비동기 compute 시작 시 상태만 COMPUTING으로 설정 (202 반환 후 백그라운드에서 솔버 실행)."""
         scenario = self.get_scenario(case_id, scenario_id)
         if not scenario:
             raise KeyError("scenario not found")
-        started_at = _now()
         scenario["status"] = "COMPUTING"
-        scenario["started_at"] = started_at
-        params = scenario.get("parameters", {})
-        interest_rate = float(params.get("interest_rate", 4.0))
-        growth_rate = float(params.get("ebitda_growth_rate", 5.0))
-        period = int(params.get("execution_period_years", 10))
-        operating_cost_ratio = float(params.get("operating_cost_ratio", 65.0))
-        base_total = 5_000_000_000.0
-        npv = base_total * (1 + growth_rate / 100.0) * (1 - interest_rate / 100.0)
-        feasibility = max(0.0, min(1.0, (growth_rate / 100.0) - (interest_rate / 200.0) + 0.5))
+        scenario["started_at"] = _now()
+        scenario["failure_reason"] = None
+        self.store.upsert_scenario(case_id, scenario_id, scenario)
 
-        by_year = []
-        yearly = base_total / max(1, period)
-        cumulative_allocation = 0.0
-        for year_idx in range(1, period + 1):
-            allocation_amount = yearly * 0.52
-            cumulative_allocation += allocation_amount
-            net_cash = yearly * ((1 + growth_rate / 100.0) - (operating_cost_ratio / 100.0))
-            by_year.append(
-                {
-                    "year": year_idx,
-                    "revenue": round(yearly * (1 + growth_rate / 100.0), 2),
-                    "ebitda": round(yearly * max(0.01, (100 - operating_cost_ratio) / 100.0), 2),
-                    "interest_expense": round(yearly * (interest_rate / 100.0), 2),
-                    "operating_cost": round(yearly * (operating_cost_ratio / 100.0), 2),
-                    "net_cashflow": round(net_cash, 2),
-                    "allocation_amount": round(allocation_amount, 2),
-                    "cumulative_allocation": round(cumulative_allocation, 2),
-                    "cash_balance": round(max(0.0, net_cash * 0.45), 2),
-                    "dscr": round(max(0.1, 1.0 + growth_rate / 25.0 - interest_rate / 40.0), 2),
-                }
-            )
+    def set_scenario_failed(self, case_id: str, scenario_id: str, reason: str) -> None:
+        """솔버 타임아웃/실패 시 상태를 FAILED로 설정."""
+        scenario = self.get_scenario(case_id, scenario_id)
+        if not scenario:
+            return
+        scenario["status"] = "FAILED"
+        scenario["completed_at"] = _now()
+        scenario["failure_reason"] = reason
+        scenario["result"] = None
+        self.store.upsert_scenario(case_id, scenario_id, scenario)
 
-        total_obligations = round(base_total, 2)
-        by_stakeholder = [
-            {
-                "class": "priority",
-                "total_obligation": round(total_obligations * 0.05, 2),
-                "allocation_amount": round(total_obligations * 0.05, 2),
-                "allocation_rate": 1.0,
-            },
-            {
-                "class": "secured",
-                "total_obligation": round(total_obligations * 0.30, 2),
-                "allocation_amount": round(total_obligations * 0.24, 2),
-                "allocation_rate": 0.8,
-            },
-            {
-                "class": "unsecured",
-                "total_obligation": round(total_obligations * 0.65, 2),
-                "allocation_amount": round(total_obligations * 0.2275, 2),
-                "allocation_rate": 0.35,
-            },
-        ]
-        constraints = scenario.get("constraints") or []
-        constraints_met = [
-            {
-                "constraint_type": c.get("constraint_type", "custom"),
-                "description": c.get("description", "custom constraint"),
-                "actual_value": c.get("value", 0.0),
-                "threshold": c.get("value", 0.0),
-                "satisfied": True,
-            }
-            for c in constraints
-        ]
-
+    def run_scenario_solver(self, case_id: str, scenario_id: str) -> dict[str, Any] | None:
+        """
+        scipy 기반 솔버 실행 (동기). 스레드에서 호출하며 60초 타임아웃 적용.
+        성공 시 결과 저장 후 반환, 실패 시 FAILED 저장 후 예외 또는 None.
+        """
+        scenario = self.get_scenario(case_id, scenario_id)
+        if not scenario:
+            raise KeyError("scenario not found")
         completed_at = _now()
-        result = {
-            "scenario_id": scenario_id,
-            "scenario_name": scenario["scenario_name"],
-            "status": "COMPLETED",
-            "computed_at": completed_at,
-            "solver_iterations": 100 + period,
-            "is_feasible": feasibility >= 0.4,
-            "feasibility_score": round(feasibility, 3),
-            "summary": {
-                "total_allocation": round(base_total * 0.52, 2),
-                "total_obligations": total_obligations,
-                "overall_allocation_rate": 0.52,
-                "execution_period_years": period,
-                "npv_at_wacc": round(npv, 2),
-            },
-            "by_year": by_year,
-            "by_stakeholder_class": by_stakeholder,
-            "constraints_met": constraints_met,
-        }
+        params = scenario.get("parameters", {})
+        constraints = scenario.get("constraints") or []
+        try:
+            with ThreadPoolExecutor(max_workers=1) as ex:
+                future = ex.submit(
+                    solve_scenario_result,
+                    scenario_id,
+                    scenario["scenario_name"],
+                    params,
+                    constraints,
+                    completed_at,
+                )
+                result = future.result(timeout=SOLVER_TIMEOUT_SECONDS + 5)
+        except SolverInfeasibleError as e:
+            self.set_scenario_failed(case_id, scenario_id, str(e))
+            return None
+        except SolverConvergenceError as e:
+            self.set_scenario_failed(case_id, scenario_id, str(e))
+            return None
+        except SolverTimeoutError as e:
+            self.set_scenario_failed(case_id, scenario_id, str(e))
+            return None
+        except Exception as e:
+            self.set_scenario_failed(case_id, scenario_id, str(e))
+            return None
         scenario["status"] = "COMPLETED"
         scenario["result"] = result
         scenario["updated_at"] = completed_at
         scenario["completed_at"] = completed_at
+        scenario["failure_reason"] = None
         self.store.upsert_scenario(case_id, scenario_id, scenario)
         return result
 
-    def create_cube(self, cube_name: str, fact_table: str, dimensions: list[str], measures: list[str]) -> dict[str, Any]:
+    def create_cube(
+        self,
+        cube_name: str,
+        fact_table: str,
+        dimensions: list[str],
+        measures: list[str],
+        dimension_details: list[dict[str, Any]] | None = None,
+        measure_details: list[dict[str, Any]] | None = None,
+        **extra: Any,
+    ) -> dict[str, Any]:
         now = _now()
         cube = {
             "name": cube_name,
@@ -280,16 +277,69 @@ class VisionRuntime:
             "last_refreshed": now,
             "row_count": 1000,
         }
+        if dimension_details is not None:
+            cube["dimension_details"] = dimension_details
+        if measure_details is not None:
+            cube["measure_details"] = measure_details
+        cube.update(extra)
         self.cubes[cube_name] = cube
         self.store.upsert_cube(cube_name, cube)
         return cube
 
+    def execute_pivot_query(
+        self,
+        sql: str,
+        params: list[Any],
+        timeout_seconds: int = 30,
+    ) -> tuple[list[dict[str, Any]], list[str]]:
+        """
+        피벗용 읽기 전용 SQL 실행. (rows, column_names) 반환.
+        PostgreSQL이 아니거나 실패 시 빈 결과. 타임아웃 시 PivotQueryTimeoutError.
+        """
+        if not getattr(self.store, "_is_postgres", False):
+            return [], []
+        try:
+            import psycopg2
+            from psycopg2.extras import RealDictCursor
+        except ImportError:
+            return [], []
+        try:
+            conn = psycopg2.connect(self.store.database_url)
+            conn.set_session(readonly=True)
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("SET statement_timeout = %s", (timeout_seconds * 1000,))
+            cur.execute(sql, params)
+            rows = cur.fetchall()
+            column_names = list(rows[0].keys()) if rows else []
+            conn.close()
+            return [dict(r) for r in rows], column_names
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "timeout" in err_msg or "canceled" in err_msg or "statement_timeout" in err_msg:
+                raise PivotQueryTimeoutError() from e
+            return [], []
+
+    def _is_etl_running(self) -> bool:
+        """진행 중인 ETL 작업이 있으면 True (RUNNING 상태)."""
+        return any(
+            j.get("status") == "RUNNING"
+            for j in self.etl_jobs.values()
+        )
+
     def queue_etl_job(self, payload: dict[str, Any]) -> dict[str, Any]:
+        sync_type = str(payload.get("sync_type") or "full").lower()
+        target_views = list(payload.get("target_views") or ["mv_business_fact"])
+        force = bool(payload.get("force"))
+        if not force and self._is_etl_running():
+            raise VisionRuntimeError("ETL_IN_PROGRESS", "데이터 동기화가 진행 중입니다")
+
         job_id = self._new_id("etl-")
         now = _now()
         job = {
             "job_id": job_id,
             "status": "queued",
+            "sync_type": sync_type,
+            "target_views": target_views,
             "created_at": now,
             "updated_at": now,
             "payload": payload,
@@ -305,11 +355,72 @@ class VisionRuntime:
         job = self.get_etl_job(job_id)
         if not job:
             return None
-        if job["status"] == "queued":
+        if job.get("status") == "queued":
             job["status"] = "completed"
             job["updated_at"] = _now()
             self.store.upsert_etl_job(job_id, job)
         return job
+
+    def run_etl_refresh_sync(self, job_id: str) -> None:
+        """
+        ETL 동기화 실행 (동기). 백그라운드 스레드에서 호출.
+        target_views에 대해 REFRESH MATERIALIZED VIEW [CONCURRENTLY] 실행 후
+        job 상태를 RUNNING → COMPLETED/FAILED, duration_seconds, rows_affected 반영.
+        """
+        job = self.get_etl_job(job_id)
+        if not job or job.get("status") != "queued":
+            return
+        now = _now()
+        job["status"] = "RUNNING"
+        job["started_at"] = now
+        job["updated_at"] = now
+        self.store.upsert_etl_job(job_id, job)
+
+        target_views = job.get("target_views") or ["mv_business_fact"]
+        views_to_refresh = [v for v in target_views if v in ALLOWED_MV_VIEWS]
+        start_monotonic = time.monotonic()
+        rows_affected: dict[str, int] = {}
+
+        try:
+            if self.store._is_postgres and views_to_refresh:
+                psycopg2, _ = self.store._import_psycopg2()
+                conn = psycopg2.connect(self.store.database_url)
+                try:
+                    # REFRESH MATERIALIZED VIEW CONCURRENTLY cannot run inside a transaction block
+                    conn.autocommit = True
+                    cur = conn.cursor()
+                    for view in views_to_refresh:
+                        try:
+                            cur.execute(f'REFRESH MATERIALIZED VIEW CONCURRENTLY "{view}"')
+                        except Exception:
+                            try:
+                                cur.execute(f'REFRESH MATERIALIZED VIEW "{view}"')
+                            except Exception as e:
+                                raise e
+                    # pg_stat_user_tables에서 대략 행 수 (갱신 후)
+                    cur.execute(
+                        "SELECT relname, n_live_tup FROM pg_stat_user_tables WHERE relname = ANY(%s)",
+                        (list(views_to_refresh),),
+                    )
+                    for row in cur.fetchall():
+                        rows_affected[str(row[0])] = int(row[1] or 0)
+                finally:
+                    conn.close()
+            # SQLite 또는 views_to_refresh 빈 경우: no-op
+            elapsed = time.monotonic() - start_monotonic
+            job["status"] = "COMPLETED"
+            job["completed_at"] = _now()
+            job["duration_seconds"] = round(elapsed, 2)
+            job["rows_affected"] = rows_affected
+            job["updated_at"] = _now()
+        except Exception as e:
+            job["status"] = "FAILED"
+            job["completed_at"] = _now()
+            job["duration_seconds"] = round(time.monotonic() - start_monotonic, 2)
+            job["error_message"] = str(e)
+            job["rows_affected"] = {}
+            job["updated_at"] = _now()
+        self.store.upsert_etl_job(job_id, job)
 
     def create_root_cause_analysis(self, case_id: str, payload: dict[str, Any], requested_by: str) -> dict[str, Any]:
         analysis_id = self._new_id("rca-")
@@ -574,6 +685,120 @@ class VisionRuntime:
             ],
             "explanation": analysis["explanation"] if include_explanation else None,
             "synapse_status": synapse_status,
+        }
+
+    def run_process_simulation(
+        self,
+        case_id: str,
+        process_model_id: str,
+        scenario_name: str,
+        description: str | None,
+        parameter_changes: list[dict[str, Any]],
+        sla_threshold_seconds: int | None,
+    ) -> dict[str, Any]:
+        """
+        프로세스 시간축 시뮬레이션 (what-if-api.md §10).
+        Synapse performance/bottlenecks/variants 호출 후 parameter_changes 적용,
+        original_cycle_time, simulated_cycle_time, by_activity, bottleneck_shift 반환.
+        Synapse 연결 실패 시 VisionRuntimeError(SYNAPSE_UNAVAILABLE) 발생.
+        """
+        if not os.getenv("SYNAPSE_BASE_URL", "").strip():
+            raise VisionRuntimeError("SYNAPSE_UNAVAILABLE", "process mining service unavailable")
+        try:
+            ctx = self._fetch_synapse_process_context(case_id, process_model_id)
+        except VisionRuntimeError:
+            raise
+        except Exception as exc:
+            raise VisionRuntimeError("SYNAPSE_UNAVAILABLE", "process mining service unavailable") from exc
+
+        # 활동별 기본 소요시간 (Synapse에서 상세 미제공 시 사용)
+        default_activities = ["접수", "승인", "검토", "배송"]
+        default_durations = [3600, 14400, 28800, 86400]
+        activity_durations = dict(zip(default_activities, default_durations))
+        bottlenecks_data = {}
+        try:
+            synapse_base = os.getenv("SYNAPSE_BASE_URL", "").strip().rstrip("/")
+            log_id = process_model_id
+            with httpx.Client(timeout=10.0) as client:
+                bn_resp = client.get(
+                    f"{synapse_base}/api/v3/synapse/process-mining/bottlenecks",
+                    params={"case_id": case_id, "log_id": log_id},
+                )
+                if bn_resp.status_code == 200:
+                    bottlenecks_data = bn_resp.json().get("data", {}) or {}
+                    for b in bottlenecks_data.get("bottlenecks") or []:
+                        act = b.get("activity")
+                        if act and "avg_duration" in b:
+                            activity_durations[act] = int(b.get("avg_duration", 86400))
+        except Exception:
+            pass
+
+        original_bottleneck = ctx.get("bottleneck_activity") or (default_activities[1] if len(default_activities) > 1 else "승인")
+        simulated_durations = dict(activity_durations)
+        for ch in parameter_changes:
+            act = (ch.get("activity") or "").strip()
+            if not act or act not in simulated_durations:
+                continue
+            change_type = (ch.get("change_type") or "").strip().lower()
+            if change_type == "duration" and ch.get("duration_change") is not None:
+                new_d = simulated_durations[act] + int(ch["duration_change"])
+                simulated_durations[act] = max(0, new_d)
+            elif change_type == "resource" and ch.get("resource_change") is not None:
+                factor = max(0.1, float(ch["resource_change"]))
+                simulated_durations[act] = max(0, int(simulated_durations[act] / factor))
+            # routing: 변형 빈도 변경은 여기서 스텁 처리
+
+        original_cycle_time = sum(activity_durations.values())
+        simulated_cycle_time = sum(simulated_durations.values())
+        cycle_time_change = simulated_cycle_time - original_cycle_time
+        cycle_time_change_pct = round((cycle_time_change / max(original_cycle_time, 1)) * 100, 1) if original_cycle_time else 0
+        hours = abs(cycle_time_change) // 3600
+        cycle_time_change_label = f"전체 주기 시간 {hours}시간 {'단축' if cycle_time_change <= 0 else '증가'}"
+
+        by_activity = []
+        for name in activity_durations:
+            orig = activity_durations[name]
+            sim = simulated_durations.get(name, orig)
+            by_activity.append({
+                "activity": name,
+                "original_duration": orig,
+                "simulated_duration": sim,
+                "change": sim - orig,
+                "is_on_critical_path": True,
+            })
+
+        simulated_bottleneck = max(simulated_durations, key=lambda a: simulated_durations[a])
+        bottleneck_shift = None
+        if original_bottleneck != simulated_bottleneck:
+            bottleneck_shift = {
+                "original": original_bottleneck,
+                "new": simulated_bottleneck,
+                "description": f"병목이 '{original_bottleneck}'에서 '{simulated_bottleneck}'(으)로 이동.",
+            }
+
+        sla_orig = 0.15
+        sla_sim = max(0.0, sla_orig + (cycle_time_change_pct / 100.0) * 0.5)
+        affected_kpis = [
+            {"kpi": "avg_cycle_time", "kpi_label": "평균 주기 시간", "original": original_cycle_time, "simulated": simulated_cycle_time, "change_pct": cycle_time_change_pct},
+            {"kpi": "sla_violation_rate", "kpi_label": "SLA 위반율", "original": sla_orig, "simulated": round(sla_sim, 2), "change_pct": round((sla_sim - sla_orig) / max(sla_orig, 0.01) * 100, 1)},
+        ]
+        critical_path = {"original": list(activity_durations), "simulated": list(simulated_durations)}
+
+        simulation_id = self._new_id("sim-")
+        return {
+            "simulation_id": simulation_id,
+            "process_model_id": process_model_id,
+            "scenario_name": scenario_name,
+            "computed_at": _now(),
+            "original_cycle_time": original_cycle_time,
+            "simulated_cycle_time": simulated_cycle_time,
+            "cycle_time_change": cycle_time_change,
+            "cycle_time_change_pct": cycle_time_change_pct,
+            "cycle_time_change_label": cycle_time_change_label,
+            "bottleneck_shift": bottleneck_shift,
+            "affected_kpis": affected_kpis,
+            "by_activity": by_activity,
+            "critical_path": critical_path,
         }
 
     def _fetch_synapse_process_context(self, case_id: str, process_id: str) -> dict[str, Any]:

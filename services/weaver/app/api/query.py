@@ -261,6 +261,8 @@ async def create_materialized_table(
     key = f"{_tenant_id(user)}:{payload.database}.{payload.table_name}"
     if key in weaver_runtime.materialized_tables and not payload.replace_if_exists:
         raise HTTPException(status_code=409, detail="TABLE_ALREADY_EXISTS")
+    row_count = 0
+    columns: list[str] = []
     if settings.external_mode:
         create_sql = f"CREATE TABLE {payload.database}.{payload.table_name} AS {sql}"
         if payload.replace_if_exists:
@@ -269,12 +271,33 @@ async def create_materialized_table(
             await mindsdb_client.execute_query(create_sql, payload.database)
         except MindsDBUnavailableError as exc:
             raise _svc_error("mindsdb", "MINDSDB_UNAVAILABLE", exc) from exc
-    row_count = 25
+        try:
+            count_result = await mindsdb_client.execute_query(
+                f"SELECT COUNT(*) AS c FROM {payload.database}.{payload.table_name}",
+                payload.database,
+            )
+            data = count_result.get("data") or []
+            if data and len(data) > 0:
+                val = data[0][0] if isinstance(data[0], (list, tuple)) else data[0]
+                row_count = int(val) if isinstance(val, (int, float)) else 0
+        except Exception:
+            row_count = 0
+        try:
+            col_result = await mindsdb_client.execute_query(
+                f"SELECT * FROM {payload.database}.{payload.table_name} LIMIT 1",
+                payload.database,
+            )
+            cols = col_result.get("columns") or []
+            columns = [str(c) for c in cols] if cols else []
+        except Exception:
+            columns = []
+    if not columns:
+        columns = ["id", "name"]
     table = {
         "table_name": payload.table_name,
         "database": payload.database,
         "row_count": row_count,
-        "columns": ["id", "name"],
+        "columns": columns,
         "created_at": _now(),
         "sql": sql,
     }

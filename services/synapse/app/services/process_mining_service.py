@@ -8,6 +8,7 @@ from xml.sax.saxutils import escape
 
 from app.mining.conformance_checker import check_conformance
 from app.services.event_log_service import EventLogDomainError, event_log_service
+from app.services.mining_store import get_mining_store
 
 
 class ProcessMiningDomainError(Exception):
@@ -53,26 +54,53 @@ class MiningTask:
     error: dict[str, Any] | None = None
 
 
+def _task_from_row(row: dict[str, Any]) -> MiningTask:
+    """Store 행 또는 dict를 MiningTask로 변환."""
+    return MiningTask(
+        tenant_id=row["tenant_id"],
+        task_id=row["task_id"],
+        task_type=row["task_type"],
+        case_id=row["case_id"],
+        log_id=row["log_id"],
+        status=row["status"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        requested_by=row.get("requested_by"),
+        started_at=row.get("started_at"),
+        completed_at=row.get("completed_at"),
+        result_id=row.get("result_id"),
+        error=row.get("error"),
+    )
+
+
 class ProcessMiningService:
     def __init__(self) -> None:
         self._tasks: dict[str, MiningTask] = {}
         self._results: dict[str, dict[str, Any]] = {}
         self._models: dict[str, dict[str, Any]] = {}
         self._max_active_tasks = 8
+        self._store = get_mining_store()
 
     def clear(self) -> None:
         self._tasks.clear()
         self._results.clear()
         self._models.clear()
+        if self._store:
+            self._store.clear()
 
     def _require_rate_limit(self) -> None:
-        active = sum(1 for item in self._tasks.values() if item.status in {"queued", "running"})
+        if self._store:
+            active = self._store.count_active_tasks()
+        else:
+            active = sum(1 for item in self._tasks.values() if item.status in {"queued", "running"})
         if active >= self._max_active_tasks:
             raise ProcessMiningDomainError(429, "MINING_RATE_LIMIT", "too many running tasks")
 
     def _create_task(self, tenant_id: str, task_type: str, case_id: str, log_id: str, requested_by: str | None) -> MiningTask:
         task_id = f"task-pm-{uuid.uuid4()}"
         now = _utcnow()
+        if self._store:
+            self._store.insert_task(task_id, tenant_id, task_type, case_id, log_id, requested_by)
         task = MiningTask(
             tenant_id=tenant_id,
             task_id=task_id,
@@ -89,6 +117,8 @@ class ProcessMiningService:
 
     def _set_running(self, task: MiningTask) -> None:
         now = _utcnow()
+        if self._store:
+            self._store.set_running(task.task_id)
         task.status = "running"
         task.started_at = now
         task.updated_at = now
@@ -96,6 +126,8 @@ class ProcessMiningService:
     def _set_completed(self, task: MiningTask, result_payload: dict[str, Any]) -> dict[str, Any]:
         now = _utcnow()
         result_id = f"pm-result-{uuid.uuid4()}"
+        if self._store:
+            self._store.set_completed(task.task_id, result_id, result_payload)
         task.status = "completed"
         task.result_id = result_id
         task.completed_at = now
@@ -113,18 +145,29 @@ class ProcessMiningService:
         return data
 
     def _task_or_404(self, tenant_id: str, task_id: str) -> MiningTask:
+        if self._store:
+            row = self._store.get_task(tenant_id, task_id)
+            if row:
+                return _task_from_row(row)
         task = self._tasks.get(task_id)
         if not task or task.tenant_id != tenant_id:
             raise ProcessMiningDomainError(404, "TASK_NOT_FOUND", "task not found")
         return task
 
     def _result_or_404(self, tenant_id: str, result_or_task_id: str) -> dict[str, Any]:
+        if self._store:
+            result = self._store.get_result(tenant_id, result_or_task_id)
+            if result:
+                return result
+            result = self._store.get_result_by_task_id(tenant_id, result_or_task_id)
+            if result:
+                return result
+            raise ProcessMiningDomainError(404, "RESULT_NOT_FOUND", "result not found")
         result = self._results.get(result_or_task_id)
         if result:
             if self._tasks[result["task_id"]].tenant_id != tenant_id:
                 raise ProcessMiningDomainError(404, "RESULT_NOT_FOUND", "result not found")
             return result
-
         task = self._tasks.get(result_or_task_id)
         if task and task.tenant_id == tenant_id and task.result_id:
             return self._results[task.result_id]
@@ -438,17 +481,34 @@ class ProcessMiningService:
         task = self._create_task(tenant_id, "discover", case_id, log_id, requested_by)
         self._set_running(task)
 
-        case_paths = self._build_case_paths(events)
-        model = self._summarize_model(case_paths)
+        model = None
+        bpmn_xml_from_pm4py = None
+        try:
+            from app.mining.process_discovery import events_to_pm4py_dataframe, run_discover_sync
+            df = events_to_pm4py_dataframe(events)
+            if len(df) > 0:
+                model, bpmn_xml_from_pm4py = run_discover_sync(
+                    algorithm=algorithm,
+                    df=df,
+                    noise_threshold=noise_threshold,
+                    dependency_threshold=dependency_threshold,
+                    generate_bpmn=generate_bpmn,
+                )
+        except Exception:
+            model = None
+            bpmn_xml_from_pm4py = None
+        if model is None:
+            case_paths = self._build_case_paths(events)
+            model = self._summarize_model(case_paths)
         result = {
             "algorithm": algorithm,
             "parameters": {"noise_threshold": noise_threshold, "dependency_threshold": dependency_threshold},
             "model": model,
-            "neo4j_nodes_created": len(model["activities"]) if store_in_neo4j else 0,
+            "neo4j_nodes_created": len(model.get("activities", [])) if store_in_neo4j else 0,
             "completed_at": _utcnow(),
         }
         if generate_bpmn:
-            result["bpmn_xml"] = self._build_bpmn_xml(model)
+            result["bpmn_xml"] = bpmn_xml_from_pm4py or self._build_bpmn_xml(model)
         if calculate_statistics:
             result["statistics"] = self._event_statistics(events)
         self._set_completed(task, result)
@@ -473,7 +533,11 @@ class ProcessMiningService:
             result = self._result_or_404(tenant_id, model_id)
             return result["result"]["model"].get("activities", [])
 
-        model = self._models.get(model_id)
+        model = None
+        if self._store:
+            model = self._store.get_model(tenant_id, model_id)
+        if model is None:
+            model = self._models.get(model_id)
         if model:
             return model.get("activities", [])
 
@@ -638,7 +702,11 @@ class ProcessMiningService:
             xml = result_data.get("bpmn_xml") or self._build_bpmn_xml(result_data.get("model", {}))
         else:
             model_id = str(source.get("model_id") or "")
-            model = self._models.get(model_id)
+            model = None
+            if self._store:
+                model = self._store.get_model(tenant_id, model_id)
+            if model is None:
+                model = self._models.get(model_id)
             if not model:
                 raise ProcessMiningDomainError(404, "MODEL_NOT_FOUND", "model not found")
             xml = model["xml"]
@@ -677,21 +745,25 @@ class ProcessMiningService:
         if not activities:
             activities = ["주문 접수", "결제 확인", "출하 지시", "배송 완료"]
         xml = content if model_type == "bpmn" else self._build_bpmn_xml({"activities": activities}, process_name=model_id)
-        self._models[model_id] = {
-            "model_id": model_id,
-            "tenant_id": tenant_id,
-            "case_id": case_id,
-            "type": model_type,
-            "xml": xml,
-            "activities": activities,
-            "created_by": requested_by,
-            "imported_at": _utcnow(),
-        }
+        imported_at = _utcnow()
+        if self._store:
+            self._store.insert_model(model_id, tenant_id, case_id, model_type, xml, activities, requested_by)
+        else:
+            self._models[model_id] = {
+                "model_id": model_id,
+                "tenant_id": tenant_id,
+                "case_id": case_id,
+                "type": model_type,
+                "xml": xml,
+                "activities": activities,
+                "created_by": requested_by,
+                "imported_at": imported_at,
+            }
         return {
             "model_id": model_id,
             "status": "imported",
             "source_result_id": payload.get("result_id"),
-            "imported_at": self._models[model_id]["imported_at"],
+            "imported_at": imported_at,
         }
 
 

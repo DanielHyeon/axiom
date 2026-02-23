@@ -9,6 +9,7 @@ from statistics import median
 from typing import Any
 
 from app.services.event_log_db import EventLogDbError, fetch_database_rows
+from app.services.event_log_store import get_event_log_store
 
 
 MAX_FILE_SIZE_BYTES = 500 * 1024 * 1024
@@ -67,16 +68,47 @@ class EventLogRecord:
     source_columns: set[str] = field(default_factory=set)
 
 
+def _record_from_store_row(row: dict[str, Any]) -> EventLogRecord:
+    """Store 행을 EventLogRecord로 변환."""
+    sc = row.get("source_columns")
+    source_columns = set(sc) if isinstance(sc, list) else (sc if isinstance(sc, set) else set())
+    return EventLogRecord(
+        log_id=row["log_id"],
+        tenant_id=row["tenant_id"],
+        case_id=row["case_id"],
+        name=row["name"],
+        source_type=row["source_type"],
+        status=row["status"],
+        created_at=row["created_at"],
+        updated_at=row["updated_at"],
+        source_config=row.get("source_config") or {},
+        options=row.get("options") or {},
+        filter=row.get("filter") or {},
+        column_mapping=row.get("column_mapping") or {},
+        raw_events=row.get("raw_events") or [],
+        events=row.get("events") or [],
+        source_columns=source_columns,
+    )
+
+
 class EventLogService:
     def __init__(self) -> None:
         self._logs: dict[str, EventLogRecord] = {}
         self._task_to_log: dict[str, str] = {}
+        self._store = get_event_log_store()
 
     def clear(self) -> None:
         self._logs.clear()
         self._task_to_log.clear()
+        if self._store:
+            self._store.clear()
 
     def _get_log(self, tenant_id: str, log_id: str) -> EventLogRecord:
+        if self._store:
+            row = self._store.get(tenant_id, log_id)
+            if not row:
+                raise EventLogDomainError(404, "LOG_NOT_FOUND", "event log not found")
+            return _record_from_store_row(row)
         record = self._logs.get(log_id)
         if not record or record.tenant_id != tenant_id:
             raise EventLogDomainError(404, "LOG_NOT_FOUND", "event log not found")
@@ -327,8 +359,25 @@ class EventLogService:
             events=events,
             source_columns=source_columns,
         )
-        self._logs[log_id] = record
-        self._task_to_log[task_id] = log_id
+        if self._store:
+            self._store.insert(
+                log_id=log_id,
+                tenant_id=tenant_id,
+                case_id=str(case_id),
+                name=str(name),
+                source_type=source_type,
+                status="completed",
+                source_config=payload.get("source_config", {}),
+                options=payload.get("options", {}),
+                filter_config=payload.get("filter", {}),
+                column_mapping=mapping,
+                source_columns=list(source_columns),
+                raw_events=raw_events,
+                events=events,
+            )
+        else:
+            self._logs[log_id] = record
+            self._task_to_log[task_id] = log_id
 
         return {
             "task_id": task_id,
@@ -345,10 +394,12 @@ class EventLogService:
         safe_limit = min(max(limit, 1), 100)
         safe_offset = max(offset, 0)
 
+        if self._store:
+            logs, total = self._store.list_by_case(tenant_id, case_id, safe_limit, safe_offset)
+            return {"logs": logs, "total": total}
         all_logs = [item for item in self._logs.values() if item.tenant_id == tenant_id and item.case_id == case_id]
         all_logs.sort(key=lambda item: item.created_at, reverse=True)
         sliced = all_logs[safe_offset : safe_offset + safe_limit]
-
         logs = []
         for item in sliced:
             stats = self._compute_statistics(item.events)
@@ -395,7 +446,10 @@ class EventLogService:
 
     def delete_log(self, tenant_id: str, log_id: str) -> dict[str, Any]:
         self._get_log(tenant_id, log_id)
-        del self._logs[log_id]
+        if self._store:
+            self._store.delete(tenant_id, log_id)
+        else:
+            del self._logs[log_id]
         return {"log_id": log_id, "deleted": True}
 
     def get_statistics(self, tenant_id: str, log_id: str) -> dict[str, Any]:
@@ -432,15 +486,26 @@ class EventLogService:
     def update_column_mapping(self, tenant_id: str, log_id: str, mapping: dict[str, Any]) -> dict[str, Any]:
         record = self._get_log(tenant_id, log_id)
         self._validate_mapping(record.source_columns, mapping)
-        record.column_mapping = mapping
         try:
-            record.events = self._build_canonical_events(record.raw_events, mapping)
+            new_events = self._build_canonical_events(record.raw_events, mapping)
         except EventLogDomainError:
             raise
         except Exception as exc:
             raise EventLogDomainError(422, "INGESTION_FAILED", "failed to reprocess after mapping update") from exc
-        record.updated_at = _now_iso()
-        stats = self._compute_statistics(record.events)["overview"]
+        if self._store:
+            self._store.update_events_and_mapping(
+                tenant_id=tenant_id,
+                log_id=log_id,
+                column_mapping=mapping,
+                raw_events=record.raw_events,
+                events=new_events,
+                source_columns=list(record.source_columns),
+            )
+        else:
+            record.column_mapping = mapping
+            record.events = new_events
+            record.updated_at = _now_iso()
+        stats = self._compute_statistics(new_events)["overview"]
         return {
             "log_id": record.log_id,
             "column_mapping": mapping,
@@ -469,17 +534,29 @@ class EventLogService:
             self._raise_db_error(err)
         self._validate_mapping(source_columns, record.column_mapping)
         events = self._build_canonical_events(raw_events, record.column_mapping)
-        record.raw_events = raw_events
-        record.events = events
-        record.source_columns = source_columns
-        record.updated_at = _now_iso()
+        updated_at = _now_iso()
+        if self._store:
+            self._store.update_events_and_mapping(
+                tenant_id=tenant_id,
+                log_id=log_id,
+                column_mapping=record.column_mapping,
+                raw_events=raw_events,
+                events=events,
+                source_columns=list(source_columns),
+            )
+        else:
+            record.raw_events = raw_events
+            record.events = events
+            record.source_columns = source_columns
+            record.updated_at = updated_at
         task_id = f"task-refresh-{uuid.uuid4()}"
-        self._task_to_log[task_id] = record.log_id
+        if not self._store:
+            self._task_to_log[task_id] = record.log_id
         return {
             "task_id": task_id,
             "log_id": record.log_id,
             "status": "ingesting",
-            "created_at": record.updated_at,
+            "created_at": updated_at,
         }
 
     def export_bpm(self, tenant_id: str, payload: dict[str, Any]) -> dict[str, Any]:
@@ -530,8 +607,25 @@ class EventLogService:
             events=canonical,
             source_columns=source_columns,
         )
-        self._logs[log_id] = record
-        self._task_to_log[task_id] = log_id
+        if self._store:
+            self._store.insert(
+                log_id=log_id,
+                tenant_id=tenant_id,
+                case_id=str(case_id),
+                name=str(name),
+                source_type="bpm_export",
+                status="completed",
+                source_config={},
+                options={},
+                filter_config={},
+                column_mapping=mapping,
+                source_columns=list(source_columns),
+                raw_events=normalized_rows,
+                events=canonical,
+            )
+        else:
+            self._logs[log_id] = record
+            self._task_to_log[task_id] = log_id
         return {
             "task_id": task_id,
             "log_id": log_id,

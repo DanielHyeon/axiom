@@ -42,6 +42,13 @@ EVENT_CONTRACTS: dict[str, EventContract] = {
         payload_schema="core/workitem_self_verification_failed/v1",
         idempotency_key_rule="event_type:aggregate_id",
     ),
+    "SAGA_COMPENSATION_COMPLETED": EventContract(
+        event_name="SAGA_COMPENSATION_COMPLETED",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/saga_compensation_completed/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
 }
 
 

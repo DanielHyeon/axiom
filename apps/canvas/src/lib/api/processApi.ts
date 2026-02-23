@@ -184,6 +184,47 @@ export async function getWorkitems(
   return response as GetWorkitemsResponse;
 }
 
+/** Tenant-scoped workitem list (dashboard: ApprovalQueue, MyWorkitems). */
+export interface WorkitemListItem {
+  workitem_id: string;
+  proc_inst_id: string | null;
+  activity_name: string | null;
+  activity_type: string | null;
+  assignee_id: string | null;
+  agent_mode: string | null;
+  status: string;
+  created_at: string | null;
+}
+
+export interface ListWorkitemsResponse {
+  items: WorkitemListItem[];
+  total: number;
+}
+
+export interface ListWorkitemsParams {
+  status?: string;
+  assignee?: 'me' | string;
+  limit?: number;
+  offset?: number;
+}
+
+export async function listWorkitems(
+  params?: ListWorkitemsParams
+): Promise<ListWorkitemsResponse> {
+  const response = await coreApi.get<{ items: WorkitemListItem[]; total: number }>(
+    '/api/v1/process/workitems',
+    {
+      params: {
+        status: params?.status,
+        assignee: params?.assignee,
+        limit: params?.limit ?? 20,
+        offset: params?.offset ?? 0,
+      },
+    }
+  );
+  return (response as ListWorkitemsResponse) ?? { items: [], total: 0 };
+}
+
 export interface ProcessFeedbackResponse {
   workitem_id: string;
   feedback: unknown;

@@ -15,7 +15,9 @@ async def ac():
 
 
 def setup_function():
+    event_log_service._store = None
     event_log_service.clear()
+    process_mining_service._store = None
     process_mining_service.clear()
 
 def test_amount_normalization():

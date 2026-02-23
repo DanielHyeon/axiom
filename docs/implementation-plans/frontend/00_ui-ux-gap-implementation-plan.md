@@ -75,6 +75,8 @@
 | **wsManager / sseManager 표준화** | Watch·SSE 등 이벤트 스트림을 공통 매니저로 추상화 여부 검토. | Low |
 | **설계 문서 동기화** | routing.md, directory-structure.md 등을 현재 코드 구조에 맞게 수정. | Low |
 
+**다음 단계 (UI/UX 심화)**: 사용자 시나리오별 불편점·디자인 일관성·로딩/에러/빈 상태·접근성·반응형을 Phase별로 다루는 [01_ui-ux-improvement-plan.md](01_ui-ux-improvement-plan.md)를 참조한다.
+
 ### 6.2 비적용 범위 (별도 계획 권장)
 
 | 항목 | 비고 |

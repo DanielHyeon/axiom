@@ -11,6 +11,7 @@
 4. 08/99: 운영 준비 + ADR 추적
 
 ## 3. 문서 목록
+- **docs/implementation-plans/synapse/01_synapse-fullspec-implementation-plan.md** — Full 스펙 구현 계획 (코드 기준 갭·Phase S1–S7)
 - docs/implementation-plans/synapse/00_overview-implementation-plan.md
 - docs/implementation-plans/synapse/01_architecture-implementation-plan.md
 - docs/implementation-plans/synapse/02_api-implementation-plan.md

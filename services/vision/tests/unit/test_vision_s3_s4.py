@@ -1,7 +1,7 @@
 import pytest
-from app.core.etl_pipeline import etl_pipeline
-from app.core.scenario_solver import scenario_solver
-from app.core.nl_to_pivot import nl_to_pivot
+from app.engines.etl_pipeline import etl_pipeline
+from app.engines.scenario_solver import scenario_solver
+from app.engines.nl_to_pivot import nl_to_pivot
 
 @pytest.mark.asyncio
 async def test_etl_pipeline_extracts_and_caches():

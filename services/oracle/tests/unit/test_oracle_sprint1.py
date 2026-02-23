@@ -24,13 +24,13 @@ def test_sql_guard_blocks_destructive_keywords():
     assert sql_guard.guard_sql("UPDATE foo SET bar=1").status == "REJECT"
 
 @pytest.mark.asyncio
-async def test_text2sql_ask_endpoint(ac: AsyncClient):
+async def test_text2sql_ask_endpoint(ac: AsyncClient, auth_headers: dict):
     payload = {
         "question": "Show me everything",
         "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000}
     }
-    res = await ac.post("/text2sql/ask", json=payload)
+    res = await ac.post("/text2sql/ask", json=payload, headers=auth_headers)
     assert res.status_code == 200
     data = res.json()
     assert data["success"] == True

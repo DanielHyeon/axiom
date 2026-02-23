@@ -107,7 +107,7 @@
 # Presentation Layer - app/api/
 app/api/auth/          # JWT 인증 엔드포인트 (login, refresh) — Implemented
 app/api/users/         # 사용자 API (GET /me) — Implemented
-app/api/cases/         # 케이스 CRUD — 미구현 (Gateway가 Synapse 등으로 프록시)
+app/api/cases/         # 케이스 목록·활동·문서 리뷰 — Implemented (GET /cases, /cases/activities, POST .../review)
 app/api/process/       # BPM 실행 API — Implemented
 app/api/agents/        # 에이전트 관리 API — Implemented
 app/api/watches/       # Watch 구독/알림 API — Implemented
@@ -123,8 +123,8 @@ app/bpm/models.py                 # BPM Pydantic 모델 — Implemented
 app/bpm/engine.py                 # BPM 엔진 코어 (process_service 위임) — Implemented
 app/bpm/saga.py                   # Saga 보상 트랜잭션 (스텁) — Implemented
 app/bpm/extractor.py              # BPMN 추출기 (PDF→BPMN/DMN) — 예정
-app/orchestrator/langgraph_flow.py # 9노드 LangGraph 오케스트레이터 (스텁) — 구조 생성
-app/orchestrator/agent_loop.py     # 에이전트 지식 학습 루프 (스텁) — 구조 생성
+app/orchestrator/langgraph_flow.py # 10노드 LangGraph 오케스트레이터 — Implemented (Oracle/Synapse 연동, SSOT §2.1)
+app/orchestrator/agent_loop.py     # 에이전트 지식 학습 루프 — Implemented (graph.ainvoke, HITL)
 
 # Infrastructure Layer - app/core/, app/workers/
 app/core/config.py                 # 환경 설정

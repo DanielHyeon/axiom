@@ -4,14 +4,28 @@ from collections import defaultdict
 from pydantic import BaseModel
 from typing import Any
 
+
+class Deviation(BaseModel):
+    """API 명세: process-mining-api §3.2 case_diagnostics.deviations."""
+    position: int
+    expected: str
+    actual: str
+    type: str  # "skipped_activity" | "unexpected_activity"
+    description: str
+
+
 class CaseDiagnostic(BaseModel):
+    """API 명세: trace·deviations 포함."""
     instance_case_id: str
     is_fit: bool
     trace_fitness: float
-    missing_tokens: int
-    remaining_tokens: int
-    consumed_tokens: int
-    produced_tokens: int
+    trace: list[str]
+    deviations: list[Deviation]
+    # 하위 호환용 (선택 노출 시 사용)
+    missing_tokens: int = 0
+    remaining_tokens: int = 0
+    consumed_tokens: int = 0
+    produced_tokens: int = 0
 
 class ConformanceResult(BaseModel):
     fitness: float
@@ -54,10 +68,11 @@ def check_conformance(
 
     for case_id, trace_events in grouped.items():
         trace = [item["activity"] for item in trace_events]
-        missing = [activity for activity in designed_activities if activity not in trace]
-        extra = [activity for activity in trace if activity not in designed_activities]
+        missing = [a for a in designed_activities if a not in trace]
+        extra_set = {a for a in trace if a not in designed_activities}
+        extra_list = [a for a in trace if a not in designed_activities]
         missing_tokens = len(missing)
-        remaining_tokens = len(extra)
+        remaining_tokens = len(extra_list)
         consumed_tokens = len(trace)
         produced_tokens = len(designed_activities)
         denom = max(1, consumed_tokens + produced_tokens)
@@ -67,16 +82,41 @@ def check_conformance(
             conformant_cases += 1
         for activity in missing:
             skipped_stats[activity] += 1
-        for activity in extra:
+        for activity in extra_list:
             unexpected_stats[activity] += 1
         fitness_sum += trace_fitness
 
+        deviations: list[Deviation] = []
+        for idx, activity in enumerate(designed_activities):
+            if activity not in trace:
+                deviations.append(
+                    Deviation(
+                        position=idx,
+                        expected=activity,
+                        actual="(누락)",
+                        type="skipped_activity",
+                        description=f"'{activity}' 활동이 누락됨",
+                    )
+                )
+        for idx, activity in enumerate(trace):
+            if activity in extra_set:
+                deviations.append(
+                    Deviation(
+                        position=idx,
+                        expected="(설계에 없음)",
+                        actual=activity,
+                        type="unexpected_activity",
+                        description=f"설계에 없는 '{activity}' 활동이 발생",
+                    )
+                )
         if include_case_diagnostics and len(diagnostics) < max_diagnostics_cases:
             diagnostics.append(
                 CaseDiagnostic(
                     instance_case_id=case_id,
                     is_fit=is_fit,
                     trace_fitness=round(trace_fitness, 3),
+                    trace=trace,
+                    deviations=deviations,
                     missing_tokens=missing_tokens,
                     remaining_tokens=remaining_tokens,
                     consumed_tokens=consumed_tokens,

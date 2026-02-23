@@ -27,13 +27,13 @@ async def test_health_readiness_probe(ac: AsyncClient):
     assert "llm" in data["checks"]
 
 @pytest.mark.asyncio
-async def test_feedback_submit_endpoint(ac: AsyncClient):
+async def test_feedback_submit_endpoint(ac: AsyncClient, auth_headers: dict):
     ask_payload = {
         "question": "Show me everything",
         "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
-    ask_res = await ac.post("/text2sql/ask", json=ask_payload)
+    ask_res = await ac.post("/text2sql/ask", json=ask_payload, headers=auth_headers)
     query_id = ask_res.json()["data"]["metadata"]["query_id"]
     response = await ac.post(
         "/feedback",
@@ -42,6 +42,7 @@ async def test_feedback_submit_endpoint(ac: AsyncClient):
             "rating": "positive",
             "comment": "Nice output",
         },
+        headers=auth_headers,
     )
     assert response.status_code == 200
     assert response.json() == {"success": True}

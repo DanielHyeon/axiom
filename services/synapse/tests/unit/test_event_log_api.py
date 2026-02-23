@@ -17,6 +17,7 @@ async def ac():
 
 
 def setup_function():
+    event_log_service._store = None  # 인메모리 모드로 테스트 (DB 불필요)
     event_log_service.clear()
 
 

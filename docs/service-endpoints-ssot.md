@@ -18,6 +18,7 @@
 | Core | 8002 | 8002 | `http://localhost:8002` |
 | Vision | 8000 | 8000 | `http://localhost:8000` |
 | Weaver | 8001 | 8001 | `http://localhost:8001` |
+| Oracle | 8004 | 8004 | `http://localhost:8004` |
 | Canvas | 80 | 5173 | `http://localhost:5173` |
 | Redis Bus | 6379 | 6379 | `redis://localhost:6379` |
 
@@ -28,11 +29,21 @@
 VITE_VISION_URL=http://localhost:8000
 VITE_WEAVER_URL=http://localhost:8001
 VITE_WS_URL=ws://localhost:8000/ws
+VITE_ORACLE_URL=http://localhost:8004
 ```
 
 참고:
-- `VITE_ORACLE_URL`, `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않는다.
-- 필요한 경우 별도 실행(로컬 개별 기동/추가 매니페스트) 후 환경 변수를 개별 주입한다.
+- Oracle NL2SQL은 Canvas에서 `oracleApi`(createApiClient)로 호출하며, 기본 Base URL은 `http://localhost:8004`(SSOT §1).
+- `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않을 수 있으며, 필요 시 개별 주입.
+
+## 2.1 Oracle / Synapse 실제 API 경로 (구현 기준)
+
+Core 오케스트레이터 등에서 호출 시 아래 경로·계약을 사용한다.
+
+| 서비스 | 메서드 | 실제 경로 | 비고 |
+|--------|--------|-----------|------|
+| Oracle | POST | `{ORACLE_BASE_URL}/text2sql/ask` | `/api/v1/ask` 아님. body: `question`, `datasource_id`, `options`(include_viz 등) |
+| Synapse | POST | `{SYNAPSE_BASE_URL}/api/v3/synapse/process-mining/discover` | `/analyze` 없음. discover/conformance/bottlenecks/performance 등 사용. discover는 payload에 `case_id`, `log_id` 필수 |
 
 ## 3. 확장 목표 프로파일 (Runtime-Target)
 

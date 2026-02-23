@@ -12,6 +12,7 @@
 4. 08/99: 운영 준비 + ADR 추적
 
 ## 3. 문서 목록
+- **docs/implementation-plans/weaver/01_weaver-fullspec-implementation-plan.md** — Full 스펙 갭·Phase 계획 (코드 기준, Core 계획서와 동일 형식)
 - docs/implementation-plans/weaver/00_overview-implementation-plan.md
 - docs/implementation-plans/weaver/01_architecture-implementation-plan.md
 - docs/implementation-plans/weaver/02_api-implementation-plan.md

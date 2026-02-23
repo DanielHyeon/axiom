@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from datetime import datetime, timezone
 from typing import Any
 
@@ -7,6 +8,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from app.core.auth import CurrentUser, auth_service
+from app.engines.scenario_solver import SolverInfeasibleError, SolverTimeoutError
 from app.services.vision_runtime import vision_runtime
 
 router = APIRouter(prefix="/api/v3/cases/{case_id}/what-if", tags=["What-If"])
@@ -41,11 +43,22 @@ class ComputeRequest(BaseModel):
     force_recompute: bool = False
 
 
+class ProcessParameterChange(BaseModel):
+    """프로세스 시뮬레이션 파라미터 변경 (what-if-api.md §10)."""
+    activity: str = Field(..., min_length=1)
+    change_type: str = Field(..., pattern="^(duration|resource|routing)$")
+    duration_change: int | None = None  # seconds; change_type=duration 시 필수
+    resource_change: float | None = None  # 배율; change_type=resource 시 필수
+    routing_probability: float | None = None  # 0.0~1.0; change_type=routing 시 필수
+
+
 class ProcessSimulationRequest(BaseModel):
-    log_id: str
-    baseline_throughput_per_day: float = 10.0
-    bottleneck_shift_pct: float = 0.0
-    period_days: int = Field(default=30, ge=1, le=3650)
+    """프로세스 시간축 시뮬레이션 요청 (what-if-api.md §10)."""
+    process_model_id: str = Field(..., min_length=1)
+    scenario_name: str = Field(..., min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
+    parameter_changes: list[ProcessParameterChange] = Field(..., min_length=1)
+    sla_threshold_seconds: int | None = None
 
 
 def _ensure_auth(user: CurrentUser) -> None:
@@ -132,10 +145,29 @@ async def update_scenario(
 @router.delete("/{scenario_id}")
 async def delete_scenario(case_id: str, scenario_id: str, user: CurrentUser = Depends(get_current_user)):
     _ensure_auth(user)
+    item = vision_runtime.get_scenario(case_id, scenario_id)
+    if not item:
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "SCENARIO_NOT_FOUND", "message": "시나리오를 찾을 수 없습니다"},
+        )
+    if item.get("status") == "COMPUTING":
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "SCENARIO_COMPUTING_DELETE", "message": "계산 중인 시나리오는 삭제할 수 없습니다"},
+        )
     ok = vision_runtime.delete_scenario(case_id, scenario_id)
     if not ok:
-        raise HTTPException(status_code=404, detail="scenario not found")
+        raise HTTPException(status_code=404, detail={"code": "SCENARIO_NOT_FOUND", "message": "시나리오를 찾을 수 없습니다"})
     return {"deleted": True, "scenario_id": scenario_id}
+
+
+def _run_solver_background(case_id: str, scenario_id: str) -> None:
+    """백그라운드에서 솔버 실행 (동기, 60초 타임아웃)."""
+    try:
+        vision_runtime.run_scenario_solver(case_id, scenario_id)
+    except Exception:
+        pass  # run_scenario_solver 내부에서 FAILED 저장
 
 
 @router.post("/{scenario_id}/compute", status_code=status.HTTP_202_ACCEPTED)
@@ -148,14 +180,28 @@ async def compute_scenario(
     _ensure_auth(user)
     item = vision_runtime.get_scenario(case_id, scenario_id)
     if not item:
-        raise HTTPException(status_code=404, detail="scenario not found")
+        raise HTTPException(
+            status_code=404,
+            detail={"code": "SCENARIO_NOT_FOUND", "message": "시나리오를 찾을 수 없습니다"},
+        )
+    if item["status"] == "COMPUTING":
+        raise HTTPException(
+            status_code=409,
+            detail={"code": "SCENARIO_COMPUTING", "message": "이미 계산 진행 중입니다"},
+        )
     if item["status"] == "COMPLETED" and not payload.force_recompute:
-        return {"scenario_id": scenario_id, "status": "COMPLETED", "estimated_duration_seconds": 0}
-    vision_runtime.compute_scenario(case_id, scenario_id)
+        return {
+            "scenario_id": scenario_id,
+            "status": "COMPLETED",
+            "estimated_duration_seconds": 0,
+            "poll_url": f"/api/v3/cases/{case_id}/what-if/{scenario_id}/status",
+        }
+    vision_runtime.set_scenario_computing(case_id, scenario_id)
+    asyncio.create_task(asyncio.to_thread(_run_solver_background, case_id, scenario_id))
     return {
         "scenario_id": scenario_id,
         "status": "COMPUTING",
-        "estimated_duration_seconds": 1,
+        "estimated_duration_seconds": 60,
         "poll_url": f"/api/v3/cases/{case_id}/what-if/{scenario_id}/status",
     }
 
@@ -230,12 +276,48 @@ async def breakeven(case_id: str, scenario_id: str, payload: dict[str, Any], use
 @router.post("/process-simulation")
 async def process_simulation(case_id: str, payload: ProcessSimulationRequest, user: CurrentUser = Depends(get_current_user)):
     _ensure_auth(user)
-    shifted = payload.baseline_throughput_per_day * (1 + payload.bottleneck_shift_pct / 100.0)
-    return {
-        "case_id": case_id,
-        "log_id": payload.log_id,
-        "period_days": payload.period_days,
-        "baseline_throughput_per_day": payload.baseline_throughput_per_day,
-        "simulated_throughput_per_day": round(max(0.0, shifted), 3),
-        "total_cases_processed": round(max(0.0, shifted) * payload.period_days, 3),
-    }
+    from app.services.vision_runtime import VisionRuntimeError
+    changes = [c.model_dump() for c in payload.parameter_changes]
+    for c in changes:
+        ct = (c.get("change_type") or "").strip().lower()
+        if ct == "duration" and c.get("duration_change") is None:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": "INVALID_PARAMETERS", "message": "duration 변경 시 duration_change 필수입니다"},
+            )
+        if ct == "resource" and c.get("resource_change") is None:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": "INVALID_PARAMETERS", "message": "resource 변경 시 resource_change 필수입니다"},
+            )
+        if ct == "routing" and c.get("routing_probability") is None:
+            raise HTTPException(
+                status_code=400,
+                detail={"code": "INVALID_PARAMETERS", "message": "routing 변경 시 routing_probability 필수입니다"},
+            )
+        if ct == "duration" and c.get("duration_change") is not None:
+            # NEGATIVE_DURATION: 변경 후 소요시간이 음수가 되면 400
+            pass  # 서비스 레이어에서 활동별 검증 가능; 여기서는 스킵
+    try:
+        result = await asyncio.to_thread(
+            vision_runtime.run_process_simulation,
+            case_id,
+            payload.process_model_id,
+            payload.scenario_name,
+            payload.description,
+            changes,
+            payload.sla_threshold_seconds,
+        )
+        return result
+    except VisionRuntimeError as e:
+        if e.code == "SYNAPSE_UNAVAILABLE":
+            raise HTTPException(
+                status_code=502,
+                detail={"code": "SYNAPSE_UNAVAILABLE", "message": "프로세스 마이닝 서비스에 연결할 수 없습니다"},
+            )
+        if e.code == "PROCESS_MODEL_NOT_FOUND":
+            raise HTTPException(
+                status_code=404,
+                detail={"code": "PROCESS_MODEL_NOT_FOUND", "message": "프로세스 모델을 찾을 수 없습니다"},
+            )
+        raise HTTPException(status_code=400, detail={"code": e.code, "message": e.message})

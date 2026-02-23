@@ -25,6 +25,15 @@ def test_conformance_checker_scores_and_diagnostics():
     assert 0.0 <= result.fitness <= 1.0
     assert len(result.case_diagnostics) == 2
     assert "skipped_activities" in result.deviation_statistics
+    # API 명세: case_diagnostics에 trace, deviations 포함
+    d0 = result.case_diagnostics[0]
+    assert hasattr(d0, "trace") and isinstance(d0.trace, list)
+    assert hasattr(d0, "deviations") and isinstance(d0.deviations, list)
+    assert d0.instance_case_id in ("c1", "c2")
+    non_fit = next((d for d in result.case_diagnostics if not d.is_fit), None)
+    if non_fit:
+        assert len(non_fit.deviations) > 0
+        assert non_fit.deviations[0].type in ("skipped_activity", "unexpected_activity")
 
 
 def test_conformance_checker_validates_inputs():

@@ -29,6 +29,18 @@ class Settings(BaseSettings):
     SYNAPSE_BASE_URL: str = "http://localhost:8002"
     SYNAPSE_SERVICE_TOKEN: str = "local-oracle-token"
 
+    # Oracle (NL2SQL·query_data 노드 연동). 실제 경로: /text2sql/ask
+    ORACLE_BASE_URL: str = "http://localhost:8004"
+    ORACLE_DEFAULT_DATASOURCE_ID: str = "default"
+
+    # MinIO (event_log worker, OCR/generate workers)
+    MINIO_ENDPOINT: str = "localhost:9000"
+    MINIO_ACCESS_KEY: str = "minioadmin"
+    MINIO_SECRET_KEY: str = "minioadmin"
+    MINIO_BUCKET: str = "axiom-documents"
+    MINIO_SECURE: bool = False
+
+    MCP_BASE_URL: str = ""  # MCP 서버 base URL (비어 있으면 execute_mcp_tool no-op)
     MCP_EXECUTE_PATH: str = "/tools/execute"
     MCP_TIMEOUT_SECONDS: float = 15.0
 

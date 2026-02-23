@@ -5,6 +5,7 @@ from app.core.security import hash_password
 from app.models.base_models import User, Tenant
 from sqlalchemy import select
 from app.core.middleware import TenantMiddleware, RequestIdMiddleware
+from app.core.rate_limiter import RateLimitMiddleware
 from app.api import health
 from app.api.auth.routes import router as auth_router
 from app.api.agent.routes import router as agent_router
@@ -13,6 +14,7 @@ from app.api.gateway.routes import router as gateway_router
 from app.api.process.routes import router as process_router
 from app.api.watch.routes import router as watch_router
 from app.api.users.routes import router as users_router
+from app.api.cases.routes import router as cases_router
 from app.core.security import get_current_user
 from fastapi import Depends
 
@@ -24,6 +26,8 @@ app.add_middleware(
         "https://app.axiom.ai",
         "https://*.axiom.ai",
         "http://localhost:3000",
+        "http://localhost:5173",  # Docker canvas-ui
+        "http://localhost:5174",  # Docker canvas-ui (포트 충돌 회피)
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -33,10 +37,12 @@ app.add_middleware(
 
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(TenantMiddleware)
+app.add_middleware(RateLimitMiddleware)
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(users_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(cases_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(process_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(watch_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(agent_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])

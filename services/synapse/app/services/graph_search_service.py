@@ -44,7 +44,7 @@ class GraphSearchService:
             ("processes", "organizations", {"from_column": "org_id", "to_column": "id"}),
             ("metrics", "cases", {"from_column": "case_id", "to_column": "id"}),
         ]
-        self._similar_queries = [
+        self._similar_queries: list[dict[str, Any]] = [
             {
                 "question": "조직별 프로세스 효율성을 조회하시오",
                 "sql": "SELECT o.name, p.efficiency_rate FROM processes p JOIN organizations o ON p.org_id = o.id",
@@ -58,6 +58,30 @@ class GraphSearchService:
                 "mappings": {"collection": "데이터 수집", "analysis": "프로세스 분석", "optimization": "최적화", "execution": "실행"},
             }
         ]
+
+    def add_query_cache(self, question: str, sql: str, confidence: float, datasource_id: str = "") -> None:
+        """Oracle reflect_cache 호출 시 Query 노드로 영속. 현재는 인메모리 리스트에 추가 (Neo4j MERGE는 추후)."""
+        question = (question or "").strip()
+        sql = (sql or "").strip()
+        if not question or not sql:
+            return
+        confidence = max(0.0, min(1.0, float(confidence)))
+        # 중복 질문이면 기존 항목 갱신
+        for item in self._similar_queries:
+            if (item.get("question") or "").strip() == question:
+                item["sql"] = sql
+                item["score"] = round(confidence, 2)
+                item["verified"] = True
+                if datasource_id:
+                    item["datasource_id"] = datasource_id
+                return
+        self._similar_queries.append({
+            "question": question,
+            "sql": sql,
+            "score": round(confidence, 2),
+            "verified": True,
+            "datasource_id": datasource_id or "",
+        })
 
     def _tokens(self, text: str) -> set[str]:
         return {t for t in re.split(r"[^a-zA-Z0-9가-힣_]+", (text or "").lower()) if t}

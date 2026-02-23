@@ -1,8 +1,8 @@
 # NL2SQL API 스펙
 
-> 구현 상태 태그: `Partial (Mock-backed)`
-> 기준일: 2026-02-21
-> 최신 근거: `docs/full-spec-gap-analysis-2026-02-22.md`
+> 구현 상태 태그: `Implemented` (JWT 인증, Ask/ReAct Full 파이프라인, Rate limiting, 품질 게이트·reflect_cache, Canvas oracleApi 통일)
+> 기준일: 2026-02-22
+> 최신 근거: `docs/implementation-plans/oracle/01_oracle-fullspec-implementation-plan.md` (Phase O1–O6 완료)
 
 ## 이 문서가 답하는 질문
 
@@ -20,11 +20,11 @@
 
 | Method | Path | 설명 | 인증 | 상태 | 근거 |
 |--------|------|------|------|------|------|
-| POST | `/text2sql/ask` | NL2SQL 단일 변환+실행 | Required | Partial | `services/oracle/app/api/text2sql.py` |
-| POST | `/text2sql/react` | ReAct 다단계 추론 (NDJSON 스트림) | Required | Partial | `services/oracle/app/api/text2sql.py` |
-| POST | `/text2sql/direct-sql` | SQL 직접 실행 | Required + Admin | Partial | `services/oracle/app/api/text2sql.py` |
+| POST | `/text2sql/ask` | NL2SQL 단일 변환+실행 | Required | Implemented | `services/oracle/app/api/text2sql.py` |
+| POST | `/text2sql/react` | ReAct 다단계 추론 (NDJSON 스트림) | Required | Implemented | `services/oracle/app/api/text2sql.py` |
+| POST | `/text2sql/direct-sql` | SQL 직접 실행 | Required + Admin | Implemented | `services/oracle/app/api/text2sql.py` |
 
-> 현재 구현은 외부 DB/LLM 연동 전 단계의 mock 기반 동작을 포함한다.
+> 구현: JWT(Core 연동), 임베딩·그래프 검색·LLM SQL·시각화·요약·품질 게이트, ReAct Select/Execute/result, Rate limit(ask 30/분·react 10/분·direct-sql 60/분).
 
 ### 외부 의존성
 

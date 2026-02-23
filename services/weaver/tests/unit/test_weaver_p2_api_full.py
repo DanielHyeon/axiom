@@ -214,7 +214,8 @@ async def test_auth_guard_requires_bearer_jwt() -> None:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         missing = await client.get("/api/datasources")
         assert missing.status_code == 401
-        assert "Authorization" in missing.json()["detail"]
+        detail = missing.json()["detail"]
+        assert detail.get("code") == "UNAUTHORIZED" and "Authorization" in (detail.get("message") or "")
 
         invalid_scheme = await client.get("/api/datasources", headers={"Authorization": "mock_token_admin"})
         assert invalid_scheme.status_code == 401

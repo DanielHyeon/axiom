@@ -2,6 +2,7 @@
 
 <!-- affects: frontend -->
 <!-- requires-update: 01_architecture/component-architecture.md -->
+<!-- 구현: Phase E 완료 — Design Tokens(src/styles/tokens.css), themeStore, ThemeProvider, 다크 모드 전역(.dark), Header 테마 전환 -->
 
 ## 이 문서가 답하는 질문
 

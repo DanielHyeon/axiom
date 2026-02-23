@@ -11,6 +11,7 @@
 4. 08/99: 운영 준비 + ADR 추적
 
 ## 3. 문서 목록
+- **docs/implementation-plans/oracle/01_oracle-fullspec-implementation-plan.md** — Full 스펙 갭·Phase·티켓 (코드 검증 기준)
 - docs/implementation-plans/oracle/00_overview-implementation-plan.md
 - docs/implementation-plans/oracle/01_architecture-implementation-plan.md
 - docs/implementation-plans/oracle/02_api-implementation-plan.md

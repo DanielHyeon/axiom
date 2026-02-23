@@ -298,6 +298,182 @@ class Neo4jMetadataStore:
             {"tenant_id": tenant_id or "", "name": name},
         )
 
+    async def save_extracted_catalog(
+        self,
+        tenant_id: str,
+        datasource_name: str,
+        catalog: dict[str, dict[str, list[dict[str, Any]]]],
+        engine: str = "postgresql",
+        *,
+        foreign_keys: list[dict[str, Any]] | None = None,
+    ) -> dict[str, Any]:
+        """
+        추출된 카탈로그를 Neo4j에 DataSource-Schema-Table-Column 구조로 저장.
+        catalog: { schema_name: { table_name: [ {name, data_type, nullable} ] } }
+        foreign_keys: [{ source_schema, source_table, source_column, target_schema, target_table, target_column, constraint_name }]
+        반환: { "nodes_created": int, "relationships_created": int, "duration_ms": int }
+        """
+        fk_list = foreign_keys if foreign_keys is not None else []
+        import time
+        start = time.perf_counter()
+        tid = tenant_id or ""
+        # 1) 기존 Schema 하위 그래프 제거 (Column -> Table -> Schema 순)
+        await self._write(
+            """
+            MATCH (s:Schema {tenant_id: $tenant_id, datasource_name: $name})-[:HAS_TABLE]->(t)-[:HAS_COLUMN]->(c)
+            DETACH DELETE c
+            """,
+            {"tenant_id": tid, "name": datasource_name},
+        )
+        await self._write(
+            """
+            MATCH (s:Schema {tenant_id: $tenant_id, datasource_name: $name})-[:HAS_TABLE]->(t)
+            DETACH DELETE t
+            """,
+            {"tenant_id": tid, "name": datasource_name},
+        )
+        await self._write(
+            """
+            MATCH (s:Schema {tenant_id: $tenant_id, datasource_name: $name})
+            DETACH DELETE s
+            """,
+            {"tenant_id": tid, "name": datasource_name},
+        )
+        # 2) DataSource MERGE
+        await self._write(
+            """
+            MERGE (d:DataSource {tenant_id: $tenant_id, name: $name})
+            SET d.engine = $engine, d.last_extracted = datetime()
+            """,
+            {"tenant_id": tid, "name": datasource_name, "engine": engine},
+        )
+        nodes_created = 0
+        rels_created = 0
+        # 2) Schema -> Table -> Column 생성 (tenant_id 포함해 스키마 노드 식별)
+        for schema_name, tables in catalog.items():
+            if not isinstance(tables, dict):
+                continue
+            schema_name = str(schema_name).strip()
+            if not schema_name:
+                continue
+            await self._write(
+                """
+                MATCH (d:DataSource {tenant_id: $tenant_id, name: $name})
+                MERGE (s:Schema {tenant_id: $tenant_id, datasource_name: $datasource_name, name: $schema_name})
+                MERGE (d)-[:HAS_SCHEMA]->(s)
+                """,
+                {
+                    "tenant_id": tid,
+                    "name": datasource_name,
+                    "datasource_name": datasource_name,
+                    "schema_name": schema_name,
+                },
+            )
+            nodes_created += 1
+            rels_created += 1
+            for table_name, columns in tables.items():
+                if not isinstance(columns, list):
+                    continue
+                table_name = str(table_name).strip()
+                if not table_name:
+                    continue
+                await self._write(
+                    """
+                    MATCH (s:Schema {tenant_id: $tenant_id, datasource_name: $datasource_name, name: $schema_name})
+                    MERGE (t:Table {tenant_id: $tenant_id, datasource_name: $datasource_name, schema_name: $schema_name, name: $table_name})
+                    MERGE (s)-[:HAS_TABLE]->(t)
+                    """,
+                    {
+                        "tenant_id": tid,
+                        "datasource_name": datasource_name,
+                        "schema_name": schema_name,
+                        "table_name": table_name,
+                    },
+                )
+                nodes_created += 1
+                rels_created += 1
+                for col in columns:
+                    if not isinstance(col, dict):
+                        continue
+                    col_name = str(col.get("name") or "").strip()
+                    if not col_name:
+                        continue
+                    dtype = str(col.get("data_type") or col.get("type") or "string")
+                    nullable = bool(col.get("nullable", True))
+                    await self._write(
+                        """
+                        MATCH (t:Table {tenant_id: $tenant_id, datasource_name: $datasource_name, schema_name: $schema_name, name: $table_name})
+                        MERGE (c:Column {tenant_id: $tenant_id, datasource_name: $datasource_name, schema_name: $schema_name, table_name: $table_name, name: $col_name})
+                        SET c.dtype = $dtype, c.nullable = $nullable
+                        MERGE (t)-[:HAS_COLUMN]->(c)
+                        """,
+                        {
+                            "tenant_id": tid,
+                            "datasource_name": datasource_name,
+                            "schema_name": schema_name,
+                            "table_name": table_name,
+                            "col_name": col_name,
+                            "dtype": dtype,
+                            "nullable": nullable,
+                        },
+                    )
+                    nodes_created += 1
+                    rels_created += 1
+        # 3) FK_TO (Column->Column), FK_TO_TABLE (Table->Table) 생성
+        for fk in fk_list:
+            if not isinstance(fk, dict):
+                continue
+            src_schema = str(fk.get("source_schema") or "").strip()
+            src_table = str(fk.get("source_table") or "").strip()
+            src_col = str(fk.get("source_column") or "").strip()
+            tgt_schema = str(fk.get("target_schema") or "").strip()
+            tgt_table = str(fk.get("target_table") or "").strip()
+            tgt_col = str(fk.get("target_column") or "").strip()
+            cname = str(fk.get("constraint_name") or "").strip() or "fk"
+            if not all([src_schema, src_table, src_col, tgt_schema, tgt_table, tgt_col]):
+                continue
+            try:
+                await self._write(
+                    """
+                    MATCH (sc:Column {tenant_id: $tid, datasource_name: $ds, schema_name: $src_schema, table_name: $src_table, name: $src_col})
+                    MATCH (tc:Column {tenant_id: $tid, datasource_name: $ds, schema_name: $tgt_schema, table_name: $tgt_table, name: $tgt_col})
+                    MERGE (sc)-[r:FK_TO]->(tc)
+                    SET r.constraint_name = $cname
+                    """,
+                    {
+                        "tid": tid,
+                        "ds": datasource_name,
+                        "src_schema": src_schema,
+                        "src_table": src_table,
+                        "src_col": src_col,
+                        "tgt_schema": tgt_schema,
+                        "tgt_table": tgt_table,
+                        "tgt_col": tgt_col,
+                        "cname": cname,
+                    },
+                )
+                rels_created += 1
+                await self._write(
+                    """
+                    MATCH (st:Table {tenant_id: $tid, datasource_name: $ds, schema_name: $src_schema, name: $src_table})
+                    MATCH (tt:Table {tenant_id: $tid, datasource_name: $ds, schema_name: $tgt_schema, name: $tgt_table})
+                    MERGE (st)-[:FK_TO_TABLE]->(tt)
+                    """,
+                    {
+                        "tid": tid,
+                        "ds": datasource_name,
+                        "src_schema": src_schema,
+                        "src_table": src_table,
+                        "tgt_schema": tgt_schema,
+                        "tgt_table": tgt_table,
+                    },
+                )
+                rels_created += 1
+            except Exception:
+                pass
+        duration_ms = int((time.perf_counter() - start) * 1000)
+        return {"nodes_created": nodes_created, "relationships_created": rels_created, "duration_ms": duration_ms}
+
     def _snapshot_row_to_item(self, node: Any) -> dict[str, Any]:
         return {
             "id": node.get("snapshot_id"),

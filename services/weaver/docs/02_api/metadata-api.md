@@ -1,5 +1,7 @@
 # 메타데이터 추출 API
 
+> **구현 상태**: Implemented (W1~W9). POST /api/datasources/{name}/extract-metadata SSE 스트리밍, progress/error/fk_extracted, Neo4j 저장, Postgres/MySQL/Oracle 어댑터.
+
 > **참고**: 이 문서는 메타데이터 추출(SSE 스트리밍) API만 다룹니다. 패브릭 스냅샷, 비즈니스 용어 사전, 태깅 등 카탈로그 API는 `02_api/metadata-catalog-api.md`를 참조하세요.
 
 <!-- affects: frontend, backend, data, llm -->

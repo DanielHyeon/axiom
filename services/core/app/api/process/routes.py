@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_session
 from app.core.middleware import get_current_tenant_id
+from app.core.security import get_current_user
 from app.services.process_service import ProcessDomainError, ProcessService
 from pydantic import BaseModel, Field
 
@@ -119,6 +120,34 @@ async def submit_workitem_endpoint(
 async def feedback_endpoint(workitem_id: str, db: AsyncSession = Depends(get_session)):
     try:
         return await ProcessService.get_feedback(db=db, workitem_id=workitem_id)
+    except ProcessDomainError as e:
+        raise HTTPException(status_code=e.status_code, detail={"code": e.code, "message": e.message})
+    except Exception:
+        raise HTTPException(status_code=500, detail="Internal Server Error")
+
+
+@router.get("/workitems")
+async def list_workitems_endpoint(
+    status: str | None = None,
+    assignee: str | None = None,
+    limit: int = 20,
+    offset: int = 0,
+    db: AsyncSession = Depends(get_session),
+    current_user: dict = Depends(get_current_user),
+):
+    """List workitems for current tenant. assignee=me uses current user id."""
+    tenant_id = get_current_tenant_id()
+    user_id: str | None = (current_user.get("user_id") or current_user.get("sub")) if assignee == "me" else None
+    try:
+        result = await ProcessService.list_workitems(
+            db=db,
+            tenant_id=tenant_id,
+            status=status,
+            assignee_id=user_id,
+            limit=limit,
+            offset=offset,
+        )
+        return result
     except ProcessDomainError as e:
         raise HTTPException(status_code=e.status_code, detail={"code": e.code, "message": e.message})
     except Exception:

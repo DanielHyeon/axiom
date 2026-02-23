@@ -12,18 +12,16 @@ async def ac():
 
 
 @pytest.mark.asyncio
-async def test_react_agent_streaming_endpoint(ac: AsyncClient):
+async def test_react_agent_streaming_endpoint(ac: AsyncClient, auth_headers: dict):
     payload = {
         "question": "What were the project revenues last year?",
-        "datasource_id": "mock_ds",
+        "datasource_id": "ds_business_main",
         "options": {
             "max_iterations": 3,
             "stream": True
         }
     }
-    
-    # We use stream requests to read chunked NDJSON outputs securely
-    async with ac.stream("POST", "/text2sql/react", json=payload) as response:
+    async with ac.stream("POST", "/text2sql/react", json=payload, headers=auth_headers) as response:
         assert response.status_code == 200
         assert response.headers["content-type"] == "application/x-ndjson"
         

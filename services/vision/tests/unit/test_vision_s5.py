@@ -13,7 +13,7 @@ async def test_api_vision_readiness_probe_returns_up():
 
 @pytest.mark.asyncio
 async def test_scenario_solver_detects_cost_regressions():
-    from app.core.scenario_solver import scenario_solver
+    from app.engines.scenario_solver import scenario_solver
     
     mods = [{"metric": "Marketing_Cost", "adjustment": "+50%"}]
     res = await scenario_solver.evaluate_what_if("cache_hash_999", modifications=mods)

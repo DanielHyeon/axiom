@@ -22,11 +22,12 @@ class EventPublisher:
         event_type: str,
         aggregate_type: str,
         aggregate_id: str,
-        payload: dict
+        payload: dict,
+        tenant_id: str | None = None,
     ):
         """
         Inserts an event into the outbox table within the SAME transaction
-        as the business logic updates.
+        as the business logic updates. tenant_id가 없으면 요청 컨텍스트의 tenant 사용.
         """
         try:
             safe_payload = enforce_event_contract(event_type=event_type, payload=payload, aggregate_id=aggregate_id)
@@ -41,6 +42,7 @@ class EventPublisher:
                 "action": "detected",
             }
 
+        tid = tenant_id if tenant_id is not None else get_current_tenant_id()
         outbox_entry = EventOutbox(
             id=str(uuid.uuid4()),
             event_type=event_type,
@@ -48,6 +50,6 @@ class EventPublisher:
             aggregate_id=aggregate_id,
             payload=safe_payload,
             status="PENDING",
-            tenant_id=get_current_tenant_id()
+            tenant_id=tid,
         )
         session.add(outbox_entry)

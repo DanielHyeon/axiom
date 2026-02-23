@@ -2,7 +2,7 @@
 
 > **기준**: `services/core/docs/` 문서 vs `services/core/app/` 실제 구현  
 > **작성일**: 2026-02-22  
-> **갱신**: 2026-02-22 — Phase A·B·C 반영: 인증, users/me, process 정의 단건 조회 구현됨.
+> **갱신**: 2026-02-22 — cases API·오케스트레이터 연동 반영: app/api/cases(목록·활동·문서 리뷰), LangGraph Oracle/Synapse 연동, SafeToolLoader MCP.
 
 ## 1. 문서 기준
 
@@ -22,7 +22,7 @@
 | 영역 | 문서 기대 | 현재 구현 | 갭 |
 |------|-----------|-----------|-----|
 | **인증/인가** | JWT 발급·검증, RBAC, auth API | ✅ login/refresh, security.py, 보호 경로 Depends | **해소** (RBAC 데코레이터·속도 제한은 선택) |
-| **API 경로** | auth, cases, process, agents, watches, users | auth, users, process, watch, agent, gateway, events, health | **해소** (cases는 Gateway 프록시 유지) |
+| **API 경로** | auth, cases, process, agents, watches, users | auth, users, process, watch, agent, gateway, events, health, **cases** | **해소** (cases: app/api/cases/routes.py 구현) |
 | **Domain 계층** | app/bpm/, app/orchestrator/ | app/bpm/(models, engine, saga, extractor 스텁), app/orchestrator/(langgraph_flow, agent_loop 스텁) | **해소** (추출기·연동은 예정) |
 | **Workers** | sync, watch_cep, ocr, extract, generate, event_log | sync, watch_cep, event_log 구현 (CEP·Synapse 로직 스텁), ocr/extract/generate 예정 | **부분 해소** |
 | **Process** | 정의 단건 조회 | GET /process/definitions/:id 구현 | **해소** |
@@ -55,7 +55,7 @@
 |-------------------|----------|------|
 | `app/api/auth/` | ✅ | app/api/auth/routes.py (login, refresh) |
 | `app/api/users/` | ✅ | app/api/users/routes.py (GET /me) |
-| `app/api/cases/` (Core 자체 케이스 CRUD) | ❌ | 없음. Gateway는 Synapse 등으로 프록시만 함 |
+| `app/api/cases/` (Core 자체 케이스·활동·문서 리뷰) | ✅ | app/api/cases/routes.py: GET /cases, GET /cases/activities, POST /cases/:caseId/documents/:docId/review. core_case, core_case_activity, core_document_review |
 | `app/api/process/` | ✅ | process/routes.py 존재 |
 | `app/api/agents/` | ✅ | agent/routes.py 존재 |
 | `app/api/watches/` | ✅ | watch/routes.py 존재 |
@@ -75,11 +75,11 @@
 | `app/bpm/saga.py` (Saga 보상) | ✅ | SagaManager 스텁 (trigger_compensation 반환만) |
 | `app/bpm/extractor.py` (PDF→BPMN/DMN) | ⚠️ | 스텁, "예정" 문서화 |
 | `app/orchestrator/` | ✅ | Phase D에서 생성 |
-| `app/orchestrator/langgraph_flow.py` (9노드 LangGraph) | ⚠️ | 스텁 (build_orchestrator_graph) |
-| `app/orchestrator/agent_loop.py` (지식 학습 루프) | ⚠️ | 스텁 (run_agent_loop) |
-| `app/orchestrator/tool_loader.py`, MCP 클라이언트 등 | ❌ | 미구현 |
+| `app/orchestrator/langgraph_flow.py` (10노드 LangGraph) | ✅ | 구현됨. query_data→Oracle /text2sql/ask, mining→Synapse /process-mining/discover. SSOT §2.1 |
+| `app/orchestrator/agent_loop.py` (지식 학습 루프) | ✅ | 구현됨 (graph.ainvoke, HITL, db·workitem 연동) |
+| `app/orchestrator/tool_loader.py`, MCP 클라이언트 등 | ✅ | SafeToolLoader·agent_service.list_mcp_tools 연동 구현 |
 
-**결과**: BPM “엔진”·Saga·BPMN 추출·LangGraph 오케스트레이터는 문서만 있고, BPM 엔진·Saga(스텁)·orchestrator(스텁) 구조 생성 완료. process_service는 bpm/engine 위임. 추출기·연동은 예정.
+**결과**: BPM “엔진”·Saga·BPMN 추출·LangGraph 오케스트레이터는 문서만 있고, BPM 엔진·Saga(스텁)·orchestrator·tool_loader 구현 완료. Oracle/Synapse 노드 연동. process_service는 bpm/engine 위임. 추출기·연동은 예정.
 
 ---
 
@@ -141,21 +141,21 @@
 |----------|----------|
 | POST /api/v1/users (watch-api.md: 사용자 생성 시 구독 시드) | ❌ (추후 확장) |
 | GET /api/v1/users/me | ✅ app/api/users/routes.py |
-| Core 자체 케이스 CRUD (app/api/cases/) | ❌ (Gateway 프록시 유지) |
+| Core 자체 케이스·활동·문서 리뷰 (app/api/cases/) | ✅ GET /cases, /cases/activities, POST .../review (core_case, core_case_activity, core_document_review) |
 | User·Tenant 모델/테이블 (Core DB) | ✅ base_models.Tenant, User |
 
 ---
 
 ## 4. 구현된 것 정리
 
-- **라우터**: health, process, watch, agent, gateway, events
+- **라우터**: health, process, watch, agent, gateway, events, **cases**
 - **미들웨어**: CORS, RequestIdMiddleware, TenantMiddleware (X-Tenant-Id / X-Forwarded-Host)
 - **Process**: 정의 목록/생성, initiate/submit/role-binding/status/workitems/feedback/rework/approve-hitl (JWT 검증 없이 tenant_id만 사용)
 - **Watch**: 구독·알림·규칙 CRUD, SSE 스트림
 - **Agent**: feedback, MCP, completion, chat, knowledge (인메모리/파일 기반 등)
 - **Gateway**: 이벤트 로그, 프로세스 마이닝, 추출, 온톨로지, 그래프, 스키마 편집 등 Synapse/외부 프록시
 - **Event Outbox**: EventOutbox 모델, EventPublisher, sync Worker로 PENDING → Redis 발행
-- **DB 모델**: EventOutbox, WorkItem, ProcessDefinition, ProcessRoleBinding, WatchSubscription, WatchRule, WatchAlert
+- **DB 모델**: EventOutbox, WorkItem, ProcessDefinition, ProcessRoleBinding, WatchSubscription, WatchRule, WatchAlert, **Case, CaseActivity, DocumentReview** (core_case, core_case_activity, core_document_review)
 
 ---
 

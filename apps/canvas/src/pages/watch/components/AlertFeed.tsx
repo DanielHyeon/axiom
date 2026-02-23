@@ -1,8 +1,10 @@
 import { useAlerts } from '@/features/watch/hooks/useAlerts';
 import { useWatchStore } from '@/features/watch/store/useWatchStore';
 import { useMemo } from 'react';
-import { Search } from 'lucide-react';
+import { Search, BellOff } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import { ErrorState } from '@/shared/components/ErrorState';
+import { EmptyState } from '@/shared/components/EmptyState';
 
 export function AlertFeed() {
     const { getFilteredAlerts, markAsRead, loadError, refetchAlerts } = useAlerts();
@@ -14,15 +16,11 @@ export function AlertFeed() {
 
     if (loadError) {
         return (
-            <div className="flex flex-col h-full bg-[#161616] border border-neutral-800 rounded-lg overflow-hidden flex-1 p-4">
-                <p className="text-amber-400 text-sm mb-2">알림 목록을 불러오지 못했습니다. {loadError.message}</p>
-                <button
-                    type="button"
-                    onClick={() => refetchAlerts()}
-                    className="text-sm px-3 py-1.5 rounded border border-neutral-600 text-neutral-300 hover:bg-neutral-800 w-fit"
-                >
-                    다시 시도
-                </button>
+            <div className="flex flex-col h-full bg-card border border-border rounded-lg overflow-hidden flex-1 p-4">
+                <ErrorState
+                    message={`알림 목록을 불러오지 못했습니다. ${loadError.message}`}
+                    onRetry={refetchAlerts}
+                />
             </div>
         );
     }
@@ -44,9 +42,11 @@ export function AlertFeed() {
             </div>
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {filteredAlerts.length === 0 ? (
-                    <div className="h-full flex items-center justify-center text-neutral-500 text-sm">
-                        표시할 알림이 없습니다.
-                    </div>
+                    <EmptyState
+                        icon={BellOff}
+                        title="표시할 알림이 없습니다"
+                        description="새 알림이 발생하거나 필터를 변경하면 여기에 표시됩니다."
+                    />
                 ) : (
                     filteredAlerts.map(alert => (
                         <div

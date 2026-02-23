@@ -527,6 +527,47 @@ class ProcessService:
         ]
 
     @staticmethod
+    async def list_workitems(
+        db: AsyncSession,
+        tenant_id: str,
+        status: Optional[str] = None,
+        assignee_id: Optional[str] = None,
+        limit: int = 20,
+        offset: int = 0,
+    ) -> dict:
+        """Tenant-scoped workitem list for dashboard (ApprovalQueue, MyWorkitems)."""
+        stmt = select(WorkItem).where(WorkItem.tenant_id == tenant_id)
+        if status:
+            stmt = stmt.where(WorkItem.status == status)
+        if assignee_id:
+            stmt = stmt.where(WorkItem.assignee_id == assignee_id)
+        stmt = stmt.order_by(WorkItem.created_at.desc()).limit(limit).offset(offset)
+        result = await db.execute(stmt)
+        workitems = result.scalars().all()
+        count_stmt = select(func.count()).select_from(WorkItem).where(WorkItem.tenant_id == tenant_id)
+        if status:
+            count_stmt = count_stmt.where(WorkItem.status == status)
+        if assignee_id:
+            count_stmt = count_stmt.where(WorkItem.assignee_id == assignee_id)
+        total = (await db.execute(count_stmt)).scalar() or 0
+        return {
+            "items": [
+                {
+                    "workitem_id": item.id,
+                    "proc_inst_id": item.proc_inst_id,
+                    "activity_name": item.activity_name,
+                    "activity_type": item.activity_type,
+                    "assignee_id": item.assignee_id,
+                    "agent_mode": item.agent_mode,
+                    "status": item.status,
+                    "created_at": item.created_at.isoformat() if item.created_at else None,
+                }
+                for item in workitems
+            ],
+            "total": total,
+        }
+
+    @staticmethod
     async def rework_workitem(
         db: AsyncSession, item_id: str, reason: str, revert_to_activity_id: Optional[str] = None
     ) -> dict:
@@ -576,3 +617,44 @@ class ProcessService:
             "reworked_from": revert_to_activity_id or item_id,
             "saga_compensations": saga_compensations,
         }
+
+    @staticmethod
+    async def get_completed_workitems_for_compensation(
+        db: AsyncSession,
+        proc_inst_id: str,
+        before_workitem_id: str,
+    ) -> list[WorkItem]:
+        """Saga 보상용: before_workitem_id보다 먼저 완료된 DONE 워크아이템 목록 (created_at 오름차순)."""
+        result = await db.execute(
+            select(WorkItem).where(WorkItem.id == before_workitem_id)
+        )
+        before_item = result.scalar_one_or_none()
+        if not before_item or before_item.proc_inst_id != proc_inst_id:
+            return []
+        result = await db.execute(
+            select(WorkItem)
+            .where(
+                WorkItem.proc_inst_id == proc_inst_id,
+                WorkItem.status == WorkItemStatus.DONE,
+                WorkItem.created_at < before_item.created_at,
+            )
+            .order_by(WorkItem.created_at.asc())
+        )
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def terminate_process_instance(db: AsyncSession, proc_inst_id: str) -> None:
+        """프로세스 인스턴스를 종료: TODO/IN_PROGRESS/SUBMITTED 워크아이템을 CANCELLED로 변경."""
+        result = await db.execute(
+            select(WorkItem).where(
+                WorkItem.proc_inst_id == proc_inst_id,
+                WorkItem.status.in_([
+                    WorkItemStatus.TODO,
+                    WorkItemStatus.IN_PROGRESS,
+                    WorkItemStatus.SUBMITTED,
+                ]),
+            )
+        )
+        for item in result.scalars().all():
+            item.status = WorkItemStatus.CANCELLED
+        await db.flush()

@@ -1,8 +1,5 @@
+import { oracleApi } from '@/lib/api/clients';
 import { createNdjsonStream } from '@/lib/api/streamManager';
-import { useAuthStore } from '@/stores/authStore';
-
-const getOracleBaseUrl = (): string =>
-  (import.meta.env.VITE_ORACLE_URL || 'http://localhost:8004').replace(/\/$/, '');
 
 /** Oracle /text2sql/ask 단일 요청 응답 */
 export interface AskResponse {
@@ -25,31 +22,18 @@ export interface ReactStreamStep {
   data?: Record<string, unknown>;
 }
 
-/** POST /text2sql/ask — 단일 변환+실행 */
+/** POST /text2sql/ask — 단일 변환+실행 (oracleApi 사용) */
 export async function postAsk(
   question: string,
   datasourceId: string,
   options?: { use_cache?: boolean; include_viz?: boolean; row_limit?: number }
 ): Promise<AskResponse> {
-  const token = useAuthStore.getState().accessToken;
-  const url = `${getOracleBaseUrl()}/text2sql/ask`;
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: JSON.stringify({
-      question,
-      datasource_id: datasourceId,
-      options: options ?? {},
-    }),
+  const data = await oracleApi.post<AskResponse>('/text2sql/ask', {
+    question,
+    datasource_id: datasourceId,
+    options: options ?? {},
   });
-  const json = (await res.json()) as AskResponse;
-  if (!res.ok) {
-    throw new Error(json.error?.message || `Request failed: ${res.status}`);
-  }
-  return json;
+  return data as AskResponse;
 }
 
 /** GET /text2sql/history — 쿼리 이력 목록 */
@@ -73,6 +57,7 @@ export interface HistoryResponse {
   };
 }
 
+/** GET /text2sql/history — oracleApi 사용 */
 export async function getHistory(params?: {
   datasource_id?: string;
   page?: number;
@@ -81,26 +66,11 @@ export async function getHistory(params?: {
   date_to?: string;
   status?: 'success' | 'error';
 }): Promise<HistoryResponse> {
-  const token = useAuthStore.getState().accessToken;
-  const url = new URL(`${getOracleBaseUrl()}/text2sql/history`);
-  if (params?.datasource_id) url.searchParams.set('datasource_id', params.datasource_id);
-  if (params?.page != null) url.searchParams.set('page', String(params.page));
-  if (params?.page_size != null) url.searchParams.set('page_size', String(params.page_size));
-  if (params?.date_from) url.searchParams.set('date_from', params.date_from);
-  if (params?.date_to) url.searchParams.set('date_to', params.date_to);
-  if (params?.status) url.searchParams.set('status', params.status);
-
-  const res = await fetch(url.toString(), {
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-  });
-  const json = (await res.json()) as HistoryResponse;
-  if (!res.ok) {
-    throw new Error('Failed to load history');
-  }
-  return json;
+  const data = await oracleApi.get<HistoryResponse>('/text2sql/history', { params });
+  return data as HistoryResponse;
 }
 
-/** POST /text2sql/react — NDJSON 스트림. streamManager 사용. */
+/** POST /text2sql/react — NDJSON 스트림. streamManager 사용, URL은 oracleApi base와 동일. */
 export function postReactStream(
   question: string,
   datasourceId: string,
@@ -110,7 +80,8 @@ export function postReactStream(
     onError: (error: Error) => void;
   }
 ): Promise<AbortController> {
-  const url = `${getOracleBaseUrl()}/text2sql/react`;
+  const base = (oracleApi.defaults.baseURL || '').replace(/\/$/, '');
+  const url = `${base}/text2sql/react`;
   return createNdjsonStream<ReactStreamStep>(
     url,
     {

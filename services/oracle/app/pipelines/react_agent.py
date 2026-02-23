@@ -1,17 +1,24 @@
 import json
-import asyncio
 from typing import AsyncGenerator, Dict, Any, List
-from pydantic import BaseModel
+
 import structlog
+from pydantic import BaseModel
+
+from app.core.auth import CurrentUser
 from app.core.llm_factory import llm_factory
-from app.core.sql_guard import sql_guard, GuardConfig
+from app.core.sql_guard import GuardConfig, sql_guard
+from app.core.sql_exec import sql_executor
+from app.core.synapse_client import synapse_client
+from app.core.visualize import recommend_visualization
 
 logger = structlog.get_logger()
 
+
 class TriageDecision(BaseModel):
-    action: str # COMPLETE | CONTINUE | FAIL
+    action: str  # COMPLETE | CONTINUE | FAIL
     next_question: str = ""
     reason: str = ""
+
 
 class ValidateResult(BaseModel):
     passed: bool
@@ -19,6 +26,7 @@ class ValidateResult(BaseModel):
     next_step: str = ""
     violations: List[str] = []
     fixes: List[str] = []
+
 
 class ReactSession(BaseModel):
     question: str
@@ -28,11 +36,42 @@ class ReactSession(BaseModel):
     current_iteration: int = 0
     status: str = "running"
 
-from app.core.auth import CurrentUser
+
+def _step_line(step: str, iteration: int, data: Dict[str, Any]) -> str:
+    return json.dumps({"step": step, "iteration": iteration, "data": data}) + "\n"
+
+
+def _error_step(iteration: int, code: str, message: str) -> str:
+    return _step_line("error", iteration, {"code": code, "message": message})
+
 
 class ReactAgent:
-    """Implement the 6-step loop: Select -> Generate -> Validate -> Fix -> Quality -> Triage"""
-    
+    """6-step loop: Select (graph) -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage; COMPLETE -> step result."""
+
+    async def _select_tables(self, question: str, tenant_id: str) -> tuple[list[str], str]:
+        """Graph/search based table list; fallback to list_schema_tables. Returns (table_names, reasoning)."""
+        try:
+            search_data = await synapse_client.search_graph(question, tenant_id=tenant_id)
+            if isinstance(search_data, dict):
+                tables = search_data.get("tables") or {}
+                names = []
+                for t in (tables.get("vector_matched") or []) + (tables.get("fk_related") or []):
+                    if isinstance(t, dict) and t.get("name"):
+                        names.append(str(t["name"]).strip())
+                if names:
+                    return list(dict.fromkeys(names)), "그래프 검색으로 관련 테이블 선택"
+        except Exception as exc:
+            logger.warning("react_select_search_fallback", reason=str(exc))
+        try:
+            payload = await synapse_client.list_schema_tables(tenant_id=tenant_id)
+            rows = (payload.get("data") or {}).get("tables") or []
+            names = [str(r.get("name", "")).strip() for r in rows if r and str(r.get("name", "")).strip()]
+            if names:
+                return names, "스키마 테이블 목록 기반"
+        except Exception:
+            pass
+        return ["sales_records"], "기본 테이블 사용"
+
     async def run_step_validate(self, sql: str, row_limit: int) -> ValidateResult:
         res = sql_guard.guard_sql(sql, GuardConfig(row_limit=row_limit))
         if res.status == "REJECT":
@@ -45,69 +84,147 @@ class ReactAgent:
         res = await llm_factory.generate(prompt, system_prompt=system)
         try:
             return json.loads(res)
-        except:
+        except Exception:
             return {"score": 0.5, "is_complete": False, "reason": "Failed to parse json."}
 
-    async def run_step_triage(self, quality_result: Dict[str, Any], iteration: int, max_iterations: int) -> TriageDecision:
+    async def run_step_triage(
+        self, quality_result: Dict[str, Any], iteration: int, max_iterations: int
+    ) -> TriageDecision:
         score = quality_result.get("score", 0.0)
         is_complete = quality_result.get("is_complete", False)
-        
         if is_complete and score >= 0.8:
             return TriageDecision(action="COMPLETE")
         if iteration >= max_iterations:
             return TriageDecision(action="FAIL", reason=f"최대 반복 횟수({max_iterations})에 도달했습니다")
         if score < 0.5:
             return TriageDecision(action="FAIL", reason="결과 품질이 기준에 미달합니다")
-            
         return TriageDecision(action="CONTINUE", next_question=quality_result.get("next_question", ""))
 
-    async def stream_react_loop(self, session: ReactSession, user: CurrentUser = None) -> AsyncGenerator[str, None]:
+    async def stream_react_loop(
+        self, session: ReactSession, user: CurrentUser | None = None
+    ) -> AsyncGenerator[str, None]:
         row_limit = session.options.get("row_limit", 1000)
-        
-        for iteration in range(1, session.max_iterations + 1):
-            session.current_iteration = iteration
-            
-            # Step 1: Select
-            yield json.dumps({"step": "select", "iteration": iteration, "data": {"tables": ["sales_records"]}}) + "\n"
-            
-            # Step 2: Generate
-            gen_prompt = f"Generate SQL for {session.question}"
-            sql = await llm_factory.generate(gen_prompt)
-            yield json.dumps({"step": "generate", "iteration": iteration, "data": {"sql": sql}}) + "\n"
-            
-            # Step 3: Validate
-            val_res = await self.run_step_validate(sql, row_limit)
-            if not val_res.passed:
-                yield json.dumps({"step": "validate", "iteration": iteration, "data": {"passed": False, "violations": val_res.violations}}) + "\n"
-                
-                # Step 4: Fix (Max 3 retries in Validate-Fix loop simulated securely)
-                fixed_sql = await llm_factory.generate(f"Fix this SQL based on {val_res.violations}")
-                val_res = await self.run_step_validate(fixed_sql, row_limit)
-                yield json.dumps({"step": "fix", "iteration": iteration, "data": {"passed": val_res.passed}}) + "\n"
+        tenant_id = str(user.tenant_id) if user else ""
+        dialect = session.options.get("dialect", "postgres")
 
+        try:
+            for iteration in range(1, session.max_iterations + 1):
+                session.current_iteration = iteration
+
+                # Step 1: Select (graph/schema based)
+                table_names, reasoning = await self._select_tables(session.question, tenant_id)
+                yield _step_line("select", iteration, {"tables": table_names, "reasoning": reasoning})
+
+                # Step 2: Generate
+                gen_prompt = f"Generate a single SELECT SQL for: {session.question}. Use tables: {table_names}. Add LIMIT {row_limit}."
+                sql = await llm_factory.generate(gen_prompt)
+                sql = (sql or "").strip()
+                if sql.startswith("```"):
+                    for line in sql.split("\n"):
+                        if "SELECT" in line.upper():
+                            sql = line.strip().strip("`")
+                            break
+                if not sql:
+                    sql = "SELECT 1"
+                yield _step_line("generate", iteration, {"sql": sql, "reasoning": ""})
+
+                # Step 3: Validate
+                val_res = await self.run_step_validate(sql, row_limit)
                 if not val_res.passed:
-                    yield json.dumps({"step": "triage", "iteration": iteration, "data": {"action": "FAIL", "reason": "Fix loop failed repeatedly"}}) + "\n"
-                    break
-            else:
-                yield json.dumps({"step": "validate", "iteration": iteration, "data": {"passed": True, "fixes": val_res.fixes}}) + "\n"
-                
-            # Simulate mocked execution
-            # Step 5: Quality
-            qual = await self.run_step_quality(session.question, val_res.sql)
-            yield json.dumps({"step": "quality", "iteration": iteration, "data": {"score": qual.get("score")}}) + "\n"
-            
-            # Step 6: Triage
-            triage = await self.run_step_triage(qual, iteration, session.max_iterations)
-            yield json.dumps({"step": "triage", "iteration": iteration, "data": triage.model_dump()}) + "\n"
-            
-            if triage.action == "COMPLETE":
-                session.status = "completed"
-                break
-            elif triage.action == "FAIL":
-                session.status = "failed"
-                break
-            
-            # If CONTINUE, loop processes next step naturally
-            session.question = triage.next_question
+                    yield _step_line(
+                        "validate", iteration, {"status": "FAIL", "violations": val_res.violations}
+                    )
+                    fixed_sql = await llm_factory.generate(f"Fix this SQL based on: {val_res.violations}")
+                    fixed_sql = (fixed_sql or "").strip() or sql
+                    val_res = await self.run_step_validate(fixed_sql, row_limit)
+                    yield _step_line(
+                        "fix",
+                        iteration,
+                        {"original_sql": sql, "fixed_sql": val_res.sql, "fixes": val_res.fixes},
+                    )
+                    if not val_res.passed:
+                        yield _step_line(
+                            "triage", iteration, {"action": "fail", "reason": "Fix loop failed repeatedly"}
+                        )
+                        yield _error_step(iteration, "SQL_GUARD_REJECT", "SQL 수정 후에도 검증을 통과하지 못했습니다.")
+                        return
+                    yield _step_line("validate", iteration, {"status": "PASS", "sql": val_res.sql, "fixes": val_res.fixes})
+                else:
+                    yield _step_line("validate", iteration, {"status": "PASS", "sql": val_res.sql, "fixes": val_res.fixes})
+
+                # Step 4: Execute (real)
+                exec_res = await sql_executor.execute_sql(val_res.sql, session.datasource_id, user)
+                preview = (exec_res.rows or [])[:10]
+                yield _step_line(
+                    "execute",
+                    iteration,
+                    {"row_count": exec_res.row_count, "preview": preview},
+                )
+
+                # Step 5: Quality
+                qual = await self.run_step_quality(session.question, val_res.sql)
+                yield _step_line(
+                    "quality",
+                    iteration,
+                    {"score": qual.get("score"), "feedback": qual.get("feedback", "")},
+                )
+
+                # Step 6: Triage
+                triage = await self.run_step_triage(qual, iteration, session.max_iterations)
+                triage_data = triage.model_dump()
+                triage_data["action"] = triage_data.get("action", "complete").lower()
+                yield _step_line("triage", iteration, triage_data)
+
+                if triage.action == "COMPLETE":
+                    session.status = "completed"
+                    # Step: result (O2-3)
+                    col_dicts = [{"name": c, "type": "varchar"} for c in exec_res.columns]
+                    viz = recommend_visualization(
+                        col_dicts, exec_res.rows or [], exec_res.row_count
+                    )
+                    summary = ""
+                    try:
+                        summary = await llm_factory.generate(
+                            f"Summarize in one sentence: columns {exec_res.columns}, first row: {preview[:1]}",
+                            temperature=0.3,
+                        )
+                        summary = (summary or "").strip()[:500]
+                    except Exception:
+                        pass
+                    yield _step_line(
+                        "result",
+                        iteration,
+                        {
+                            "sql": val_res.sql,
+                            "result": exec_res.model_dump(),
+                            "summary": summary,
+                            "visualization": viz,
+                        },
+                    )
+                    return
+                if triage.action == "FAIL":
+                    session.status = "failed"
+                    yield _error_step(
+                        iteration,
+                        "MAX_ITERATIONS" if iteration >= session.max_iterations else "QUALITY_FAIL",
+                        triage.reason or "ReAct 실패",
+                    )
+                    return
+
+                session.question = triage.next_question or session.question
+
+            yield _error_step(
+                session.current_iteration,
+                "MAX_ITERATIONS",
+                f"최대 반복 횟수({session.max_iterations})에 도달했습니다.",
+            )
+        except Exception as exc:
+            logger.exception("react_loop_error", error=str(exc))
+            yield _error_step(
+                session.current_iteration or 1,
+                "SQL_EXECUTION_ERROR",
+                str(exc)[:500] or "ReAct 루프 중 오류 발생",
+            )
+
 
 react_agent = ReactAgent()

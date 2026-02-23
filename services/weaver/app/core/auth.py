@@ -48,15 +48,23 @@ class AuthService:
     }
 
     @staticmethod
+    def _unauthorized(message: str):
+        raise HTTPException(status_code=401, detail={"code": "UNAUTHORIZED", "message": message})
+
+    @staticmethod
+    def _forbidden(message: str):
+        raise HTTPException(status_code=403, detail={"code": "FORBIDDEN", "message": message})
+
+    @staticmethod
     def _extract_bearer_token(authorization: str | None) -> str:
         if not authorization:
-            raise HTTPException(status_code=401, detail="Missing Authorization header")
+            AuthService._unauthorized("Missing Authorization header")
         prefix = "bearer "
         if not authorization.lower().startswith(prefix):
-            raise HTTPException(status_code=401, detail="Invalid authorization scheme")
+            AuthService._unauthorized("Invalid authorization scheme")
         token = authorization[len(prefix) :].strip()
         if not token:
-            raise HTTPException(status_code=401, detail="Missing bearer token")
+            AuthService._unauthorized("Missing bearer token")
         return token
 
     def verify_token(self, authorization: str | None) -> CurrentUser:
@@ -72,13 +80,13 @@ class AuthService:
                 options=options,
             )
         except jwt.PyJWTError as exc:
-            raise HTTPException(status_code=401, detail=f"Invalid token: {exc}") from exc
+            self._unauthorized(f"Invalid token: {exc}")
 
         user_id = str(payload.get("sub") or "")
         tenant_id = str(payload.get("tenant_id") or "")
         role = str(payload.get("role") or "")
         if not user_id or not tenant_id or not role:
-            raise HTTPException(status_code=401, detail="Invalid token payload")
+            self._unauthorized("Invalid token payload")
 
         claim_permissions = payload.get("permissions")
         permissions: list[str]
@@ -95,19 +103,19 @@ class AuthService:
         
     def requires_role(self, user: CurrentUser, allowed_roles: List[str]):
         if user.role not in allowed_roles:
-            raise HTTPException(status_code=403, detail=f"Role {user.role} not permitted.")
+            self._forbidden(f"Role {user.role} not permitted.")
 
     def requires_permission(self, user: CurrentUser, permission: str):
         if user.role == "admin":
             return
         if permission not in user.permissions:
-            raise HTTPException(status_code=403, detail=f"Permission {permission} not permitted.")
+            self._forbidden(f"Permission {permission} not permitted.")
 
     def requires_any_permission(self, user: CurrentUser, permissions: List[str]):
         if user.role == "admin":
             return
         if not any(p in user.permissions for p in permissions):
             joined = ",".join(permissions)
-            raise HTTPException(status_code=403, detail=f"Permissions [{joined}] not permitted.")
+            self._forbidden(f"Permissions [{joined}] not permitted.")
 
 auth_service = AuthService()

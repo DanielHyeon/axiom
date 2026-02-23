@@ -118,6 +118,18 @@
 └──────────────────────────────────────────────────────────────────┘
 ```
 
+### 3.1 규칙 CRUD 연동 (구현 상태)
+
+알림 규칙 설정 UI는 **Core API** `GET/POST/PUT/DELETE /api/v1/watches/rules` 와 연동되어 있다.
+
+| 계층 | 파일 | 역할 |
+|------|------|------|
+| API 클라이언트 | `lib/api/watch.ts` | `listRules`, `getRule`, `createRule`, `updateRule`, `deleteRule` |
+| 훅 | `features/watch/hooks/useWatchRules.ts` | 규칙 목록 조회·추가·수정·삭제, `addRule`/`updateRuleById`/`removeRule` |
+| UI | `pages/watch/components/AlertRuleEditor.tsx` | 폼 제출 시 `addRule(payload)`, 토글/삭제 시 `updateRuleById`/`removeRule` |
+
+규칙 생성/수정/삭제 시 Core Watch CEP 규칙이 반영되며, SSE 스트림(`/api/v1/watches/stream`)으로 실시간 알림이 전달된다.
+
 ---
 
 ## 4. 컴포넌트 분해

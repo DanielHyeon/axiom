@@ -16,11 +16,11 @@
 | Worker | 파일 | 입력 | 출력 | 간격/방식 | 구현 |
 |--------|------|------|------|----------|------|
 | **sync** | `workers/sync.py` | event_outbox (DB 폴링) | Redis Streams | 5초 폴링 | Implemented |
-| **watch_cep** | `workers/watch_cep.py` | axiom:watches (Redis) | 알림 생성/발송 | Consumer Group | Implemented (CEP·알림 로직 스텁) |
+| **watch_cep** | `workers/watch_cep.py` | axiom:watches (Redis) | 알림 생성/발송 | Consumer Group | Implemented |
 | **ocr** | `workers/ocr.py` | axiom:workers (Redis) | 텍스트 추출 결과 (DB) | Consumer Group | 예정 |
 | **extract** | `workers/extract.py` | axiom:workers (Redis) | 구조화 데이터 (DB) | Consumer Group | 예정 |
 | **generate** | `workers/generate.py` | axiom:workers (Redis) | 생성된 문서 (MinIO) | Consumer Group | 예정 |
-| **event_log** | `workers/event_log.py` | axiom:workers (Redis) | 파싱된 이벤트 로그 (Synapse 전달) | Consumer Group | Implemented (소비·ACK, Synapse 연동 스텁) |
+| **event_log** | `workers/event_log.py` | axiom:workers (Redis) | 파싱된 이벤트 로그 (Synapse 전달) | Consumer Group | Implemented |
 
 ---
 

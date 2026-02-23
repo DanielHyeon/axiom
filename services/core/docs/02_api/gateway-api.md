@@ -45,7 +45,7 @@ process-gpt-gs-main/gateway/
 
 | 경로 패턴 | 대상 서비스 | 설명 | 타임아웃 |
 |----------|-----------|------|---------|
-| `/api/v1/cases/**` | Core | 케이스 CRUD | 30s |
+| `/api/v1/cases/**` | Core | 케이스 목록·활동·문서 리뷰 (자체 구현) | 30s |
 | `/api/v1/process/**` | Core BPM | 프로세스 실행 | 60s |
 | `/api/v1/agents/**` | Core Agent | 에이전트 관리 | 120s |
 | `/api/v1/documents/**` | Core Worker | 문서 관리 | 60s |
@@ -65,6 +65,16 @@ process-gpt-gs-main/gateway/
 
 > **복원력 참조**: 각 프록시 경로의 Circuit Breaker 설정, Fallback 전략, Retry 정책은 [resilience-patterns.md](../01_architecture/resilience-patterns.md) §2~4를 참조한다.
 
+#### 2.1.1 Core Cases API (자체 구현)
+
+`/api/v1/cases/**` 는 Core 자체 라우터에서 처리하며, DB 테이블 `core_case`, `core_case_activity`, `core_document_review` 를 사용한다. 구현: `app/api/cases/routes.py`.
+
+| 메서드 | 경로 | 설명 | 상태 |
+|--------|------|------|------|
+| GET | `/api/v1/cases` | 케이스 목록 (tenant_id·status 필터, limit/offset 페이징, total) | Implemented |
+| GET | `/api/v1/cases/activities` | 최근 활동 (tenant 전체 또는 case_id 필터) | Implemented |
+| POST | `/api/v1/cases/{case_id}/documents/{doc_id}/review` | 문서 리뷰 저장·갱신, 동일 케이스에 CaseActivity(document_review) 추가 | Implemented |
+
 ### 2.2 공개 경로 (인증 불필요)
 
 | 경로 | 설명 | 구현 |
@@ -75,7 +85,7 @@ process-gpt-gs-main/gateway/
 | `/api/v1/docs` | OpenAPI 문서 (개발 환경만) | FastAPI 기본 |
 | `/api/v1/redoc` | ReDoc 문서 (개발 환경만) | FastAPI 기본 |
 
-보호 경로(process, watch, agent, gateway, events, users)는 `Depends(get_current_user)` 적용. 속도 제한 미들웨어는 미구현(선택).
+보호 경로(process, watch, agent, gateway, events, users)는 `Depends(get_current_user)` 적용. 속도 제한 미들웨어는 `app/core/rate_limiter.py` + `RateLimitMiddleware` 로 구현됨(§4).
 
 ### 2.3 SSE/WebSocket 경로
 

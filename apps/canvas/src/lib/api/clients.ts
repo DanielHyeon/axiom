@@ -6,13 +6,12 @@ import { createApiClient } from './createApiClient';
 const getEnvUrl = (key: string): string => {
     const url = import.meta.env[key];
     if (!url) {
-        if (key === 'VITE_CORE_URL') {
-            return 'http://localhost:8000';
-        }
+        if (key === 'VITE_CORE_URL') return 'http://localhost:8000';
+        if (key === 'VITE_ORACLE_URL') return 'http://localhost:8004';
         console.warn(`Environment variable ${key} is not defined. API calls to this service may fail.`);
         return 'http://localhost:8000';
     }
-    return url;
+    return (url as string).replace(/\/$/, '');
 };
 
 // VITE_XXX_URL mapped to specific backend SSOT endpoints

@@ -1,50 +1,48 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { triggerSync, listJobs, type JobItem } from '../api/weaverDatasourceApi';
+import React, { useState } from 'react';
+import { extractMetadataStream } from '../api/weaverDatasourceApi';
 import { RefreshCw, Loader2 } from 'lucide-react';
 
 interface SyncProgressProps {
   selectedDsName: string | null;
+  onComplete?: () => void;
 }
 
-const SYNC_JOB_TYPE = 'schema_sync';
-
-export function SyncProgress({ selectedDsName }: SyncProgressProps) {
-  const [lastSync, setLastSync] = useState<{ job_id: string; ds: string } | null>(null);
+export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) {
   const [syncing, setSyncing] = useState(false);
-  const [jobs, setJobs] = useState<JobItem[]>([]);
-  const [jobsLoading, setJobsLoading] = useState(false);
-
-  const loadJobs = useCallback(async () => {
-    setJobsLoading(true);
-    try {
-      const res = await listJobs();
-      const syncJobs = (res.jobs ?? []).filter((j) => j.type === SYNC_JOB_TYPE);
-      setJobs(syncJobs);
-    } catch {
-      setJobs([]);
-    } finally {
-      setJobsLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadJobs();
-    const interval = setInterval(loadJobs, 8000);
-    return () => clearInterval(interval);
-  }, [loadJobs]);
+  const [progress, setProgress] = useState<{ phase?: string; percent?: number } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSync = async () => {
     if (!selectedDsName || syncing) return;
     setSyncing(true);
-    setLastSync(null);
+    setProgress(null);
+    setError(null);
     try {
-      const res = await triggerSync(selectedDsName);
-      setLastSync({ job_id: res.job_id, ds: res.datasource_id });
-      await loadJobs();
-    } catch (e) {
-      console.error('Sync failed', e);
-    } finally {
+      await extractMetadataStream(
+        selectedDsName,
+        {},
+        {
+          onProgress: (data) => setProgress({ phase: data.phase, percent: data.percent }),
+          onComplete: () => {
+            setSyncing(false);
+            setProgress(null);
+            onComplete?.();
+          },
+          onNeo4jSaved: () => {
+            setSyncing(false);
+            setProgress(null);
+            onComplete?.();
+          },
+          onError: (data) => setError(data.message ?? '오류 발생'),
+        }
+      );
       setSyncing(false);
+      setProgress(null);
+      onComplete?.();
+    } catch (e) {
+      setSyncing(false);
+      setProgress(null);
+      setError(e instanceof Error ? e.message : '동기화 실패');
     }
   };
 
@@ -59,26 +57,15 @@ export function SyncProgress({ selectedDsName }: SyncProgressProps) {
           className="flex items-center gap-2 text-sm px-3 py-1.5 rounded border border-neutral-300 hover:bg-neutral-50 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {syncing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
-          {syncing ? '동기화 중...' : '동기화 시작'}
+          {syncing ? (progress?.percent != null ? `동기화 중 ${progress.percent}%` : '동기화 중...') : '동기화 시작'}
         </button>
-        {lastSync && (
+        {progress?.phase && (
           <p className="text-xs text-neutral-600">
-            시작됨: {lastSync.ds} (job: {lastSync.job_id})
+            {progress.phase}
+            {progress.percent != null ? ` — ${progress.percent}%` : ''}
           </p>
         )}
-        {jobs.length > 0 && (
-          <div className="mt-2">
-            <p className="text-xs font-medium text-neutral-500 mb-1">최근 동기화 작업</p>
-            <ul className="text-xs text-neutral-600 space-y-0.5 max-h-24 overflow-y-auto">
-              {jobs.slice(0, 5).map((j) => (
-                <li key={j.id}>
-                  {j.datasource_id ?? j.id} — {j.status ?? '?'} {j.created_at ? new Date(j.created_at).toLocaleTimeString() : ''}
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {jobsLoading && jobs.length === 0 && <p className="text-xs text-neutral-400">작업 목록 로딩 중...</p>}
+        {error && <p className="text-xs text-red-600">{error}</p>}
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ from pydantic import ConfigDict
 
 class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
-    JWT_SECRET_KEY: str = "super-secret-key-for-local-dev"
+    # Core와 동일한 값 사용 시 Core가 발급한 JWT 검증 가능 (O3 Core 연동)
+    JWT_SECRET_KEY: str = "axiom-dev-secret-key-do-not-use-in-production"
     JWT_ALGORITHM: str = "HS256"
     SYNAPSE_API_URL: str = "http://localhost:8003"
     SYNAPSE_SCHEMA_EDIT_BASE: str = "/api/v3/synapse/schema-edit"

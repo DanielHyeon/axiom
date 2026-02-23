@@ -4,6 +4,8 @@ pydantic==2.6.1
 httpx==0.26.0
 neo4j==5.28.1
 asyncpg==0.30.0
+aiomysql==0.2.0
+oracledb==2.4.1
 redis==5.2.1
 pyjwt==2.10.1
 pytest==8.0.2

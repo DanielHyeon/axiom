@@ -5,6 +5,8 @@ import { Stage, Layer, Rect, Text, Group } from 'react-konva';
 import { useProcessDesignerStore } from '@/stores/processDesignerStore';
 import type { CanvasNode, CanvasItemType } from '@/stores/processDesignerStore';
 import { ROUTES } from '@/lib/routes/routes';
+import { PropertyPanel } from './PropertyPanel';
+import { Minimap } from './Minimap';
 
 const BOARD_STORAGE_PREFIX = 'process-board-';
 
@@ -28,7 +30,7 @@ export function ProcessDesignerPage() {
     const { boardId } = useParams<{ boardId: string }>();
     const [searchParams] = useSearchParams();
     const fromOntology = searchParams.get('fromOntology');
-    const { nodes, selectedNodeId, addNode, setNodes, updateNodePosition, setSelectedNode } = useProcessDesignerStore();
+    const { nodes, selectedNodeId, addNode, setNodes, updateNodePosition, updateNodeLabel, setSelectedNode, stageView, setStageView } = useProcessDesignerStore();
     const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -94,6 +96,13 @@ export function ProcessDesignerPage() {
 
     const selectedNode = nodes.find(n => n.id === selectedNodeId);
 
+    const handleMinimapClick = (virtualX: number, virtualY: number) => {
+        const scale = stageView.scale;
+        const cx = -virtualX + (stageSize.width / scale) / 2;
+        const cy = -virtualY + (stageSize.height / scale) / 2;
+        setStageView({ x: cx, y: cy });
+    };
+
     return (
         <div className="flex flex-col h-[calc(100vh-4rem)] bg-neutral-950 text-white overflow-hidden border-t border-neutral-800">
             {fromOntology && (
@@ -156,91 +165,69 @@ export function ProcessDesignerPage() {
             >
                 <Stage width={stageSize.width} height={stageSize.height}>
                     <Layer>
-                        {nodes.map(node => (
-                            <Group
-                                key={node.id}
-                                x={node.x}
-                                y={node.y}
-                                draggable
-                                onClick={() => setSelectedNode(node.id)}
-                                onDragEnd={(e) => {
-                                    updateNodePosition(node.id, e.target.x(), e.target.y());
-                                }}
-                            >
-                                <Rect
-                                    width={140}
-                                    height={80}
-                                    fill={node.color}
-                                    cornerRadius={4}
-                                    shadowColor="black"
-                                    shadowBlur={selectedNodeId === node.id ? 10 : 2}
-                                    shadowOpacity={0.3}
-                                    stroke={selectedNodeId === node.id ? '#ffffff' : 'transparent'}
-                                    strokeWidth={2}
-                                />
-                                <Text
-                                    text={node.label}
-                                    width={140}
-                                    height={80}
-                                    fill="#000000"
-                                    align="center"
-                                    verticalAlign="middle"
-                                    fontStyle="bold"
-                                    padding={10}
-                                />
-                            </Group>
-                        ))}
+                        <Group
+                            x={stageView.x}
+                            y={stageView.y}
+                            scaleX={stageView.scale}
+                            scaleY={stageView.scale}
+                        >
+                            <Rect
+                                x={-5000}
+                                y={-5000}
+                                width={10000}
+                                height={10000}
+                                listening
+                                onClick={() => setSelectedNode(null)}
+                            />
+                            {nodes.map(node => (
+                                <Group
+                                    key={node.id}
+                                    x={node.x}
+                                    y={node.y}
+                                    draggable
+                                    onClick={() => setSelectedNode(node.id)}
+                                    onDragEnd={(e) => {
+                                        updateNodePosition(node.id, e.target.x(), e.target.y());
+                                    }}
+                                >
+                                    <Rect
+                                        width={140}
+                                        height={80}
+                                        fill={node.color}
+                                        cornerRadius={4}
+                                        shadowColor="black"
+                                        shadowBlur={selectedNodeId === node.id ? 10 : 2}
+                                        shadowOpacity={0.3}
+                                        stroke={selectedNodeId === node.id ? '#ffffff' : 'transparent'}
+                                        strokeWidth={2}
+                                    />
+                                    <Text
+                                        text={node.label}
+                                        width={140}
+                                        height={80}
+                                        fill="#000000"
+                                        align="center"
+                                        verticalAlign="middle"
+                                        fontStyle="bold"
+                                        padding={10}
+                                    />
+                                </Group>
+                            ))}
+                        </Group>
                     </Layer>
                 </Stage>
                 <div className="absolute top-4 left-4 bg-neutral-900/80 px-3 py-1.5 rounded text-xs text-neutral-400 pointer-events-none">
                     노드를 드래그하여 배치하세요
                 </div>
+                <Minimap
+                    nodes={nodes}
+                    stageSize={stageSize}
+                    stageView={stageView}
+                    onViewportClick={handleMinimapClick}
+                />
             </div>
 
-            {/* 3. Property Panel */}
-            <div className="w-80 border-l border-neutral-800 bg-neutral-900 flex flex-col">
-                <div className="p-4 border-b border-neutral-800 font-bold text-sm text-neutral-300">
-                    속성 패널 (Property Panel)
-                </div>
-                <div className="p-4 flex-1">
-                    {selectedNode ? (
-                        <div className="space-y-4">
-                            <div>
-                                <label className="text-xs text-neutral-500 uppercase tracking-wider block mb-1">ID</label>
-                                <div className="text-sm font-mono bg-neutral-950 px-2 py-1 rounded text-neutral-400">{selectedNode.id}</div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-neutral-500 uppercase tracking-wider block mb-1">Type</label>
-                                <div className="text-sm px-2 py-1 rounded bg-neutral-950 text-neutral-300">{ITEM_LABELS[selectedNode.type]}</div>
-                            </div>
-                            <div>
-                                <label className="text-xs text-neutral-500 uppercase tracking-wider block mb-1">Label</label>
-                                <input
-                                    type="text"
-                                    value={selectedNode.label}
-                                    readOnly
-                                    className="w-full bg-neutral-800 border border-neutral-700 rounded px-2 py-1.5 text-sm text-white"
-                                />
-                                <p className="text-xs text-neutral-500 mt-1">이름 편집은 캔버스의 인라인 편집을 사용하세요.</p>
-                            </div>
-                            <div className="grid grid-cols-2 gap-2 mt-4">
-                                <div>
-                                    <label className="text-xs text-neutral-500 uppercase tracking-wider block mb-1">X Position</label>
-                                    <div className="text-sm px-2 py-1 bg-neutral-950 rounded text-neutral-400">{Math.round(selectedNode.x)}</div>
-                                </div>
-                                <div>
-                                    <label className="text-xs text-neutral-500 uppercase tracking-wider block mb-1">Y Position</label>
-                                    <div className="text-sm px-2 py-1 bg-neutral-950 rounded text-neutral-400">{Math.round(selectedNode.y)}</div>
-                                </div>
-                            </div>
-                        </div>
-                    ) : (
-                        <div className="h-full flex items-center justify-center text-sm text-neutral-500 text-center">
-                            캔버스에서 노드를 선택하여<br />속성을 확인하세요.
-                        </div>
-                    )}
-                </div>
-            </div>
+            <PropertyPanel selectedNode={selectedNode ?? null} onUpdateLabel={updateNodeLabel} />
             </div>
         </div>
     );

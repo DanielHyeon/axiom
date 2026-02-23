@@ -323,3 +323,53 @@ class WatchService:
     async def delete_rule(db: AsyncSession, tenant_id: str, rule_id: str) -> None:
         rule = await WatchService.get_rule(db=db, tenant_id=tenant_id, rule_id=rule_id)
         await db.delete(rule)
+
+    @staticmethod
+    async def create_alert(
+        db: AsyncSession,
+        tenant_id: str,
+        subscription_id: str | None,
+        event_type: str,
+        severity: str,
+        message: str,
+        case_id: str | None = None,
+        case_name: str | None = None,
+        action_url: str | None = None,
+        meta: dict | None = None,
+    ) -> WatchAlert:
+        """CEP Worker용 알림 생성. severity는 LOW|MEDIUM|HIGH|CRITICAL."""
+        alert = WatchAlert(
+            subscription_id=subscription_id,
+            event_type=event_type,
+            case_id=case_id,
+            case_name=case_name,
+            severity=severity.upper() if severity else "MEDIUM",
+            message=message,
+            status="unread",
+            action_url=action_url,
+            meta=meta or {},
+            tenant_id=tenant_id,
+        )
+        db.add(alert)
+        await db.flush()
+        return alert
+
+    @staticmethod
+    async def list_subscriptions_for_event(
+        db: AsyncSession,
+        tenant_id: str,
+        event_type: str,
+        case_id: str | None,
+    ) -> list[WatchSubscription]:
+        """event_type·tenant_id·case_id(선택)에 맞는 활성 구독 목록."""
+        stmt = select(WatchSubscription).where(
+            WatchSubscription.tenant_id == tenant_id,
+            WatchSubscription.event_type == event_type,
+            WatchSubscription.active.is_(True),
+        )
+        if case_id is not None:
+            stmt = stmt.where(
+                (WatchSubscription.case_id.is_(None)) | (WatchSubscription.case_id == case_id)
+            )
+        result = await db.execute(stmt)
+        return list(result.scalars().all())

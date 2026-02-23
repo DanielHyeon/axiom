@@ -1,17 +1,20 @@
 from __future__ import annotations
 
+import json
 from datetime import datetime, timezone
 import re
 import time
 from typing import Any
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, status
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from app.core.auth import CurrentUser, auth_service
 from app.core.config import settings
 from app.core.error_codes import external_service_http_exception, public_error_message
 from app.services.audit_log import audit_log_service
+from app.services.introspection_service import extract_metadata_stream
 from app.services.mindsdb_client import MindsDBUnavailableError, mindsdb_client
 from app.services.neo4j_metadata_store import Neo4jStoreUnavailableError, neo4j_metadata_store
 from app.services.postgres_metadata_store import PostgresStoreUnavailableError, postgres_metadata_store
@@ -154,6 +157,13 @@ class ConnectionUpdate(BaseModel):
     user: str | None = None
     password: str | None = None
     sslmode: str | None = None
+
+
+class ExtractMetadataRequest(BaseModel):
+    schemas: list[str] | None = None
+    include_sample_data: bool = False
+    sample_limit: int = Field(default=5, ge=1, le=100)
+    include_row_counts: bool = True
 
 
 @router.get("/api/datasources/types")
@@ -437,6 +447,65 @@ async def datasource_test(name: str, user: CurrentUser = Depends(get_current_use
         "response_time_ms": int((time.perf_counter() - started) * 1000),
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }
+
+
+@router.post("/api/datasources/{name}/extract-metadata")
+async def extract_metadata(
+    name: str,
+    payload: ExtractMetadataRequest,
+    request: Request,
+    user: CurrentUser = Depends(get_current_user),
+):
+    """메타데이터 추출 SSE 스트리밍. metadata-api.md §2. 지원 엔진: postgresql, mysql, oracle."""
+    _ensure_writer(user)
+    ds = _ensure_datasource(user, name)
+    engine = (ds.get("engine") or "").strip().lower()
+    if engine not in _SUPPORTED_ENGINES:
+        raise HTTPException(status_code=400, detail="INVALID_ENGINE")
+    connection = ds.get("connection") or {}
+    ds_key = _ds_key(user, name)
+
+    async def generate():
+        async for event in extract_metadata_stream(
+            name,
+            engine,
+            connection,
+            target_schemas=payload.schemas,
+            include_sample_data=payload.include_sample_data,
+            sample_limit=payload.sample_limit,
+            include_row_counts=payload.include_row_counts,
+        ):
+            data = dict(event.get("data", {}))
+            catalog = data.pop("_catalog", None)
+            foreign_keys = data.pop("_foreign_keys", None)
+            if event.get("event") == "complete" and catalog is not None:
+                if settings.metadata_external_mode:
+                    try:
+                        neo4j_stats = await neo4j_metadata_store.save_extracted_catalog(
+                            _tenant_id(user), name, catalog, engine, foreign_keys=foreign_keys or []
+                        )
+                        yield f"event: neo4j_saved\ndata: {json.dumps(neo4j_stats, ensure_ascii=False)}\n\n"
+                    except Neo4jStoreUnavailableError as exc:
+                        err_data = {"message": public_error_message(exc), "code": "NEO4J_UNAVAILABLE"}
+                        yield f"event: error\ndata: {json.dumps(err_data, ensure_ascii=False)}\n\n"
+                        raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+                yield f"event: complete\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+                ds_ref = weaver_runtime.datasources.get(ds_key)
+                if ds_ref is not None:
+                    ds_ref["catalog"] = catalog
+                    ds_ref["metadata_extracted"] = True
+                    ds_ref["tables_count"] = sum(len(t) for t in catalog.values())
+                    ds_ref["schemas_count"] = len(catalog)
+                continue
+            # 그 외 이벤트는 그대로 전달
+            line = f"event: {event.get('event', '')}\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
+            yield line
+
+    return StreamingResponse(
+        generate(),
+        media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @router.get("/api/datasources/{name}/schemas")

@@ -1,17 +1,43 @@
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.security import HTTPAuthorizationCredentials
 from pydantic import BaseModel, Field
 from typing import Dict, Any, Optional
 import structlog
 
 from app.pipelines.nl2sql_pipeline import nl2sql_pipeline
-from app.core.auth import auth_service, CurrentUser
+from app.core.auth import auth_service, CurrentUser, security_scheme
 from app.core.query_history import query_history_repo
 from app.core.synapse_client import synapse_client
+from app.core.rate_limit import rate_limiter
 
 logger = structlog.get_logger()
 
-async def get_current_user(authorization: str = Header("mock_token", alias="Authorization")) -> CurrentUser:
-    return auth_service.verify_token(authorization)
+
+async def get_current_user(
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
+) -> CurrentUser:
+    if not credentials:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authorization header missing",
+        )
+    return auth_service.verify_token(credentials.credentials)
+
+
+async def rate_limit_ask(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    rate_limiter.check(f"text2sql:ask:{user.user_id}", limit=30, window_seconds=60)
+    return user
+
+
+async def rate_limit_react(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    rate_limiter.check(f"text2sql:react:{user.user_id}", limit=10, window_seconds=60)
+    return user
+
+
+async def rate_limit_direct_sql(user: CurrentUser = Depends(get_current_user)) -> CurrentUser:
+    rate_limiter.check(f"text2sql:direct_sql:{user.user_id}", limit=60, window_seconds=60)
+    return user
+
 
 router = APIRouter(prefix="/text2sql", tags=["Text2SQL"])
 
@@ -46,7 +72,7 @@ def _validate_datasource_id(datasource_id: str) -> None:
     raise HTTPException(status_code=404, detail="DATASOURCE_NOT_FOUND")
 
 @router.post("/ask")
-async def ask_question(request_payload: AskRequest, user: CurrentUser = Depends(get_current_user)):
+async def ask_question(request_payload: AskRequest, user: CurrentUser = Depends(rate_limit_ask)):
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
     _validate_datasource_id(request_payload.datasource_id)
     result = await nl2sql_pipeline.execute(
@@ -80,7 +106,7 @@ from fastapi.responses import StreamingResponse
 from app.pipelines.react_agent import react_agent, ReactSession
 
 @router.post("/react")
-async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depends(get_current_user)):
+async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depends(rate_limit_react)):
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
     _validate_datasource_id(request_payload.datasource_id)
     session = ReactSession(
@@ -96,7 +122,7 @@ async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depend
     )
 
 @router.post("/direct-sql")
-async def direct_sql(payload: DirectSqlRequest, user: CurrentUser = Depends(get_current_user)):
+async def direct_sql(payload: DirectSqlRequest, user: CurrentUser = Depends(rate_limit_direct_sql)):
     # Mocking admin only execution
     auth_service.requires_role(user, ["admin"])
     _validate_datasource_id(payload.datasource_id)

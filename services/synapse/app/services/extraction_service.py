@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from app.core.ingestion_contract import IngestionContractError, validate_4source_ingestion_metadata
+from app.extraction.ner_extractor import DocumentExtractionResponse, NERExtractor
 
 TARGET_ENTITY_TYPES = [
     "COMPANY",
@@ -87,6 +88,98 @@ class ExtractionService:
             if item not in TARGET_ENTITY_TYPES:
                 raise ExtractionDomainError(400, "INVALID_ENTITY_TYPES", f"unsupported type: {item}")
 
+    def _ner_response_to_entities_relations(
+        self,
+        doc_id: str,
+        ner_response: DocumentExtractionResponse,
+        threshold: float,
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """NER 구조화 출력을 서비스 entities/relations 형식으로 변환."""
+        entities: list[dict[str, Any]] = []
+        entity_by_idx: list[dict[str, Any]] = []
+        for idx, c in enumerate(ner_response.companies):
+            entity_id = f"entity-{uuid.uuid4()}"
+            status = "committed" if c.confidence >= threshold else "pending_review"
+            entity = {
+                "id": entity_id,
+                "text": c.name,
+                "entity_type": "COMPANY",
+                "normalized_value": c.name,
+                "confidence": c.confidence,
+                "ontology_mapping": (
+                    {"layer": "resource", "label": "Company:Resource", "neo4j_node_id": f"node-{uuid.uuid4()}"}
+                    if status == "committed"
+                    else None
+                ),
+                "status": status,
+                "source_chunk": 1,
+                "context": "",
+                "review_reason": None,
+            }
+            entities.append(entity)
+            entity_by_idx.append(entity)
+            self._entity_to_doc[entity_id] = doc_id
+        for idx, p in enumerate(ner_response.persons):
+            entity_id = f"entity-{uuid.uuid4()}"
+            status = "committed" if p.confidence >= threshold else "pending_review"
+            entity = {
+                "id": entity_id,
+                "text": p.name,
+                "entity_type": "PERSON",
+                "normalized_value": p.name,
+                "confidence": p.confidence,
+                "ontology_mapping": (
+                    {"layer": "resource", "label": "Person:Resource", "neo4j_node_id": f"node-{uuid.uuid4()}"}
+                    if status == "committed"
+                    else None
+                ),
+                "status": status,
+                "source_chunk": 1,
+                "context": p.role or "",
+                "review_reason": None,
+            }
+            entities.append(entity)
+            entity_by_idx.append(entity)
+            self._entity_to_doc[entity_id] = doc_id
+        for idx, a in enumerate(ner_response.amounts):
+            entity_id = f"entity-{uuid.uuid4()}"
+            status = "committed" if a.confidence >= threshold else "pending_review"
+            entity = {
+                "id": entity_id,
+                "text": a.raw_text,
+                "entity_type": "AMOUNT",
+                "normalized_value": str(a.normalized_amount),
+                "confidence": a.confidence,
+                "ontology_mapping": (
+                    {"layer": "measure", "label": "Amount:Measure", "neo4j_node_id": f"node-{uuid.uuid4()}"}
+                    if status == "committed"
+                    else None
+                ),
+                "status": status,
+                "source_chunk": 1,
+                "context": "",
+                "review_reason": None,
+            }
+            entities.append(entity)
+            entity_by_idx.append(entity)
+            self._entity_to_doc[entity_id] = doc_id
+        relations: list[dict[str, Any]] = []
+        for i in range(max(0, len(entity_by_idx) - 1)):
+            e1, e2 = entity_by_idx[i], entity_by_idx[i + 1]
+            conf = min(e1["confidence"], e2["confidence"])
+            status = "committed" if conf >= threshold else "pending_review"
+            relations.append({
+                "id": f"rel-{uuid.uuid4()}",
+                "subject": e1["id"],
+                "predicate": "RELATED_TO",
+                "object": e2["id"],
+                "confidence": conf,
+                "ontology_mapping": {"relation_type": "LINKED", "source_layer": "resource", "target_layer": "process"},
+                "status": status,
+                "evidence": f"{e1['text']} -> {e2['text']}",
+            })
+        return entities, relations
+
     def _generate_entities_and_relations(
         self, doc_id: str, threshold: float, target_types: list[str]
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
@@ -155,7 +248,16 @@ class ExtractionService:
 
         task_id = f"task-{uuid.uuid4()}"
         now = _utcnow()
-        entities, relations = self._generate_entities_and_relations(doc_id, auto_threshold, target_types)
+        document_text = payload.get("text") or (options.get("document_text") or "").strip()
+        if document_text:
+            ner = NERExtractor()
+            ner_response = ner.extract_entities_sync(document_text)
+            if ner_response.companies or ner_response.persons or ner_response.amounts:
+                entities, relations = self._ner_response_to_entities_relations(doc_id, ner_response, auto_threshold)
+            else:
+                entities, relations = self._generate_entities_and_relations(doc_id, auto_threshold, target_types)
+        else:
+            entities, relations = self._generate_entities_and_relations(doc_id, auto_threshold, target_types)
         steps = [
             {"name": "text_extraction", "status": "completed", "duration_ms": 1200},
             {"name": "chunking", "status": "completed", "duration_ms": 150, "chunk_count": max(1, len(entities))},

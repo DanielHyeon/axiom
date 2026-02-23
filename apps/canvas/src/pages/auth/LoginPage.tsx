@@ -18,6 +18,11 @@ interface LoginResponse {
 const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:8000').replace(/\/$/, '');
 const authFallbackMock = import.meta.env.VITE_AUTH_FALLBACK_MOCK !== 'false';
 
+/** Docker/개발용 테스트 계정 (Core SEED_DEV_USER=1 시 생성) */
+const TEST_ACCOUNTS: { label: string; email: string; password: string }[] = [
+  { label: 'Admin', email: 'admin@local.axiom', password: 'admin' },
+];
+
 const decodeJwtPayload = (token: string): Record<string, unknown> | null => {
   const parts = token.split('.');
   if (parts.length < 2) return null;
@@ -53,6 +58,7 @@ export function LoginPage() {
   const location = useLocation();
   const login = useAuthStore((state) => state.login);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const { register, handleSubmit, formState } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -62,6 +68,7 @@ export function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
+    setSubmitting(true);
     const redirectTo = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname || '/dashboard';
     try {
       const response = await axios.post<LoginResponse>(`${coreBaseUrl}/api/v1/auth/login`, {
@@ -96,7 +103,13 @@ export function LoginPage() {
         permissions: ['case:read', 'case:write', 'document:write', 'watch:manage', 'olap:query', 'nl2sql:query'],
       });
       navigate(redirectTo, { replace: true });
+    } finally {
+      setSubmitting(false);
     }
+  };
+
+  const onTestAccount = (account: (typeof TEST_ACCOUNTS)[0]) => {
+    onSubmit({ email: account.email, password: account.password });
   };
 
   return (
@@ -132,13 +145,32 @@ export function LoginPage() {
           </div>
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={submitting}
             className="w-full rounded-md bg-white text-black hover:bg-neutral-200 px-4 py-2 text-sm font-medium transition-colors mt-2"
           >
-            {isSubmitting ? 'Signing In...' : 'Sign In'}
+            {submitting ? 'Signing In...' : 'Sign In'}
           </button>
           {error && <p className="text-sm text-red-400">{error}</p>}
         </form>
+
+        {TEST_ACCOUNTS.length > 0 && (
+          <div className="mt-6 border-t border-neutral-700 pt-6">
+            <p className="text-xs text-neutral-500 mb-2">테스트 계정 (Docker/개발)</p>
+            <div className="flex flex-col gap-2">
+              {TEST_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  disabled={submitting}
+                  onClick={() => onTestAccount(account)}
+                  className="w-full rounded-md border border-neutral-600 bg-neutral-800 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-50"
+                >
+                  {account.label}으로 로그인 ({account.email})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

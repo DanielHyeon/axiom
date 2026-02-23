@@ -200,12 +200,19 @@ async def get_process_bottleneck_root_cause(
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except VisionRuntimeError as exc:
+        # root-cause-api.md §에러 코드: 사용자 표시 메시지 정합
+        _PROCESS_BOTTLENECK_MESSAGES = {
+            "SYNAPSE_UNAVAILABLE": "프로세스 마이닝 서비스에 연결할 수 없습니다",
+            "PROCESS_MODEL_NOT_FOUND": "프로세스 모델을 찾을 수 없습니다",
+            "INSUFFICIENT_PROCESS_DATA": "프로세스 분석에 필요한 데이터가 부족합니다",
+        }
+        msg = _PROCESS_BOTTLENECK_MESSAGES.get(exc.code, exc.message)
         if exc.code == "SYNAPSE_UNAVAILABLE":
-            raise HTTPException(status_code=502, detail={"code": exc.code, "message": exc.message}) from exc
+            raise HTTPException(status_code=502, detail={"code": exc.code, "message": msg}) from exc
         if exc.code == "PROCESS_MODEL_NOT_FOUND":
-            raise HTTPException(status_code=404, detail={"code": exc.code, "message": exc.message}) from exc
+            raise HTTPException(status_code=404, detail={"code": exc.code, "message": msg}) from exc
         if exc.code == "INSUFFICIENT_PROCESS_DATA":
-            raise HTTPException(status_code=422, detail={"code": exc.code, "message": exc.message}) from exc
+            raise HTTPException(status_code=422, detail={"code": exc.code, "message": msg}) from exc
         raise HTTPException(status_code=500, detail={"code": "RUNTIME_ERROR", "message": exc.message}) from exc
     except KeyError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc

@@ -1,0 +1,44 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "save": "Save",
+    "list": "List",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "error": "An error occurred."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "cases": "Cases",
+    "analysis": "Analysis",
+    "data": "Data",
+    "processDesigner": "Process Designer",
+    "watch": "Watch",
+    "settings": "Settings"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "allCases": "All Cases",
+    "inProgress": "In Progress",
+    "inReview": "In Review",
+    "dueThisWeek": "Due This Week",
+    "recentActivity": "Recent Activity",
+    "noRecentActivity": "No recent activity.",
+    "caseSummary": "Case Summary",
+    "myWork": "My Work",
+    "approvalQueue": "Approval Queue",
+    "noAssignedWork": "No assigned workitems.",
+    "noApprovalItems": "No items pending approval."
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "processDesigner": {
+    "toolbox": "Toolbox",
+    "propertyPanel": "Property Panel",
+    "selectNodeHint": "Select a node on the canvas to view properties.",
+    "minimapAria": "Minimap: click to move view to that position"
+  }
+}

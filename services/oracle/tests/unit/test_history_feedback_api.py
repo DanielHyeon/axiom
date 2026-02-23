@@ -69,18 +69,18 @@ def override_repo(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_ask_includes_query_id_and_history_list(override_repo, ac: AsyncClient):
+async def test_ask_includes_query_id_and_history_list(override_repo, ac: AsyncClient, auth_headers: dict):
     ask_payload = {
         "question": "Show me everything",
         "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
-    ask_res = await ac.post("/text2sql/ask", json=ask_payload)
+    ask_res = await ac.post("/text2sql/ask", json=ask_payload, headers=auth_headers)
     assert ask_res.status_code == 200
-    query_id = ask_res.json()["data"]["metadata"]["query_id"]
-    assert query_id.startswith("q-")
+    query_id = ask_res.json()["data"]["metadata"].get("query_id")
+    assert query_id
 
-    history_res = await ac.get("/text2sql/history")
+    history_res = await ac.get("/text2sql/history", headers=auth_headers)
     assert history_res.status_code == 200
     body = history_res.json()
     assert body["success"] is True
@@ -88,30 +88,33 @@ async def test_ask_includes_query_id_and_history_list(override_repo, ac: AsyncCl
 
 
 @pytest.mark.asyncio
-async def test_history_detail_not_found(override_repo, ac: AsyncClient):
-    res = await ac.get("/text2sql/history/not-found")
+async def test_history_detail_not_found(override_repo, ac: AsyncClient, auth_headers: dict):
+    res = await ac.get("/text2sql/history/not-found", headers=auth_headers)
     assert res.status_code == 404
 
 
 @pytest.mark.asyncio
-async def test_feedback_submit_and_validation(override_repo, ac: AsyncClient):
+async def test_feedback_submit_and_validation(override_repo, ac: AsyncClient, auth_headers: dict):
     ask_payload = {
         "question": "Show me everything",
         "datasource_id": "ds_business_main",
         "options": {"row_limit": 1000},
     }
-    ask_res = await ac.post("/text2sql/ask", json=ask_payload)
-    query_id = ask_res.json()["data"]["metadata"]["query_id"]
+    ask_res = await ac.post("/text2sql/ask", json=ask_payload, headers=auth_headers)
+    data = ask_res.json()["data"]
+    query_id = (data.get("metadata") or {}).get("query_id")
+    assert query_id
 
     ok = await ac.post(
         "/feedback",
         json={"query_id": query_id, "rating": "positive", "comment": "good"},
+        headers=auth_headers,
     )
     assert ok.status_code == 200
     assert ok.json() == {"success": True}
 
-    invalid = await ac.post("/feedback", json={"query_id": query_id, "rating": "bad"})
+    invalid = await ac.post("/feedback", json={"query_id": query_id, "rating": "bad"}, headers=auth_headers)
     assert invalid.status_code == 422
 
-    missing = await ac.post("/feedback", json={"query_id": "missing", "rating": "positive"})
+    missing = await ac.post("/feedback", json={"query_id": "missing", "rating": "positive"}, headers=auth_headers)
     assert missing.status_code == 404

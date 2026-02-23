@@ -22,25 +22,23 @@ apps/canvas/
 │   ├── main.tsx                     # 진입점 (QueryClientProvider 래핑)
 │   │
 │   ├── features/                    # ★ 기능별 모듈 (핵심)
-│   │   ├── case-dashboard/          # 1. 케이스 대시보드
+│   │   ├── case-dashboard/          # 1. 케이스 대시보드 (API: lib/api/casesApi.ts)
 │   │   │   ├── components/
 │   │   │   │   ├── CaseTable.tsx
-│   │   │   │   ├── CaseCard.tsx
 │   │   │   │   ├── CaseTimeline.tsx
 │   │   │   │   ├── StatsCard.tsx
-│   │   │   │   └── CaseFilters.tsx
+│   │   │   │   ├── CaseFilters.tsx
+│   │   │   │   ├── ApprovalQueuePanel.tsx
+│   │   │   │   ├── MyWorkitemsPanel.tsx
+│   │   │   │   └── ...
 │   │   │   ├── hooks/
 │   │   │   │   ├── useCases.ts
 │   │   │   │   ├── useCaseStats.ts
-│   │   │   │   └── useCaseFilters.ts
-│   │   │   ├── api/
-│   │   │   │   ├── caseApi.ts
-│   │   │   │   └── caseApi.types.ts
-│   │   │   ├── stores/
-│   │   │   │   └── caseFilterStore.ts
-│   │   │   ├── types/
-│   │   │   │   └── case.types.ts
-│   │   │   └── index.ts
+│   │   │   │   ├── useCaseFilters.ts
+│   │   │   │   ├── useApprovalQueue.ts
+│   │   │   │   ├── useMyWorkitems.ts
+│   │   │   │   └── useCaseActivities.ts
+│   │   │   └── ...
 │   │   │
 │   │   ├── document-management/     # 2. 문서 관리 + HITL
 │   │   │   ├── components/
@@ -102,18 +100,19 @@ apps/canvas/
 │   │   │   ├── api/
 │   │   │   └── index.ts
 │   │   │
-│   │   ├── watch-alerts/            # 7. Watch 알림
+│   │   ├── watch/                   # 7. Watch 알림 (API: lib/api/watch.ts + watchStream.ts)
 │   │   │   ├── components/
-│   │   │   │   ├── AlertFeed.tsx
-│   │   │   │   ├── AlertCard.tsx
-│   │   │   │   ├── AlertRuleEditor.tsx
-│   │   │   │   ├── EventTimeline.tsx
-│   │   │   │   └── PriorityFilter.tsx
+│   │   │   │   └── WatchToastListener.tsx
 │   │   │   ├── hooks/
-│   │   │   ├── api/
-│   │   │   └── index.ts
+│   │   │   │   ├── useAlerts.ts
+│   │   │   │   └── useWatchRules.ts
+│   │   │   ├── store/
+│   │   │   │   └── useWatchStore.ts
+│   │   │   └── types/
+│   │   │       └── watch.ts
+│   │   │   (AlertRuleEditor, AlertFeed 등은 pages/watch/ 에 위치)
 │   │   │
-│   │   ├── process-designer/          # 8. 비즈니스 프로세스 디자이너
+│   │   ├── process-designer/          # 8. 비즈니스 프로세스 디자이너 (store: stores/processDesignerStore.ts)
 │   │   │   ├── components/
 │   │   │   │   ├── ProcessCanvas/
 │   │   │   │   │   ├── ProcessCanvas.tsx
@@ -143,24 +142,20 @@ apps/canvas/
 │   │   │   ├── api/
 │   │   │   │   ├── processApi.ts
 │   │   │   │   └── processApi.types.ts
-│   │   │   ├── stores/
-│   │   │   │   └── processDesignerStore.ts
 │   │   │   ├── types/
 │   │   │   │   ├── canvasItem.types.ts
 │   │   │   │   ├── connection.types.ts
 │   │   │   │   └── board.types.ts
-│   │   │   └── index.ts
+│   │   │   └── ... (store는 src/stores/processDesignerStore.ts)
 │   │   │
-│   │   └── datasource-manager/      # + 데이터소스 관리
+│   │   └── datasource/              # 데이터소스 관리 (Weaver API)
 │   │       ├── components/
-│   │       │   ├── DatasourceList.tsx
-│   │       │   ├── ConnectionForm.tsx
 │   │       │   ├── SchemaExplorer.tsx
-│   │       │   ├── SyncProgress.tsx
-│   │       │   └── MetadataTree.tsx
+│   │       │   └── SyncProgress.tsx
 │   │       ├── hooks/
-│   │       ├── api/
-│   │       └── index.ts
+│   │       │   └── useDatasources.ts
+│   │       └── api/
+│   │           └── weaverDatasourceApi.ts
 │   │
 │   ├── pages/                       # 라우트 페이지 (React.lazy)
 │   │   ├── dashboard/
@@ -208,37 +203,57 @@ apps/canvas/
 │   │   ├── ServiceStatusBanner.tsx
 │   │   └── ui/                      # Shadcn/ui (button, card, input, select 등)
 │   │
-│   ├── shared/                      # 공유 컴포넌트/유틸 (EmptyState, AuthGuard 등)
-│   │   └── components/
+│   ├── shared/                      # 공유 컴포넌트/유틸
+│   │   ├── components/
+│   │   │   ├── EmptyState.tsx
+│   │   │   └── RoleGuard.tsx        # 역할 기반 접근 (admin 등)
+│   │   └── hooks/
+│   │       └── useRole.ts
 │   │
 │   ├── layouts/                     # 레이아웃
 │   │   ├── RootLayout.tsx           # 최상위 (Outlet만)
 │   │   ├── MainLayout.tsx           # 사이드바 + 헤더 + Outlet (대시보드용)
 │   │   ├── Sidebar.tsx
 │   │   ├── DashboardLayout.tsx      # (선택 사용)
-│   │   ├── AuthLayout.tsx           # (선택 사용)
 │   │   └── components/
 │   │       ├── Header.tsx
 │   │       ├── UserMenu.tsx
-│   │       └── NotificationBell.tsx
+│   │       ├── NotificationBell.tsx
+│   │       ├── LocaleToggle.tsx
+│   │       └── ThemeToggle.tsx
 │   │
 │   ├── stores/                      # 전역 Zustand 스토어
-│   │   └── authStore.ts
+│   │   ├── authStore.ts
+│   │   ├── themeStore.ts
+│   │   └── processDesignerStore.ts
 │   │
 │   ├── lib/                         # 라이브러리 설정/API
-│   │   ├── queryClient.ts           # TanStack Query 전역 설정
+│   │   ├── queryClient.ts
 │   │   ├── routes/
+│   │   │   ├── routeConfig.tsx      # createBrowserRouter 정의
 │   │   │   ├── routes.ts            # ROUTES 상수
-│   │   │   └── params.ts            # useCaseParams 등
+│   │   │   └── params.ts
+│   │   ├── i18n/                    # 다국어 (locales, index)
 │   │   └── api/
-│   │       ├── watchStream.ts       # Watch SSE (EventSource)
-│   │       ├── streamManager.ts     # POST 스트림 (LLM/ReAct)
-│   │       ├── wsManager.ts         # (deprecated re-export → watchStream)
-│   │       └── ...                  # 각 도메인 API 클라이언트
+│   │       ├── clients.ts           # coreApi, weaverApi, oracleApi 등
+│   │       ├── createApiClient.ts
+│   │       ├── casesApi.ts           # 케이스/Core API
+│   │       ├── processApi.ts
+│   │       ├── watch.ts              # Watch 규칙 CRUD
+│   │       ├── watchStream.ts        # Watch SSE (EventSource)
+│   │       ├── streamManager.ts      # POST 스트림 (LLM/ReAct)
+│   │       ├── wsManager.ts
+│   │       ├── health.ts
+│   │       ├── usersApi.ts
+│   │       ├── settingsApi.ts
+│   │       └── agentApi.ts
 │   │
-│   ├── types/                       # 공유 TypeScript 타입
+│   ├── types/                        # 공유 TypeScript 타입
 │   │   └── auth.types.ts
-│   │
+│   ├── providers/                   # 앱급 Provider (테마 등)
+│   │   └── ThemeProvider.tsx
+│   ├── styles/
+│   │   └── tokens.css
 │   ├── index.css                    # 글로벌 스타일 (Tailwind)
 │   └── vite-env.d.ts
 │
@@ -358,3 +373,4 @@ src/                                src/
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
 | 2026-02-20 | 1.1 | Axiom Team | process-designer feature 모듈 및 페이지 추가 |
 | 2026-02-22 | 1.2 | Axiom Team | 현재 구현 반영: src/ 직하위 App·main, layouts(RootLayout·MainLayout·Sidebar·components), components/·components/ui/, lib/queryClient·watchStream·streamManager, 설정 하위 페이지, pages 경로 정리 |
+| 2026-02-23 | 1.3 | Axiom Team | 현행화: lib/routes/routeConfig.tsx, lib/api 파일 목록(clients·casesApi·watch·watchStream 등), case-dashboard(lib/api/casesApi 사용), watch·datasource·process-designer 구조, shared/RoleGuard·useRole, stores/themeStore·processDesignerStore, providers·styles |

@@ -1,5 +1,8 @@
 # VISION 구현 계획 인덱스
 
+## 0. Full 스펙 구현 계획 (코드 검증 기준)
+- **[01_vision-fullspec-implementation-plan.md](01_vision-fullspec-implementation-plan.md)** — 미구현·스텁·갭 항목만 정리한 단일 계획서. Core/Synapse 풀스펙 문서와 동일 구조. 갭 요약(코드 기준), Phase V1~V6, 티켓·통과 기준·권장 실행 순서 포함.
+
 ## 1. 범위
 - 설계 문서 원본: services/vision/docs
 - 문서번호(00~99) 기준 구현 계획 분할

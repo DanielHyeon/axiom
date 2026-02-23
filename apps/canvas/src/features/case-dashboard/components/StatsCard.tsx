@@ -8,11 +8,11 @@ interface StatsCardProps {
 
 export function StatsCard({ label, value, trend, trendLabel }: StatsCardProps) {
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-      <p className="text-sm text-neutral-400">{label}</p>
-      <p className="mt-1 text-2xl font-semibold text-white">{value}</p>
+    <div className="rounded-lg border border-border bg-card p-4">
+      <p className="text-sm text-secondary-foreground">{label}</p>
+      <p className="mt-1 text-2xl font-semibold text-foreground">{value}</p>
       {trend != null && trendLabel != null && (
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="mt-1 text-xs text-secondary-foreground">
           {trend === 'up' && '▲ '}
           {trend === 'down' && '▼ '}
           {trend === 'same' && '━ '}

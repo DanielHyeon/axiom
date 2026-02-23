@@ -175,6 +175,16 @@ def build_orchestrator_graph():
 
     return compiled
 
+### 2.3 외부 서비스 URL (Oracle, Synapse)
+
+오케스트레이터의 **query_data**·**process_mining_analysis** 노드가 호출하는 실제 URL과 요청 계약은 **SSOT**로 관리한다.
+
+- **SSOT**: 프로젝트 루트 `docs/service-endpoints-ssot.md` §2.1  
+- **Oracle**: `POST {ORACLE_BASE_URL}/text2sql/ask` (body: `question`, `datasource_id`, `options`). `/api/v1/ask` 경로는 사용하지 않음.  
+- **Synapse**: `POST {SYNAPSE_BASE_URL}/api/v3/synapse/process-mining/discover` 등. `/analyze` 엔드포인트는 없음. discover/conformance/bottlenecks/performance 사용, payload에 `case_id`·`log_id` 필수.
+
+구현: `app/orchestrator/langgraph_flow.py`의 `_node_query_data`, `_node_mining`.
+
 # 노드 함수들
 async def route_intent(state: OrchestratorState) -> dict:
     """의도 분류 (프로세스/문서/데이터 쿼리/프로세스 마이닝)"""
@@ -605,7 +615,9 @@ from langchain_core.tools import tool
 from langgraph.prebuilt import create_react_agent
 import httpx
 
-SYNAPSE_BASE_URL = "http://synapse:8000/api/v1"
+# 실제 URL·계약 SSOT: docs/service-endpoints-ssot.md §2.1
+# Synapse 실제 prefix: /api/v3/synapse/process-mining (구현 기준)
+SYNAPSE_BASE_URL = "http://synapse:8000/api/v3/synapse/process-mining"
 
 # --- Tool Definitions ---
 
@@ -622,7 +634,7 @@ async def trigger_process_discovery(
     heuristic가 노이즈에 강건하여 기본값으로 권장."""
     async with httpx.AsyncClient(timeout=180) as client:
         response = await client.post(
-            f"{SYNAPSE_BASE_URL}/process-mining/discover",
+            f"{SYNAPSE_BASE_URL}/discover",
             json={
                 "case_id": case_id,
                 "log_id": log_id,
@@ -644,7 +656,7 @@ async def run_conformance_check(
     method: token_replay (빠름) 또는 alignment (정확함) 선택."""
     async with httpx.AsyncClient(timeout=180) as client:
         response = await client.post(
-            f"{SYNAPSE_BASE_URL}/process-mining/conformance",
+            f"{SYNAPSE_BASE_URL}/conformance",
             json={
                 "case_id": case_id,
                 "log_id": log_id,
@@ -665,7 +677,7 @@ async def analyze_performance(
     평균 대기 시간, 처리 시간, 빈도별 병목을 식별한다."""
     async with httpx.AsyncClient(timeout=180) as client:
         response = await client.post(
-            f"{SYNAPSE_BASE_URL}/process-mining/bottlenecks",
+            f"{SYNAPSE_BASE_URL}/bottlenecks",
             json={"case_id": case_id, "log_id": log_id},
         )
         return response.json()
@@ -682,7 +694,7 @@ async def get_process_variants(
     Variant는 동일한 활동 순서를 가진 케이스들의 그룹이다."""
     async with httpx.AsyncClient(timeout=60) as client:
         response = await client.get(
-            f"{SYNAPSE_BASE_URL}/process-mining/variants",
+            f"{SYNAPSE_BASE_URL}/variants",
             params={"case_id": case_id, "log_id": log_id, "top_k": top_k},
         )
         return response.json()
@@ -696,7 +708,7 @@ async def compare_models(
     설계 모델(BPM)과 발견 모델(Mining)의 비교에 사용한다."""
     async with httpx.AsyncClient(timeout=60) as client:
         response = await client.post(
-            f"{SYNAPSE_BASE_URL}/process-mining/compare",
+            f"{SYNAPSE_BASE_URL}/compare",
             json={
                 "model_a_id": model_a_id,
                 "model_b_id": model_b_id,

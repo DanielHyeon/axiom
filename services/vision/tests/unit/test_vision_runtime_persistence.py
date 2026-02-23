@@ -18,7 +18,7 @@ def test_vision_runtime_persists_state_across_restarts(tmp_path) -> None:
         },
         created_by="tester",
     )
-    runtime.compute_scenario("case-1", scenario["id"])
+    runtime.run_scenario_solver("case-1", scenario["id"])
     runtime.create_cube("BusinessAnalysisCube", "mv_business_fact", ["Region"], ["CaseCount"])
     job = runtime.queue_etl_job({"source": "dw"})
     runtime.complete_etl_job_if_queued(job["job_id"])

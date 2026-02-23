@@ -84,3 +84,17 @@ async def related_tables(table_name: str, max_hops: int = 2):
 @router.get("/stats")
 async def graph_stats():
     return {"success": True, "data": graph_search_service.stats()}
+
+
+@router.post("/query-cache")
+async def reflect_query_cache(body: dict[str, Any], request: Request):
+    """Oracle 품질 게이트 통과 쿼리 반영 (O4). question, sql, confidence, datasource_id 수신 후 Query 노드/캐시에 반영."""
+    _ = request
+    question = str(body.get("question") or "").strip()
+    sql = str(body.get("sql") or "").strip()
+    confidence = float(body.get("confidence") or 0.0)
+    datasource_id = str(body.get("datasource_id") or "").strip()
+    if not question or not sql:
+        raise HTTPException(status_code=400, detail="question and sql are required")
+    graph_search_service.add_query_cache(question, sql, confidence, datasource_id)
+    return {"success": True}

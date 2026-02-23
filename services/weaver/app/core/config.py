@@ -22,7 +22,7 @@ class Settings:
         self.mindsdb_timeout_seconds = float(os.getenv("MINDSDB_TIMEOUT", "15"))
         self.mindsdb_user = os.getenv("MINDSDB_USER", "")
         self.mindsdb_password = os.getenv("MINDSDB_PASSWORD", "")
-        self.jwt_secret_key = os.getenv("JWT_SECRET_KEY", "weaver-dev-secret-change-me")
+        self.jwt_secret_key = os.getenv("JWT_SECRET_KEY", "axiom-dev-secret-key-do-not-use-in-production")
         self.jwt_algorithm = os.getenv("JWT_ALGORITHM", "HS256")
         self.jwt_issuer = os.getenv("JWT_ISSUER", "")
         self.jwt_audience = os.getenv("JWT_AUDIENCE", "")
