@@ -64,7 +64,7 @@ export function LoginPage() {
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
   });
-  const { errors, isSubmitting } = formState;
+  const { errors } = formState;
 
   const onSubmit = async (data: LoginFormValues) => {
     setError(null);
@@ -113,49 +113,58 @@ export function LoginPage() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-neutral-950 px-4">
-      <div className="w-full max-w-sm rounded-lg border border-neutral-800 bg-neutral-900 p-8 shadow-xl">
+    <div className="relative flex h-screen w-full items-center justify-center bg-background px-4 overflow-hidden">
+      {/* Ambient gradient blobs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute top-1/4 left-1/3 h-[500px] w-[500px] rounded-full bg-primary/8 blur-[100px]" />
+        <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-blue-500/5 blur-[80px]" />
+      </div>
+
+      <div className="glass-card relative w-full max-w-sm rounded-2xl p-8">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold tracking-tight text-white mb-2">Axiom Canvas</h1>
-          <p className="text-sm text-neutral-400">Enter your credentials to access the system</p>
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-400 shadow-lg shadow-primary/25">
+            <span className="text-lg font-bold text-white">A</span>
+          </div>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Axiom Canvas</h1>
+          <p className="text-sm text-muted-foreground">시스템에 접속하려면 로그인하세요</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300" htmlFor="email">Email</label>
+            <label className="text-[13px] font-medium text-foreground" htmlFor="email">Email</label>
             <input
               id="email"
               type="email"
               {...register('email')}
-              className="w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
               placeholder="name@example.com"
             />
-            {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+            {errors.email && <p className="text-sm text-destructive">{errors.email.message}</p>}
           </div>
           <div className="space-y-2">
-            <label className="text-sm font-medium text-neutral-300" htmlFor="password">Password</label>
+            <label className="text-[13px] font-medium text-foreground" htmlFor="password">Password</label>
             <input
               id="password"
               type="password"
               {...register('password')}
-              className="w-full rounded-md border border-neutral-700 bg-neutral-950 px-3 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring/50 transition-all"
               placeholder="••••••••"
             />
-            {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
+            {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
           </div>
           <button
             type="submit"
             disabled={submitting}
-            className="w-full rounded-md bg-white text-black hover:bg-neutral-200 px-4 py-2 text-sm font-medium transition-colors mt-2"
+            className="w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 text-sm font-medium transition-all duration-200 mt-2 disabled:opacity-50"
           >
-            {submitting ? 'Signing In...' : 'Sign In'}
+            {submitting ? '로그인 중...' : '로그인'}
           </button>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-destructive">{error}</p>}
         </form>
 
         {TEST_ACCOUNTS.length > 0 && (
-          <div className="mt-6 border-t border-neutral-700 pt-6">
-            <p className="text-xs text-neutral-500 mb-2">테스트 계정 (Docker/개발)</p>
+          <div className="mt-6 border-t border-border/30 pt-6">
+            <p className="text-xs text-muted-foreground mb-2">테스트 계정 (Docker/개발)</p>
             <div className="flex flex-col gap-2">
               {TEST_ACCOUNTS.map((account) => (
                 <button
@@ -163,7 +172,7 @@ export function LoginPage() {
                   type="button"
                   disabled={submitting}
                   onClick={() => onTestAccount(account)}
-                  className="w-full rounded-md border border-neutral-600 bg-neutral-800 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-700 hover:text-white transition-colors disabled:opacity-50"
+                  className="w-full rounded-lg border border-border/30 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200 disabled:opacity-50"
                 >
                   {account.label}으로 로그인 ({account.email})
                 </button>

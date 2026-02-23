@@ -1,5 +1,3 @@
-import React from 'react';
-
 export interface ScenarioComparisonRow {
   scenario_id: string;
   scenario_name: string;

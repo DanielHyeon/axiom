@@ -164,8 +164,9 @@ export function extractMetadataStream(
           return;
         }
         const decoder = new TextDecoder();
+        const r = reader;
         function read(): Promise<void> {
-          return reader.read().then(({ done, value }) => {
+          return r.read().then(({ done, value }) => {
             if (done) {
               resolve();
               return;

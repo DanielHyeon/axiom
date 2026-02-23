@@ -28,12 +28,12 @@ export async function postAsk(
   datasourceId: string,
   options?: { use_cache?: boolean; include_viz?: boolean; row_limit?: number }
 ): Promise<AskResponse> {
-  const data = await oracleApi.post<AskResponse>('/text2sql/ask', {
+  const res = await oracleApi.post('/text2sql/ask', {
     question,
     datasource_id: datasourceId,
     options: options ?? {},
   });
-  return data as AskResponse;
+  return res as unknown as AskResponse;
 }
 
 /** GET /text2sql/history — 쿼리 이력 목록 */
@@ -66,8 +66,8 @@ export async function getHistory(params?: {
   date_to?: string;
   status?: 'success' | 'error';
 }): Promise<HistoryResponse> {
-  const data = await oracleApi.get<HistoryResponse>('/text2sql/history', { params });
-  return data as HistoryResponse;
+  const res = await oracleApi.get('/text2sql/history', { params });
+  return res as unknown as HistoryResponse;
 }
 
 /** POST /text2sql/react — NDJSON 스트림. streamManager 사용, URL은 oracleApi base와 동일. */

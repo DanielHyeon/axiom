@@ -36,20 +36,20 @@ export interface ListCasesParams {
 
 /** GET /api/v1/cases — 케이스 목록 */
 export async function listCases(params?: ListCasesParams): Promise<CaseListResponse> {
-  const data = await coreApi.get<CaseListResponse>('/api/v1/cases', {
+  const res = await coreApi.get('/api/v1/cases', {
     params: {
       status: params?.status,
       limit: params?.limit ?? 20,
       offset: params?.offset ?? 0,
     },
   });
-  return (data as CaseListResponse) ?? { items: [], total: 0 };
+  return (res as unknown as CaseListResponse) ?? { items: [], total: 0 };
 }
 
 /** GET /api/v1/cases/activities — 최근 활동 */
 export async function listCaseActivities(limit?: number): Promise<ActivitiesResponse> {
-  const data = await coreApi.get<ActivitiesResponse>('/api/v1/cases/activities', {
+  const res = await coreApi.get('/api/v1/cases/activities', {
     params: { limit: limit ?? 20 },
   });
-  return (data as ActivitiesResponse) ?? { items: [] };
+  return (res as unknown as ActivitiesResponse) ?? { items: [] };
 }

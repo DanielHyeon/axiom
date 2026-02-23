@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { extractMetadataStream } from '../api/weaverDatasourceApi';
 import { RefreshCw, Loader2 } from 'lucide-react';
 

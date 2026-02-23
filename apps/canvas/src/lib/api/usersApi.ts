@@ -22,6 +22,6 @@ function toUser(r: CurrentUserResponse): User {
 }
 
 export async function getCurrentUser(): Promise<User> {
-  const response = await coreApi.get<CurrentUserResponse>('/api/v1/users/me');
-  return toUser(response as CurrentUserResponse);
+  const response = await coreApi.get('/api/v1/users/me');
+  return toUser(response as unknown as CurrentUserResponse);
 }

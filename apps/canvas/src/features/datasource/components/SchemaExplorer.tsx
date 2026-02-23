@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getDatasourceSchemas, getDatasourceTables } from '../api/weaverDatasourceApi';
 import { ChevronRight, ChevronDown, Database, FolderOpen, Table } from 'lucide-react';
 

@@ -23,9 +23,9 @@ export async function submitDocumentReview(
   docId: string,
   payload: DocumentReviewRequest
 ): Promise<DocumentReviewResponse> {
-  const data = await coreApi.post<DocumentReviewResponse>(
+  const res = await coreApi.post(
     `/api/v1/cases/${caseId}/documents/${docId}/review`,
     payload
   );
-  return data as DocumentReviewResponse;
+  return res as unknown as DocumentReviewResponse;
 }

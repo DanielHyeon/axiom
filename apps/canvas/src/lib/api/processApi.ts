@@ -51,7 +51,7 @@ export async function listProcessDefinitions(params?: {
       sort: params?.sort ?? 'created_at:desc',
     },
   });
-  return response as ListProcessDefinitionsResponse;
+  return response as unknown as ListProcessDefinitionsResponse;
 }
 
 export async function createProcessDefinition(
@@ -62,7 +62,7 @@ export async function createProcessDefinition(
       ? { ...payload, bpmn_xml: payload.bpmn_xml ?? MINIMAL_BPMN_XML }
       : payload;
   const response = await coreApi.post('/api/v1/process/definitions', body);
-  return response as CreateProcessDefinitionResponse;
+  return response as unknown as CreateProcessDefinitionResponse;
 }
 
 export interface ProcessDefinitionDetailResponse {
@@ -83,7 +83,7 @@ export async function getProcessDefinition(
   procDefId: string
 ): Promise<ProcessDefinitionDetailResponse> {
   const response = await coreApi.get(`/api/v1/process/definitions/${procDefId}`);
-  return response as ProcessDefinitionDetailResponse;
+  return response as unknown as ProcessDefinitionDetailResponse;
 }
 
 export interface InitiateProcessRequest {
@@ -112,7 +112,7 @@ export async function initiateProcess(
   body: InitiateProcessRequest
 ): Promise<InitiateProcessResponse> {
   const response = await coreApi.post('/api/v1/process/initiate', body);
-  return response as InitiateProcessResponse;
+  return response as unknown as InitiateProcessResponse;
 }
 
 export interface SubmitWorkitemRequest {
@@ -134,7 +134,7 @@ export async function submitWorkitem(
   body: SubmitWorkitemRequest
 ): Promise<SubmitWorkitemResponse> {
   const response = await coreApi.post('/api/v1/process/submit', body);
-  return response as SubmitWorkitemResponse;
+  return response as unknown as SubmitWorkitemResponse;
 }
 
 export interface RoleBindingRequest {
@@ -149,7 +149,7 @@ export interface RoleBindingResponse {
 
 export async function roleBinding(body: RoleBindingRequest): Promise<RoleBindingResponse> {
   const response = await coreApi.post('/api/v1/process/role-binding', body);
-  return response as RoleBindingResponse;
+  return response as unknown as RoleBindingResponse;
 }
 
 export interface ProcessStatusResponse {
@@ -167,7 +167,7 @@ export async function getProcessStatus(
   procInstId: string
 ): Promise<ProcessStatusResponse> {
   const response = await coreApi.get(`/api/v1/process/${procInstId}/status`);
-  return response as ProcessStatusResponse;
+  return response as unknown as ProcessStatusResponse;
 }
 
 export interface GetWorkitemsResponse {
@@ -181,7 +181,7 @@ export async function getWorkitems(
   const response = await coreApi.get(`/api/v1/process/${procInstId}/workitems`, {
     params,
   });
-  return response as GetWorkitemsResponse;
+  return response as unknown as GetWorkitemsResponse;
 }
 
 /** Tenant-scoped workitem list (dashboard: ApprovalQueue, MyWorkitems). */
@@ -211,7 +211,7 @@ export interface ListWorkitemsParams {
 export async function listWorkitems(
   params?: ListWorkitemsParams
 ): Promise<ListWorkitemsResponse> {
-  const response = await coreApi.get<{ items: WorkitemListItem[]; total: number }>(
+  const response = await coreApi.get(
     '/api/v1/process/workitems',
     {
       params: {
@@ -222,7 +222,7 @@ export async function listWorkitems(
       },
     }
   );
-  return (response as ListWorkitemsResponse) ?? { items: [], total: 0 };
+  return (response as unknown as ListWorkitemsResponse) ?? { items: [], total: 0 };
 }
 
 export interface ProcessFeedbackResponse {
@@ -235,7 +235,7 @@ export async function getProcessFeedback(
   workitemId: string
 ): Promise<ProcessFeedbackResponse> {
   const response = await coreApi.get(`/api/v1/process/feedback/${workitemId}`);
-  return response as ProcessFeedbackResponse;
+  return response as unknown as ProcessFeedbackResponse;
 }
 
 export interface ReworkRequest {

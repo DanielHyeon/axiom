@@ -10,5 +10,5 @@ export interface CoreReadinessResponse {
  */
 export async function getCoreReadiness(): Promise<CoreReadinessResponse> {
   const response = await coreApi.get('/api/v1/health/ready');
-  return response as CoreReadinessResponse;
+  return response as unknown as CoreReadinessResponse;
 }

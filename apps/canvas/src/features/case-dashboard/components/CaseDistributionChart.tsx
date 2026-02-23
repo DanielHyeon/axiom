@@ -1,11 +1,12 @@
-import React from 'react';
+import { useMemo } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts';
+import { PieChart as PieChartIcon } from 'lucide-react';
 import type { Case } from '../hooks/useCases';
 
 const COLORS = ['#3b82f6', '#eab308', '#22c55e', '#ef4444'];
 
 export function CaseDistributionChart({ cases }: { cases: Case[] }) {
-  const byStatus = React.useMemo(() => {
+  const byStatus = useMemo(() => {
     const map: Record<string, number> = {};
     for (const c of cases) {
       map[c.status] = (map[c.status] ?? 0) + 1;
@@ -15,9 +16,14 @@ export function CaseDistributionChart({ cases }: { cases: Case[] }) {
 
   if (byStatus.length === 0) {
     return (
-      <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-        <h3 className="text-sm font-semibold text-white">유형별 분포</h3>
-        <p className="mt-2 text-sm text-neutral-500">데이터 없음</p>
+      <div className="glass-card rounded-xl p-5">
+        <h3 className="text-[13px] font-semibold text-foreground">유형별 분포</h3>
+        <div className="flex flex-col items-center py-8 text-center">
+          <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
+            <PieChartIcon className="h-5 w-5 text-muted-foreground/50" />
+          </div>
+          <p className="text-sm text-muted-foreground">데이터 없음</p>
+        </div>
       </div>
     );
   }
@@ -30,8 +36,8 @@ export function CaseDistributionChart({ cases }: { cases: Case[] }) {
   };
 
   return (
-    <div className="rounded-lg border border-neutral-800 bg-neutral-900/50 p-4">
-      <h3 className="mb-3 text-sm font-semibold text-white">상태별 분포</h3>
+    <div className="glass-card rounded-xl p-5">
+      <h3 className="mb-3 text-[13px] font-semibold text-foreground">상태별 분포</h3>
       <ResponsiveContainer width="100%" height={200}>
         <PieChart>
           <Pie
