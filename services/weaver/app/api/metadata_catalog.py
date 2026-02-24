@@ -11,7 +11,7 @@ from app.core.auth import CurrentUser, auth_service
 from app.core.config import settings
 from app.core.error_codes import external_service_http_exception
 from app.services.audit_log import audit_log_service
-from app.services.neo4j_metadata_store import Neo4jStoreUnavailableError, neo4j_metadata_store
+from app.services.synapse_metadata_client import SynapseMetadataClientError, synapse_metadata_client
 from app.services.postgres_metadata_store import PostgresStoreUnavailableError, postgres_metadata_store
 from app.services.request_guard import idempotency_store, rate_limiter
 from app.services.weaver_runtime import weaver_runtime
@@ -269,7 +269,7 @@ async def _finalize_snapshot(tenant_id: str, case_id: str, ds_name: str, item: d
         await postgres_metadata_store.save_snapshot(item, tenant_id=tenant_id)
         return
     if settings.metadata_external_mode:
-        await neo4j_metadata_store.save_snapshot(item, tenant_id=tenant_id)
+        await synapse_metadata_client.save_snapshot(item, tenant_id=tenant_id)
         return
     bucket = weaver_runtime.snapshots.setdefault((tenant_id, case_id, ds_name), {})
     bucket[item["id"]] = item
@@ -346,7 +346,7 @@ async def create_snapshot(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.save_snapshot(item, tenant_id=_tenant_id(user))
+            await synapse_metadata_client.save_snapshot(item, tenant_id=_tenant_id(user))
             if background_tasks:
                 background_tasks.add_task(_finalize_snapshot, _tenant_id(user), case_id, ds_name, dict(item))
             audit_log_service.emit(
@@ -366,8 +366,8 @@ async def create_snapshot(
                 response=item,
             ) if idem_key else None
             return item
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     bucket[snapshot_id] = item
     if background_tasks:
         background_tasks.add_task(_finalize_snapshot, _tenant_id(user), case_id, ds_name, dict(item))
@@ -406,9 +406,9 @@ async def list_snapshots(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            rows = await neo4j_metadata_store.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            rows = await synapse_metadata_client.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         rows = sorted(_snapshot_bucket(user, case_id, ds_name).values(), key=lambda x: x["version"], reverse=True)
     start = (page - 1) * size
@@ -429,9 +429,9 @@ async def diff_snapshots(case_id: str, ds_name: str, from_version: int = Query(.
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            rows = await neo4j_metadata_store.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            rows = await synapse_metadata_client.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         rows = list(_snapshot_bucket(user, case_id, ds_name).values())
     from_item = next((x for x in rows if x["version"] == from_version), None)
@@ -555,9 +555,9 @@ async def get_snapshot(case_id: str, ds_name: str, snapshot_id: str, user: Curre
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            item = await neo4j_metadata_store.get_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            item = await synapse_metadata_client.get_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         item = _snapshot_bucket(user, case_id, ds_name).get(snapshot_id)
     if not item:
@@ -575,9 +575,9 @@ async def restore_snapshot(case_id: str, ds_name: str, snapshot_id: str, user: C
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            item = await neo4j_metadata_store.get_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            item = await synapse_metadata_client.get_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         item = _snapshot_bucket(user, case_id, ds_name).get(snapshot_id)
     if not item:
@@ -623,9 +623,9 @@ async def delete_snapshot(
             raise HTTPException(status_code=404, detail="SNAPSHOT_NOT_FOUND")
     elif settings.metadata_external_mode:
         try:
-            ok = await neo4j_metadata_store.delete_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            ok = await synapse_metadata_client.delete_snapshot(case_id, ds_name, snapshot_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
         if not ok:
             raise HTTPException(status_code=404, detail="SNAPSHOT_NOT_FOUND")
     else:
@@ -703,7 +703,7 @@ async def create_term(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.save_glossary_term(item, tenant_id=_tenant_id(user))
+            await synapse_metadata_client.save_glossary_term(item, tenant_id=_tenant_id(user))
             audit_log_service.emit(
                 action="metadata.glossary.create",
                 actor_id=str(user.user_id),
@@ -720,8 +720,8 @@ async def create_term(
                 response=item,
             ) if idem_key else None
             return item
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     weaver_runtime.glossary[f"{_tenant_id(user)}:{term_id}"] = item
     audit_log_service.emit(
         action="metadata.glossary.create",
@@ -752,10 +752,10 @@ async def list_terms(user: CurrentUser = Depends(get_current_user)):
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            items = await neo4j_metadata_store.list_glossary_terms(tenant_id=_tenant_id(user))
+            items = await synapse_metadata_client.list_glossary_terms(tenant_id=_tenant_id(user))
             return {"items": items, "total": len(items)}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     items = sorted(
         [x for x in weaver_runtime.glossary.values() if str(x.get("tenant_id") or "") == _tenant_id(user)],
         key=lambda x: x["created_at"],
@@ -775,10 +775,10 @@ async def search_terms(q: str = Query(..., min_length=1), user: CurrentUser = De
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            items = await neo4j_metadata_store.search_glossary_terms(q, tenant_id=_tenant_id(user))
+            items = await synapse_metadata_client.search_glossary_terms(q, tenant_id=_tenant_id(user))
             return {"items": items, "total": len(items)}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     query = q.lower()
     items = [
         x
@@ -799,9 +799,9 @@ async def get_term(term_id: str, user: CurrentUser = Depends(get_current_user)):
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            item = await neo4j_metadata_store.get_glossary_term(term_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            item = await synapse_metadata_client.get_glossary_term(term_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         item = weaver_runtime.glossary.get(f"{_tenant_id(user)}:{term_id}")
     if not item:
@@ -833,9 +833,9 @@ async def update_term(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            item = await neo4j_metadata_store.get_glossary_term(term_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            item = await synapse_metadata_client.get_glossary_term(term_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         item = weaver_runtime.glossary.get(f"{_tenant_id(user)}:{term_id}")
     if not item:
@@ -866,7 +866,7 @@ async def update_term(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.save_glossary_term(item, tenant_id=_tenant_id(user))
+            await synapse_metadata_client.save_glossary_term(item, tenant_id=_tenant_id(user))
             audit_log_service.emit(
                 action="metadata.glossary.update",
                 actor_id=str(user.user_id),
@@ -883,8 +883,8 @@ async def update_term(
                 response=item,
             ) if idem_key else None
             return item
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     audit_log_service.emit(
         action="metadata.glossary.update",
         actor_id=str(user.user_id),
@@ -927,9 +927,9 @@ async def delete_term(
             raise HTTPException(status_code=404, detail="TERM_NOT_FOUND")
     elif settings.metadata_external_mode:
         try:
-            ok = await neo4j_metadata_store.delete_glossary_term(term_id, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            ok = await synapse_metadata_client.delete_glossary_term(term_id, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
         if not ok:
             raise HTTPException(status_code=404, detail="TERM_NOT_FOUND")
     else:
@@ -961,15 +961,15 @@ async def add_table_tag(case_id: str, ds_name: str, table_name: str, payload: Ta
     _ensure_writer(user)
     if settings.metadata_external_mode:
         try:
-            tags = await neo4j_metadata_store.add_entity_tag(
+            tags = await synapse_metadata_client.add_entity_tag(
                 _table_entity_key(user, case_id, ds_name, table_name),
                 "table",
                 {"tenant_id": _tenant_id(user), "case_id": case_id, "datasource": ds_name, "table_name": table_name},
                 payload.tag,
             )
             return {"table": table_name, "tags": tags}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, "table")
     weaver_runtime.table_tags.setdefault(key, set()).add(payload.tag)
     return {"table": table_name, "tags": sorted(weaver_runtime.table_tags[key])}
@@ -980,10 +980,10 @@ async def list_table_tags(case_id: str, ds_name: str, table_name: str, user: Cur
     _ensure_reader(user)
     if settings.metadata_external_mode:
         try:
-            tags = await neo4j_metadata_store.list_entity_tags(_table_entity_key(user, case_id, ds_name, table_name))
+            tags = await synapse_metadata_client.list_entity_tags(_table_entity_key(user, case_id, ds_name, table_name))
             return {"table": table_name, "tags": tags}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, "table")
     return {"table": table_name, "tags": sorted(weaver_runtime.table_tags.get(key, set()))}
 
@@ -993,10 +993,10 @@ async def delete_table_tag(case_id: str, ds_name: str, table_name: str, tag: str
     _ensure_writer(user)
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.remove_entity_tag(_table_entity_key(user, case_id, ds_name, table_name), tag)
+            await synapse_metadata_client.remove_entity_tag(_table_entity_key(user, case_id, ds_name, table_name), tag)
             return {"deleted": True, "tag": tag}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, "table")
     tags = weaver_runtime.table_tags.get(key, set())
     tags.discard(tag)
@@ -1008,7 +1008,7 @@ async def add_column_tag(case_id: str, ds_name: str, table_name: str, column_nam
     _ensure_writer(user)
     if settings.metadata_external_mode:
         try:
-            tags = await neo4j_metadata_store.add_entity_tag(
+            tags = await synapse_metadata_client.add_entity_tag(
                 _column_entity_key(user, case_id, ds_name, table_name, column_name),
                 "column",
                 {
@@ -1021,8 +1021,8 @@ async def add_column_tag(case_id: str, ds_name: str, table_name: str, column_nam
                 payload.tag,
             )
             return {"column": column_name, "tags": tags}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, column_name, "column")
     weaver_runtime.column_tags.setdefault(key, set()).add(payload.tag)
     return {"column": column_name, "tags": sorted(weaver_runtime.column_tags[key])}
@@ -1033,10 +1033,10 @@ async def list_column_tags(case_id: str, ds_name: str, table_name: str, column_n
     _ensure_reader(user)
     if settings.metadata_external_mode:
         try:
-            tags = await neo4j_metadata_store.list_entity_tags(_column_entity_key(user, case_id, ds_name, table_name, column_name))
+            tags = await synapse_metadata_client.list_entity_tags(_column_entity_key(user, case_id, ds_name, table_name, column_name))
             return {"column": column_name, "tags": tags}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, column_name, "column")
     return {"column": column_name, "tags": sorted(weaver_runtime.column_tags.get(key, set()))}
 
@@ -1046,10 +1046,10 @@ async def delete_column_tag(case_id: str, ds_name: str, table_name: str, column_
     _ensure_writer(user)
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.remove_entity_tag(_column_entity_key(user, case_id, ds_name, table_name, column_name), tag)
+            await synapse_metadata_client.remove_entity_tag(_column_entity_key(user, case_id, ds_name, table_name, column_name), tag)
             return {"deleted": True, "tag": tag}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     key = (_tenant_id(user), case_id, ds_name, table_name, column_name, "column")
     tags = weaver_runtime.column_tags.get(key, set())
     tags.discard(tag)
@@ -1061,10 +1061,10 @@ async def entities_by_tag(tag: str, user: CurrentUser = Depends(get_current_user
     _ensure_reader(user)
     if settings.metadata_external_mode:
         try:
-            entities = await neo4j_metadata_store.entities_by_tag(tag, tenant_id=_tenant_id(user))
+            entities = await synapse_metadata_client.entities_by_tag(tag, tenant_id=_tenant_id(user))
             return {"tag": tag, "entities": entities, "total": len(entities)}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     entities = []
     for (tenant_id, case_id, ds_name, table_name, _), tags in weaver_runtime.table_tags.items():
         if tenant_id != _tenant_id(user):
@@ -1093,11 +1093,11 @@ async def metadata_search(q: str = Query(..., min_length=1), user: CurrentUser =
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            term_items = await neo4j_metadata_store.search_glossary_terms(q, tenant_id=_tenant_id(user))
+            term_items = await synapse_metadata_client.search_glossary_terms(q, tenant_id=_tenant_id(user))
             results = [{"type": "term", "name": x["term"], "id": x["id"]} for x in term_items]
             return {"items": results, "total": len(results)}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     query = q.lower()
     results = []
     for ds in weaver_runtime.datasources.values():
@@ -1171,9 +1171,9 @@ async def datasource_stats(case_id: str, ds_name: str, user: CurrentUser = Depen
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     elif settings.metadata_external_mode:
         try:
-            snapshot_count = len(await neo4j_metadata_store.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user)))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            snapshot_count = len(await synapse_metadata_client.list_snapshots(case_id, ds_name, tenant_id=_tenant_id(user)))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     else:
         snapshot_count = len(_snapshot_bucket(user, case_id, ds_name))
     return {
@@ -1194,10 +1194,10 @@ async def tenant_stats(user: CurrentUser = Depends(get_current_user)):
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            stats = await neo4j_metadata_store.stats(tenant_id=_tenant_id(user))
+            stats = await synapse_metadata_client.stats(tenant_id=_tenant_id(user))
             return {"tenant_id": str(user.tenant_id), "stats": stats}
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     return {
         "tenant_id": str(user.tenant_id),
         "stats": {

@@ -1,0 +1,19 @@
+{
+  "event_name": "WATCH_ALERT_TRIGGERED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["alert_id", "tenant_id", "subscription_id", "severity", "idempotency_key"],
+    "properties": {
+      "alert_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "subscription_id": {"type": "string"},
+      "severity": {"type": "string"},
+      "message": {"type": "string"},
+      "channel": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

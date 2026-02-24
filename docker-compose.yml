@@ -7,6 +7,8 @@ services:
       - POSTGRES_PASSWORD=arkos
     ports:
       - "15432:5432"
+    volumes:
+      - ./scripts/init-db-schemas.sql:/docker-entrypoint-initdb.d/01-init-schemas.sql:ro
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U arkos -d insolvency_os" ]
       interval: 10s
@@ -49,6 +51,7 @@ services:
       - NEO4J_USER=neo4j
       - NEO4J_PASSWORD=password
       - SCHEMA_EDIT_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - JWT_SECRET_KEY=axiom-dev-secret-key-do-not-use-in-production
     depends_on:
       neo4j-db:
         condition: service_healthy
@@ -72,6 +75,7 @@ services:
       - CORE_EVENT_BUS=redis
       - VISION_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
       - SYNAPSE_BASE_URL=http://synapse-svc:8003
+      - CORE_BASE_URL=http://core-svc:8002
     depends_on:
       redis-bus:
         condition: service_healthy
@@ -94,6 +98,7 @@ services:
       - "8002:8002"
     environment:
       - DATABASE_URL=postgresql+asyncpg://arkos:arkos@postgres-db:5432/insolvency_os
+      - DATABASE_SCHEMA=core
       - CORE_AGENT_STATE_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
       - REDIS_URL=redis://redis-bus:6379
       - SYNAPSE_BASE_URL=http://synapse-svc:8003
@@ -121,13 +126,17 @@ services:
     ports:
       - "8001:8001"
     environment:
-      - NEO4J_URI=bolt://neo4j-db:7687
+      - SYNAPSE_BASE_URL=http://synapse-svc:8003
+      - WEAVER_METADATA_PG_MODE=1
+      - POSTGRES_DSN=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
     depends_on:
       vision-svc:
         condition: service_healthy
       core-svc:
         condition: service_healthy
-      neo4j-db:
+      synapse-svc:
+        condition: service_healthy
+      postgres-db:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health/ready')\" || exit 1"]

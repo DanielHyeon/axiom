@@ -1,3 +1,7 @@
+import asyncio
+import logging
+import os
+
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 from app.api.analytics import router as analytics_router
@@ -6,6 +10,8 @@ from app.api.olap import router as olap_router
 from app.api.root_cause import router as root_cause_router
 from app.api.what_if import router as what_if_router
 from app.services.vision_runtime import vision_runtime
+
+logger = logging.getLogger("axiom.vision")
 
 app = FastAPI(title="Axiom Vision", version="1.0.0")
 
@@ -16,6 +22,57 @@ app.include_router(analytics_v3_router)
 app.include_router(what_if_router)
 app.include_router(olap_router)
 app.include_router(root_cause_router)
+
+# ── DDD-P2-03: CaseEventConsumer background task ── #
+_consumer_task: asyncio.Task | None = None
+# ── DDD-P3-01: Vision Outbox Relay ── #
+_relay_task: asyncio.Task | None = None
+_relay_worker = None
+
+
+@app.on_event("startup")
+async def _start_case_event_consumer():
+    """CQRS 읽기 모델 갱신 워커를 백그라운드 태스크로 시작."""
+    global _consumer_task
+    if os.getenv("VISION_CQRS_CONSUMER_ENABLED", "true").lower() not in ("true", "1", "yes"):
+        logger.info("CaseEventConsumer disabled via VISION_CQRS_CONSUMER_ENABLED")
+        return
+    try:
+        from app.workers.case_event_consumer import CaseEventConsumer
+        consumer = CaseEventConsumer()
+        _consumer_task = asyncio.create_task(consumer.start())
+        logger.info("CaseEventConsumer background task started")
+    except Exception:
+        logger.warning("CaseEventConsumer failed to start (redis may be unavailable)", exc_info=True)
+
+
+@app.on_event("startup")
+async def _start_vision_relay():
+    """DDD-P3-01: Vision Outbox Relay 워커 시작."""
+    global _relay_task, _relay_worker
+    try:
+        from app.events.outbox import VisionRelayWorker, ensure_outbox_table
+        ensure_outbox_table()
+        _relay_worker = VisionRelayWorker(poll_interval=5, max_batch=100)
+        _relay_task = asyncio.create_task(_relay_worker.run())
+        logger.info("VisionRelayWorker background task started")
+    except Exception:
+        logger.warning("VisionRelayWorker failed to start", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def _stop_background_tasks():
+    global _consumer_task, _relay_task, _relay_worker
+    if _relay_worker is not None:
+        _relay_worker.shutdown()
+    for task in (_consumer_task, _relay_task):
+        if task and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
+    logger.info("Vision background tasks stopped")
 
 
 @app.get("/health")

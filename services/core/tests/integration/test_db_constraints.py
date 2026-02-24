@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy import text
 
-from app.core.database import AsyncSessionLocal, engine
+from app.core.database import AsyncSessionLocal, engine, ensure_schema
 from app.models.base_models import Base
 
 
@@ -11,6 +11,7 @@ async def setup_db():
     if engine.url.get_backend_name() != "postgresql":
         pytest.skip("postgres-only constraint test")
     async with engine.begin() as conn:
+        await ensure_schema(conn)
         await conn.run_sync(Base.metadata.create_all)
     yield
 
@@ -49,7 +50,7 @@ async def test_process_watch_constraint_and_index_contracts():
                 """
                 SELECT indexname
                 FROM pg_indexes
-                WHERE schemaname = 'public'
+                WHERE schemaname = 'core'
                   AND indexname = ANY(:names)
                 """
             ),
@@ -65,7 +66,7 @@ async def test_watch_rule_unique_constraint_enforced():
         await session.execute(
             text(
                 """
-                INSERT INTO watch_rules (id, name, event_type, definition, active, tenant_id)
+                INSERT INTO core.watch_rules (id, name, event_type, definition, active, tenant_id)
                 VALUES
                 ('wr-1', 'same-name', 'deadline', '{}'::jsonb, true, 'tenant-1')
                 """
@@ -78,7 +79,7 @@ async def test_watch_rule_unique_constraint_enforced():
             await session.execute(
                 text(
                     """
-                    INSERT INTO watch_rules (id, name, event_type, definition, active, tenant_id)
+                    INSERT INTO core.watch_rules (id, name, event_type, definition, active, tenant_id)
                     VALUES
                     ('wr-2', 'same-name', 'deadline', '{}'::jsonb, true, 'tenant-1')
                     """

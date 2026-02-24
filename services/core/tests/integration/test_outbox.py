@@ -4,11 +4,12 @@ from sqlalchemy import select
 from app.models.base_models import Base, WorkItem, EventOutbox
 from app.services.process_service import ProcessService
 from app.core.middleware import _tenant_id
-from app.core.database import engine, AsyncSessionLocal
+from app.core.database import engine, AsyncSessionLocal, ensure_schema
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():
     async with engine.begin() as conn:
+        await ensure_schema(conn)
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:

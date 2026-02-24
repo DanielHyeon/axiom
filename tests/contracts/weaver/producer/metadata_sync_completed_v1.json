@@ -1,0 +1,17 @@
+{
+  "event_name": "METADATA_SYNC_COMPLETED",
+  "version": "1.0.0",
+  "producer": "weaver",
+  "schema": {
+    "type": "object",
+    "required": ["datasource_name", "tenant_id", "idempotency_key"],
+    "properties": {
+      "datasource_name": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "tables_synced": {"type": "integer"},
+      "columns_synced": {"type": "integer"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

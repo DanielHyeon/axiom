@@ -1,0 +1,18 @@
+{
+  "event_name": "SAGA_COMPENSATION_COMPLETED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["proc_inst_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "proc_inst_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "failed_workitem_id": {"type": "string"},
+      "failure_reason": {"type": "string"},
+      "compensated_steps": {"type": "integer"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

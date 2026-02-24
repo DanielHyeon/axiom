@@ -12,7 +12,7 @@ from minio import Minio
 
 from app.core.config import settings
 from app.core.redis_client import get_redis
-from app.services.synapse_gateway_service import GatewayProxyError, synapse_gateway_service
+from app.infrastructure.external.synapse_acl import SynapseACLError, synapse_acl
 from app.workers.base import BaseWorker
 from app.workers.event_log_parsers import (
     validate_csv,
@@ -156,17 +156,15 @@ class EventLogWorker(BaseWorker):
                 f"--{boundary}\r\n"
                 f'Content-Disposition: form-data; name="file"; filename="upload"\r\n\r\n'
             ).encode("utf-8") + file_bytes + f"\r\n--{boundary}--\r\n".encode("utf-8")
-            # Gateway service로 Synapse 호출 (tenant 헤더)
-            await synapse_gateway_service.request(
-                "POST",
-                "/api/v3/synapse/event-logs/ingest",
-                incoming_headers={"X-Tenant-Id": tenant_id},
+            # ACL을 통한 Synapse 호출 (tenant 헤더)
+            await synapse_acl.ingest_event_log(
+                tenant_id=tenant_id,
                 raw_body=body,
                 content_type=f"multipart/form-data; boundary={boundary}",
                 timeout=300.0,
             )
-        except GatewayProxyError as e:
-            logger.exception("event_log Synapse ingest failed: %s", e.body)
+        except SynapseACLError as e:
+            logger.exception("event_log Synapse ingest failed: %s", e.detail)
             await self._report_failure(event_log_id, [f"Synapse ingest failed: {e.status_code}"])
             return
 

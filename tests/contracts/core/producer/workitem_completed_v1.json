@@ -1,0 +1,18 @@
+{
+  "event_name": "WORKITEM_COMPLETED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["workitem_id", "proc_inst_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "workitem_id": {"type": "string"},
+      "proc_inst_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "activity_name": {"type": "string"},
+      "completion_days": {"type": "number"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "event_name": "CONFORMANCE_CHECK_COMPLETED",
+  "consumer": "vision",
+  "consumer_group": "vision_analytics_group",
+  "required_fields": ["task_id", "log_id", "model_id", "tenant_id"]
+}

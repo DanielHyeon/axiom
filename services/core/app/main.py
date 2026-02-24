@@ -1,3 +1,5 @@
+import asyncio
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.database import init_database, AsyncSessionLocal
@@ -8,13 +10,14 @@ from app.core.middleware import TenantMiddleware, RequestIdMiddleware
 from app.core.rate_limiter import RateLimitMiddleware
 from app.api import health
 from app.api.auth.routes import router as auth_router
-from app.api.agent.routes import router as agent_router
+from app.modules.agent.api.routes import router as agent_router
 from app.api.events.routes import router as events_router
 from app.api.gateway.routes import router as gateway_router
-from app.api.process.routes import router as process_router
-from app.api.watch.routes import router as watch_router
+from app.modules.process.api.routes import router as process_router
+from app.modules.watch.api.routes import router as watch_router
 from app.api.users.routes import router as users_router
-from app.api.cases.routes import router as cases_router
+from app.modules.case.api.routes import router as cases_router
+from app.api.admin.event_routes import router as admin_events_router
 from app.core.security import get_current_user
 from fastapi import Depends
 
@@ -48,6 +51,7 @@ app.include_router(watch_router, prefix="/api/v1", dependencies=[Depends(get_cur
 app.include_router(agent_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(gateway_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(admin_events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 
 
 @app.on_event("startup")
@@ -59,15 +63,22 @@ async def startup_event():
             from sqlalchemy import select, func
             r = await session.execute(select(func.count()).select_from(User))
             if (r.scalar() or 0) == 0:
-                t = Tenant(id="default", name="Default", active=True)
+                _SEED_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+                _SEED_USER_ID = "00000000-0000-0000-0000-000000000002"
+                t = Tenant(id=_SEED_TENANT_ID, name="Default", active=True)
                 session.add(t)
                 u = User(
-                    id="seed-admin",
+                    id=_SEED_USER_ID,
                     email=settings.SEED_DEV_EMAIL,
                     password_hash=hash_password(settings.SEED_DEV_PASSWORD),
-                    tenant_id="default",
+                    tenant_id=_SEED_TENANT_ID,
                     role="admin",
                     active=True,
                 )
                 session.add(u)
                 await session.commit()
+
+    # Start Outbox Relay Worker (Transactional Outbox pattern)
+    from app.workers.sync import SyncWorker
+    relay = SyncWorker(poll_interval_seconds=5, max_batch=100)
+    asyncio.create_task(relay.run())

@@ -1,0 +1,6 @@
+{
+  "event_name": "ONTOLOGY_NODE_UPDATED",
+  "consumer": "oracle",
+  "consumer_group": "oracle_group",
+  "required_fields": ["node_id", "node_type", "tenant_id"]
+}

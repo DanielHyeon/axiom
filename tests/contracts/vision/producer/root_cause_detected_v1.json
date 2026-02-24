@@ -1,0 +1,17 @@
+{
+  "event_name": "ROOT_CAUSE_DETECTED",
+  "version": "1.0.0",
+  "producer": "vision",
+  "schema": {
+    "type": "object",
+    "required": ["analysis_id", "tenant_id", "root_causes", "idempotency_key"],
+    "properties": {
+      "analysis_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "root_causes": {"type": "array", "items": {"type": "object"}},
+      "severity": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

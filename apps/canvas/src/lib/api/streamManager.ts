@@ -40,7 +40,7 @@ async function createStream<T>(
   mode: 'text' | 'ndjson'
 ): Promise<AbortController> {
   const controller = new AbortController();
-  const token = useAuthStore.getState().accessToken;
+  const { accessToken, user } = useAuthStore.getState();
 
   (async () => {
     try {
@@ -48,7 +48,8 @@ async function createStream<T>(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+          ...(user?.tenantId ? { 'X-Tenant-Id': user.tenantId } : {}),
           Accept: mode === 'ndjson' ? 'application/x-ndjson' : 'text/event-stream',
         },
         body: JSON.stringify(body),
@@ -56,6 +57,12 @@ async function createStream<T>(
       });
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('요청 제한에 도달했습니다. 잠시 후 다시 시도해주세요.');
+        }
+        if (response.status === 403) {
+          throw new Error('접근 권한이 없습니다.');
+        }
         throw new Error(`Stream failed: ${response.status}`);
       }
 

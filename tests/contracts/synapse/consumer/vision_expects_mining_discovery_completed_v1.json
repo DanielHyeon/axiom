@@ -1,0 +1,6 @@
+{
+  "event_name": "MINING_DISCOVERY_COMPLETED",
+  "consumer": "vision",
+  "consumer_group": "vision_analytics_group",
+  "required_fields": ["task_id", "tenant_id", "log_id"]
+}

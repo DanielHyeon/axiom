@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from sqlalchemy import select
 
-from app.core.database import AsyncSessionLocal, engine
+from app.core.database import AsyncSessionLocal, engine, ensure_schema
 from app.core.events import EventPublisher
 from app.core.middleware import _tenant_id
 from app.core.observability import metrics_registry
@@ -38,6 +38,7 @@ class FakeRedis:
 async def setup_db():
     metrics_registry.reset()
     async with engine.begin() as conn:
+        await ensure_schema(conn)
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:

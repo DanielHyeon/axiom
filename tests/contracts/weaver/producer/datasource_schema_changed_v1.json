@@ -1,0 +1,17 @@
+{
+  "event_name": "DATASOURCE_SCHEMA_CHANGED",
+  "version": "1.0.0",
+  "producer": "weaver",
+  "schema": {
+    "type": "object",
+    "required": ["datasource_name", "tenant_id", "change_type", "idempotency_key"],
+    "properties": {
+      "datasource_name": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "change_type": {"type": "string"},
+      "affected_tables": {"type": "array", "items": {"type": "string"}},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

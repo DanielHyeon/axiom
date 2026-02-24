@@ -1,0 +1,6 @@
+{
+  "event_name": "WHATIF_SIMULATION_COMPLETED",
+  "consumer": "canvas",
+  "consumer_group": "canvas_ws_group",
+  "required_fields": ["simulation_id", "tenant_id"]
+}

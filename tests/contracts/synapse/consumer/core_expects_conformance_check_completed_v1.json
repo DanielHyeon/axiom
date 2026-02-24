@@ -1,0 +1,6 @@
+{
+  "event_name": "CONFORMANCE_CHECK_COMPLETED",
+  "consumer": "core",
+  "consumer_group": "core_group",
+  "required_fields": ["task_id", "tenant_id", "model_id", "fitness_score"]
+}

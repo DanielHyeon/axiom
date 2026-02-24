@@ -1,0 +1,17 @@
+{
+  "event_name": "PROCESS_INITIATED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["proc_inst_id", "tenant_id", "definition_id", "idempotency_key"],
+    "properties": {
+      "proc_inst_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "definition_id": {"type": "string"},
+      "definition_name": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

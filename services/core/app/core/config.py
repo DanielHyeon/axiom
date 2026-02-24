@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     
     # DB configuration
     DATABASE_URL: str = "postgresql+asyncpg://arkos:arkos@localhost:5432/insolvency_os"
+    DATABASE_SCHEMA: str = "core"
     
     # Redis configuration
     REDIS_URL: str = "redis://localhost:6379"

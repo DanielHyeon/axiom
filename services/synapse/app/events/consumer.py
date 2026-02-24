@@ -13,7 +13,7 @@ from app.graph.ontology_ingest import OntologyIngestor
 
 logger = structlog.get_logger()
 
-STREAM_KEY = "axiom:events"
+STREAM_KEY = "axiom:core:events"
 CONSUMER_GROUP = "synapse_group"
 CONSUMER_NAME = "synapse-ingest-1"
 BLOCK_MS = 5000

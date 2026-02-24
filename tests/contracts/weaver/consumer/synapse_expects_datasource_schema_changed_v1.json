@@ -1,0 +1,6 @@
+{
+  "event_name": "DATASOURCE_SCHEMA_CHANGED",
+  "consumer": "synapse",
+  "consumer_group": "synapse_group",
+  "required_fields": ["datasource_name", "tenant_id", "change_type"]
+}

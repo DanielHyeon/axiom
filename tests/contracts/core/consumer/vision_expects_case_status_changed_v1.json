@@ -1,0 +1,6 @@
+{
+  "event_name": "CASE_STATUS_CHANGED",
+  "consumer": "vision",
+  "consumer_group": "vision_analytics_group",
+  "required_fields": ["case_id", "tenant_id", "new_status"]
+}

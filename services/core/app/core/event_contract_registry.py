@@ -49,6 +49,35 @@ EVENT_CONTRACTS: dict[str, EventContract] = {
         payload_schema="core/saga_compensation_completed/v1",
         idempotency_key_rule="event_type:aggregate_id",
     ),
+    # ── DDD-P3-01: 신규 Core 이벤트 ──
+    "WORKITEM_CREATED": EventContract(
+        event_name="WORKITEM_CREATED",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/workitem_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "WORKITEM_CANCELLED": EventContract(
+        event_name="WORKITEM_CANCELLED",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/workitem_cancelled/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "CASE_STATUS_CHANGED": EventContract(
+        event_name="CASE_STATUS_CHANGED",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/case_status_changed/v1",
+        idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
+    ),
+    "WATCH_ALERT_TRIGGERED": EventContract(
+        event_name="WATCH_ALERT_TRIGGERED",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/watch_alert_triggered/v1",
+        idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
+    ),
 }
 
 

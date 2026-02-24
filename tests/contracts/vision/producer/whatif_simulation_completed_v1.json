@@ -1,0 +1,17 @@
+{
+  "event_name": "WHATIF_SIMULATION_COMPLETED",
+  "version": "1.0.0",
+  "producer": "vision",
+  "schema": {
+    "type": "object",
+    "required": ["simulation_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "simulation_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "scenario_name": {"type": "string"},
+      "result_summary": {"type": "object"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

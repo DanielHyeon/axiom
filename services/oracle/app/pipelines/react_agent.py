@@ -8,7 +8,7 @@ from app.core.auth import CurrentUser
 from app.core.llm_factory import llm_factory
 from app.core.sql_guard import GuardConfig, sql_guard
 from app.core.sql_exec import sql_executor
-from app.core.synapse_client import synapse_client
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
 from app.core.visualize import recommend_visualization
 
 logger = structlog.get_logger()
@@ -31,6 +31,7 @@ class ValidateResult(BaseModel):
 class ReactSession(BaseModel):
     question: str
     datasource_id: str
+    case_id: str | None = None  # O3: ontology context
     options: Dict[str, Any]
     max_iterations: int = 5
     current_iteration: int = 0
@@ -48,24 +49,33 @@ def _error_step(iteration: int, code: str, message: str) -> str:
 class ReactAgent:
     """6-step loop: Select (graph) -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage; COMPLETE -> step result."""
 
-    async def _select_tables(self, question: str, tenant_id: str) -> tuple[list[str], str]:
-        """Graph/search based table list; fallback to list_schema_tables. Returns (table_names, reasoning)."""
+    async def _select_tables(
+        self, question: str, tenant_id: str, case_id: str | None = None,
+    ) -> tuple[list[str], str]:
+        """ACL을 통한 테이블 선택. O3: ontology context 우선, fallback to graph search / schema catalog."""
+        # O3: ontology context 우선
+        if case_id:
+            try:
+                ctx = await oracle_synapse_acl.search_ontology_context(
+                    case_id=case_id, query=question, tenant_id=tenant_id,
+                )
+                if ctx and ctx.preferred_tables:
+                    return ctx.preferred_tables, "온톨로지 기반 테이블 선택"
+            except Exception as exc:
+                logger.warning("react_ontology_fallback", reason=str(exc))
+        # Existing: graph search fallback
         try:
-            search_data = await synapse_client.search_graph(question, tenant_id=tenant_id)
-            if isinstance(search_data, dict):
-                tables = search_data.get("tables") or {}
-                names = []
-                for t in (tables.get("vector_matched") or []) + (tables.get("fk_related") or []):
-                    if isinstance(t, dict) and t.get("name"):
-                        names.append(str(t["name"]).strip())
-                if names:
-                    return list(dict.fromkeys(names)), "그래프 검색으로 관련 테이블 선택"
+            search_result = await oracle_synapse_acl.search_schema_context(
+                query=question, tenant_id=tenant_id
+            )
+            if search_result.tables:
+                names = [t.name for t in search_result.tables]
+                return list(dict.fromkeys(names)), "그래프 검색으로 관련 테이블 선택"
         except Exception as exc:
             logger.warning("react_select_search_fallback", reason=str(exc))
         try:
-            payload = await synapse_client.list_schema_tables(tenant_id=tenant_id)
-            rows = (payload.get("data") or {}).get("tables") or []
-            names = [str(r.get("name", "")).strip() for r in rows if r and str(r.get("name", "")).strip()]
+            tables = await oracle_synapse_acl.list_tables(tenant_id=tenant_id)
+            names = [t.name for t in tables if t.name]
             if names:
                 return names, "스키마 테이블 목록 기반"
         except Exception:
@@ -111,8 +121,8 @@ class ReactAgent:
             for iteration in range(1, session.max_iterations + 1):
                 session.current_iteration = iteration
 
-                # Step 1: Select (graph/schema based)
-                table_names, reasoning = await self._select_tables(session.question, tenant_id)
+                # Step 1: Select (O3: ontology → graph → schema → fallback)
+                table_names, reasoning = await self._select_tables(session.question, tenant_id, session.case_id)
                 yield _step_line("select", iteration, {"tables": table_names, "reasoning": reasoning})
 
                 # Step 2: Generate

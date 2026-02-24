@@ -12,6 +12,8 @@ class PostgresStoreUnavailableError(RuntimeError):
 
 
 class PostgresMetadataStore:
+    _DB_SCHEMA = "weaver"
+
     def __init__(self) -> None:
         self._pool = None
         self._breaker = SimpleCircuitBreaker(failure_threshold=3, reset_timeout_seconds=20.0)
@@ -31,7 +33,10 @@ class PostgresMetadataStore:
         except Exception as exc:
             raise PostgresStoreUnavailableError("asyncpg package is not installed") from exc
         async def _create():
-            return await asyncpg.create_pool(dsn=dsn, min_size=1, max_size=5)
+            return await asyncpg.create_pool(
+                dsn=dsn, min_size=1, max_size=5,
+                server_settings={"search_path": f"{self._DB_SCHEMA},public"},
+            )
         try:
             self._pool = await with_retry(_create, retries=2, base_delay_seconds=0.05)
             self._breaker.on_success()
@@ -46,6 +51,7 @@ class PostgresMetadataStore:
     async def _migrate(self) -> None:
         pool = self._pool
         async with pool.acquire() as conn:
+            await conn.execute(f"CREATE SCHEMA IF NOT EXISTS {self._DB_SCHEMA}")
             await conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS weaver_metadata_datasources (

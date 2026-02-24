@@ -12,12 +12,15 @@ export const createApiClient = (baseURL: string): AxiosInstance => {
         },
     });
 
-    // Request Interceptor
+    // Request Interceptor: Inject JWT + Tenant ID
     api.interceptors.request.use(
         (config) => {
-            const accessToken = useAuthStore.getState().accessToken;
+            const { accessToken, user } = useAuthStore.getState();
             if (accessToken && config.headers) {
                 config.headers.Authorization = `Bearer ${accessToken}`;
+            }
+            if (user?.tenantId && config.headers) {
+                config.headers['X-Tenant-Id'] = user.tenantId;
             }
             return config;
         },

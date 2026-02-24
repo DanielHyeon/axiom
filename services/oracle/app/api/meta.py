@@ -1,4 +1,4 @@
-from typing import Any
+from dataclasses import asdict
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field
 
 from app.api.text2sql import get_current_user
 from app.core.auth import CurrentUser, auth_service
-from app.core.synapse_client import synapse_client
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, DatasourceInfo
 
 router = APIRouter(prefix="/text2sql/meta", tags=["Meta"])
 
@@ -16,30 +16,12 @@ class DescriptionUpdateRequest(BaseModel):
     description: str = Field(..., min_length=1, max_length=500)
 
 
-def _resolve_datasource(datasource_id: str) -> dict[str, Any]:
-    for item in synapse_client.list_datasources():
-        if item.get("id") == datasource_id:
-            return item
+def _resolve_datasource(datasource_id: str) -> DatasourceInfo:
+    """ACL을 통해 데이터소스 조회."""
+    for ds in oracle_synapse_acl.list_datasources():
+        if ds.id == datasource_id:
+            return ds
     raise HTTPException(status_code=404, detail="datasource not found")
-
-
-def _fallback_tables() -> list[dict[str, Any]]:
-    return [
-        {
-            "name": "processes",
-            "description": "프로세스 실행 내역",
-            "row_count": 1250,
-            "column_count": 4,
-            "has_embedding": True,
-        },
-        {
-            "name": "organizations",
-            "description": "이해관계자 정보",
-            "row_count": 320,
-            "column_count": 2,
-            "has_embedding": True,
-        },
-    ]
 
 
 @router.get("/tables")
@@ -55,22 +37,31 @@ async def list_tables(
     datasource = _resolve_datasource(datasource_id)
 
     try:
-        payload = await synapse_client.list_schema_tables(str(user.tenant_id))
-        rows = payload.get("data", {}).get("tables", [])
+        table_infos = await oracle_synapse_acl.list_tables(str(user.tenant_id))
     except Exception:
-        rows = _fallback_tables()
+        table_infos = []
+
+    if not table_infos:
+        raise HTTPException(
+            status_code=503,
+            detail="스키마 메타데이터를 불러올 수 없습니다. Synapse 연결을 확인하세요.",
+        )
+
+    rows = [
+        {
+            "name": t.name,
+            "schema": datasource.schema,
+            "db": datasource.database,
+            "description": t.description,
+            "column_count": len(t.columns),
+            "is_valid": t.has_embedding,
+            "has_vector": t.has_embedding,
+        }
+        for t in table_infos
+    ]
 
     items = []
-    for row in rows:
-        table = {
-            "name": row.get("name"),
-            "schema": datasource.get("schema", "public"),
-            "db": datasource.get("database", ""),
-            "description": row.get("description"),
-            "column_count": int(row.get("column_count", 0)),
-            "is_valid": bool(row.get("has_embedding", True)),
-            "has_vector": bool(row.get("has_embedding", False)),
-        }
+    for table in rows:
         if valid_only and not table["is_valid"]:
             continue
         if search:
@@ -109,8 +100,7 @@ async def get_table_columns(
     datasource = _resolve_datasource(datasource_id)
 
     try:
-        payload = await synapse_client.get_schema_table(str(user.tenant_id), name)
-        table = payload.get("data", {})
+        table_info = await oracle_synapse_acl.get_table_detail(str(user.tenant_id), name)
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 400:
             raise HTTPException(status_code=404, detail="table not found")
@@ -118,29 +108,30 @@ async def get_table_columns(
     except Exception:
         raise HTTPException(status_code=503, detail="meta provider unavailable")
 
-    columns = []
-    for col in table.get("columns", []):
-        col_name = str(col.get("name") or "")
-        columns.append(
-            {
-                "name": col_name,
-                "fqn": f"{datasource.get('schema', 'public')}.{name}.{col_name}",
-                "data_type": col.get("data_type"),
-                "nullable": True,
-                "is_primary_key": col_name == "id",
-                "description": col.get("description"),
-                "has_vector": bool(table.get("has_embedding", False)),
-                "foreign_keys": [],
-            }
-        )
+    if not table_info:
+        raise HTTPException(status_code=404, detail="table not found")
+
+    columns = [
+        {
+            "name": col.name,
+            "fqn": f"{datasource.schema}.{name}.{col.name}",
+            "data_type": col.data_type,
+            "nullable": True,
+            "is_primary_key": col.is_key,
+            "description": col.description,
+            "has_vector": table_info.has_embedding,
+            "foreign_keys": [],
+        }
+        for col in table_info.columns
+    ]
 
     return {
         "success": True,
         "data": {
             "table": {
                 "name": name,
-                "schema": datasource.get("schema", "public"),
-                "description": table.get("description"),
+                "schema": datasource.schema,
+                "description": table_info.description,
             },
             "columns": columns,
             "value_mappings": [],
@@ -151,8 +142,8 @@ async def get_table_columns(
 @router.get("/datasources")
 async def list_datasources(user: CurrentUser = Depends(get_current_user)):
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
-    rows = synapse_client.list_datasources()
-    return {"success": True, "data": {"datasources": rows}}
+    ds_list = oracle_synapse_acl.list_datasources()
+    return {"success": True, "data": {"datasources": [asdict(ds) for ds in ds_list]}}
 
 
 @router.put("/tables/{name}/description")
@@ -164,8 +155,9 @@ async def update_table_description(
     auth_service.requires_role(user, ["admin"])
     _resolve_datasource(payload.datasource_id)
     try:
-        response = await synapse_client.update_table_description(str(user.tenant_id), name, payload.description)
-        data = response.get("data", {})
+        result = await oracle_synapse_acl.update_table_description(
+            str(user.tenant_id), name, payload.description
+        )
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 400:
             raise HTTPException(status_code=400, detail="invalid table or payload")
@@ -175,9 +167,9 @@ async def update_table_description(
     return {
         "success": True,
         "data": {
-            "table": data.get("table_name", name),
-            "description": data.get("description", payload.description),
-            "vector_updated": bool(data.get("embedding_updated", False)),
+            "table": result.name,
+            "description": result.description,
+            "vector_updated": result.vector_updated,
         },
     }
 
@@ -195,13 +187,12 @@ async def update_column_description(
         raise HTTPException(status_code=400, detail="fqn must be schema.table.column")
     _, table_name, column_name = parts
     try:
-        response = await synapse_client.update_column_description(
+        result = await oracle_synapse_acl.update_column_description(
             str(user.tenant_id),
             table_name=table_name,
             column_name=column_name,
             description=payload.description,
         )
-        data = response.get("data", {})
     except httpx.HTTPStatusError as exc:
         if exc.response.status_code == 400:
             raise HTTPException(status_code=400, detail="invalid table/column or payload")
@@ -212,7 +203,7 @@ async def update_column_description(
         "success": True,
         "data": {
             "column_fqn": fqn,
-            "description": data.get("description", payload.description),
-            "vector_updated": bool(data.get("embedding_updated", False)),
+            "description": result.description,
+            "vector_updated": result.vector_updated,
         },
     }

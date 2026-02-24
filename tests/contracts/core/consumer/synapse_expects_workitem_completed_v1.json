@@ -1,0 +1,6 @@
+{
+  "event_name": "WORKITEM_COMPLETED",
+  "consumer": "synapse",
+  "consumer_group": "synapse_group",
+  "required_fields": ["workitem_id", "tenant_id", "proc_inst_id"]
+}

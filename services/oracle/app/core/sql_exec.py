@@ -2,15 +2,14 @@ from __future__ import annotations
 
 from typing import Any, Optional
 import re
-import time
 
-import httpx
 import structlog
 from pydantic import BaseModel
 
 from app.core.auth import CurrentUser
 from app.core.config import settings
-from app.core.synapse_client import synapse_client
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
+from app.infrastructure.acl.weaver_acl import oracle_weaver_acl
 
 logger = structlog.get_logger()
 
@@ -27,8 +26,6 @@ class SQLExecutor:
         self.sql_timeout = sql_timeout
         self.max_rows = max_rows
         self.execution_mode = settings.ORACLE_SQL_EXECUTION_MODE.lower()
-        self.weaver_query_url = settings.WEAVER_QUERY_API_URL
-        self.weaver_bearer_token = settings.WEAVER_BEARER_TOKEN.strip()
 
     @staticmethod
     def _extract_limit(sql: str, default: int = 2, upper_bound: int = 10000) -> int:
@@ -61,42 +58,27 @@ class SQLExecutor:
         return [c for c in columns if c] or ["value"]
 
     def _resolve_database_name(self, datasource_id: str) -> str | None:
-        for item in synapse_client.list_datasources():
-            if item.get("id") == datasource_id:
-                db_name = str(item.get("database") or "").strip()
-                return db_name or None
+        """ACL을 통해 데이터소스의 DB 이름 조회."""
+        for ds in oracle_synapse_acl.list_datasources():
+            if ds.id == datasource_id:
+                return ds.database or None
         return None
 
     async def _execute_via_weaver(self, sql: str, datasource_id: str, user: CurrentUser, timeout: int) -> ExecutionResult:
-        if not self.weaver_bearer_token:
-            raise RuntimeError("WEAVER_BEARER_TOKEN is not configured")
-
-        payload: dict[str, Any] = {"sql": sql}
-        if database := self._resolve_database_name(datasource_id):
-            payload["database"] = database
-
-        headers = {
-            "Authorization": f"Bearer {self.weaver_bearer_token}",
-            "Content-Type": "application/json",
-            "X-Tenant-Id": str(user.tenant_id),
-        }
-        started = time.perf_counter()
-        async with httpx.AsyncClient(timeout=timeout) as client:
-            response = await client.post(self.weaver_query_url, json=payload, headers=headers)
-            response.raise_for_status()
-            body = response.json()
-
-        rows = body.get("data") or []
-        columns = body.get("columns") or []
-        row_count = int(body.get("row_count", len(rows)))
-        truncated = row_count > len(rows)
-        elapsed_ms = int((time.perf_counter() - started) * 1000)
+        """ACL을 통해 Weaver에 SQL 실행 후 Oracle ExecutionResult로 변환."""
+        database = self._resolve_database_name(datasource_id)
+        acl_result = await oracle_weaver_acl.execute_query(
+            sql=sql,
+            database=database,
+            tenant_id=str(user.tenant_id),
+            timeout=timeout,
+        )
         return ExecutionResult(
-            columns=[str(c) for c in columns],
-            rows=rows if isinstance(rows, list) else [],
-            row_count=row_count,
-            truncated=truncated,
-            execution_time_ms=max(int(body.get("execution_time_ms", elapsed_ms)), 1),
+            columns=acl_result.columns,
+            rows=acl_result.rows,
+            row_count=acl_result.row_count,
+            truncated=acl_result.truncated,
+            execution_time_ms=acl_result.execution_time_ms,
             backend="weaver",
         )
 

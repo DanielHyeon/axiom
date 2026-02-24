@@ -8,6 +8,8 @@ from typing import Any
 
 
 class VisionStateStore:
+    _DB_SCHEMA = "vision"
+
     def __init__(self, database_url: str) -> None:
         self.database_url = self._normalize_database_url(database_url)
         self._is_postgres = self.database_url.startswith("postgresql://") or self.database_url.startswith("postgres://")
@@ -57,7 +59,11 @@ class VisionStateStore:
     def _connect(self):
         if self._is_postgres:
             psycopg2, _ = self._import_psycopg2()
-            return psycopg2.connect(self.database_url)
+            conn = psycopg2.connect(self.database_url)
+            cur = conn.cursor()
+            cur.execute(f"SET search_path TO {self._DB_SCHEMA}, public")
+            cur.close()
+            return conn
         conn = sqlite3.connect(str(self.db_path))
         conn.row_factory = sqlite3.Row
         return conn
@@ -66,6 +72,8 @@ class VisionStateStore:
         with self._connect() as conn:
             if self._is_postgres:
                 cur = conn.cursor()
+                cur.execute(f"CREATE SCHEMA IF NOT EXISTS {self._DB_SCHEMA}")
+                conn.commit()
                 cur.execute(
                     """
                     CREATE TABLE IF NOT EXISTS what_if_scenarios (

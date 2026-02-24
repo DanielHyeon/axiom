@@ -1,0 +1,6 @@
+{
+  "event_name": "ROOT_CAUSE_DETECTED",
+  "consumer": "core",
+  "consumer_group": "core_group",
+  "required_fields": ["analysis_id", "tenant_id", "root_causes"]
+}

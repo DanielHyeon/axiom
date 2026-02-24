@@ -1,3 +1,5 @@
+import asyncio
+import logging
 import uuid
 
 from fastapi import FastAPI, Request, status
@@ -11,8 +13,11 @@ from app.core.error_codes import public_error_message
 from app.core.logging import configure_secret_redaction
 from app.services.metrics import metrics_service
 from app.services.mindsdb_client import mindsdb_client
-from app.services.neo4j_metadata_store import neo4j_metadata_store
+from app.services.synapse_metadata_client import synapse_metadata_client
 from app.services.postgres_metadata_store import postgres_metadata_store
+from app.services.weaver_runtime import weaver_runtime
+
+logger = logging.getLogger("axiom.weaver")
 
 configure_secret_redaction()
 
@@ -29,6 +34,73 @@ app.add_middleware(
 app.include_router(datasource_router)
 app.include_router(query_router)
 app.include_router(metadata_catalog_router)
+
+# ── DDD-P3-01: Weaver Outbox Relay ── #
+_relay_task: asyncio.Task | None = None
+_relay_worker = None
+
+
+@app.on_event("startup")
+async def _start_weaver_relay():
+    """DDD-P3-01: Weaver Outbox Relay 워커 시작."""
+    global _relay_task, _relay_worker
+    if not settings.metadata_pg_mode:
+        return
+    try:
+        from app.events.outbox import WeaverRelayWorker, ensure_outbox_table
+        await ensure_outbox_table()
+        _relay_worker = WeaverRelayWorker(poll_interval=5, max_batch=100)
+        _relay_task = asyncio.create_task(_relay_worker.run())
+        logger.info("WeaverRelayWorker background task started")
+    except Exception:
+        logger.warning("WeaverRelayWorker failed to start", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def _stop_weaver_relay():
+    global _relay_task, _relay_worker
+    if _relay_worker is not None:
+        _relay_worker.shutdown()
+    if _relay_task and not _relay_task.done():
+        _relay_task.cancel()
+        try:
+            await _relay_task
+        except asyncio.CancelledError:
+            pass
+
+
+@app.on_event("startup")
+async def hydrate_runtime_from_store():
+    """Startup hydration: restore in-memory registries from PostgreSQL (DDD-P0-03).
+
+    When metadata_pg_mode is enabled, loads datasources and glossary terms
+    from PostgresMetadataStore into WeaverRuntime so data survives restarts.
+    """
+    if not settings.metadata_pg_mode:
+        logger.info("Weaver startup: metadata_pg_mode disabled, skipping hydration")
+        return
+    try:
+        # Hydrate datasources
+        stats = await postgres_metadata_store.stats()
+        ds_count = stats.get("datasources", 0)
+        glossary_count = stats.get("glossary_terms", 0)
+        logger.info(
+            "Weaver startup: hydrating from PostgreSQL (datasources=%d, glossary=%d)",
+            ds_count, glossary_count,
+        )
+
+        # Hydrate glossary terms
+        terms = await postgres_metadata_store.list_glossary_terms()
+        for term in terms:
+            key = f"{term.get('tenant_id', '')}:{term['id']}"
+            weaver_runtime.glossary[key] = term
+
+        logger.info(
+            "Weaver startup: hydration complete (glossary=%d terms loaded)",
+            len(terms),
+        )
+    except Exception as exc:
+        logger.warning("Weaver startup: hydration failed (non-fatal): %s", exc)
 
 
 @app.middleware("http")
@@ -60,7 +132,7 @@ async def health_ready():
     dependencies: dict[str, str] = {
         "mindsdb": "disabled",
         "postgres": "disabled",
-        "neo4j": "disabled",
+        "synapse_graph": "disabled",
     }
     details: dict[str, str] = {}
 
@@ -82,11 +154,11 @@ async def health_ready():
 
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.health_check()
-            dependencies["neo4j"] = "up"
+            await synapse_metadata_client.health_check()
+            dependencies["synapse_graph"] = "up"
         except Exception as exc:
-            dependencies["neo4j"] = "down"
-            details["neo4j"] = public_error_message(exc)
+            dependencies["synapse_graph"] = "down"
+            details["synapse_graph"] = public_error_message(exc)
 
     is_ready = all(state != "down" for state in dependencies.values())
     body = {

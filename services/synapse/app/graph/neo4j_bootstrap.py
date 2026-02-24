@@ -9,7 +9,7 @@ class Neo4jBootstrap:
     Neo4j schema initialization and migration.
     Runs on service startup. All operations are idempotent (IF NOT EXISTS).
     """
-    SCHEMA_VERSION = "2.0.0"
+    SCHEMA_VERSION = "2.2.0"
 
     def __init__(self, neo4j: Neo4jClient):
         self.neo4j = neo4j
@@ -22,6 +22,8 @@ class Neo4jBootstrap:
         await self._create_ontology_constraints()
         await self._create_ontology_indexes()
         await self._create_fulltext_indexes()
+        await self._create_mapping_indexes()
+        await self._create_snapshot_indexes()
         await self._record_schema_version()
         logger.info("neo4j_bootstrap_complete", version=self.SCHEMA_VERSION)
 
@@ -73,6 +75,21 @@ class Neo4jBootstrap:
             "CREATE FULLTEXT INDEX schema_fulltext IF NOT EXISTS FOR (n:Table|Column) ON EACH [n.name, n.description]",
         ]
         await self._execute_batch(indexes, "fulltext_indexes")
+
+    async def _create_mapping_indexes(self):
+        indexes = [
+            "CREATE INDEX maps_to_index IF NOT EXISTS FOR ()-[r:MAPS_TO]-() ON (r.created_at)",
+            "CREATE INDEX derived_from_index IF NOT EXISTS FOR ()-[r:DERIVED_FROM]-() ON (r.created_at)",
+            "CREATE INDEX defines_index IF NOT EXISTS FOR ()-[r:DEFINES]-() ON (r.created_at)",
+        ]
+        await self._execute_batch(indexes, "mapping_indexes", optional=True)
+
+    async def _create_snapshot_indexes(self):
+        indexes = [
+            "CREATE CONSTRAINT snapshot_id_unique IF NOT EXISTS FOR (s:OntologySnapshot) REQUIRE s.id IS UNIQUE",
+            "CREATE INDEX snapshot_case_id IF NOT EXISTS FOR (s:OntologySnapshot) ON (s.case_id)",
+        ]
+        await self._execute_batch(indexes, "snapshot_indexes", optional=True)
 
     async def _record_schema_version(self):
         async with self.neo4j.session() as session:

@@ -1,0 +1,6 @@
+{
+  "event_name": "METADATA_SYNC_COMPLETED",
+  "consumer": "oracle",
+  "consumer_group": "oracle_group",
+  "required_fields": ["datasource_name", "tenant_id", "tables_synced"]
+}

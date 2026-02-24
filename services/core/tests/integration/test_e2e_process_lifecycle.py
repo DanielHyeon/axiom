@@ -2,7 +2,7 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
-from app.core.database import engine
+from app.core.database import engine, ensure_schema
 from app.main import app
 from app.models.base_models import Base
 
@@ -10,6 +10,7 @@ from app.models.base_models import Base
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():
     async with engine.begin() as conn:
+        await ensure_schema(conn)
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:

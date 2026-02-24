@@ -7,7 +7,7 @@ import structlog
 from app.pipelines.nl2sql_pipeline import nl2sql_pipeline
 from app.core.auth import auth_service, CurrentUser, security_scheme
 from app.core.query_history import query_history_repo
-from app.core.synapse_client import synapse_client
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
 from app.core.rate_limit import rate_limiter
 
 logger = structlog.get_logger()
@@ -50,15 +50,18 @@ class AskOptions(BaseModel):
 class AskRequest(BaseModel):
     question: str = Field(..., min_length=2, max_length=2000)
     datasource_id: str
+    case_id: str | None = None  # O3: ontology context
     options: AskOptions = Field(default_factory=AskOptions)
 
 class ReactOptions(BaseModel):
     max_iterations: int = Field(default=5, le=10)
     stream: bool = True
+    row_limit: int = Field(default=1000, le=10000)
 
 class ReactRequest(BaseModel):
     question: str = Field(..., min_length=2, max_length=2000)
     datasource_id: str
+    case_id: str | None = None  # O3: ontology context
     options: ReactOptions = Field(default_factory=ReactOptions)
 
 class DirectSqlRequest(BaseModel):
@@ -66,8 +69,8 @@ class DirectSqlRequest(BaseModel):
     datasource_id: str
 
 def _validate_datasource_id(datasource_id: str) -> None:
-    for item in synapse_client.list_datasources():
-        if item.get("id") == datasource_id:
+    for ds in oracle_synapse_acl.list_datasources():
+        if ds.id == datasource_id:
             return
     raise HTTPException(status_code=404, detail="DATASOURCE_NOT_FOUND")
 
@@ -76,10 +79,11 @@ async def ask_question(request_payload: AskRequest, user: CurrentUser = Depends(
     auth_service.requires_role(user, ["admin", "manager", "attorney", "analyst", "engineer"])
     _validate_datasource_id(request_payload.datasource_id)
     result = await nl2sql_pipeline.execute(
-        request_payload.question, 
-        request_payload.datasource_id, 
+        request_payload.question,
+        request_payload.datasource_id,
         request_payload.options.model_dump(),
-        user
+        user,
+        case_id=request_payload.case_id,
     )
     if result.get("success"):
         data = result.get("data", {})
@@ -112,8 +116,9 @@ async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depend
     session = ReactSession(
         question=request_payload.question,
         datasource_id=request_payload.datasource_id,
+        case_id=request_payload.case_id,
         options=request_payload.options.model_dump(),
-        max_iterations=request_payload.options.max_iterations
+        max_iterations=request_payload.options.max_iterations,
     )
     # Return NDJSON stream directly from generator
     return StreamingResponse(

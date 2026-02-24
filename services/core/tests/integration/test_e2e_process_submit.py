@@ -4,11 +4,12 @@ from httpx import AsyncClient, ASGITransport
 from sqlalchemy import text
 from app.main import app
 from app.models.base_models import Base, WorkItem
-from app.core.database import engine, AsyncSessionLocal
+from app.core.database import engine, AsyncSessionLocal, ensure_schema
 
 @pytest_asyncio.fixture(autouse=True)
 async def setup_db():
     async with engine.begin() as conn:
+        await ensure_schema(conn)
         await conn.run_sync(Base.metadata.create_all)
     yield
     async with engine.begin() as conn:
@@ -43,7 +44,7 @@ async def test_api_submit_workitem_e2e():
         
     # 4. Assert DB state (Router commit success)
     async with AsyncSessionLocal() as session:
-        outbox = await session.execute(text("SELECT * FROM event_outbox WHERE aggregate_id = 'e2e-wi-1'"))
+        outbox = await session.execute(text("SELECT * FROM core.event_outbox WHERE aggregate_id = 'e2e-wi-1'"))
         row = outbox.fetchone()
         assert row is not None
         assert getattr(row, "event_type", row[1]) == "WORKITEM_COMPLETED"
@@ -75,7 +76,7 @@ async def test_api_submit_workitem_self_verification_fail_routing():
 
     async with AsyncSessionLocal() as session:
         outbox = await session.execute(
-            text("SELECT * FROM event_outbox WHERE aggregate_id = 'e2e-wi-sv-1' ORDER BY created_at DESC LIMIT 1")
+            text("SELECT * FROM core.event_outbox WHERE aggregate_id = 'e2e-wi-sv-1' ORDER BY created_at DESC LIMIT 1")
         )
         row = outbox.fetchone()
         assert row is not None

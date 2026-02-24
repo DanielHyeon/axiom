@@ -1,0 +1,6 @@
+{
+  "event_name": "WHATIF_SIMULATION_COMPLETED",
+  "consumer": "core",
+  "consumer_group": "core_group",
+  "required_fields": ["simulation_id", "tenant_id"]
+}

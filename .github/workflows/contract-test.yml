@@ -1,0 +1,35 @@
+name: Event Contract Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "services/*/app/core/event_contract_registry.py"
+      - "tests/contracts/**"
+      - ".github/workflows/contract-test.yml"
+  push:
+    branches:
+      - main
+    paths:
+      - "services/*/app/core/event_contract_registry.py"
+      - "tests/contracts/**"
+      - ".github/workflows/contract-test.yml"
+
+jobs:
+  contract-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install Dependencies
+        run: pip install pytest
+
+      - name: Run Contract Tests
+        run: pytest tests/contracts/test_event_contracts.py -v --tb=short

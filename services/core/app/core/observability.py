@@ -26,6 +26,7 @@ class MetricsRegistry:
 
     def render_prometheus(self) -> str:
         lines = [
+            # ── Outbox metrics ──
             "# HELP core_event_outbox_published_total Outbox published events",
             "# TYPE core_event_outbox_published_total counter",
             f"core_event_outbox_published_total {self.get_counter('core_event_outbox_published_total')}",
@@ -35,6 +36,7 @@ class MetricsRegistry:
             "# HELP core_event_outbox_pending Outbox pending events",
             "# TYPE core_event_outbox_pending gauge",
             f"core_event_outbox_pending {self.get_gauge('core_event_outbox_pending')}",
+            # ── DLQ stream metrics ──
             "# HELP core_dlq_messages_total Total DLQ moved messages",
             "# TYPE core_dlq_messages_total counter",
             f"core_dlq_messages_total {self.get_counter('core_dlq_messages_total')}",
@@ -47,6 +49,21 @@ class MetricsRegistry:
             "# HELP core_dlq_reprocess_failed_total DLQ reprocess failures",
             "# TYPE core_dlq_reprocess_failed_total counter",
             f"core_dlq_reprocess_failed_total {self.get_counter('core_dlq_reprocess_failed_total')}",
+            # ── DLQ DB metrics (DDD-P3-05) ──
+            "# HELP core_dlq_db_unresolved Dead letter events unresolved in DB",
+            "# TYPE core_dlq_db_unresolved gauge",
+            f"core_dlq_db_unresolved {self.get_gauge('core_dlq_db_unresolved')}",
+            "# HELP core_dlq_retry_total Manual DLQ retry count",
+            "# TYPE core_dlq_retry_total counter",
+            f"core_dlq_retry_total {self.get_counter('core_dlq_retry_total')}",
+            "# HELP core_dlq_discard_total Manual DLQ discard count",
+            "# TYPE core_dlq_discard_total counter",
+            f"core_dlq_discard_total {self.get_counter('core_dlq_discard_total')}",
+            # ── Relay lag (DDD-P3-05) ──
+            "# HELP core_relay_lag_seconds Outbox to Stream relay lag",
+            "# TYPE core_relay_lag_seconds gauge",
+            f"core_relay_lag_seconds {self.get_gauge('core_relay_lag_seconds')}",
+            # ── Legacy ──
             "# HELP core_legacy_write_violations_total Legacy write policy violations detected",
             "# TYPE core_legacy_write_violations_total counter",
             f"core_legacy_write_violations_total {self.get_counter('core_legacy_write_violations_total')}",

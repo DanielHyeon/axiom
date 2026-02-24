@@ -1,0 +1,6 @@
+{
+  "event_name": "ONTOLOGY_NODE_UPDATED",
+  "consumer": "weaver",
+  "consumer_group": "weaver_group",
+  "required_fields": ["node_id", "tenant_id", "node_type", "changed_fields"]
+}

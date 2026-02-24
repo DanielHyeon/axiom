@@ -1,0 +1,6 @@
+{
+  "event_name": "PROCESS_INITIATED",
+  "consumer": "synapse",
+  "consumer_group": "synapse_group",
+  "required_fields": ["proc_inst_id", "tenant_id", "definition_id"]
+}

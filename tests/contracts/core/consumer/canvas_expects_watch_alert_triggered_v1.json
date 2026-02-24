@@ -1,0 +1,6 @@
+{
+  "event_name": "WATCH_ALERT_TRIGGERED",
+  "consumer": "canvas",
+  "consumer_group": "canvas_ws_group",
+  "required_fields": ["alert_id", "tenant_id", "subscription_id", "severity"]
+}

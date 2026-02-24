@@ -1,0 +1,6 @@
+{
+  "event_name": "WORKITEM_CANCELLED",
+  "consumer": "vision",
+  "consumer_group": "vision_analytics_group",
+  "required_fields": ["workitem_id", "tenant_id"]
+}

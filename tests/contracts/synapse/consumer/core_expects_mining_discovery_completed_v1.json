@@ -1,0 +1,6 @@
+{
+  "event_name": "MINING_DISCOVERY_COMPLETED",
+  "consumer": "core",
+  "consumer_group": "core_group",
+  "required_fields": ["task_id", "log_id", "tenant_id"]
+}

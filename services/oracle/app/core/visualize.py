@@ -70,6 +70,16 @@ def recommend_visualization(
                 "y_label": y_col,
             },
         }
+    if len(measures) >= 2 and not categories and not time_cols:
+        return {
+            "chart_type": "scatter",
+            "config": {
+                "x_column": col_names[measures[0]],
+                "y_column": col_names[measures[1]],
+                "x_label": col_names[measures[0]],
+                "y_label": col_names[measures[1]],
+            },
+        }
     if len(measures) == 1 and (row_count == 1 or not categories):
         return {
             "chart_type": "kpi_card",

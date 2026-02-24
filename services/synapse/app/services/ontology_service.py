@@ -346,6 +346,51 @@ class OntologyService:
                 break
         return {"node_id": node_id, "neighbors": neighbors, "total": len(neighbors)}
 
+    # -- O5-5: GlossaryTerm ↔ Ontology Bridge ------------------------------------
+
+    async def suggest_glossary_matches(self, term_name: str, case_id: str, limit: int = 5) -> list[dict[str, Any]]:
+        """Fulltext search for ontology nodes matching a glossary term name."""
+        try:
+            async with self._neo4j.session() as session:
+                result = await session.run(
+                    """
+                    CALL db.index.fulltext.queryNodes('ontology_fulltext', $term)
+                    YIELD node, score
+                    WHERE score > 0.5 AND node.case_id = $case_id
+                    RETURN node.id AS id, node.name AS name, labels(node)[0] AS layer, score
+                    ORDER BY score DESC
+                    LIMIT $limit
+                    """,
+                    term=term_name,
+                    case_id=case_id,
+                    limit=limit,
+                )
+                return [dict(r) async for r in result]
+        except Exception as exc:
+            logger.warning("glossary_suggest_failed", error=str(exc), term=term_name, case_id=case_id)
+            return []
+
+    async def create_glossary_link(self, term_id: str, node_id: str, case_id: str) -> dict[str, Any]:
+        """Create DEFINES relationship between GlossaryTerm and OntologyNode."""
+        try:
+            async with self._neo4j.session() as session:
+                await session.run(
+                    """
+                    MATCH (t {id: $term_id})
+                    MATCH (n {case_id: $case_id, node_id: $node_id})
+                    MERGE (t)-[r:DEFINES]->(n)
+                    SET r.created_at = datetime()
+                    RETURN r
+                    """,
+                    term_id=term_id,
+                    node_id=node_id,
+                    case_id=case_id,
+                )
+        except Exception as exc:
+            logger.warning("glossary_link_failed", error=str(exc), term_id=term_id, node_id=node_id)
+            raise
+        return {"term_id": term_id, "node_id": node_id, "case_id": case_id}
+
     async def path_to(self, source_id: str, target_id: str, max_depth: int = 6) -> dict[str, Any]:
         case_id = self._node_case_index.get(source_id)
         if not case_id or self._node_case_index.get(target_id) != case_id:

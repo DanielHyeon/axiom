@@ -1,0 +1,6 @@
+{
+  "event_name": "ONTOLOGY_NODE_CREATED",
+  "consumer": "oracle",
+  "consumer_group": "oracle_group",
+  "required_fields": ["node_id", "tenant_id", "node_type"]
+}

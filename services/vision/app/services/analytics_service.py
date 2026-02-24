@@ -1,16 +1,27 @@
 """
 Vision Analytics 서비스 (Phase V1 Full-spec).
-실 DB(PostgreSQL) 연동: vision_analytics_* 테이블 + core_case 조회.
+실 DB(PostgreSQL) 연동: vision_analytics_* 테이블.
+Core BC 소유 데이터는 Core API를 통해 조회 (DDD-P0-02: BC 경계 보호).
+
+DDD-P2-03: Vision CQRS 도입
+- vision.case_summary 읽기 모델 우선 조회, Core API Fallback
+- VISION_CQRS_MODE 환경변수로 전환 전략 제어
+  - "shadow"  : Core API 우선 + 읽기 모델 비교 로깅 (단계 2)
+  - "primary" : 읽기 모델 우선 + Core API Fallback (단계 3, 기본값)
+  - "standalone" : 읽기 모델 전용, Core API 호출 안 함 (단계 4)
 """
 from __future__ import annotations
 
 import json
+import logging
 import os
 import sys
 from datetime import datetime, date, timedelta
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
+
+logger = logging.getLogger("axiom.vision.analytics")
 
 # psycopg2 (Vision 이미 사용)
 try:
@@ -36,25 +47,35 @@ def _is_postgres(url: str) -> bool:
 
 
 class CaseNotFoundError(Exception):
-    """케이스가 core_case 또는 vision_analytics_case_financial에 없음."""
+    """케이스가 Core API 또는 vision_analytics_case_financial에 없음."""
     pass
 
 
+CQRS_MODE = os.getenv("VISION_CQRS_MODE", "primary")  # shadow | primary | standalone
+
+
 class AnalyticsService:
+    _DB_SCHEMA = "vision"
+
     def __init__(self, database_url: str | None = None) -> None:
         self.database_url = (database_url or _database_url()).strip()
         self._postgres = _is_postgres(self.database_url)
+        self._cqrs_mode = CQRS_MODE
 
     def _conn(self):
         if not self._postgres:
             raise RuntimeError("Analytics requires PostgreSQL")
         try:
-            return psycopg2.connect(self.database_url)
+            conn = psycopg2.connect(self.database_url)
+            cur = conn.cursor()
+            cur.execute(f"SET search_path TO {self._DB_SCHEMA}, public")
+            cur.close()
+            return conn
         except psycopg2.OperationalError as e:
             raise RuntimeError("Analytics DB unavailable") from e
 
     def ensure_schema(self) -> None:
-        """vision_analytics_* 테이블이 없으면 생성."""
+        """vision 스키마 + vision_analytics_* 테이블이 없으면 생성."""
         if not self._postgres:
             return
         sql_path = Path(__file__).resolve().parent.parent.parent / "migrations" / "001_vision_analytics.sql"
@@ -62,6 +83,8 @@ class AnalyticsService:
             return
         with self._conn() as conn:
             cur = conn.cursor()
+            cur.execute(f"CREATE SCHEMA IF NOT EXISTS {self._DB_SCHEMA}")
+            conn.commit()
             cur.execute(open(sql_path).read())
             cur.close()
             conn.commit()
@@ -149,9 +172,80 @@ class AnalyticsService:
             "computed_at": (r.get("computed_at") or datetime.utcnow()).isoformat().replace("+00:00", "Z") if hasattr(r.get("computed_at"), "isoformat") else datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ"),
         }
 
+    # ──── CQRS 읽기 모델 조회 (DDD-P2-03) ──── #
+
+    def _query_local_summary(self, tenant_id: str) -> dict[str, Any] | None:
+        """vision.case_summary 읽기 모델에서 케이스 통계 조회."""
+        if not self._postgres:
+            return None
+        try:
+            with self._conn() as conn:
+                cur = conn.cursor(cursor_factory=RealDictCursor)
+                cur.execute(
+                    "SELECT * FROM case_summary WHERE tenant_id = %s",
+                    (tenant_id,),
+                )
+                row = cur.fetchone()
+                cur.close()
+                return dict(row) if row else None
+        except Exception:
+            logger.debug("case_summary query failed (table may not exist yet)", exc_info=True)
+            return None
+
+    def _core_api_case_stats(self, tenant_id: str) -> dict[str, Any]:
+        """Core API를 통해 케이스 통계 조회 (DDD-P0-02: BC 경계 보호)."""
+        from app.clients.core_client import get_core_client
+        return get_core_client().get_case_stats_sync(tenant_id)
+
+    def _make_kpi_from_case_stats(
+        self, stats: dict[str, Any], period: str, period_label: str,
+    ) -> dict[str, Any]:
+        """case_summary 또는 Core API 결과를 KPI 포맷으로 변환."""
+        total = stats.get("total_cases", 0)
+        active = stats.get("active_cases", 0)
+        return self._row_to_kpi(
+            {
+                "total_cases": total,
+                "active_cases": active,
+                "total_obligations_amount": 0,
+                "avg_performance_rate": 0,
+                "avg_case_duration_days": stats.get("avg_completion_days") or 0,
+                "stakeholder_satisfaction_rate": 0,
+                "prev_total_cases": None,
+                "prev_active_cases": None,
+                "prev_total_obligations_amount": None,
+                "prev_avg_performance_rate": None,
+                "prev_avg_case_duration_days": None,
+                "prev_stakeholder_satisfaction_rate": None,
+                "computed_at": stats.get("last_updated_at") or datetime.utcnow(),
+            },
+            period,
+            period_label,
+        )
+
+    def _shadow_compare(
+        self, local: dict[str, Any] | None, core: dict[str, Any], tenant_id: str,
+    ) -> None:
+        """Shadow Mode: 읽기 모델 ↔ Core API 결과 비교 로깅."""
+        if local is None:
+            logger.info("[CQRS-shadow] tenant=%s — local read model empty, skipping compare", tenant_id)
+            return
+        mismatches = []
+        for key in ("total_cases", "active_cases"):
+            lv = local.get(key, 0)
+            cv = core.get(key, 0)
+            if lv != cv:
+                mismatches.append(f"{key}: local={lv} core={cv}")
+        if mismatches:
+            logger.warning("[CQRS-shadow] tenant=%s — MISMATCH: %s", tenant_id, "; ".join(mismatches))
+        else:
+            logger.info("[CQRS-shadow] tenant=%s — read model matches Core API", tenant_id)
+
     def get_summary(self, tenant_id: str, period: str, case_type: str | None) -> dict[str, Any]:
         self.ensure_schema()
         case_type = case_type or "ALL"
+
+        # 1차: vision_analytics_kpi (기존 집계 테이블)에서 조회
         with self._conn() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
             cur.execute(
@@ -162,45 +256,38 @@ class AnalyticsService:
                 (tenant_id, period, case_type),
             )
             row = cur.fetchone()
+            cur.close()
             if row:
                 period_labels = {"YTD": "2026년 누적", "MTD": "이번 달", "QTD": "이번 분기", "LAST_YEAR": "전년", "ALL": "전체"}
                 return self._row_to_kpi(dict(row), period, period_labels.get(period, period))
-            # core_case에서 집계 (테이블 없으면 0으로)
-            try:
-                cur.execute(
-                    """
-                    SELECT
-                        count(*) AS total_cases,
-                        count(*) FILTER (WHERE status = 'IN_PROGRESS') AS active_cases
-                    FROM core_case
-                    WHERE tenant_id = %s
-                    """,
-                    (tenant_id,),
-                )
-                agg = cur.fetchone()
-            except psycopg2.ProgrammingError:
-                agg = None
-            cur.close()
-        if agg:
-            total = agg["total_cases"] or 0
-            active = agg["active_cases"] or 0
-        else:
-            total = active = 0
-        return self._row_to_kpi({
-            "total_cases": total,
-            "active_cases": active,
-            "total_obligations_amount": 0,
-            "avg_performance_rate": 0,
-            "avg_case_duration_days": 0,
-            "stakeholder_satisfaction_rate": 0,
-            "prev_total_cases": None,
-            "prev_active_cases": None,
-            "prev_total_obligations_amount": None,
-            "prev_avg_performance_rate": None,
-            "prev_avg_case_duration_days": None,
-            "prev_stakeholder_satisfaction_rate": None,
-            "computed_at": datetime.utcnow(),
-        }, period, {"YTD": "2026년 누적", "MTD": "이번 달", "QTD": "이번 분기", "LAST_YEAR": "전년", "ALL": "전체"}.get(period, period))
+
+        # 2차: CQRS 전환 전략에 따른 Fallback (DDD-P2-03)
+        period_labels = {"YTD": "2026년 누적", "MTD": "이번 달", "QTD": "이번 분기", "LAST_YEAR": "전년", "ALL": "전체"}
+        period_label = period_labels.get(period, period)
+
+        if self._cqrs_mode == "shadow":
+            # 단계 2: Core API 우선, 읽기 모델과 비교 로깅
+            core_stats = self._core_api_case_stats(tenant_id)
+            local_row = self._query_local_summary(tenant_id)
+            self._shadow_compare(local_row, core_stats, tenant_id)
+            return self._make_kpi_from_case_stats(core_stats, period, period_label)
+
+        if self._cqrs_mode == "standalone":
+            # 단계 4: 읽기 모델 전용
+            local_row = self._query_local_summary(tenant_id)
+            if local_row:
+                return self._make_kpi_from_case_stats(local_row, period, period_label)
+            return self._make_kpi_from_case_stats(
+                {"total_cases": 0, "active_cases": 0}, period, period_label,
+            )
+
+        # 단계 3 (기본 "primary"): 읽기 모델 우선, Core API Fallback
+        local_row = self._query_local_summary(tenant_id)
+        if local_row:
+            return self._make_kpi_from_case_stats(local_row, period, period_label)
+
+        core_stats = self._core_api_case_stats(tenant_id)
+        return self._make_kpi_from_case_stats(core_stats, period, period_label)
 
     def get_cases_trend(
         self,
@@ -236,35 +323,21 @@ class AnalyticsService:
                     "case_type": case_type,
                     "group_by": group_by,
                 }
-            # core_case에서 월별 집계 (테이블 없으면 빈 시리즈)
-            try:
-                cur.execute(
-                    """
-                    SELECT
-                        to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM') AS period,
-                        count(*) AS new_cases,
-                        count(*) FILTER (WHERE status = 'COMPLETED') AS completed_cases,
-                        count(*) FILTER (WHERE status = 'IN_PROGRESS') AS active_cases
-                    FROM core_case
-                    WHERE tenant_id = %s AND created_at::date >= %s AND created_at::date <= %s
-                    GROUP BY to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM')
-                    ORDER BY 1
-                    """,
-                    (tenant_id, from_date, to_date),
-                )
-                db_rows = cur.fetchall()
-            except psycopg2.ProgrammingError:
-                db_rows = []
+            # Fallback: Core API를 통해 트렌드 조회 (DDD-P0-02: BC 경계 보호)
             cur.close()
+        from app.clients.core_client import get_core_client
+        core_trend = get_core_client().get_case_trend_sync(
+            tenant_id, from_date.isoformat(), to_date.isoformat(), granularity,
+        )
         series = [
             {
-                "period": r["period"],
-                "new_cases": r["new_cases"] or 0,
-                "completed_cases": r["completed_cases"] or 0,
-                "active_cases": r["active_cases"] or 0,
+                "period": r.get("period", ""),
+                "new_cases": r.get("new_cases", 0),
+                "completed_cases": r.get("completed_cases", 0),
+                "active_cases": r.get("active_cases", 0),
                 "total_obligations_registered": 0,
             }
-            for r in db_rows
+            for r in core_trend
         ]
         return {
             "granularity": granularity,
@@ -372,27 +445,21 @@ class AnalyticsService:
 
     def get_case_financial_summary(self, case_id: str, tenant_id: str) -> dict[str, Any]:
         self.ensure_schema()
+        # Core API를 통해 케이스 정보 조회 (DDD-P0-02: BC 경계 보호)
+        from app.clients.core_client import get_core_client
+        case_info = get_core_client().get_case_info_sync(case_id, tenant_id)
+        if not case_info:
+            raise CaseNotFoundError("사건을 찾을 수 없습니다")
+        core_title = case_info.get("title", "")
         with self._conn() as conn:
             cur = conn.cursor(cursor_factory=RealDictCursor)
-            try:
-                cur.execute(
-                    "SELECT id, title FROM core_case WHERE id = %s AND tenant_id = %s",
-                    (case_id, tenant_id),
-                )
-                case_row = cur.fetchone()
-            except psycopg2.ProgrammingError:
-                case_row = None
-            if not case_row:
-                cur.close()
-                raise CaseNotFoundError("사건을 찾을 수 없습니다")
-            core_title = (case_row.get("title") or "") if case_row else ""
             cur.execute(
                 "SELECT case_number, company_name, financials, execution_progress, stakeholder_breakdown FROM vision_analytics_case_financial WHERE case_id = %s",
                 (case_id,),
             )
             fin = cur.fetchone()
             if not fin:
-                # core_case에만 있는 경우 한 번 삽입 (실데이터 연동)
+                # Core API에서 확인된 케이스의 재무 레코드 초기 삽입
                 cur.execute(
                     """
                     INSERT INTO vision_analytics_case_financial (case_id, tenant_id, case_number, company_name, financials, execution_progress, stakeholder_breakdown)

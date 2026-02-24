@@ -1,0 +1,19 @@
+{
+  "event_name": "ONTOLOGY_NODE_UPDATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["node_id", "node_type", "tenant_id", "idempotency_key"],
+    "properties": {
+      "node_id": {"type": "string"},
+      "node_type": {"type": "string"},
+      "label": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "changed_fields": {"type": "array", "items": {"type": "string"}},
+      "properties": {"type": "object"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

@@ -1,6 +1,9 @@
 -- Vision Analytics 스키마 (Phase V1 Full-spec)
--- 공유 DB(insolvency_os)에 Vision 전용 테이블 생성. core_case는 Core 소유.
+-- Vision BC 전용 스키마에 테이블 생성. core_case는 Core 소유.
 -- 실행: psql $DATABASE_URL -f migrations/001_vision_analytics.sql
+
+CREATE SCHEMA IF NOT EXISTS vision;
+SET search_path TO vision, public;
 
 -- KPI 요약 (period/case_type별 1행)
 CREATE TABLE IF NOT EXISTS vision_analytics_kpi (

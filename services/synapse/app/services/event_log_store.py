@@ -31,19 +31,27 @@ def _import_psycopg2():
 class EventLogStore:
     """Event log metadata and events persisted to PostgreSQL."""
 
+    _DB_SCHEMA = "synapse"
+
     def __init__(self, database_url: str | None = None) -> None:
         self._database_url = database_url or settings.SCHEMA_EDIT_DATABASE_URL
         self._schema_ready = False
 
     def _connect(self):
         psycopg2, _ = _import_psycopg2()
-        return psycopg2.connect(self._database_url)
+        conn = psycopg2.connect(self._database_url)
+        cur = conn.cursor()
+        cur.execute(f"SET search_path TO {self._DB_SCHEMA}, public")
+        cur.close()
+        return conn
 
     def _ensure_schema(self) -> None:
         if self._schema_ready:
             return
         conn = self._connect()
         cur = conn.cursor()
+        cur.execute(f"CREATE SCHEMA IF NOT EXISTS {self._DB_SCHEMA}")
+        conn.commit()
         cur.execute(
             """
             CREATE TABLE IF NOT EXISTS event_logs (

@@ -1,0 +1,19 @@
+{
+  "event_name": "MINING_DISCOVERY_COMPLETED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["task_id", "log_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "task_id": {"type": "string"},
+      "log_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "algorithm": {"type": "string"},
+      "activity_count": {"type": "integer"},
+      "transition_count": {"type": "integer"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

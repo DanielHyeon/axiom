@@ -1,0 +1,6 @@
+{
+  "event_name": "ONTOLOGY_NODE_CREATED",
+  "consumer": "weaver",
+  "consumer_group": "weaver_group",
+  "required_fields": ["node_id", "node_type", "tenant_id"]
+}

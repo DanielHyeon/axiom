@@ -1,0 +1,6 @@
+{
+  "event_name": "ROOT_CAUSE_DETECTED",
+  "consumer": "watch",
+  "consumer_group": "watch_cep_group",
+  "required_fields": ["analysis_id", "tenant_id", "root_causes"]
+}

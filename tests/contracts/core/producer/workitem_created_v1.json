@@ -1,0 +1,19 @@
+{
+  "event_name": "WORKITEM_CREATED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["workitem_id", "proc_inst_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "workitem_id": {"type": "string"},
+      "proc_inst_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "activity_name": {"type": "string"},
+      "activity_type": {"type": "string"},
+      "assignee_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

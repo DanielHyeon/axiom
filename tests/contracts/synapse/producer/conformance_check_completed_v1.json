@@ -1,0 +1,19 @@
+{
+  "event_name": "CONFORMANCE_CHECK_COMPLETED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["task_id", "log_id", "model_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "task_id": {"type": "string"},
+      "log_id": {"type": "string"},
+      "model_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "fitness_score": {"type": "number"},
+      "precision_score": {"type": "number"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

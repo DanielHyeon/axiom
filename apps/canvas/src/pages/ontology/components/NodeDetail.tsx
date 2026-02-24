@@ -1,7 +1,7 @@
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
-import { useOntologyMock } from '@/features/ontology/hooks/useOntologyMock';
+import { useOntologyData } from '@/features/ontology/hooks/useOntologyData';
 import { Button } from '@/components/ui/button';
-import { Network, ArrowRight } from 'lucide-react';
+import { Network, ArrowRight, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import type { OntologyLayer } from '@/features/ontology/types/ontology';
 
@@ -14,11 +14,12 @@ const LAYER_LABELS: Record<OntologyLayer, string> = {
 
 interface NodeDetailProps {
     onFindPath: (targetId: string) => void;
+    onImpactAnalysis: (nodeId: string) => void;
 }
 
-export function NodeDetail({ onFindPath }: NodeDetailProps) {
-    const { selectedNodeId } = useOntologyStore();
-    const { graphData } = useOntologyMock(); // In a real app, you'd fetch specific node details
+export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
+    const { selectedNodeId, caseId } = useOntologyStore();
+    const { graphData } = useOntologyData(caseId);
 
     const selectedNode = useMemo(() => {
         return graphData.nodes.find(n => n.id === selectedNodeId) || null;
@@ -122,6 +123,13 @@ export function NodeDetail({ onFindPath }: NodeDetailProps) {
                     onClick={() => onFindPath(selectedNode.id)}
                 >
                     이 노드로 경로 탐색 <ArrowRight size={14} className="ml-2 opacity-50" />
+                </Button>
+                <Button
+                    variant="outline"
+                    className="w-full text-xs justify-between"
+                    onClick={() => onImpactAnalysis(selectedNode.id)}
+                >
+                    영향 분석 <Zap size={14} className="ml-2 opacity-50" />
                 </Button>
             </div>
         </div>

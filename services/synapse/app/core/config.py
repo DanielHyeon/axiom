@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     EXTRACTION_LLM_ENABLED: bool = False
     # Ontology Ingest (Phase S7): 비어 있으면 소비 비활성화
     REDIS_URL: str = ""
+    # O3: Neo4j fulltext 기반 ontology context (context_v2)
+    FEATURE_SEARCH_V2: bool = False
 
     model_config = ConfigDict(env_file=".env")
 

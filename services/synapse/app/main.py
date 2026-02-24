@@ -11,17 +11,22 @@ from app.api.extraction import router as extraction_router
 from app.api.mining import router as mining_router
 from app.api.ontology import router as ontology_router
 from app.api.schema_edit import router as schema_edit_router
+from app.api.metadata_graph import router as metadata_graph_router
+from app.api.concept_mapping import router as concept_mapping_router
 from app.events.consumer import run_ontology_ingest_consumer
+from app.events.outbox import SynapseRelayWorker, ensure_outbox_table
 import structlog
 
 logger = structlog.get_logger()
 
 _ingest_task: asyncio.Task | None = None
+_relay_task: asyncio.Task | None = None
+_relay_worker: SynapseRelayWorker | None = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _ingest_task
+    global _ingest_task, _relay_task, _relay_worker
     logger.info("synapse_startup")
     try:
         _bootstrap = Neo4jBootstrap(neo4j_client)
@@ -29,16 +34,23 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("neo4j_bootstrap_error", error=str(e))
         raise
+    # DDD-P3-01: Outbox 테이블 보장 + Relay 워커 시작
+    ensure_outbox_table()
     if get_redis() is not None:
         _ingest_task = asyncio.create_task(run_ontology_ingest_consumer())
+        _relay_worker = SynapseRelayWorker(poll_interval=5, max_batch=100)
+        _relay_task = asyncio.create_task(_relay_worker.run())
     yield
     logger.info("synapse_shutdown")
-    if _ingest_task is not None and not _ingest_task.done():
-        _ingest_task.cancel()
-        try:
-            await _ingest_task
-        except asyncio.CancelledError:
-            pass
+    if _relay_worker is not None:
+        _relay_worker.shutdown()
+    for task in (_ingest_task, _relay_task):
+        if task is not None and not task.done():
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
     await close_redis()
     await neo4j_client.close()
 
@@ -50,6 +62,8 @@ app.include_router(extraction_router)
 app.include_router(mining_router)
 app.include_router(ontology_router)
 app.include_router(schema_edit_router)
+app.include_router(metadata_graph_router)
+app.include_router(concept_mapping_router)
 
 @app.get("/health/live")
 async def health_live():

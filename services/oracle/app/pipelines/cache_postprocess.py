@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 import structlog
 
-from app.core.synapse_client import synapse_client
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
 
 logger = structlog.get_logger()
 
@@ -33,7 +33,7 @@ class CachePostProcessor:
         tenant_id: str | None = None,
     ):
         try:
-            await synapse_client.reflect_cache(question, sql, confidence, datasource_id)
+            await oracle_synapse_acl.reflect_cache(question, sql, confidence, datasource_id)
             logger.info(
                 "cache_persisted",
                 question=question,

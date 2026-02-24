@@ -14,10 +14,7 @@ class Settings(BaseSettings):
     WEAVER_BEARER_TOKEN: str = ""
     ORACLE_SQL_EXECUTION_MODE: str = "hybrid"
     ORACLE_SQL_EXECUTION_TIMEOUT_SEC: int = 15
-    ORACLE_DATASOURCES_JSON: str = (
-        '[{"id":"ds_business_main","name":"Business Main DB","type":"postgresql",'
-        '"host":"localhost","database":"insolvency_os","status":"active"}]'
-    )
+    ORACLE_DATASOURCES_JSON: str = "[]"
     QUERY_HISTORY_DATABASE_URL: str = "postgresql://arkos:arkos@localhost:5432/insolvency_os"
 
     model_config = ConfigDict(env_file=".env")

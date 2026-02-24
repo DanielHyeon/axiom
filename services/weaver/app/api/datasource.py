@@ -16,7 +16,7 @@ from app.core.error_codes import external_service_http_exception, public_error_m
 from app.services.audit_log import audit_log_service
 from app.services.introspection_service import extract_metadata_stream
 from app.services.mindsdb_client import MindsDBUnavailableError, mindsdb_client
-from app.services.neo4j_metadata_store import Neo4jStoreUnavailableError, neo4j_metadata_store
+from app.services.synapse_metadata_client import SynapseMetadataClientError, synapse_metadata_client
 from app.services.postgres_metadata_store import PostgresStoreUnavailableError, postgres_metadata_store
 from app.services.request_guard import idempotency_store, rate_limiter
 from app.services.weaver_runtime import weaver_runtime
@@ -265,9 +265,9 @@ async def create_datasource(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.upsert_datasource(ds["name"], ds["engine"], tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            await synapse_metadata_client.upsert_datasource(ds["name"], ds["engine"], tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     response = {
         **ds,
         "connection": _sanitize_connection(ds["connection"]),
@@ -327,9 +327,9 @@ async def delete_datasource(
             raise _svc_error("postgres", "POSTGRES_UNAVAILABLE", exc) from exc
     if settings.metadata_external_mode:
         try:
-            await neo4j_metadata_store.delete_datasource(name, tenant_id=_tenant_id(user))
-        except Neo4jStoreUnavailableError as exc:
-            raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+            await synapse_metadata_client.delete_datasource(name, tenant_id=_tenant_id(user))
+        except SynapseMetadataClientError as exc:
+            raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
     schemas, tables, columns = _catalog_counts(_ensure_catalog(ds))
     response = {
         "message": f"DataSource '{name}' deleted successfully",
@@ -481,14 +481,14 @@ async def extract_metadata(
             if event.get("event") == "complete" and catalog is not None:
                 if settings.metadata_external_mode:
                     try:
-                        neo4j_stats = await neo4j_metadata_store.save_extracted_catalog(
+                        graph_stats = await synapse_metadata_client.save_extracted_catalog(
                             _tenant_id(user), name, catalog, engine, foreign_keys=foreign_keys or []
                         )
-                        yield f"event: neo4j_saved\ndata: {json.dumps(neo4j_stats, ensure_ascii=False)}\n\n"
-                    except Neo4jStoreUnavailableError as exc:
+                        yield f"event: graph_saved\ndata: {json.dumps(graph_stats, ensure_ascii=False)}\n\n"
+                    except SynapseMetadataClientError as exc:
                         err_data = {"message": public_error_message(exc), "code": "NEO4J_UNAVAILABLE"}
                         yield f"event: error\ndata: {json.dumps(err_data, ensure_ascii=False)}\n\n"
-                        raise _svc_error("neo4j", "NEO4J_UNAVAILABLE", exc) from exc
+                        raise _svc_error("synapse", "SYNAPSE_UNAVAILABLE", exc) from exc
                 yield f"event: complete\ndata: {json.dumps(data, ensure_ascii=False)}\n\n"
                 ds_ref = weaver_runtime.datasources.get(ds_key)
                 if ds_ref is not None:

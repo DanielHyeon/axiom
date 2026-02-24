@@ -1,0 +1,6 @@
+{
+  "event_name": "WORKITEM_SELF_VERIFICATION_FAILED",
+  "consumer": "watch",
+  "consumer_group": "watch_cep_group",
+  "required_fields": ["workitem_id", "tenant_id", "failure_reason"]
+}

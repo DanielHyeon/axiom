@@ -1,0 +1,18 @@
+{
+  "event_name": "CASE_STATUS_CHANGED",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["case_id", "tenant_id", "old_status", "new_status", "idempotency_key"],
+    "properties": {
+      "case_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "old_status": {"type": "string"},
+      "new_status": {"type": "string"},
+      "changed_by": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

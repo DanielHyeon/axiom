@@ -1,19 +1,21 @@
 import { create } from 'zustand';
-import type { OntologyLayer, OntologyFilters } from '../types/ontology';
+import type { OntologyLayer, OntologyFilters, ViewMode } from '../types/ontology';
 
 interface OntologyState {
+    caseId: string | null;
     filters: OntologyFilters;
     selectedNodeId: string | null;
     hoveredNodeId: string | null;
-    isTableMode: boolean;
+    viewMode: ViewMode;
 
     // Actions
+    setCaseId: (id: string | null) => void;
     setSearchQuery: (query: string) => void;
     toggleLayer: (layer: OntologyLayer) => void;
     setDepth: (depth: number) => void;
     selectNode: (id: string | null) => void;
     setHoveredNode: (id: string | null) => void;
-    toggleViewMode: () => void;
+    setViewMode: (mode: ViewMode) => void;
     resetFilters: () => void;
 }
 
@@ -24,11 +26,13 @@ const defaultFilters: OntologyFilters = {
 };
 
 export const useOntologyStore = create<OntologyState>((set) => ({
+    caseId: null,
     filters: defaultFilters,
     selectedNodeId: null,
     hoveredNodeId: null,
-    isTableMode: false,
+    viewMode: 'graph',
 
+    setCaseId: (id) => set({ caseId: id }),
     setSearchQuery: (query) => set((state) => ({
         filters: { ...state.filters, query }
     })),
@@ -49,7 +53,7 @@ export const useOntologyStore = create<OntologyState>((set) => ({
 
     selectNode: (id) => set({ selectedNodeId: id }),
     setHoveredNode: (id) => set({ hoveredNodeId: id }),
-    toggleViewMode: () => set((state) => ({ isTableMode: !state.isTableMode })),
+    setViewMode: (mode) => set({ viewMode: mode }),
 
     resetFilters: () => set({
         filters: {
@@ -57,6 +61,7 @@ export const useOntologyStore = create<OntologyState>((set) => ({
             layers: new Set(['kpi', 'measure', 'process', 'resource']),
             depth: 2
         },
-        selectedNodeId: null
+        selectedNodeId: null,
+        viewMode: 'graph',
     })
 }));

@@ -2,17 +2,21 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 
-from app.services.synapse_gateway_service import (
-    GatewayProxyError,
-    SynapseGatewayService,
-    synapse_gateway_service,
+from app.infrastructure.external.synapse_acl import (
+    SynapseACL,
+    SynapseACLError,
+    synapse_acl,
 )
+
+# Backward compatibility aliases
+SynapseGatewayService = SynapseACL
+GatewayProxyError = SynapseACLError
 
 router = APIRouter(tags=["gateway"])
 
 
-def get_synapse_gateway() -> SynapseGatewayService:
-    return synapse_gateway_service
+def get_synapse_gateway() -> SynapseACL:
+    return synapse_acl
 
 
 def _incoming_headers(request: Request) -> dict[str, str]:
@@ -23,8 +27,8 @@ def _incoming_headers(request: Request) -> dict[str, str]:
     }
 
 
-def _raise_proxy(err: GatewayProxyError) -> None:
-    raise HTTPException(status_code=err.status_code, detail=err.body)
+def _raise_proxy(err: SynapseACLError) -> None:
+    raise HTTPException(status_code=err.status_code, detail=err.detail)
 
 
 @router.post("/event-logs/upload", status_code=202)
