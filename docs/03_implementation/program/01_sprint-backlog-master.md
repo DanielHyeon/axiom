@@ -81,7 +81,7 @@
 - 목표: 문서-구현 API 정합성 복구 및 우선순위 엔드포인트 구현 착수
 - 범위: Core/Synapse/Oracle/Vision/Weaver API 갭 P0/P1
 - 핵심 산출물:
-  - 서비스별 `88_sprint8-ticket-board.md` 기준 P0 티켓 구현/검증
+  - 서비스별 `87_sprint8-ticket-board.md` 기준 P0 티켓 구현/검증
   - API 문서 상태(Implemented/Partial/Planned)와 근거(코드/티켓) 동기화
   - 프로그램 실행 티켓 문서 `11_sprint8-execution-tickets.md` 기준 통합 추적
 - 통과 기준:

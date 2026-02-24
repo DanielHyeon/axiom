@@ -45,5 +45,5 @@
 2. Process API 필수 라이프사이클 경로 보강
 3. Gateway event-log/process-mining 프록시 경로 복구
 - 완료 기준:
-  - `docs/03_implementation/core/88_sprint8-ticket-board.md` 항목 완료
+  - `docs/03_implementation/core/87_sprint8-ticket-board.md` 항목 완료
   - API 문서 상태/근거 컬럼과 런타임 경로 불일치 고위험 항목 0건

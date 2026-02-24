@@ -45,5 +45,5 @@
 2. OLAP 조회 경로(cubes/pivot) 1차 구현
 3. 문서 상태/근거 컬럼 동기화
 - 완료 기준:
-  - `docs/03_implementation/vision/88_sprint8-ticket-board.md` 항목 완료
+  - `docs/03_implementation/vision/87_sprint8-ticket-board.md` 항목 완료
   - Vision `02_api` 문서와 런타임 경로 정합성 확보

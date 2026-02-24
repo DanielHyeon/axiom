@@ -45,5 +45,5 @@
 2. Query API 1차 경로 구현
 3. Metadata Catalog API 핵심 경로(snapshots/search/stats) 1차 구현
 - 완료 기준:
-  - `docs/03_implementation/weaver/88_sprint8-ticket-board.md` 항목 완료
+  - `docs/03_implementation/weaver/87_sprint8-ticket-board.md` 항목 완료
   - Weaver `02_api` 문서와 런타임 경로 정합성 확보

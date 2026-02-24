@@ -75,7 +75,7 @@
 - Sprint 9: `docs/03_implementation/program/12_sprint9-execution-tickets.md`
 - Sprint 8 정렬 원칙:
   - 목표: API 문서-구현 정합성 복구 및 P0/P1 엔드포인트 우선 구현
-  - 서비스 보드: `docs/03_implementation/{core|synapse|oracle|vision|weaver}/88_sprint8-ticket-board.md`
+  - 서비스 보드: `docs/03_implementation/{core|synapse|oracle|vision|weaver}/87_sprint8-ticket-board.md`
   - 완료 기준: API 상태/근거 컬럼 동기화 + P0 계약 테스트 통과
 - Sprint 9~12 정렬 원칙:
   - 목표: Full Spec 갭(Critical/High) 해소를 우선하며, 엔드포인트 존재 여부보다 실연동/운영성/정책 강제를 완료 조건으로 사용

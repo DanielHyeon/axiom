@@ -25,5 +25,5 @@
 - docs/03_implementation/vision/99_decisions-implementation-plan.md
 - docs/03_implementation/vision/89_agent-utilization-plan.md
 - docs/03_implementation/vision/99_traceability-matrix.md
-- docs/03_implementation/vision/88_sprint8-ticket-board.md
+- docs/03_implementation/vision/87_sprint8-ticket-board.md
 - docs/03_implementation/vision/README.md

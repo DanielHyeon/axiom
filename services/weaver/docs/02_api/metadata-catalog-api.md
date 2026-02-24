@@ -73,35 +73,35 @@ Weaver는 "Data Fabric"에서 **"Data Fabric + Metadata Service"**로 승격된�
 | 메서드 | 경로 | 설명 | 권한 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------|------------------|
 | **패브릭 스냅샷** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 생성 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots` | 스냅샷 목록 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 상세 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/diff` | 스냅샷 Diff | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}/restore` | 스냅샷 복원 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/snapshots/{snapshot_id}` | 스냅샷 삭제 | `metadata:admin` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
 | **비즈니스 용어 사전** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/glossary` | 용어 생성 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary` | 용어 목록 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/{term_id}` | 용어 상세 조회 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `PUT` | `/api/v1/metadata/glossary/{term_id}` | 용어 수정 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/glossary/{term_id}` | 용어 삭제 (Planned) | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/glossary/search` | 용어 검색 (Planned) | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
 | **테이블/컬럼 태깅** |  |  |  |  |  |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags` | 테이블 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/tags/{tag}` | 테이블 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `POST` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 추가 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags` | 컬럼 태그 조회 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `DELETE` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/tables/{table_name}/columns/{column_name}/tags/{tag}` | 컬럼 태그 삭제 | `metadata:write` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/tags/{tag}/entities` | 태그별 엔티티 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
 | **메타데이터 검색** |  |  |  |  |  |
-| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/search` | 통합 검색 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas` | 스키마 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables` | 테이블 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/schemas/{schema_name}/tables/{table_name}/columns` | 컬럼 목록 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
 | **메타데이터 통계** |  |  |  |  |  |
-| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
-| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/94_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/cases/{case_id}/datasources/{ds_name}/stats` | 데이터소스별 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
+| `GET` | `/api/v1/metadata/stats` | 테넌트 전체 통계 | `metadata:read` | Implemented | `docs/implementation-plans/weaver/82_sprint3-ticket-board.md` |
 
 ---
 

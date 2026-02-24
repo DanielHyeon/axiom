@@ -23,5 +23,5 @@
 - docs/03_implementation/synapse/99_decisions-implementation-plan.md
 - docs/03_implementation/synapse/89_agent-utilization-plan.md
 - docs/03_implementation/synapse/99_traceability-matrix.md
-- docs/03_implementation/synapse/88_sprint8-ticket-board.md
+- docs/03_implementation/synapse/87_sprint8-ticket-board.md
 - docs/03_implementation/synapse/README.md

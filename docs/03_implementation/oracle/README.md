@@ -23,5 +23,5 @@
 - docs/03_implementation/oracle/99_decisions-implementation-plan.md
 - docs/03_implementation/oracle/89_agent-utilization-plan.md
 - docs/03_implementation/oracle/99_traceability-matrix.md
-- docs/03_implementation/oracle/88_sprint8-ticket-board.md
+- docs/03_implementation/oracle/87_sprint8-ticket-board.md
 - docs/03_implementation/oracle/README.md

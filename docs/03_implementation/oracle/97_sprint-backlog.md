@@ -45,5 +45,5 @@
 2. Events API 이관 전략 확정 및 최소 경로 적용
 3. 문서 상태/근거 컬럼 동기화
 - 완료 기준:
-  - `docs/03_implementation/oracle/88_sprint8-ticket-board.md` 항목 완료
+  - `docs/03_implementation/oracle/87_sprint8-ticket-board.md` 항목 완료
   - Oracle `02_api` 문서와 런타임 경로 불일치 고위험 항목 0건

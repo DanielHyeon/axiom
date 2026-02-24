@@ -19,19 +19,19 @@
 
 | 메서드 | 경로 | 설명 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|------------------|
-| `GET` | `/api/datasources/types` | 지원 DB 타입 목록 + 설정 스키마 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/supported-engines` | 메타데이터 추출 지원 엔진 목록 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources` | 등록된 데이터소스 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `POST` | `/api/datasources` | 새 데이터소스 생성 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}` | 특정 데이터소스 상세 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `DELETE` | `/api/datasources/{name}` | 데이터소스 삭제 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `PUT` | `/api/datasources/{name}/connection` | 연결 정보 업데이트 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/health` | 데이터소스 연결 상태 확인 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `POST` | `/api/datasources/{name}/test` | 연결 테스트 (생성 전 검증) | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/schemas` | 스키마 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables` | 테이블 목록 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables/{table}/schema` | 테이블 스키마 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Implemented | `docs/implementation-plans/weaver/95_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/types` | 지원 DB 타입 목록 + 설정 스키마 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/supported-engines` | 메타데이터 추출 지원 엔진 목록 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources` | 등록된 데이터소스 목록 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `POST` | `/api/datasources` | 새 데이터소스 생성 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}` | 특정 데이터소스 상세 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `DELETE` | `/api/datasources/{name}` | 데이터소스 삭제 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `PUT` | `/api/datasources/{name}/connection` | 연결 정보 업데이트 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/health` | 데이터소스 연결 상태 확인 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `POST` | `/api/datasources/{name}/test` | 연결 테스트 (생성 전 검증) | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/schemas` | 스키마 목록 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables` | 테이블 목록 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables/{table}/schema` | 테이블 스키마 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
 
 ---
 

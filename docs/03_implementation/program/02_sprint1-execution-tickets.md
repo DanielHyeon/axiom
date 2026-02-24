@@ -22,4 +22,4 @@
 ## Sprint 1 Exit Criteria
 - 아키텍처 경계 위반 Critical 0건
 - API 계약 변경 승인 프로세스 운영 증적 확보
-- 각 프로젝트 `96_sprint1-ticket-board.md`의 모든 티켓 `Done`
+- 각 프로젝트 `80_sprint1-ticket-board.md`의 모든 티켓 `Done`

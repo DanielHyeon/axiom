@@ -45,5 +45,5 @@
 2. Extraction API 1차 구현 + HITL 경로 구현
 3. Schema-edit API 기본 경로 구현
 - 완료 기준:
-  - `docs/03_implementation/synapse/88_sprint8-ticket-board.md` 항목 완료
+  - `docs/03_implementation/synapse/87_sprint8-ticket-board.md` 항목 완료
   - Synapse `02_api` 문서 상태와 런타임 경로 정합성 확보

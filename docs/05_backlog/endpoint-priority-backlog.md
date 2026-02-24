@@ -26,7 +26,7 @@
   - `GET /api/v1/watches/stream`
 - 근거 문서
   - `services/core/docs/02_api/watch-api.md`
-  - `docs/03_implementation/core/90_sprint7-ticket-board.md`
+  - `docs/03_implementation/core/86_sprint7-ticket-board.md`
 - 이유
   - 프론트 호출 경로가 이미 존재하므로(Watch 화면) 실패 영향이 즉시 발생
 
@@ -43,7 +43,7 @@
   - `GET /api/v1/watches/rules`
 - 근거 문서
   - `services/core/docs/02_api/watch-api.md`
-  - `docs/03_implementation/core/90_sprint7-ticket-board.md`
+  - `docs/03_implementation/core/86_sprint7-ticket-board.md`
 
 ### P0-CORE-PROCESS-ESSENTIAL
 
@@ -57,7 +57,7 @@
   - `POST /api/v1/process/rework`
 - 근거 문서
   - `services/core/docs/02_api/process-api.md`
-  - `docs/03_implementation/core/95_sprint2-ticket-board.md`
+  - `docs/03_implementation/core/81_sprint2-ticket-board.md`
 
 ---
 
@@ -78,7 +78,7 @@
   - `DELETE /{log_id}`
 - 근거 문서
   - `services/synapse/docs/02_api/event-log-api.md`
-  - `docs/03_implementation/synapse/94_sprint3-ticket-board.md`
+  - `docs/03_implementation/synapse/82_sprint3-ticket-board.md`
 
 ### P1-SYNAPSE-EXTRACTION
 
@@ -95,7 +95,7 @@
   - `POST /documents/{doc_id}/revert-extraction`
 - 근거 문서
   - `services/synapse/docs/02_api/extraction-api.md`
-  - `docs/03_implementation/synapse/94_sprint3-ticket-board.md`
+  - `docs/03_implementation/synapse/82_sprint3-ticket-board.md`
 
 ### P1-SYNAPSE-SCHEMA-EDIT
 
@@ -110,7 +110,7 @@
   - `/batch-update-embeddings`
 - 근거 문서
   - `services/synapse/docs/02_api/schema-edit-api.md`
-  - `docs/03_implementation/synapse/94_sprint3-ticket-board.md`
+  - `docs/03_implementation/synapse/82_sprint3-ticket-board.md`
 
 ### P1-ORACLE-META
 
@@ -124,7 +124,7 @@
   - `/text2sql/meta/columns/{fqn}/description`
 - 근거 문서
   - `services/oracle/docs/02_api/meta-api.md`
-  - `docs/03_implementation/oracle/95_sprint2-ticket-board.md`
+  - `docs/03_implementation/oracle/81_sprint2-ticket-board.md`
 
 ### P1-CORE-GATEWAY-PROXY
 
@@ -135,7 +135,7 @@
   - `/api/v1/process-mining/*` 전 구간
 - 근거 문서
   - `services/core/docs/02_api/gateway-api.md`
-  - `docs/03_implementation/core/96_sprint1-ticket-board.md`
+  - `docs/03_implementation/core/80_sprint1-ticket-board.md`
 
 ---
 
@@ -157,7 +157,7 @@
   - `/what-if/process-simulation`
 - 근거 문서
   - `services/vision/docs/02_api/what-if-api.md`
-  - `docs/03_implementation/vision/92_sprint5-ticket-board.md`
+  - `docs/03_implementation/vision/84_sprint5-ticket-board.md`
 
 ### P2-VISION-OLAP
 
@@ -176,7 +176,7 @@
   - `/etl/airflow/trigger-dag`
 - 근거 문서
   - `services/vision/docs/02_api/olap-api.md`
-  - `docs/03_implementation/vision/92_sprint5-ticket-board.md`
+  - `docs/03_implementation/vision/84_sprint5-ticket-board.md`
 
 ### P2-WEAVER-DATASOURCE-QUERY
 
@@ -188,8 +188,8 @@
 - 근거 문서
   - `services/weaver/docs/02_api/datasource-api.md`
   - `services/weaver/docs/02_api/query-api.md`
-  - `docs/03_implementation/weaver/95_sprint2-ticket-board.md`
-  - `docs/03_implementation/weaver/94_sprint3-ticket-board.md`
+  - `docs/03_implementation/weaver/81_sprint2-ticket-board.md`
+  - `docs/03_implementation/weaver/82_sprint3-ticket-board.md`
 
 ### P2-WEAVER-METADATA-CATALOG
 
@@ -199,7 +199,7 @@
   - `/api/v1/metadata/*` 전 구간
 - 근거 문서
   - `services/weaver/docs/02_api/metadata-catalog-api.md`
-  - `docs/03_implementation/weaver/94_sprint3-ticket-board.md`
+  - `docs/03_implementation/weaver/82_sprint3-ticket-board.md`
 
 ### P2-ORACLE-EVENTS
 
@@ -210,7 +210,7 @@
   - `/text2sql/watch-agent/chat`
 - 근거 문서
   - `services/oracle/docs/02_api/events-api.md`
-  - `docs/03_implementation/oracle/90_sprint7-ticket-board.md`
+  - `docs/03_implementation/oracle/86_sprint7-ticket-board.md`
 
 ### P2-CORE-AGENT-MCP
 
@@ -222,7 +222,7 @@
   - `/api/v1/mcp/*`
 - 근거 문서
   - `services/core/docs/02_api/agent-api.md`
-  - `docs/03_implementation/core/93_sprint4-ticket-board.md`
+  - `docs/03_implementation/core/83_sprint4-ticket-board.md`
 
 ---
 
