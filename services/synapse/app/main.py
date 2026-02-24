@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 import asyncio
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.core.neo4j_client import neo4j_client
 from app.core.redis_client import close_redis, get_redis
 from app.graph.neo4j_bootstrap import Neo4jBootstrap
@@ -55,7 +56,20 @@ async def lifespan(app: FastAPI):
     await neo4j_client.close()
 
 app = FastAPI(title="Axiom Synapse", version="2.0.0", lifespan=lifespan)
+# Middleware order: last added = first executed
+# TenantMiddleware must run AFTER CORSMiddleware so CORS preflight isn't blocked
 app.add_middleware(TenantMiddleware)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(graph_router)
 app.include_router(event_logs_router)
 app.include_router(extraction_router)

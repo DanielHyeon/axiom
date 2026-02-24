@@ -263,12 +263,15 @@ class NL2SQLPipeline:
         except RuntimeError:
             pass
 
+        result_dict = exec_res.model_dump()
+        result_dict["columns"] = [{"name": c, "type": "varchar"} for c in exec_res.columns]
+
         return {
             "success": True,
             "data": {
                 "question": question,
                 "sql": guard_res.sql,
-                "result": exec_res.model_dump(),
+                "result": result_dict,
                 "visualization": visualization,
                 "summary": summary,
                 "metadata": {

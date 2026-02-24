@@ -156,6 +156,8 @@ services:
       - CORE_API_URL=http://core-svc:8002
       - WEAVER_QUERY_API_URL=http://weaver-svc:8001/api/query
       - QUERY_HISTORY_DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - ORACLE_SQL_EXECUTION_MODE=direct
+      - ORACLE_DATASOURCES_JSON=[{"id":"ds_sample","name":"Sample Business DB","type":"postgresql","host":"postgres-db","database":"insolvency_os","schema":"public","status":"active"}]
     depends_on:
       postgres-db:
         condition: service_healthy

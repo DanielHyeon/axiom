@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any, Optional
 import re
+import time
 
 import structlog
 from pydantic import BaseModel
@@ -106,13 +107,67 @@ class SQLExecutor:
             backend="mock",
         )
 
+    @staticmethod
+    def _serialize_value(val: Any) -> Any:
+        """PostgreSQL 네이티브 타입을 JSON 직렬화 가능한 타입으로 변환."""
+        if val is None:
+            return None
+        from decimal import Decimal
+        if isinstance(val, Decimal):
+            return float(val)
+        if hasattr(val, 'isoformat'):
+            return val.isoformat()
+        if isinstance(val, (bytes, memoryview)):
+            return str(val)
+        if isinstance(val, (dict, list)):
+            return val
+        return val
+
+    async def _execute_direct_pg(self, sql: str, user: CurrentUser) -> ExecutionResult:
+        """PostgreSQL에 직접 SQL을 실행하여 실제 데이터를 반환."""
+        import psycopg2
+
+        db_url = settings.QUERY_HISTORY_DATABASE_URL
+        started = time.perf_counter()
+        try:
+            conn = psycopg2.connect(db_url)
+            conn.set_session(readonly=True, autocommit=True)
+            cur = conn.cursor()
+            cur.execute(sql)
+            columns = [desc[0] for desc in cur.description] if cur.description else []
+            rows_raw = cur.fetchmany(self.max_rows + 1)
+            truncated = len(rows_raw) > self.max_rows
+            rows = [[self._serialize_value(v) for v in r] for r in rows_raw[:self.max_rows]]
+            cur.close()
+            conn.close()
+            elapsed_ms = max(int((time.perf_counter() - started) * 1000), 1)
+            logger.info("sql_exec_direct_pg_ok", rows=len(rows), cols=len(columns), ms=elapsed_ms)
+            return ExecutionResult(
+                columns=columns,
+                rows=rows,
+                row_count=len(rows),
+                truncated=truncated,
+                execution_time_ms=elapsed_ms,
+                backend="direct_pg",
+            )
+        except Exception as exc:
+            elapsed_ms = max(int((time.perf_counter() - started) * 1000), 1)
+            logger.error("sql_exec_direct_pg_failed", error=str(exc), ms=elapsed_ms)
+            raise
+
     async def execute_sql(self, sql: str, datasource_id: str, user: CurrentUser, timeout: Optional[int] = None) -> ExecutionResult:
         logger.info("sql_exec_start", sql_len=len(sql), tenant=str(user.tenant_id))
         effective_timeout = timeout or settings.ORACLE_SQL_EXECUTION_TIMEOUT_SEC
 
-        if self.execution_mode not in {"mock", "hybrid", "weaver"}:
+        if self.execution_mode not in {"mock", "hybrid", "weaver", "direct"}:
             logger.warning("invalid_sql_execution_mode", mode=self.execution_mode)
             self.execution_mode = "hybrid"
+
+        if self.execution_mode == "direct":
+            try:
+                return await self._execute_direct_pg(sql, user)
+            except Exception as exc:
+                logger.warning("sql_exec_direct_fallback_to_mock", reason=str(exc))
 
         if self.execution_mode in {"hybrid", "weaver"}:
             try:

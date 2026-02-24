@@ -201,12 +201,14 @@ class ReactAgent:
                         summary = (summary or "").strip()[:500]
                     except Exception:
                         pass
+                    result_dict = exec_res.model_dump()
+                    result_dict["columns"] = col_dicts
                     yield _step_line(
                         "result",
                         iteration,
                         {
                             "sql": val_res.sql,
-                            "result": exec_res.model_dump(),
+                            "result": result_dict,
                             "summary": summary,
                             "visualization": viz,
                         },

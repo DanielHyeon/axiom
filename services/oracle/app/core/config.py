@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     SERVICE_TOKEN_ORACLE: str = "local-oracle-token"
     WEAVER_QUERY_API_URL: str = "http://localhost:8001/api/query"
     WEAVER_BEARER_TOKEN: str = ""
-    ORACLE_SQL_EXECUTION_MODE: str = "hybrid"
+    ORACLE_SQL_EXECUTION_MODE: str = "hybrid"  # mock | hybrid | weaver | direct
     ORACLE_SQL_EXECUTION_TIMEOUT_SEC: int = 15
     ORACLE_DATASOURCES_JSON: str = "[]"
     QUERY_HISTORY_DATABASE_URL: str = "postgresql://arkos:arkos@localhost:5432/insolvency_os"

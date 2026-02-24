@@ -3,6 +3,7 @@ import logging
 import os
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from app.api.analytics import router as analytics_router
 from app.api.analytics_v3 import router as analytics_v3_router
@@ -14,6 +15,17 @@ from app.services.vision_runtime import vision_runtime
 logger = logging.getLogger("axiom.vision")
 
 app = FastAPI(title="Axiom Vision", version="1.0.0")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://localhost:5174",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 기존 /analytics* 엔드포인트(테스트·내부 용도)와
 # /api/v3/analytics* 풀스펙 엔드포인트를 모두 제공한다.

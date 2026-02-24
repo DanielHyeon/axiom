@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from app.api.text2sql import router as text2sql_router
 from app.api.health import router as health_router
@@ -11,6 +12,14 @@ import structlog
 logger = structlog.get_logger()
 
 app = FastAPI(title="Axiom Oracle", version="2.0.0")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.exception_handler(RateLimitExceeded)

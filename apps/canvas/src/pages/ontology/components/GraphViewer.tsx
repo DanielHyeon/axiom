@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef, useCallback, useState } from 'react';
 import ForceGraph2D from 'react-force-graph-2d';
 import type { ForceGraphMethods } from 'react-force-graph-2d';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
@@ -18,20 +18,35 @@ interface GraphViewerProps {
 
 export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
     const fgRef = useRef<ForceGraphMethods>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
     const { selectedNodeId, hoveredNodeId, selectNode, setHoveredNode } = useOntologyStore();
+    const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
+
+    // Track container size
+    useEffect(() => {
+        const el = containerRef.current;
+        if (!el) return;
+        const ro = new ResizeObserver(([entry]) => {
+            const { width, height } = entry.contentRect;
+            if (width > 0 && height > 0) {
+                setDimensions({ width: Math.floor(width), height: Math.floor(height) });
+            }
+        });
+        ro.observe(el);
+        return () => ro.disconnect();
+    }, []);
 
     // Zoom to fit on initial full load
     useEffect(() => {
         if (data.nodes.length > 0 && fgRef.current) {
-            fgRef.current.zoomToFit(400, 50); // duration, padding
+            setTimeout(() => fgRef.current?.zoomToFit(400, 50), 300);
         }
-    }, [data.nodes.length]);
+    }, [data.nodes.length, dimensions]);
 
-    // Handle Window Resize (optional but good for responsive canvas)
+    // Handle Window Resize
     useEffect(() => {
         const handleResize = () => {
             if (fgRef.current) {
-                // The wrapper div will trigger remeasure, but we can force update
                 fgRef.current.zoomToFit(100);
             }
         };
@@ -136,13 +151,15 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
     }, [selectedNodeId, selectNode]);
 
     return (
-        <div className="flex-1 w-full h-full bg-[#111111] overflow-hidden"
+        <div ref={containerRef} className="flex-1 w-full h-full bg-[#111111] overflow-hidden"
             role="application"
             aria-label={`온톨로지 그래프. 노드 ${data.nodes.length}개 표출됨. 마우스 드래그로 이동.`}>
             {data.nodes.length > 0 ? (
                 <ForceGraph2D
                     ref={fgRef as any}
                     graphData={data as any}
+                    width={dimensions.width}
+                    height={dimensions.height}
                     nodeCanvasObject={(node, ctx, globalScale) => drawNode(node as OntologyNode, ctx, globalScale)}
                     nodeRelSize={6}
                     linkColor={(link) => highlightLinks.has(link as OntologyEdge) ? '#ffffff' : '#404040'}
@@ -151,8 +168,8 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
                     linkDirectionalArrowRelPos={1}
                     onNodeHover={(node) => setHoveredNode(node ? (node as OntologyNode).id : null)}
                     onNodeClick={(node) => handleNodeClick(node as OntologyNode)}
-                    d3AlphaDecay={0.02} // Slower decay for smoother settling
-                    d3VelocityDecay={0.3} // Less friction
+                    d3AlphaDecay={0.02}
+                    d3VelocityDecay={0.3}
                 />
             ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-500">
