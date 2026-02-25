@@ -138,6 +138,7 @@ llm-service/ragdata/
 *.Identifier
 
 # Python
+.venv*/
 __pycache__/
 *.py[cod]
 *.pyo
