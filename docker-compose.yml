@@ -129,6 +129,7 @@ services:
       - SYNAPSE_BASE_URL=http://synapse-svc:8003
       - WEAVER_METADATA_PG_MODE=1
       - POSTGRES_DSN=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - WEAVER_CORS_ALLOWED_ORIGINS=http://localhost:5174,http://localhost:3000,https://app.axiom.kr,https://canvas.axiom.kr
     depends_on:
       vision-svc:
         condition: service_healthy

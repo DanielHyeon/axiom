@@ -53,17 +53,18 @@ export function WhatIfPage() {
             }));
             setScenarios(mapped);
             if (!activeScenarioId && mapped[0]) setActiveScenarioId(mapped[0].id);
-        } else if (!caseId && scenarios.length === 0) {
+        } else if (!vision.loading && scenarios.length === 0) {
+            // No Vision scenarios available (or no caseId) — create a default draft
             const mockId = 'scen-1';
             setScenarios([{
                 id: mockId,
-                name: '기본 물류 최적화 시나리오',
+                name: caseId ? '새 What-if 시나리오' : '기본 물류 최적화 시나리오',
                 status: 'DRAFT',
                 parameters: {}
             }]);
             setActiveScenarioId(mockId);
         }
-    }, [caseId, vision.scenarios, scenarios.length, setCaseId, setScenarios, setActiveScenarioId, activeScenarioId]);
+    }, [caseId, vision.scenarios, vision.loading, scenarios.length, setCaseId, setScenarios, setActiveScenarioId, activeScenarioId]);
 
     const handleCompare = useCallback(() => {
         if (!caseId) return;

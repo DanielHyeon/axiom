@@ -61,10 +61,11 @@ async def startup_event():
     if getattr(settings, "SEED_DEV_USER", False):
         async with AsyncSessionLocal() as session:
             from sqlalchemy import select, func
+            from app.models.base_models import Case
+            _SEED_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+            _SEED_USER_ID = "00000000-0000-0000-0000-000000000002"
             r = await session.execute(select(func.count()).select_from(User))
             if (r.scalar() or 0) == 0:
-                _SEED_TENANT_ID = "00000000-0000-0000-0000-000000000001"
-                _SEED_USER_ID = "00000000-0000-0000-0000-000000000002"
                 t = Tenant(id=_SEED_TENANT_ID, name="Default", active=True)
                 session.add(t)
                 u = User(
@@ -76,6 +77,18 @@ async def startup_event():
                     active=True,
                 )
                 session.add(u)
+                await session.commit()
+            # Seed demo case for ontology viewer
+            _DEMO_CASE_ID = "00000000-0000-4000-a000-000000000100"
+            rc = await session.execute(select(func.count()).select_from(Case).where(Case.id == _DEMO_CASE_ID))
+            if (rc.scalar() or 0) == 0:
+                session.add(Case(
+                    id=_DEMO_CASE_ID,
+                    tenant_id=_SEED_TENANT_ID,
+                    title="[Demo] 제조업 프로세스 분석",
+                    status="IN_PROGRESS",
+                    priority="HIGH",
+                ))
                 await session.commit()
 
     # Start Outbox Relay Worker (Transactional Outbox pattern)

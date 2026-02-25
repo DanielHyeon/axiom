@@ -197,7 +197,7 @@ export function OlapPivotPage() {
               )}
 
               {!queryResult && !error && !isQuerying && (
-                <div className="h-32 flex items-center justify-center text-neutral-500 text-sm italic">
+                <div className="h-32 flex items-center justify-center text-neutral-400 text-sm italic">
                   조건을 구성하고 "분석 실행"을 클릭하세요.
                 </div>
               )}

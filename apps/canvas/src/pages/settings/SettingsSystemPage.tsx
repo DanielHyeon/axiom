@@ -33,31 +33,31 @@ export const SettingsSystemPage: React.FC = () => {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold">시스템</h2>
-        <p className="text-sm text-neutral-500">로딩 중…</p>
+        <h2 className="text-lg font-semibold text-foreground">시스템</h2>
+        <p className="text-sm text-neutral-400">로딩 중…</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-semibold">시스템</h2>
+      <h2 className="text-lg font-semibold text-foreground">시스템</h2>
       {error && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
+        <p className="text-sm text-red-400 bg-red-950/30 border border-red-800 rounded px-3 py-2">
           {error}
         </p>
       )}
       <div className="space-y-3">
-        <h3 className="text-sm font-medium text-neutral-700">서비스 상태</h3>
-        <ul className="border border-neutral-200 rounded divide-y divide-neutral-200">
+        <h3 className="text-sm font-medium text-neutral-300">서비스 상태</h3>
+        <ul className="border border-neutral-700 rounded divide-y divide-neutral-700">
           {serviceStatuses.map((s) => (
             <li key={s.name} className="px-4 py-2 flex items-center justify-between">
-              <span>{s.name}</span>
+              <span className="text-neutral-100">{s.name}</span>
               <span
                 className={
                   s.status === 'up'
-                    ? 'text-emerald-600 font-medium'
-                    : 'text-red-600 font-medium'
+                    ? 'text-emerald-400 font-medium'
+                    : 'text-red-400 font-medium'
                 }
               >
                 {s.status === 'up' ? '정상' : '이상'}
@@ -68,17 +68,17 @@ export const SettingsSystemPage: React.FC = () => {
       </div>
       {coreReadiness && (
         <div className="space-y-3">
-          <h3 className="text-sm font-medium text-neutral-700">Core 상세 (DB / Redis)</h3>
-          <ul className="border border-neutral-200 rounded divide-y divide-neutral-200">
+          <h3 className="text-sm font-medium text-neutral-300">Core 상세 (DB / Redis)</h3>
+          <ul className="border border-neutral-700 rounded divide-y divide-neutral-700">
             {coreReadiness.checks &&
               Object.entries(coreReadiness.checks).map(([key, value]) => (
                 <li key={key} className="px-4 py-2 flex items-center justify-between">
-                  <span>{key}</span>
+                  <span className="text-neutral-100">{key}</span>
                   <span
                     className={
                       value === 'healthy'
-                        ? 'text-emerald-600 font-medium'
-                        : 'text-red-600 font-medium'
+                        ? 'text-emerald-400 font-medium'
+                        : 'text-red-400 font-medium'
                     }
                   >
                     {value === 'healthy' ? '정상' : value}
@@ -91,7 +91,7 @@ export const SettingsSystemPage: React.FC = () => {
       <button
         type="button"
         onClick={() => load()}
-        className="rounded border border-neutral-300 px-4 py-2 text-sm"
+        className="rounded border border-neutral-600 text-neutral-200 px-4 py-2 text-sm hover:bg-neutral-800"
       >
         새로고침
       </button>

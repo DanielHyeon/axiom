@@ -22,7 +22,7 @@ export const CaseListPage: React.FC = () => {
 
   return (
     <div className="p-6">
-      <h1 className="mb-4 text-2xl font-bold text-white">케이스 목록</h1>
+      <h1 className="mb-6 text-2xl font-semibold text-sky-300">케이스 목록</h1>
 
       <div className="mb-4">
         <CaseFilters status={statusFilter} onStatusChange={setStatusFilter} />

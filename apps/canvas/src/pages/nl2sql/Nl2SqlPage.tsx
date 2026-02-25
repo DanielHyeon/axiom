@@ -33,7 +33,8 @@ import { Database, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EXAMPLE_QUESTIONS = [
-  '2024년 매출 성장률이 가장 높은 사업부는?',
+  '2024-06-20 서울전자 매출은?',
+  '2024년 회사별 매출 성장률이 가장 높은 곳은?',
   '최근 3개월 처리 건수 추이',
   '지역별 평균 처리 시간 비교',
 ];

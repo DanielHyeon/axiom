@@ -14,6 +14,49 @@ from app.services.vision_runtime import vision_runtime
 
 logger = logging.getLogger("axiom.vision")
 
+
+# ---------------------------------------------------------------------------
+# Demo OLAP cubes — seeded so the OLAP Pivot page has selectable cubes
+# ---------------------------------------------------------------------------
+_DEMO_CUBES = [
+    {
+        "name": "매출분석",
+        "fact_table": "sales",
+        "dimensions": ["company_name", "department", "product_category", "region", "sale_date"],
+        "measures": ["revenue", "cost", "quantity"],
+        "measure_details": [
+            {"name": "revenue", "column": "revenue", "aggregator": "sum", "format": "#,###"},
+            {"name": "cost", "column": "cost", "aggregator": "sum", "format": "#,###"},
+            {"name": "quantity", "column": "quantity", "aggregator": "sum", "format": "#,###"},
+        ],
+    },
+    {
+        "name": "운영분석",
+        "fact_table": "operations",
+        "dimensions": ["operation_type", "status", "region", "operator_name"],
+        "measures": ["duration_minutes", "case_count"],
+        "measure_details": [
+            {"name": "duration_minutes", "column": "duration_minutes", "aggregator": "avg", "format": "#,##0.0"},
+            {"name": "case_count", "column": "id", "aggregator": "count", "format": "#,###"},
+        ],
+    },
+]
+
+
+def _seed_demo_cubes() -> None:
+    """Register demo cubes if not already present."""
+    for cube_def in _DEMO_CUBES:
+        if cube_def["name"] not in vision_runtime.cubes:
+            vision_runtime.create_cube(
+                cube_name=cube_def["name"],
+                fact_table=cube_def["fact_table"],
+                dimensions=cube_def["dimensions"],
+                measures=cube_def["measures"],
+                measure_details=cube_def.get("measure_details"),
+            )
+            logger.info("demo_cube_seeded: %s", cube_def["name"])
+
+
 app = FastAPI(title="Axiom Vision", version="1.0.0")
 app.add_middleware(
     CORSMiddleware,
@@ -40,6 +83,15 @@ _consumer_task: asyncio.Task | None = None
 # ── DDD-P3-01: Vision Outbox Relay ── #
 _relay_task: asyncio.Task | None = None
 _relay_worker = None
+
+
+@app.on_event("startup")
+async def _seed_cubes_on_startup():
+    """Register demo OLAP cubes so the pivot page has data to work with."""
+    try:
+        _seed_demo_cubes()
+    except Exception:
+        logger.warning("demo cube seeding failed", exc_info=True)
 
 
 @app.on_event("startup")

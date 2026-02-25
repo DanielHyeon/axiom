@@ -51,9 +51,9 @@ export async function deleteDatasource(name: string): Promise<void> {
   await weaverApi.delete(`/api/datasources/${encodeURIComponent(name)}`);
 }
 
-export async function testConnection(name: string): Promise<{ status: string; message?: string }> {
+export async function testConnection(name: string): Promise<{ success: boolean; name: string; response_time_ms?: number; message?: string }> {
   const res = await weaverApi.post(`/api/datasources/${encodeURIComponent(name)}/test`);
-  return res as unknown as { status: string; message?: string };
+  return res as unknown as { success: boolean; name: string; response_time_ms?: number; message?: string };
 }
 
 export async function getDatasourceSchemas(name: string): Promise<{ datasource: string; schemas: string[] }> {

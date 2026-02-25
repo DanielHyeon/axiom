@@ -16,7 +16,7 @@ export function EmptyState({ icon: Icon, title, description, actionLabel, onActi
                 <Icon size={24} />
             </div>
             <h3 className="mb-2 text-lg font-semibold text-neutral-200">{title}</h3>
-            <p className="max-w-sm mb-6 text-sm text-neutral-500">
+            <p className="max-w-sm mb-6 text-sm text-neutral-400">
                 {description}
             </p>
             {actionLabel && onAction && (

@@ -64,6 +64,12 @@ export const CaseDetailPage: React.FC = () => {
           문서
         </Link>
         <Link
+          to={ROUTES.DATA.ONTOLOGY_CASE(caseId)}
+          className="text-blue-600 hover:underline"
+        >
+          온톨로지
+        </Link>
+        <Link
           to={ROUTES.CASES.SCENARIOS(caseId)}
           className="text-blue-600 hover:underline"
         >

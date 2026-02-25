@@ -40,7 +40,7 @@ class Settings:
         self.weaver_cors_allowed_methods = _csv_list("WEAVER_CORS_ALLOWED_METHODS", "GET,POST,PUT,DELETE,OPTIONS")
         self.weaver_cors_allowed_headers = _csv_list(
             "WEAVER_CORS_ALLOWED_HEADERS",
-            "Authorization,Content-Type,X-Request-Id,Idempotency-Key",
+            "Authorization,Content-Type,X-Request-Id,X-Tenant-Id,Idempotency-Key",
         )
 
 

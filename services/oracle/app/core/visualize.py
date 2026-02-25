@@ -6,19 +6,101 @@ from __future__ import annotations
 from typing import Any
 
 
+# Column names commonly used as time/date axis
+_TIME_NAME_HINTS = frozenset([
+    "date", "sale_date", "started_at", "completed_at", "occurred_at",
+    "created_at", "updated_at", "month", "quarter", "year",
+])
+
+# Column names commonly used as numeric measures
+_MEASURE_NAME_HINTS = frozenset([
+    "revenue", "cost", "quantity", "amount", "total", "sum", "avg",
+    "count", "rate", "score", "duration", "duration_minutes",
+    "duration_seconds", "price", "profit", "margin",
+])
+
+_NUMERIC_PG_TYPES = frozenset([
+    "integer", "int", "int4", "int8", "bigint", "smallint",
+    "numeric", "decimal", "float", "float4", "float8",
+    "real", "double precision", "serial", "bigserial",
+    "numeric(15,2)", "numeric(10,2)",
+])
+
+
+def _is_numeric_value(val: Any) -> bool:
+    """Check if a sample value looks numeric."""
+    if val is None:
+        return False
+    if isinstance(val, (int, float)):
+        return True
+    if isinstance(val, str):
+        try:
+            float(val.replace(",", ""))
+            return True
+        except (ValueError, AttributeError):
+            return False
+    return False
+
+
+def _is_date_value(val: Any) -> bool:
+    """Check if a sample value looks like a date/time."""
+    if val is None:
+        return False
+    if hasattr(val, "isoformat"):  # datetime, date objects
+        return True
+    if isinstance(val, str):
+        s = val.strip()
+        # ISO date: 2024-06-20 or 2024-06-20T10:00:00
+        if len(s) >= 10 and s[4:5] == "-" and s[7:8] == "-":
+            return True
+        # YYYY-MM format
+        if len(s) == 7 and s[4:5] == "-":
+            return True
+    return False
+
+
 def _infer_column_role(name: str, col_type: str, sample: Any) -> str:
     name_lower = (name or "").lower()
     type_lower = (col_type or "").lower()
-    if "date" in type_lower or "time" in type_lower or "at" in name_lower and "date" in name_lower:
+
+    # 1. Check declared type first
+    if "date" in type_lower or "timestamp" in type_lower:
         return "time"
+    if type_lower in _NUMERIC_PG_TYPES:
+        return "measure"
+
+    # 2. Check column name hints
+    if name_lower in _TIME_NAME_HINTS:
+        return "time"
+    # Patterns like *_at, *_date
+    if name_lower.endswith("_at") or name_lower.endswith("_date"):
+        return "time"
+    # Korean time-related suffixes in aliases
+    if any(k in name_lower for k in ("년", "월", "분기", "yyyy")):
+        return "time"
+
+    if name_lower in _MEASURE_NAME_HINTS:
+        return "measure"
+    # Patterns containing common measure words
+    if any(k in name_lower for k in (
+        "count", "amount", "value", "rate", "total", "sum", "avg",
+        "revenue", "cost", "quantity", "price", "profit", "margin",
+        "매출", "비용", "건수", "합계", "평균", "수량", "이익", "성장률",
+        "시간", "duration",
+    )):
+        return "measure"
+
     if "id" in name_lower and name_lower != "id":
         return "dimension"
-    if "name" in name_lower or "label" in name_lower or "title" in name_lower:
+    if any(k in name_lower for k in ("name", "label", "title", "type", "status", "region", "category")):
         return "category"
-    if "count" in name_lower or "amount" in name_lower or "value" in name_lower or "rate" in name_lower:
+
+    # 3. Infer from actual sample data
+    if _is_date_value(sample):
+        return "time"
+    if _is_numeric_value(sample):
         return "measure"
-    if type_lower in ("integer", "int", "bigint", "numeric", "decimal", "float", "real"):
-        return "measure"
+
     return "category"
 
 

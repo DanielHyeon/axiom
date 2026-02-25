@@ -1,6 +1,8 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
+import { useCases } from '@/features/case-dashboard/hooks/useCases';
+import { ROUTES } from '@/lib/routes/routes';
 import { useOntologyData } from '@/features/ontology/hooks/useOntologyData';
 import { exportOntology } from '@/features/ontology/api/ontologyApi';
 import { GraphViewer } from './components/GraphViewer';
@@ -71,14 +73,10 @@ export function OntologyPage() {
         URL.revokeObjectURL(url);
     };
 
+    const navigate = useNavigate();
+
     if (!caseId) {
-        return (
-            <div className="flex flex-col items-center justify-center h-full text-neutral-500 gap-2">
-                <Share2 size={32} className="opacity-20" />
-                <p className="text-sm">사건을 선택하세요.</p>
-                <p className="text-xs text-neutral-600">URL에 ?caseId=xxx 파라미터가 필요합니다.</p>
-            </div>
-        );
+        return <CaseSelector onSelect={(id) => navigate(ROUTES.DATA.ONTOLOGY_CASE(id))} />;
     }
 
     return (
@@ -210,6 +208,36 @@ export function OntologyPage() {
                     <HITLReviewQueue caseId={caseId} onClose={() => setShowHITL(false)} />
                 )}
             </div>
+        </div>
+    );
+}
+
+function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
+    const { data: cases, isLoading } = useCases();
+
+    return (
+        <div className="flex flex-col items-center justify-center h-full text-neutral-500 gap-4">
+            <Share2 size={32} className="opacity-20" />
+            <p className="text-sm font-medium text-neutral-400">온톨로지를 탐색할 케이스를 선택하세요</p>
+            {isLoading ? (
+                <div className="h-8 w-48 animate-pulse rounded bg-neutral-800" />
+            ) : cases && cases.length > 0 ? (
+                <div className="flex flex-col gap-2 w-full max-w-sm">
+                    {cases.map((c) => (
+                        <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => onSelect(c.id)}
+                            className="flex items-center justify-between px-4 py-3 rounded-lg border border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 hover:border-neutral-700 transition-colors text-left"
+                        >
+                            <span className="text-sm text-neutral-200 truncate">{c.title}</span>
+                            <span className="text-xs text-neutral-600 shrink-0 ml-2">{c.status}</span>
+                        </button>
+                    ))}
+                </div>
+            ) : (
+                <p className="text-xs text-neutral-600">등록된 케이스가 없습니다.</p>
+            )}
         </div>
     );
 }

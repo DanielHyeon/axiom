@@ -1,15 +1,119 @@
-import { useEffect, useRef, useCallback, useState } from 'react';
-import ForceGraph2D from 'react-force-graph-2d';
-import type { ForceGraphMethods } from 'react-force-graph-2d';
+import { useEffect, useRef, useCallback } from 'react';
+import cytoscape from 'cytoscape';
+import dagre from 'cytoscape-dagre';
+import coseBilkent from 'cytoscape-cose-bilkent';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
-import type { OntologyNode, OntologyEdge, OntologyGraphData } from '@/features/ontology/types/ontology';
+import type { OntologyGraphData } from '@/features/ontology/types/ontology';
 
-const LAYER_COLORS = {
-    kpi: '#EF4444',     // Red
-    measure: '#F59E0B', // Orange
-    process: '#3B82F6', // Blue
-    resource: '#10B981' // Green
+// Register layout extensions once
+cytoscape.use(dagre);
+cytoscape.use(coseBilkent);
+
+const LAYER_COLORS: Record<string, string> = {
+    kpi: '#EF4444',
+    measure: '#F59E0B',
+    process: '#3B82F6',
+    resource: '#10B981',
 };
+
+const LAYER_SHAPES: Record<string, string> = {
+    kpi: 'ellipse',
+    measure: 'diamond',
+    process: 'round-rectangle',
+    resource: 'rectangle',
+};
+
+const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
+    {
+        selector: 'node',
+        style: {
+            label: 'data(label)',
+            'text-valign': 'bottom',
+            'text-halign': 'center',
+            'text-margin-y': 6,
+            'font-size': 11,
+            color: '#d4d4d4',
+            'text-outline-width': 2,
+            'text-outline-color': '#111111',
+            'background-color': '#666',
+            width: 'mapData(weight, 1, 10, 24, 56)',
+            height: 'mapData(weight, 1, 10, 24, 56)',
+            'border-width': 0,
+            'overlay-opacity': 0,
+        },
+    },
+    // Layer-specific node styles
+    {
+        selector: 'node.kpi',
+        style: { 'background-color': LAYER_COLORS.kpi, shape: LAYER_SHAPES.kpi as any },
+    },
+    {
+        selector: 'node.measure',
+        style: { 'background-color': LAYER_COLORS.measure, shape: LAYER_SHAPES.measure as any },
+    },
+    {
+        selector: 'node.process',
+        style: { 'background-color': LAYER_COLORS.process, shape: LAYER_SHAPES.process as any },
+    },
+    {
+        selector: 'node.resource',
+        style: { 'background-color': LAYER_COLORS.resource, shape: LAYER_SHAPES.resource as any },
+    },
+    // Edge base style
+    {
+        selector: 'edge',
+        style: {
+            width: 1.5,
+            'line-color': '#404040',
+            'target-arrow-color': '#404040',
+            'target-arrow-shape': 'triangle',
+            'curve-style': 'bezier',
+            'arrow-scale': 0.8,
+            label: 'data(label)',
+            'font-size': 9,
+            color: '#737373',
+            'text-rotation': 'autorotate',
+            'text-outline-width': 1.5,
+            'text-outline-color': '#111111',
+            'overlay-opacity': 0,
+        },
+    },
+    // Selected node
+    {
+        selector: 'node:selected',
+        style: {
+            'border-width': 3,
+            'border-color': '#ffffff',
+        },
+    },
+    // Highlighted (neighbor or path) nodes & edges
+    {
+        selector: 'node.highlighted',
+        style: {
+            'border-width': 2,
+            'border-color': '#ffffff',
+            'z-index': 10,
+        },
+    },
+    {
+        selector: 'edge.highlighted',
+        style: {
+            'line-color': '#ffffff',
+            'target-arrow-color': '#ffffff',
+            width: 2.5,
+            'z-index': 10,
+        },
+    },
+    // Dimmed (not in highlight set)
+    {
+        selector: 'node.dimmed',
+        style: { opacity: 0.15 },
+    },
+    {
+        selector: 'edge.dimmed',
+        style: { opacity: 0.08 },
+    },
+];
 
 interface GraphViewerProps {
     data: OntologyGraphData;
@@ -17,160 +121,178 @@ interface GraphViewerProps {
 }
 
 export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
-    const fgRef = useRef<ForceGraphMethods>(null);
+    const cyRef = useRef<cytoscape.Core | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const { selectedNodeId, hoveredNodeId, selectNode, setHoveredNode } = useOntologyStore();
-    const [dimensions, setDimensions] = useState({ width: 800, height: 600 });
 
-    // Track container size
+    // Convert OntologyGraphData → Cytoscape elements
+    const toCyElements = useCallback((): cytoscape.ElementDefinition[] => {
+        const nodes: cytoscape.ElementDefinition[] = data.nodes.map((n) => ({
+            group: 'nodes' as const,
+            data: {
+                id: n.id,
+                label: n.label,
+                layer: n.layer,
+                weight: Math.min(n.val || 1, 10),
+                ...n.properties,
+            },
+            classes: n.layer,
+        }));
+
+        const edges: cytoscape.ElementDefinition[] = data.links.map((e, i) => {
+            const sourceId = typeof e.source === 'object' ? e.source.id : e.source;
+            const targetId = typeof e.target === 'object' ? e.target.id : e.target;
+            return {
+                group: 'edges' as const,
+                data: {
+                    id: `e-${sourceId}-${targetId}-${i}`,
+                    source: sourceId,
+                    target: targetId,
+                    label: e.label || '',
+                    relType: e.type,
+                },
+            };
+        });
+
+        return [...nodes, ...edges];
+    }, [data]);
+
+    // Initialize Cytoscape instance
     useEffect(() => {
-        const el = containerRef.current;
-        if (!el) return;
-        const ro = new ResizeObserver(([entry]) => {
-            const { width, height } = entry.contentRect;
-            if (width > 0 && height > 0) {
-                setDimensions({ width: Math.floor(width), height: Math.floor(height) });
+        if (!containerRef.current) return;
+
+        const cy = cytoscape({
+            container: containerRef.current,
+            style: CYTOSCAPE_STYLE,
+            elements: [],
+            minZoom: 0.2,
+            maxZoom: 5,
+            wheelSensitivity: 0.3,
+        });
+
+        cyRef.current = cy;
+
+        // Event: node click → select
+        cy.on('tap', 'node', (evt) => {
+            const nodeId = evt.target.id();
+            const store = useOntologyStore.getState();
+            if (store.selectedNodeId === nodeId) {
+                selectNode(null);
+            } else {
+                selectNode(nodeId);
+                cy.animate({ center: { eles: evt.target }, zoom: 2 }, { duration: 500 });
             }
         });
+
+        // Event: background click → deselect
+        cy.on('tap', (evt) => {
+            if (evt.target === cy) {
+                selectNode(null);
+            }
+        });
+
+        // Event: node hover
+        cy.on('mouseover', 'node', (evt) => setHoveredNode(evt.target.id()));
+        cy.on('mouseout', 'node', () => setHoveredNode(null));
+
+        return () => {
+            cy.destroy();
+            cyRef.current = null;
+        };
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+    // Sync elements when data changes
+    useEffect(() => {
+        const cy = cyRef.current;
+        if (!cy) return;
+
+        const elements = toCyElements();
+        cy.elements().remove();
+
+        if (elements.length === 0) return;
+
+        cy.add(elements);
+
+        // Run layout
+        cy.layout({
+            name: 'cose-bilkent',
+            animate: false,
+            nodeDimensionsIncludeLabels: true,
+            idealEdgeLength: 120,
+            nodeRepulsion: 6000,
+            gravity: 0.25,
+            numIter: 2500,
+            tile: true,
+        } as any).run();
+
+        // Fit to viewport after layout
+        setTimeout(() => cy.fit(undefined, 40), 100);
+    }, [toCyElements]);
+
+    // Sync selection state from store → cytoscape
+    useEffect(() => {
+        const cy = cyRef.current;
+        if (!cy) return;
+
+        cy.nodes().unselect();
+        if (selectedNodeId) {
+            const node = cy.getElementById(selectedNodeId);
+            if (node.length) node.select();
+        }
+    }, [selectedNodeId]);
+
+    // Highlight logic: path or hover/selection neighbors
+    useEffect(() => {
+        const cy = cyRef.current;
+        if (!cy || cy.elements().length === 0) return;
+
+        // Clear previous highlights
+        cy.elements().removeClass('highlighted dimmed');
+
+        if (shortestPathIds.length > 0) {
+            // Path mode: highlight path nodes and edges between them
+            const pathSet = new Set(shortestPathIds);
+            const pathNodes = cy.nodes().filter((n) => pathSet.has(n.id()));
+            const pathEdges = cy.edges().filter((e) => {
+                const srcIdx = shortestPathIds.indexOf(e.source().id());
+                const tgtIdx = shortestPathIds.indexOf(e.target().id());
+                return srcIdx !== -1 && tgtIdx !== -1 && Math.abs(srcIdx - tgtIdx) === 1;
+            });
+
+            pathNodes.addClass('highlighted');
+            pathEdges.addClass('highlighted');
+            cy.elements().not(pathNodes.union(pathEdges)).addClass('dimmed');
+        } else if (hoveredNodeId || selectedNodeId) {
+            // Neighbor mode
+            const activeId = hoveredNodeId || selectedNodeId;
+            if (activeId) {
+                const activeNode = cy.getElementById(activeId);
+                if (activeNode.length) {
+                    const neighborhood = activeNode.closedNeighborhood();
+                    neighborhood.addClass('highlighted');
+                    cy.elements().not(neighborhood).addClass('dimmed');
+                }
+            }
+        }
+    }, [shortestPathIds, hoveredNodeId, selectedNodeId]);
+
+    // Resize observer
+    useEffect(() => {
+        const el = containerRef.current;
+        const cy = cyRef.current;
+        if (!el || !cy) return;
+
+        const ro = new ResizeObserver(() => cy.resize());
         ro.observe(el);
         return () => ro.disconnect();
     }, []);
 
-    // Zoom to fit on initial full load
-    useEffect(() => {
-        if (data.nodes.length > 0 && fgRef.current) {
-            setTimeout(() => fgRef.current?.zoomToFit(400, 50), 300);
-        }
-    }, [data.nodes.length, dimensions]);
-
-    // Handle Window Resize
-    useEffect(() => {
-        const handleResize = () => {
-            if (fgRef.current) {
-                fgRef.current.zoomToFit(100);
-            }
-        };
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
-
-    const highlightNodes = new Set<string>();
-    const highlightLinks = new Set<OntologyEdge>();
-
-    // Determine highlighted elements based on Hover, Selection, or Path
-    if (shortestPathIds.length > 0) {
-        shortestPathIds.forEach(id => highlightNodes.add(id));
-        data.links.forEach(link => {
-            const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-            const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-
-            const sourceIdx = shortestPathIds.indexOf(sourceId);
-            const targetIdx = shortestPathIds.indexOf(targetId);
-
-            // If they are adjacent in the path array
-            if (sourceIdx !== -1 && targetIdx !== -1 && Math.abs(sourceIdx - targetIdx) === 1) {
-                highlightLinks.add(link);
-            }
-        });
-    } else if (hoveredNodeId || selectedNodeId) {
-        const activeId = hoveredNodeId || selectedNodeId;
-        if (activeId) {
-            highlightNodes.add(activeId);
-            data.links.forEach(link => {
-                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
-                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
-                if (sourceId === activeId || targetId === activeId) {
-                    highlightLinks.add(link);
-                    highlightNodes.add(sourceId);
-                    highlightNodes.add(targetId);
-                }
-            });
-        }
-    }
-
-    const drawNode = useCallback((node: OntologyNode, ctx: CanvasRenderingContext2D, globalScale: number) => {
-        // Opacity dampening if something is highlighted but this node isn't
-        const isHighlighted = highlightNodes.size === 0 || highlightNodes.has(node.id);
-        const opacity = isHighlighted ? 1 : 0.2;
-
-        const size = (node.val || 1) * 3; // Base size multiplied by edge degree
-        const color = LAYER_COLORS[node.layer];
-
-        ctx.beginPath();
-        ctx.globalAlpha = opacity;
-        ctx.fillStyle = color;
-
-        // Custom Shapes based on Layer
-        // KPI: Circle, Process: Square, Measure: Triangle (Custom drawing), Resource: Diamond
-        if (node.layer === 'kpi' || node.layer === 'process') {
-            // For simplicity in Canvas mapping, sticking to basic primitives for now
-            ctx.arc(node.x!, node.y!, size, 0, 2 * Math.PI, false);
-            ctx.fill();
-        } else if (node.layer === 'resource') {
-            ctx.rect(node.x! - size, node.y! - size, size * 2, size * 2);
-            ctx.fill();
-        } else {
-            // Diamond
-            ctx.moveTo(node.x!, node.y! - size);
-            ctx.lineTo(node.x! + size, node.y!);
-            ctx.lineTo(node.x!, node.y! + size);
-            ctx.lineTo(node.x! - size, node.y!);
-            ctx.closePath();
-            ctx.fill();
-        }
-
-        // Draw Selection Halo
-        if (node.id === selectedNodeId) {
-            ctx.lineWidth = 1.5;
-            ctx.strokeStyle = '#ffffff';
-            ctx.stroke();
-        }
-
-        // Label Rendering (only when zoomed in or highlighted)
-        if (isHighlighted && globalScale > 1.5) {
-            const label = node.label;
-            const fontSize = 12 / globalScale;
-            ctx.font = `${fontSize}px Sans-Serif`;
-            ctx.fillStyle = `rgba(255,255,255, ${opacity})`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(label, node.x!, node.y! + size + fontSize);
-        }
-        ctx.globalAlpha = 1; // Reset
-    }, [highlightNodes, selectedNodeId]);
-
-    const handleNodeClick = useCallback((node: OntologyNode) => {
-        if (selectedNodeId === node.id) {
-            selectNode(null); // Toggle off
-        } else {
-            selectNode(node.id);
-            // Optional: Pan to Center
-            fgRef.current?.centerAt(node.x, node.y, 1000);
-            fgRef.current?.zoom(3, 1000); // Level 3 zoom
-        }
-    }, [selectedNodeId, selectNode]);
-
     return (
-        <div ref={containerRef} className="flex-1 w-full h-full bg-[#111111] overflow-hidden"
+        <div className="flex-1 w-full h-full bg-[#111111] overflow-hidden relative"
             role="application"
             aria-label={`온톨로지 그래프. 노드 ${data.nodes.length}개 표출됨. 마우스 드래그로 이동.`}>
             {data.nodes.length > 0 ? (
-                <ForceGraph2D
-                    ref={fgRef as any}
-                    graphData={data as any}
-                    width={dimensions.width}
-                    height={dimensions.height}
-                    nodeCanvasObject={(node, ctx, globalScale) => drawNode(node as OntologyNode, ctx, globalScale)}
-                    nodeRelSize={6}
-                    linkColor={(link) => highlightLinks.has(link as OntologyEdge) ? '#ffffff' : '#404040'}
-                    linkWidth={(link) => highlightLinks.has(link as OntologyEdge) ? 2 : 1}
-                    linkDirectionalArrowLength={3.5}
-                    linkDirectionalArrowRelPos={1}
-                    onNodeHover={(node) => setHoveredNode(node ? (node as OntologyNode).id : null)}
-                    onNodeClick={(node) => handleNodeClick(node as OntologyNode)}
-                    d3AlphaDecay={0.02}
-                    d3VelocityDecay={0.3}
-                />
+                <div ref={containerRef} className="w-full h-full" />
             ) : (
                 <div className="w-full h-full flex items-center justify-center text-neutral-500">
                     데이터가 없습니다.

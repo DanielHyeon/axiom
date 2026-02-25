@@ -37,9 +37,14 @@ def _table_info_to_schema(t: TableInfo) -> TableSchema:
 
 class NL2SQLPipeline:
     _FALLBACK_SCHEMAS = {
-        "processes": ["id", "org_id", "status", "started_at", "completed_at", "duration_seconds", "amount"],
-        "organizations": ["id", "name", "region", "industry", "risk_level"],
-        "event_logs": ["id", "event_type", "occurred_at", "severity", "case_id"],
+        "sales": [
+            "id", "company_name", "department", "sale_date",
+            "product_category", "revenue", "cost", "quantity", "region",
+        ],
+        "operations": [
+            "id", "case_ref", "operation_type", "started_at",
+            "completed_at", "duration_minutes", "status", "region", "operator_name",
+        ],
     }
 
     async def _load_schema_catalog(self, tenant_id: str) -> tuple[list[TableSchema], str]:
@@ -64,10 +69,25 @@ class NL2SQLPipeline:
             return catalog, schema_source
         return [TableSchema(name=name, columns=cols) for name, cols in self._FALLBACK_SCHEMAS.items()], "fallback"
 
+    _COLUMN_TYPE_HINTS: dict[str, str] = {
+        "id": "SERIAL PRIMARY KEY",
+        "sale_date": "DATE",
+        "started_at": "TIMESTAMP",
+        "completed_at": "TIMESTAMP",
+        "revenue": "NUMERIC(15,2)",
+        "cost": "NUMERIC(15,2)",
+        "quantity": "INTEGER",
+        "duration_minutes": "NUMERIC(10,2)",
+    }
+
     def _format_schema_ddl(self, schemas: list[TableSchema], value_mappings: list[Any], similar_queries: list[Any]) -> str:
         lines = []
         for s in schemas:
-            cols = ", ".join(f"{c} VARCHAR" for c in s.columns)
+            col_defs = []
+            for c in s.columns:
+                ctype = self._COLUMN_TYPE_HINTS.get(c, "VARCHAR")
+                col_defs.append(f"{c} {ctype}")
+            cols = ", ".join(col_defs)
             lines.append(f"CREATE TABLE {s.name} ({cols});")
         ddl = "\n".join(lines)
         if value_mappings:

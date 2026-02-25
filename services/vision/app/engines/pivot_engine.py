@@ -8,6 +8,8 @@ ALLOWED_TABLES = frozenset({
     "mv_business_fact", "mv_cashflow_fact",
     "dim_case_type", "dim_org", "dim_time", "dim_stakeholder_type",
     "dim_organization", "dim_stakeholder",
+    # Demo tables seeded by Oracle service
+    "sales", "operations",
 })
 
 AGGREGATOR_SQL = {

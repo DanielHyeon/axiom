@@ -42,7 +42,7 @@ export function DroppableZone({ id, title, items, accepts, onRemove }: Droppable
             />
           ))}
           {items.length === 0 && (
-            <div className="text-xs text-neutral-600 flex items-center pl-2 h-[28px] italic w-full">
+            <div className="text-xs text-neutral-500 flex items-center pl-2 h-[28px] italic w-full">
               여기에 항목을 드롭하세요
             </div>
           )}

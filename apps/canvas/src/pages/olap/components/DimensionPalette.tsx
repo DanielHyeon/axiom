@@ -14,8 +14,8 @@ export function DimensionPalette({ cube }: DimensionPaletteProps) {
 
     if (!cube) {
         return (
-            <div className="w-64 border-r border-neutral-800 bg-[#161616] p-4 flex flex-col items-center justify-center text-neutral-500">
-                <Database size={32} className="mb-2 opacity-20" />
+            <div className="w-64 border-r border-neutral-800 bg-[#161616] p-4 flex flex-col items-center justify-center text-neutral-400">
+                <Database size={32} className="mb-2 opacity-30" />
                 <p className="text-sm">큐브를 선택하세요</p>
             </div>
         );
@@ -34,14 +34,14 @@ export function DimensionPalette({ cube }: DimensionPaletteProps) {
         <div className="w-64 border-r border-neutral-800 bg-[#161616] flex flex-col">
             <div className="p-4 border-b border-neutral-800 bg-[#1a1a1a]">
                 <h3 className="font-medium text-sm text-neutral-200">{cube.name}</h3>
-                <p className="text-xs text-neutral-500 mt-1">{cube.description}</p>
+                <p className="text-xs text-neutral-400 mt-1">{cube.description}</p>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-6">
                 <div>
                     <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 flex items-center justify-between">
                         차원 (Dimensions)
-                        <span className="text-neutral-600 font-normal">{cube.dimensions.length}</span>
+                        <span className="text-neutral-400 font-normal">{cube.dimensions.length}</span>
                     </h4>
                     <div className="space-y-1">
                         {cube.dimensions.map(dim => (
@@ -58,7 +58,7 @@ export function DimensionPalette({ cube }: DimensionPaletteProps) {
                 <div>
                     <h4 className="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-3 flex items-center justify-between">
                         측정값 (Measures)
-                        <span className="text-neutral-600 font-normal">{cube.measures.length}</span>
+                        <span className="text-neutral-400 font-normal">{cube.measures.length}</span>
                     </h4>
                     <div className="space-y-1">
                         {cube.measures.map(meas => (

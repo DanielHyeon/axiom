@@ -24,6 +24,7 @@ export const ROUTES = {
   },
   DATA: {
     ONTOLOGY: '/data/ontology',
+    ONTOLOGY_CASE: (caseId: string) => `/data/ontology?caseId=${encodeURIComponent(caseId)}`,
     DATASOURCES: '/data/datasources',
   },
   PROCESS_DESIGNER: {

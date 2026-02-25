@@ -1,11 +1,13 @@
 # Build Stage
 FROM node:20-alpine AS builder
 
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
 WORKDIR /app
 
-# Install dependencies
-COPY package.json ./
-RUN npm install --legacy-peer-deps
+# Install dependencies (lock file ensures reproducible builds)
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
 
 # Build-time API URLs (Docker: browser → host ports)
 ARG VITE_CORE_URL=http://localhost:8002
@@ -19,7 +21,7 @@ ENV VITE_VISION_URL=$VITE_VISION_URL
 ENV VITE_WEAVER_URL=$VITE_WEAVER_URL
 ENV VITE_ORACLE_URL=$VITE_ORACLE_URL
 
-# Copy source and build (Docker: skip tsc to avoid TS strict errors; fix types in repo for full build)
+# Copy source and build
 COPY . .
 RUN npx vite build
 
