@@ -2337,14 +2337,14 @@ async def get_or_build_impact_graph(kpi_fp: str, org_id: str, params: dict):
 
 **백엔드**:
 
-| 파일 | 신규/수정 | 설명 |
-|---|---|---|
-| `services/weaver/app/core/sql_parser.py` | 신규 | 2-stage SQL 파서 |
-| `services/weaver/app/core/pii_masker.py` | 신규 | PII 마스킹 + SQL 정규화 |
-| `services/weaver/app/services/query_log_store.py` | 신규 | 로그 저장 (org_id 파티셔닝, 멱등성) |
-| `services/weaver/app/api/insight.py` | 신규 | logs, logs:ingest, query-subgraph |
-| `services/weaver/app/main.py` | 수정 | insight 라우터 등록 |
-| `services/weaver/requirements.txt` | 수정 | sqlglot 추가 |
+| 파일 | 신규/수정 | 설명 | 구현 상태 |
+|---|---|---|---|
+| `services/weaver/app/core/sql_parser.py` | 신규 | 2-stage SQL 파서 | ⚠️ `worker/parse_task.py`에 regex 파서 내장 (sqlglot 미사용) |
+| `services/weaver/app/core/pii_masker.py` | 신규 | PII 마스킹 + SQL 정규화 | ⚠️ `services/sql_normalize.py`로 이동, **PII regex 누락** |
+| `services/weaver/app/services/query_log_store.py` | 신규 | 로그 저장 (org_id 파티셔닝, 멱등성) | ✅ `services/insight_query_store.py`로 구현 (asyncpg) |
+| `services/weaver/app/api/insight.py` | 신규 | logs, logs:ingest, query-subgraph | ✅ POST /logs, POST /logs:ingest, POST /query-subgraph 구현 |
+| `services/weaver/app/main.py` | 수정 | insight 라우터 등록 | ✅ 구현 |
+| `services/weaver/requirements.txt` | 수정 | sqlglot 추가 | ⚠️ sqlglot 미사용 (regex 전환) |
 
 **프론트엔드**:
 
@@ -2359,18 +2359,18 @@ async def get_or_build_impact_graph(kpi_fp: str, org_id: str, params: dict):
 
 **Phase 1 테스트**:
 
-| # | 항목 | 기준 | 방법 |
-|---|---|---|---|
-| T1-1 | SQL 파서 primary | SELECT/FROM/JOIN/WHERE/GROUP BY 정확 파싱, confidence ≥ 0.85 | pytest |
-| T1-2 | SQL 파서 fallback | 비표준 SQL → mode=fallback, confidence ≤ 0.49 | pytest |
-| T1-3 | PII 마스킹 | 이메일/전화/SSN 패턴 마스킹 확인 | pytest |
-| T1-4 | 로그 인제스트 | POST /logs 정상 저장 + 멱등성 검증 | curl + pytest |
-| T1-5 | org_id 격리 | org_A 로그가 org_B 조회에 미노출 | pytest |
-| T1-6 | query-subgraph | 유효 SQL → 200 + 올바른 노드/엣지 | curl + pytest |
-| T1-7 | Graph 탭 렌더링 | NL2SQL 실행 후 그래프 렌더링 | 브라우저 E2E |
-| T1-8 | confidence 배지 | primary/fallback 배지 정확 표시 | 브라우저 |
-| T1-9 | 입력 방어 | 100KB SQL → 413, 중첩 폭탄 → 200ms 내 컷 | pytest |
-| T1-10 | trace_id | ingest trace_id → 응답 meta.trace_id 연계 | curl |
+| # | 항목 | 기준 | 방법 | 구현 상태 |
+|---|---|---|---|---|
+| T1-1 | SQL 파서 primary | SELECT/FROM/JOIN/WHERE/GROUP BY 정확 파싱, confidence ≥ 0.85 | pytest | ⚠️ regex 파서로 대체 (confidence 미저장) |
+| T1-2 | SQL 파서 fallback | 비표준 SQL → mode=fallback, confidence ≤ 0.49 | pytest | ✅ fallback 모드 동작 |
+| T1-3 | PII 마스킹 | 이메일/전화/SSN 패턴 마스킹 확인 | pytest | ❌ PII regex (EMAIL/PHONE/SSN) 미구현 |
+| T1-4 | 로그 인제스트 | POST /logs 정상 저장 + 멱등성 검증 | curl + pytest | ✅ ON CONFLICT DO NOTHING 동작 |
+| T1-5 | tenant_id 격리 | tenant_A 로그가 tenant_B 조회에 미노출 | pytest | ✅ RLS + SET LOCAL 동작 |
+| T1-6 | query-subgraph | 유효 SQL → 200 + 올바른 노드/엣지 | curl + pytest | ✅ 구현 완료 (5노드/2엣지 확인) |
+| T1-7 | Graph 탭 렌더링 | NL2SQL 실행 후 그래프 렌더링 | 브라우저 E2E | ✅ QuerySubgraphViewer (Cytoscape dagre LR) 구현 |
+| T1-8 | confidence 배지 | primary/fallback 배지 정확 표시 | 브라우저 | ✅ stats bar (parse_mode + confidence%) 구현 |
+| T1-9 | 입력 방어 | 100KB SQL → 413, 중첩 폭탄 → 200ms 내 컷 | pytest | ❌ MAX_SQL_LENGTH 검증 미구현 |
+| T1-10 | trace_id | ingest trace_id → 응답 meta.trace_id 연계 | curl | ✅ request_id → trace_id 전파 동작 |
 
 ---
 
@@ -2378,53 +2378,53 @@ async def get_or_build_impact_graph(kpi_fp: str, org_id: str, params: dict):
 
 **백엔드**:
 
-| 파일 | 신규/수정 | 설명 |
-|---|---|---|
-| `services/weaver/app/services/query_log_analyzer.py` | 신규 | DRIVER/DIMENSION 분류 |
-| `services/weaver/app/services/impact_graph_builder.py` | 신규 | 영향 그래프 (202 async) |
-| `services/weaver/app/services/driver_scorer.py` | 신규 | 점수 계산 + breakdown 저장 |
-| `services/weaver/app/api/insight.py` | 수정 | kpis, impact, drivers, drivers/{id}, jobs |
-| `services/oracle/app/api/nl2sql.py` | 수정 | 실행 → POST /insight/logs 자동 전송 |
+| 파일 | 신규/수정 | 설명 | 구현 상태 |
+|---|---|---|---|
+| `services/weaver/app/services/query_log_analyzer.py` | 신규 | DRIVER/DIMENSION 분류 | ✅ 구현 (asyncpg, PR8 cooccur 통합 미적용) |
+| `services/weaver/app/services/impact_graph_builder.py` | 신규 | 영향 그래프 (202 async) | ✅ 구현 (PR8 cooccur·node_id 통합 미적용) |
+| `services/weaver/app/services/driver_scorer.py` | 신규 | 점수 계산 + breakdown 저장 | ✅ 수식 100% 일치 |
+| `services/weaver/app/api/insight.py` | 수정 | kpis, impact, drivers, drivers/{id}, jobs | ⚠️ POST /impact + GET /jobs 구현, **Worker 큐 enqueue 누락** |
+| `services/oracle/app/api/nl2sql.py` | 수정 | 실행 → POST /insight/logs 자동 전송 | ❌ 미구현 (Oracle→Weaver 자동 인제스트 연동) |
 
 **프론트엔드**:
 
-| 파일 | 신규/수정 | 설명 |
-|---|---|---|
-| `lib/routes/routes.ts` | 수정 | ANALYSIS.INSIGHT 추가 |
-| `lib/routes/routeConfig.tsx` | 수정 | InsightPage 라우트 |
-| `layouts/Sidebar.tsx` | 수정 | Insight 메뉴 |
-| `features/insight/store/useInsightStore.ts` | 신규 | Zustand |
-| `features/insight/hooks/useImpactGraph.ts` | 신규 | 202 폴링/SSE 포함 |
-| `features/insight/hooks/useDriverDetail.ts` | 신규 | Driver Evidence 조회 |
-| `features/insight/components/ImpactGraphViewer.tsx` | 신규 | Cytoscape 렌더러 |
-| `features/insight/components/KpiSelector.tsx` | 신규 | KPI 목록 (페이지네이션) |
-| `features/insight/components/DriverRankingPanel.tsx` | 신규 | Driver 순위 |
-| `features/insight/components/NodeDetailPanel.tsx` | 신규 | 상세 + Breakdown + Evidence |
-| `features/insight/components/PathComparisonPanel.tsx` | 신규 | Top 3 경로 비교 |
-| `features/insight/components/TimeRangeSelector.tsx` | 신규 | 기간 필터 |
-| `features/insight/utils/scoreCalculator.ts` | 신규 | Breakdown 표시 |
-| `features/insight/utils/fingerprintUtils.ts` | 신규 | fingerprint 유틸 |
-| `pages/insight/InsightPage.tsx` | 신규 | 메인 (fingerprint 딥링크) |
-| `pages/insight/components/InsightHeader.tsx` | 신규 | 헤더 |
-| `pages/insight/components/InsightSidebar.tsx` | 신규 | 좌측 패널 |
+| 파일 | 신규/수정 | 설명 | 구현 상태 |
+|---|---|---|---|
+| `lib/routes/routes.ts` | 수정 | ANALYSIS.INSIGHT 추가 | ✅ 구현 |
+| `lib/routes/routeConfig.tsx` | 수정 | InsightPage 라우트 | ✅ 구현 |
+| `layouts/Sidebar.tsx` | 수정 | Insight 메뉴 | ✅ 구현 |
+| `features/insight/store/useInsightStore.ts` | 신규 | Zustand | ✅ 구현 |
+| `features/insight/hooks/useImpactGraph.ts` | 신규 | 202 폴링/SSE 포함 | ✅ 구현 |
+| `features/insight/hooks/useDriverDetail.ts` | 신규 | Driver Evidence 조회 | ❌ 미구현 |
+| `features/insight/components/ImpactGraphViewer.tsx` | 신규 | Cytoscape 렌더러 | ✅ 구현 |
+| `features/insight/components/KpiSelector.tsx` | 신규 | KPI 목록 (페이지네이션) | ✅ 구현 |
+| `features/insight/components/DriverRankingPanel.tsx` | 신규 | Driver 순위 | ❌ 미구현 |
+| `features/insight/components/NodeDetailPanel.tsx` | 신규 | 상세 + Breakdown + Evidence | ❌ 미구현 |
+| `features/insight/components/PathComparisonPanel.tsx` | 신규 | Top 3 경로 비교 | ❌ 미구현 |
+| `features/insight/components/TimeRangeSelector.tsx` | 신규 | 기간 필터 | ❌ 미구현 |
+| `features/insight/utils/scoreCalculator.ts` | 신규 | Breakdown 표시 | ❌ 미구현 |
+| `features/insight/utils/fingerprintUtils.ts` | 신규 | fingerprint 유틸 | ❌ 미구현 |
+| `pages/insight/InsightPage.tsx` | 신규 | 메인 (fingerprint 딥링크) | ✅ 구현 |
+| `pages/insight/components/InsightHeader.tsx` | 신규 | 헤더 | ❌ 미구현 |
+| `pages/insight/components/InsightSidebar.tsx` | 신규 | 좌측 패널 | ❌ 미구현 |
 
 **Phase 2 테스트**:
 
-| # | 항목 | 기준 | 방법 |
-|---|---|---|---|
-| T2-1 | DRIVER/DIMENSION 분류 | GROUP BY만 → DIMENSION, WHERE → DRIVER | pytest |
-| T2-2 | 카디널리티 보정 | NDV>95% → score 대폭 감점 | pytest |
-| T2-3 | 최소 표본수 | <50건 → 감점 + UI 안내 | pytest + 브라우저 |
-| T2-4 | KPI fingerprint 병합 | 동일 fp KPI 병합, ontology primary | pytest |
-| T2-5 | Impact API (200) | 캐시 히트 → 200 + 올바른 GraphData | curl |
-| T2-6 | Impact API (202) | 캐시 미스 → 202 + job_id → 폴링 → 완료 | curl |
-| T2-7 | Driver 상세 + Evidence | breakdown + top_queries + paths 반환 | curl |
-| T2-8 | Insight 렌더링 | 3-패널 레이아웃 정상, 콘솔 에러 없음 | 브라우저 E2E |
-| T2-9 | 202 UX | 로딩 UI + 완료 시 자동 렌더 + 실패 시 폴백 | 브라우저 E2E |
-| T2-10 | Evidence 패널 | Top Queries 항상 노출, 클릭 → subgraph 점프 | 브라우저 E2E |
-| T2-11 | 경로 비교 | Top 3 토글 on/off, dimmed/highlighted | 브라우저 E2E |
-| T2-12 | Truncation UX | truncated → "더 보기" 버튼 동작 | 브라우저 E2E |
-| T2-13 | 상태 바 | mode/queries/cache/trace 정보 표시 | 브라우저 |
+| # | 항목 | 기준 | 방법 | 구현 상태 |
+|---|---|---|---|---|
+| T2-1 | DRIVER/DIMENSION 분류 | GROUP BY만 → DIMENSION, WHERE → DRIVER | pytest | ✅ 4축 스코어링 수식 100% 일치 |
+| T2-2 | 카디널리티 보정 | NDV>95% → score 대폭 감점 | pytest | ⚠️ time_dim_penalty/common_dim_penalty 구현, NDV 직접 참조는 없음 |
+| T2-3 | 최소 표본수 | <50건 → 감점 + UI 안내 | pytest + 브라우저 | ✅ min_distinct_queries=2 필터 동작 |
+| T2-4 | KPI fingerprint 병합 | 동일 fp KPI 병합, ontology primary | pytest | ⚠️ KpiMetricMapper 모듈 완성, DB 로더·통합 미적용 |
+| T2-5 | Impact API (200) | 캐시 히트 → 200 + 올바른 GraphData | curl | ❌ cache_key 저장 경로 미구현 |
+| T2-6 | Impact API (202) | 캐시 미스 → 202 + job_id → 폴링 → 완료 | curl | ⚠️ 202 반환 동작, **Worker 큐 enqueue 누락으로 job 미실행** |
+| T2-7 | Driver 상세 + Evidence | breakdown + top_queries + paths 반환 | curl | ✅ evidence_samples + paths 구현 |
+| T2-8 | Insight 렌더링 | 3-패널 레이아웃 정상, 콘솔 에러 없음 | 브라우저 E2E | — 프론트엔드 범위 |
+| T2-9 | 202 UX | 로딩 UI + 완료 시 자동 렌더 + 실패 시 폴백 | 브라우저 E2E | — 프론트엔드 범위 |
+| T2-10 | Evidence 패널 | Top Queries 항상 노출, 클릭 → subgraph 점프 | 브라우저 E2E | — 프론트엔드 범위 |
+| T2-11 | 경로 비교 | Top 3 토글 on/off, dimmed/highlighted | 브라우저 E2E | — 프론트엔드 범위 |
+| T2-12 | Truncation UX | truncated → "더 보기" 버튼 동작 | 브라우저 E2E | — 프론트엔드 범위 |
+| T2-13 | 상태 바 | mode/queries/cache/trace 정보 표시 | 브라우저 | — 프론트엔드 범위 |
 
 ---
 
@@ -2545,7 +2545,44 @@ Week 10:   [Final]   통합 테스트 + 보안 (FG-16~21) + 성능 최적화
 | cytoscape-dagre (프론트) | 기설치 | dagre 레이아웃 |
 | cytoscape-cose-bilkent (프론트) | 기설치 | cose-bilkent 레이아웃 |
 
-### 15.4 변경 이력
+### 15.4 구현 갭 분석 (2026-02-26)
+
+> 설계서 v3.1 기준으로 실제 구현 코드를 대조한 결과.
+> 상세 PR별 분석은 [PR 구현 가이드](./insight-view-pr-implementation.md)의 "구현 갭 분석 요약" 참조.
+
+**전체 요약**:
+
+| PR | 일치도 | 핵심 갭 |
+|---|---|---|
+| PR1 (DB) | 95% | PARTITION 미사용 (의도적), 테이블 구조 설계 이상 |
+| PR2 (공통) | 98% | 파일 통합 (의도적) |
+| PR3 (Auth) | 100% | 완전 일치 |
+| PR4 (Ingest) | 70% | **PII regex 누락**, MAX_SQL_LENGTH 미검증, hash 절단 미적용 |
+| PR5 (Redis Job) | 65% | **heartbeat 미구현**, TTL 분리 없음, **Worker 큐 enqueue 누락** |
+| PR6 (Workers) | 75% | sqlglot→regex (의도적), heartbeat 미호출, cache 저장 누락 |
+| PR7 (Analysis) | 90% | scorer 수식 100% 일치, DB 접근 asyncpg 전환 (의도적) |
+| PR8 (Accuracy) | 40% | 개별 모듈 완성, **analyzer·graph_builder 통합 미적용** |
+
+**P0 수정 필요 (기능 동작 불가)**:
+
+- **[P0-1]** Worker 큐 enqueue 연결 — job 생성 후 실행 경로 없음
+- **[P0-2]** PII regex (EMAIL/PHONE/SSN) 추가 — 보안 필수
+
+**P1 수정 필요 (핵심 기능 미완)**:
+
+- **[P1-1]** Impact 결과 Redis cache 저장 — 캐시 히트 200 경로 미동작
+- **[P1-2]** PR8 cooccur + node_id → analyzer·graph_builder 통합 — 정확도 개선 핵심
+
+**P2 수정 필요 (안정성·모니터링)**:
+
+- **[P2-1]** heartbeat 구현 + impact_task 호출
+- **[P2-2]** parse_mode/confidence DB 저장
+- **[P2-3]** load_kpi_definitions DB 로더
+- **[P2-4]** MAX_SQL_LENGTH 검증, hash 절단
+
+---
+
+### 15.5 변경 이력
 
 | 버전 | 날짜 | 설명 |
 |---|---|---|
@@ -2553,3 +2590,4 @@ Week 10:   [Final]   통합 테스트 + 보안 (FG-16~21) + 성능 최적화
 | v2.0 | 2026-02-26 | P0~P2 1차 피드백 반영 |
 | v3.0 | 2026-02-26 | P0~P2 전면 보강: org_id 서버 주입, 리치 LogItem, 2-stage 파서 confidence/mode, Driver 후보 필터링/카디널리티/표본수, Score Breakdown, FG-16~28 보안/관측/UX 게이트, 202 Job+SSE, breadthfirst 레이아웃, Evidence UX 고정, KPI timeseries, coverage API, PII 마스킹, trace_id 전파 |
 | v3.1 | 2026-02-26 | P0~P2 갭 보강: §1.4 피드백 추적표, §2.4 Oracle→Weaver 자동 인제스트 연동, §3.8 DDL(인덱스/RLS/파티션), §3.9 Zustand 스토어 인터페이스, §4.10 coverage/confidence 산출 공식, §4.11 API 에러 응답 표준, §7.6 운영 모니터링 메트릭(Prometheus/RUM), §8.3.1 useImpactGraph 폴링 훅 pseudocode, §8.7 에러 Fallback 전략 매트릭스 |
+| v3.1.1 | 2026-02-26 | 구현 갭 분석: §12 Phase 1/2 테이블에 구현 상태 컬럼 추가, §15.4 PR1~PR8 갭 분석 요약 (P0~P2 우선순위 분류) |

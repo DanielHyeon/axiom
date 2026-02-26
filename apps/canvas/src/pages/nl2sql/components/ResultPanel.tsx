@@ -23,11 +23,13 @@ import { exportToCsv } from '@/lib/csvExport';
 import { ChartRecommender } from './ChartRecommender';
 import { SqlPreview } from './SqlPreview';
 import { MetadataPanel } from './MetadataPanel';
+import { QueryGraphPanel } from './QueryGraphPanel';
 import type { ChartConfig, ExecutionMetadata } from '@/features/nl2sql/types/nl2sql';
 import {
   BarChart3,
   Table2,
   Code,
+  Network,
   Download,
   Sparkles,
   ArrowUpDown,
@@ -35,7 +37,7 @@ import {
   ChevronRight,
 } from 'lucide-react';
 
-type TabId = 'chart' | 'table' | 'sql';
+type TabId = 'chart' | 'table' | 'sql' | 'graph';
 
 interface ResultPanelProps {
   sql: string;
@@ -108,6 +110,7 @@ export function ResultPanel({
     { id: 'chart', label: '차트', icon: <BarChart3 className="h-3.5 w-3.5" />, disabled: !hasChart },
     { id: 'table', label: '테이블', icon: <Table2 className="h-3.5 w-3.5" /> },
     { id: 'sql', label: 'SQL', icon: <Code className="h-3.5 w-3.5" /> },
+    { id: 'graph', label: 'Graph', icon: <Network className="h-3.5 w-3.5" /> },
   ];
 
   const handleExport = () => {
@@ -227,6 +230,9 @@ export function ResultPanel({
 
         {/* SQL tab */}
         {activeTab === 'sql' && <SqlPreview sql={sql} />}
+
+        {/* Graph tab */}
+        {activeTab === 'graph' && <QueryGraphPanel sql={sql} />}
       </div>
 
       {/* Summary */}

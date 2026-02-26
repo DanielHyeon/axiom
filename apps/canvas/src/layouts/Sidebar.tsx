@@ -12,6 +12,7 @@ import {
   Workflow,
   ShieldAlert,
   Settings,
+  Lightbulb,
 } from 'lucide-react';
 
 const navItemClass = ({ isActive }: { isActive: boolean }) =>
@@ -60,6 +61,10 @@ export const Sidebar: React.FC = () => {
         <NavLink to={ROUTES.ANALYSIS.OLAP} className={navItemClass}>
           <BarChart3 className="h-4 w-4" />
           OLAP Pivot
+        </NavLink>
+        <NavLink to={ROUTES.ANALYSIS.INSIGHT} className={navItemClass}>
+          <Lightbulb className="h-4 w-4" />
+          Insight
         </NavLink>
 
         <SectionLabel>데이터</SectionLabel>

@@ -148,14 +148,30 @@ apps/canvas/
 │   │   │   │   └── board.types.ts
 │   │   │   └── ... (store는 src/stores/processDesignerStore.ts)
 │   │   │
-│   │   └── datasource/              # 데이터소스 관리 (Weaver API)
+│   │   ├── datasource/              # 데이터소스 관리 (Weaver API)
+│   │   │   ├── components/
+│   │   │   │   ├── SchemaExplorer.tsx
+│   │   │   │   └── SyncProgress.tsx
+│   │   │   ├── hooks/
+│   │   │   │   └── useDatasources.ts
+│   │   │   └── api/
+│   │   │       └── weaverDatasourceApi.ts
+│   │   │
+│   │   └── insight/                 # 9. KPI Impact Graph + Query Subgraph (Weaver API)
+│   │       ├── api/
+│   │       │   └── insightApi.ts    # requestImpact, getJobStatus, postQuerySubgraph
 │   │       ├── components/
-│   │       │   ├── SchemaExplorer.tsx
-│   │       │   └── SyncProgress.tsx
+│   │       │   ├── ImpactGraphViewer.tsx   # Cytoscape.js Impact Graph (cose-bilkent)
+│   │       │   ├── KpiSelector.tsx         # KPI fingerprint 입력
+│   │       │   └── QuerySubgraphViewer.tsx # SQL → 서브그래프 (dagre LR)
 │   │       ├── hooks/
-│   │       │   └── useDatasources.ts
-│   │       └── api/
-│   │           └── weaverDatasourceApi.ts
+│   │       │   └── useImpactGraph.ts       # 202 async 폴링 훅
+│   │       ├── store/
+│   │       │   └── useInsightStore.ts      # Zustand (kpi, graph, job, drivers)
+│   │       ├── types/
+│   │       │   └── insight.ts              # GraphData, GraphNode, GraphEdge 등
+│   │       └── utils/
+│   │           └── graphTransformer.ts     # API → Cytoscape elements 변환
 │   │
 │   ├── pages/                       # 라우트 페이지 (React.lazy)
 │   │   ├── dashboard/
@@ -374,3 +390,4 @@ src/                                src/
 | 2026-02-20 | 1.1 | Axiom Team | process-designer feature 모듈 및 페이지 추가 |
 | 2026-02-22 | 1.2 | Axiom Team | 현재 구현 반영: src/ 직하위 App·main, layouts(RootLayout·MainLayout·Sidebar·components), components/·components/ui/, lib/queryClient·watchStream·streamManager, 설정 하위 페이지, pages 경로 정리 |
 | 2026-02-23 | 1.3 | Axiom Team | 현행화: lib/routes/routeConfig.tsx, lib/api 파일 목록(clients·casesApi·watch·watchStream 등), case-dashboard(lib/api/casesApi 사용), watch·datasource·process-designer 구조, shared/RoleGuard·useRole, stores/themeStore·processDesignerStore, providers·styles |
+| 2026-02-26 | 1.4 | Axiom Team | features/insight/ 모듈 추가 (api·components·hooks·store·types·utils), pages/insight/ 추가 |

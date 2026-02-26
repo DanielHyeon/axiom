@@ -21,6 +21,7 @@ export const ROUTES = {
   ANALYSIS: {
     OLAP: '/analysis/olap',
     NL2SQL: '/analysis/nl2sql',
+    INSIGHT: '/analysis/insight',
   },
   DATA: {
     ONTOLOGY: '/data/ontology',

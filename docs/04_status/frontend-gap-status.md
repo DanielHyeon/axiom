@@ -15,6 +15,7 @@
 | `/dashboard` | ✅ `ROUTES.DASHBOARD` → `/dashboard`, index에서 리다이렉트 | |
 | `/auth/login`, `/auth/callback` | ✅ ROUTES.AUTH.LOGIN, CALLBACK, CallbackPage | |
 | `/analysis/olap`, `/analysis/nl2sql` | ✅ `/analysis/olap`, `/analysis/nl2sql` | |
+| `/analysis/insight` | ✅ `ROUTES.ANALYSIS.INSIGHT` → `/analysis/insight`, InsightPage (KPI Impact Graph + Cytoscape) | Sidebar에 Insight 항목 추가, useInsightStore(Zustand), useImpactGraph(202 폴링), ImpactGraphViewer, KpiSelector, QuerySubgraphViewer 구현 |
 | `/data/ontology`, `/data/datasources` | ✅ `/data/ontology`, `/data/datasources` | DatasourcePage 존재 |
 | `/process-designer`, `/process-designer/:boardId` | ✅ ProcessDesignerListPage, ProcessDesignerPage(:boardId) | |
 | 라우트 상수 | ✅ `lib/routes/routes.ts` ROUTES 객체 | |

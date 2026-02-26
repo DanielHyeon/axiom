@@ -6,10 +6,13 @@ from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from app.api.datasource import router as datasource_router
+from app.api.insight import router as insight_router
 from app.api.metadata_catalog import router as metadata_catalog_router
 from app.api.query import router as query_router
 from app.core.config import settings
 from app.core.error_codes import public_error_message
+from app.core.insight_errors import InsightError, insight_error_handler
+from app.core.insight_redis import close_insight_redis, get_insight_redis
 from app.core.logging import configure_secret_redaction
 from app.services.metrics import metrics_service
 from app.services.mindsdb_client import mindsdb_client
@@ -31,7 +34,10 @@ app.add_middleware(
     allow_headers=settings.weaver_cors_allowed_headers,
 )
 
+app.add_exception_handler(InsightError, insight_error_handler)
+
 app.include_router(datasource_router)
+app.include_router(insight_router)
 app.include_router(query_router)
 app.include_router(metadata_catalog_router)
 
@@ -67,6 +73,46 @@ async def _stop_weaver_relay():
             await _relay_task
         except asyncio.CancelledError:
             pass
+
+
+@app.on_event("startup")
+async def _start_insight_redis():
+    """Eagerly initialise the Insight Redis connection (non-fatal)."""
+    try:
+        await get_insight_redis()
+    except Exception:
+        logger.warning("Insight Redis init failed (non-fatal)", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def _stop_insight_redis():
+    await close_insight_redis()
+
+
+@app.on_event("startup")
+async def _cleanup_stale_insight_jobs():
+    """Mark any 'running' insight jobs as failed after a server restart.
+
+    Without this, jobs interrupted mid-flight remain in 'running' state
+    forever (until their TTL expires) and block new requests from seeing
+    a fresh result via the jobmap dedup key.
+    """
+    try:
+        rd = await get_insight_redis()
+        if rd is None:
+            return
+        from app.services.insight_job_store import finish_job
+        count = 0
+        async for key in rd.scan_iter("insight:job:*"):
+            job = await rd.hgetall(key)
+            if job and job.get("status") == "running":
+                job_id = job.get("job_id", key.split(":")[-1])
+                await finish_job(rd, job_id, error="server_restart")
+                count += 1
+        if count:
+            logger.warning("Marked %d stale running insight job(s) as failed", count)
+    except Exception:
+        logger.warning("Insight job cleanup failed (non-fatal)", exc_info=True)
 
 
 @app.on_event("startup")

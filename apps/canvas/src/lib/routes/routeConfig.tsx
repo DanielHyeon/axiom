@@ -19,6 +19,7 @@ const DocumentReviewPage = lazy(() => import('@/pages/documents/DocumentReviewPa
 const WhatIfPage = lazy(() => import('@/pages/whatif/WhatIfPage').then((m) => ({ default: m.WhatIfPage })));
 const OlapPivotPage = lazy(() => import('@/pages/olap/OlapPivotPage').then((m) => ({ default: m.OlapPivotPage })));
 const Nl2SqlPage = lazy(() => import('@/pages/nl2sql/Nl2SqlPage').then((m) => ({ default: m.NL2SQLPage })));
+const InsightPage = lazy(() => import('@/pages/insight/InsightPage').then((m) => ({ default: m.InsightPage })));
 const OntologyPage = lazy(() => import('@/pages/ontology/OntologyPage').then((m) => ({ default: m.OntologyPage })));
 const DatasourcePage = lazy(() => import('@/pages/data/DatasourcePage').then((m) => ({ default: m.DatasourcePage })));
 const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage').then((m) => ({ default: m.ProcessDesignerListPage })));
@@ -78,6 +79,7 @@ export const router = createBrowserRouter([
               },
               { path: 'analysis/olap', element: <SuspensePage><OlapPivotPage /></SuspensePage> },
               { path: 'analysis/nl2sql', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><Nl2SqlPage /></SuspensePage></RoleGuard> },
+              { path: 'analysis/insight', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><InsightPage /></SuspensePage></RoleGuard> },
               { path: 'data/ontology', element: <SuspensePage><OntologyPage /></SuspensePage> },
               { path: 'data/datasources', element: <SuspensePage><DatasourcePage /></SuspensePage> },
               {

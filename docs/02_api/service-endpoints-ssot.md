@@ -36,7 +36,19 @@ VITE_ORACLE_URL=http://localhost:8004
 - Oracle NL2SQL은 Canvas에서 `oracleApi`(createApiClient)로 호출하며, 기본 Base URL은 `http://localhost:8004`(SSOT §1).
 - `VITE_SYNAPSE_URL`는 현재 Compose/K8s 프로파일에서 기본 제공되지 않을 수 있으며, 필요 시 개별 주입.
 
-## 2.1 Oracle / Synapse 실제 API 경로 (구현 기준)
+## 2.1 Weaver Insight API 경로 (구현 기준)
+
+Canvas에서 `weaverApi`(Axios)로 호출하며, Base URL은 `http://localhost:8001`(SSOT §1).
+
+| 메서드 | 경로 | 설명 | 응답 |
+|--------|------|------|------|
+| POST | `/api/insight/logs` | Query Log 단건/배치 인제스트 | `{ inserted, deduped, trace_id }` |
+| POST | `/api/insight/logs:ingest` | 대량 배치 인제스트 (max 5000) | `{ inserted, deduped, batch_id, trace_id }` |
+| POST | `/api/insight/impact` | KPI Impact Graph 생성 요청 | 200 (캐시 히트) 또는 202 + `job_id` |
+| GET | `/api/insight/jobs/{job_id}` | 비동기 Job 상태 폴링 | `{ status, progress, graph, trace_id }` |
+| POST | `/api/insight/query-subgraph` | SQL → TABLE/COLUMN/PREDICATE 서브그래프 | `{ parse_result, graph, trace_id }` |
+
+## 2.2 Oracle / Synapse 실제 API 경로 (구현 기준)
 
 Core 오케스트레이터 등에서 호출 시 아래 경로·계약을 사용한다.
 

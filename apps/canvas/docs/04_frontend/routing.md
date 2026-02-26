@@ -37,7 +37,8 @@
 │
 ├── /analysis                        (MainLayout)
 │   ├── /olap                        → OlapPivotPage              [Vision API]
-│   └── /nl2sql                      → Nl2SqlPage                 [Oracle API]
+│   ├── /nl2sql                      → Nl2SqlPage                 [Oracle API]
+│   └── /insight                     → InsightPage                [Weaver API]
 │
 ├── /data                            (MainLayout)
 │   ├── /ontology                    → OntologyBrowser            [Synapse API]
@@ -89,7 +90,7 @@ export const router = createBrowserRouter([
               { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
               { path: 'dashboard', element: <SuspensePage><CaseDashboardPage /></SuspensePage> },
               { path: 'cases', children: [...] },
-              { path: 'analysis/olap', ... }, { path: 'analysis/nl2sql', ... },
+              { path: 'analysis/olap', ... }, { path: 'analysis/nl2sql', ... }, { path: 'analysis/insight', ... },
               { path: 'data/ontology', ... }, { path: 'data/datasources', ... },
               { path: 'process-designer', children: [...] },
               { path: 'watch', ... },
@@ -169,7 +170,8 @@ router.beforeEach((to, from, next) => {
 │  ├──────────────────────┤ │
 │  │ 📈 분석               │ │
 │  │   ├ OLAP 피벗         │ │  → /analysis/olap
-│  │   └ 자연어 쿼리       │ │  → /analysis/nl2sql
+│  │   ├ 자연어 쿼리       │ │  → /analysis/nl2sql
+│  │   └ Insight          │ │  → /analysis/insight
 │  ├──────────────────────┤ │
 │  │ 🔗 데이터             │ │
 │  │   ├ 온톨로지          │ │  → /data/ontology
@@ -259,6 +261,7 @@ export const ROUTES = {
   ANALYSIS: {
     OLAP: '/analysis/olap',
     NL2SQL: '/analysis/nl2sql',
+    INSIGHT: '/analysis/insight',
   },
   DATA: {
     ONTOLOGY: '/data/ontology',
@@ -320,3 +323,4 @@ export const ROUTES = {
 | 2026-02-20 | 1.1 | Axiom Team | process-designer 라우트 추가 |
 | 2026-02-20 | 1.2 | Axiom Team | 라우트 파라미터 타입 안전성(§5), 라우트 상수 관리(§6) 추가 |
 | 2026-02-22 | 1.3 | Axiom Team | 현재 구현 반영: RootLayout/MainLayout/ProtectedRoute, BrowserRouter, 설정 하위 /system·/logs·/users·/config, 페이지명(CaseDocumentsListPage 등) |
+| 2026-02-26 | 1.4 | Axiom Team | /analysis/insight 라우트 추가 (InsightPage, ROUTES.ANALYSIS.INSIGHT) |

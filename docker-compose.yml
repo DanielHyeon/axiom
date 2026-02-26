@@ -129,8 +129,11 @@ services:
       - SYNAPSE_BASE_URL=http://synapse-svc:8003
       - WEAVER_METADATA_PG_MODE=1
       - POSTGRES_DSN=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
+      - REDIS_URL=redis://redis-bus:6379/0
       - WEAVER_CORS_ALLOWED_ORIGINS=http://localhost:5174,http://localhost:3000,https://app.axiom.kr,https://canvas.axiom.kr
     depends_on:
+      redis-bus:
+        condition: service_healthy
       vision-svc:
         condition: service_healthy
       core-svc:
@@ -182,6 +185,8 @@ services:
       dockerfile: Dockerfile
       args:
         VITE_CORE_URL: http://localhost:8002
+        VITE_WEAVER_URL: http://localhost:8001
+        VITE_ORACLE_URL: http://localhost:8004
     ports:
       - "5174:80" # 브라우저: http://localhost:5174 → Core API: http://localhost:8002
     depends_on:
