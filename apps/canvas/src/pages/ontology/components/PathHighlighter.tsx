@@ -14,8 +14,8 @@ export function PathHighlighter({ pathNodeIds, pathModeSource, onClear }: PathHi
   if (pathNodeIds.length === 0) return null;
 
   return (
-    <div className="bg-blue-900/20 border-b border-blue-900/50 px-4 py-2 flex items-center justify-between text-sm">
-      <div className="flex items-center gap-2 text-blue-200">
+    <div className="bg-blue-50 border border-blue-200 rounded px-4 py-2 flex items-center justify-between text-sm">
+      <div className="flex items-center gap-2 text-blue-600 font-[IBM_Plex_Mono]">
         <Map size={16} />
         {pathModeSource
           ? '경로의 도착 노드를 선택하세요.'
@@ -25,7 +25,7 @@ export function PathHighlighter({ pathNodeIds, pathModeSource, onClear }: PathHi
         variant="ghost"
         size="sm"
         onClick={onClear}
-        className="h-7 text-blue-400 hover:text-blue-300"
+        className="h-7 text-blue-600 hover:text-blue-700 hover:bg-blue-100 font-[Sora]"
       >
         탐색 종료
       </Button>

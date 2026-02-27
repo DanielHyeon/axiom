@@ -35,11 +35,11 @@ function DepthGroup({ depth, nodes }: { depth: number; nodes: ImpactNode[] }) {
                 className="flex items-center gap-2 w-full text-left py-1"
             >
                 {expanded ? (
-                    <ChevronDown size={14} className="text-neutral-500" />
+                    <ChevronDown size={14} className="text-[#999]" />
                 ) : (
-                    <ChevronRight size={14} className="text-neutral-500" />
+                    <ChevronRight size={14} className="text-[#999]" />
                 )}
-                <span className="text-sm font-semibold text-neutral-300">{depth}-hop</span>
+                <span className="text-sm font-semibold text-black font-[Sora]">{depth}-hop</span>
                 <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
                     {nodes.length}
                 </Badge>
@@ -59,34 +59,34 @@ function ImpactNodeRow({ node }: { node: ImpactNode }) {
     const layerColor = LAYER_COLORS[node.layer] ?? LAYER_COLORS.unknown;
 
     return (
-        <div className="bg-[#1a1a1a] p-2 rounded border border-neutral-800/30 hover:border-neutral-700 transition-colors">
+        <div className="p-2 rounded border border-[#E5E5E5] hover:bg-[#F5F5F5] transition-colors">
             <div className="flex items-center gap-2">
                 <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: layerColor }}
                 />
-                <span className="text-sm text-neutral-200 flex-1 truncate" title={node.label}>
+                <span className="text-[13px] text-black flex-1 truncate font-[Sora]" title={node.label}>
                     {node.label}
                 </span>
-                <Badge variant="outline" className="text-[10px] border-neutral-700 text-neutral-500">
+                <Badge variant="outline" className="text-[10px] border-[#E5E5E5] text-[#999] font-[IBM_Plex_Mono]">
                     {node.layer}
                 </Badge>
             </div>
             {/* Path breadcrumb */}
             {node.path.length > 1 && (
-                <div className="mt-1.5 text-[10px] text-neutral-500 flex flex-wrap items-center gap-0.5">
+                <div className="mt-1.5 text-[10px] text-[#999] font-[IBM_Plex_Mono] flex flex-wrap items-center gap-0.5">
                     {node.path.map((step, i) => (
                         <span key={i} className="flex items-center gap-0.5">
                             {i > 0 && step.rel_type && (
                                 <>
-                                    <span className="text-neutral-600">{step.rel_type}</span>
-                                    <ArrowRight size={8} className="text-neutral-600" />
+                                    <span className="text-[#CCC]">{step.rel_type}</span>
+                                    <ArrowRight size={8} className="text-[#CCC]" />
                                 </>
                             )}
                             <span
                                 className={
                                     i === node.path.length - 1
-                                        ? 'text-neutral-300 font-medium'
+                                        ? 'text-black font-medium'
                                         : ''
                                 }
                             >
@@ -123,24 +123,26 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
     );
 
     return (
-        <div className="w-96 border-l border-neutral-800 bg-[#161616] flex flex-col h-full overflow-hidden">
+        <div className="flex flex-col h-full overflow-hidden">
             {/* Header */}
-            <div className="p-5 border-b border-neutral-800 bg-[#1a1a1a]">
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                        <Zap size={16} className="text-amber-400" />
-                        <h2 className="text-lg font-bold text-neutral-100">영향 분석</h2>
-                    </div>
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="p-1 text-neutral-500 hover:text-neutral-300 transition-colors"
-                    >
-                        <X size={18} />
-                    </button>
+            <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5] shrink-0">
+                <div className="flex items-center gap-2">
+                    <Zap size={14} className="text-amber-500" />
+                    <span className="text-[13px] font-semibold text-black font-[Sora]">영향 분석</span>
                 </div>
-                {data?.root && (
-                    <p className="text-xs text-neutral-500 mt-1">
+                <button
+                    type="button"
+                    onClick={onClose}
+                    className="text-[#999] hover:text-black text-lg transition-colors"
+                >
+                    ×
+                </button>
+            </div>
+
+            {/* Root info */}
+            {data?.root && (
+                <div className="px-6 py-3 border-b border-[#E5E5E5]">
+                    <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
                         {data.root.label}{' '}
                         <span
                             className="inline-block w-1.5 h-1.5 rounded-full ml-1 align-middle"
@@ -151,12 +153,12 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
                         />
                         <span className="ml-1">{data.root.layer}</span>
                     </p>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Summary */}
             {data && (
-                <div className="px-5 py-3 border-b border-neutral-800/50 flex gap-4 text-xs text-neutral-400">
+                <div className="px-6 py-3 border-b border-[#E5E5E5] flex gap-4 text-[11px] text-[#999] font-[IBM_Plex_Mono]">
                     <span>영향 노드: {data.total_affected}</span>
                     <span>최대 깊이: {data.max_depth_reached}</span>
                     <span>{data.analysis_time_ms}ms</span>
@@ -164,8 +166,8 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
             )}
 
             {/* Depth Slider */}
-            <div className="px-5 py-3 border-b border-neutral-800/50">
-                <label className="text-xs text-neutral-500 block mb-2">
+            <div className="px-6 py-3 border-b border-[#E5E5E5]">
+                <label className="text-[11px] text-[#999] font-[IBM_Plex_Mono] block mb-2">
                     탐색 깊이: {maxDepth}
                 </label>
                 <Slider
@@ -178,22 +180,22 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
             </div>
 
             {/* Content */}
-            <div className="flex-1 overflow-y-auto p-5 space-y-4">
+            <div className="flex-1 overflow-y-auto p-6 space-y-4">
                 {isLoading && (
-                    <div className="flex flex-col items-center justify-center py-12 text-neutral-500">
+                    <div className="flex flex-col items-center justify-center py-12 text-[#999]">
                         <Loader2 size={24} className="animate-spin mb-2" />
-                        <p className="text-sm">BFS 탐색 중...</p>
+                        <p className="text-sm font-[IBM_Plex_Mono]">BFS 탐색 중...</p>
                     </div>
                 )}
 
                 {isError && (
-                    <div className="rounded border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-200">
+                    <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
                         영향 분석에 실패했습니다.
                     </div>
                 )}
 
                 {data && data.total_affected === 0 && !isLoading && (
-                    <div className="text-center py-8 text-neutral-600 text-sm">
+                    <div className="text-center py-8 text-[#999] text-sm font-[IBM_Plex_Mono]">
                         연결된 영향 노드가 없습니다.
                     </div>
                 )}

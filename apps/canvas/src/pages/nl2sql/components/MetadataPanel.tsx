@@ -21,9 +21,9 @@ interface MetadataPanelProps {
 }
 
 const GUARD_VARIANT: Record<string, { className: string; label: string }> = {
-  PASS: { className: 'border-green-700 text-green-400', label: 'PASS' },
-  FIX: { className: 'border-amber-700 text-amber-400', label: 'FIX' },
-  REJECT: { className: 'border-red-700 text-red-400', label: 'REJECT' },
+  PASS: { className: 'border-green-300 text-green-600', label: 'PASS' },
+  FIX: { className: 'border-amber-300 text-amber-600', label: 'FIX' },
+  REJECT: { className: 'border-red-300 text-red-600', label: 'REJECT' },
 };
 
 export function MetadataPanel({ metadata }: MetadataPanelProps) {
@@ -33,7 +33,7 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
   if (!metadata) return null;
 
   const guardInfo = GUARD_VARIANT[metadata.guard_status ?? ''] ?? {
-    className: 'border-neutral-700 text-neutral-400',
+    className: 'border-[#E5E5E5] text-[#999]',
     label: metadata.guard_status ?? 'N/A',
   };
 
@@ -81,19 +81,19 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
   if (summaryItems.length === 0) return null;
 
   return (
-    <div className="border-t border-neutral-800">
+    <div className="border-t border-[#E5E5E5]">
       {/* Collapsed summary row */}
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex w-full items-center justify-between px-3 py-2 hover:bg-neutral-800/30 transition-colors"
+        className="flex w-full items-center justify-between px-3 py-2 hover:bg-[#F5F5F5] transition-colors"
       >
         <div className="flex flex-wrap items-center gap-2">
           {summaryItems.map((item, i) => (
             <Badge
               key={i}
               variant="outline"
-              className="gap-1 text-neutral-400 border-neutral-700 font-normal"
+              className="gap-1 text-[#999] border-[#E5E5E5] font-normal font-[IBM_Plex_Mono]"
             >
               {item.icon}
               {item.text}
@@ -101,9 +101,9 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
           ))}
         </div>
         {expanded ? (
-          <ChevronUp className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
+          <ChevronUp className="h-3.5 w-3.5 text-[#999] shrink-0" />
         ) : (
-          <ChevronDown className="h-3.5 w-3.5 text-neutral-500 shrink-0" />
+          <ChevronDown className="h-3.5 w-3.5 text-[#999] shrink-0" />
         )}
       </button>
 
@@ -112,9 +112,9 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
         <div className="px-3 pb-3 space-y-3 text-sm">
           {metadata.execution_time_ms != null && (
             <div className="flex items-center gap-2">
-              <Clock className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-neutral-400">Execution Time:</span>
-              <span className="text-neutral-200 font-mono">
+              <Clock className="h-3.5 w-3.5 text-[#999]" />
+              <span className="text-[#999] font-[IBM_Plex_Mono]">Execution Time:</span>
+              <span className="text-black font-[IBM_Plex_Mono]">
                 {metadata.execution_time_ms >= 1000
                   ? `${(metadata.execution_time_ms / 1000).toFixed(2)}s`
                   : `${metadata.execution_time_ms}ms`}
@@ -124,9 +124,9 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
 
           {metadata.guard_status && (
             <div className="flex items-center gap-2">
-              <ShieldCheck className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-neutral-400">Guard Status:</span>
-              <Badge variant="outline" className={cn('font-mono', guardInfo.className)}>
+              <ShieldCheck className="h-3.5 w-3.5 text-[#999]" />
+              <span className="text-[#999] font-[IBM_Plex_Mono]">Guard Status:</span>
+              <Badge variant="outline" className={cn('font-[IBM_Plex_Mono]', guardInfo.className)}>
                 {guardInfo.label}
               </Badge>
             </div>
@@ -136,11 +136,11 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
             <div>
               <div className="flex items-center gap-2 mb-1">
                 <ShieldCheck className="h-3.5 w-3.5 text-amber-500" />
-                <span className="text-neutral-400">Guard Fixes:</span>
+                <span className="text-[#999] font-[IBM_Plex_Mono]">Guard Fixes:</span>
               </div>
               <ul className="ml-6 space-y-0.5">
                 {metadata.guard_fixes.map((fix, i) => (
-                  <li key={i} className="text-xs text-amber-300/80">
+                  <li key={i} className="text-xs text-amber-600 font-[IBM_Plex_Mono]">
                     - {fix}
                   </li>
                 ))}
@@ -151,12 +151,12 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
           {metadata.tables_used && metadata.tables_used.length > 0 && (
             <div>
               <div className="flex items-center gap-2 mb-1">
-                <Table2 className="h-3.5 w-3.5 text-neutral-500" />
-                <span className="text-neutral-400">Tables Used:</span>
+                <Table2 className="h-3.5 w-3.5 text-[#999]" />
+                <span className="text-[#999] font-[IBM_Plex_Mono]">Tables Used:</span>
               </div>
               <div className="ml-6 flex flex-wrap gap-1">
                 {metadata.tables_used.map((table) => (
-                  <Badge key={table} variant="secondary" className="text-xs font-mono">
+                  <Badge key={table} variant="secondary" className="text-xs font-[IBM_Plex_Mono]">
                     {table}
                   </Badge>
                 ))}
@@ -166,23 +166,23 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
 
           {metadata.schema_source && (
             <div className="flex items-center gap-2">
-              <Search className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-neutral-400">Schema Source:</span>
-              <span className="text-neutral-200">{metadata.schema_source}</span>
+              <Search className="h-3.5 w-3.5 text-[#999]" />
+              <span className="text-[#999] font-[IBM_Plex_Mono]">Schema Source:</span>
+              <span className="text-black font-[IBM_Plex_Mono]">{metadata.schema_source}</span>
             </div>
           )}
 
           {metadata.cache_hit != null && (
             <div className="flex items-center gap-2">
-              <Zap className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-neutral-400">Cache:</span>
+              <Zap className="h-3.5 w-3.5 text-[#999]" />
+              <span className="text-[#999] font-[IBM_Plex_Mono]">Cache:</span>
               <Badge
                 variant="outline"
                 className={cn(
-                  'font-normal',
+                  'font-normal font-[IBM_Plex_Mono]',
                   metadata.cache_hit
-                    ? 'border-green-700 text-green-400'
-                    : 'border-neutral-700 text-neutral-400'
+                    ? 'border-green-300 text-green-600'
+                    : 'border-[#E5E5E5] text-[#999]'
                 )}
               >
                 {metadata.cache_hit ? 'HIT' : 'MISS'}
@@ -192,9 +192,9 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
 
           {metadata.query_id && (
             <div className="flex items-center gap-2">
-              <Hash className="h-3.5 w-3.5 text-neutral-500" />
-              <span className="text-neutral-400">Query ID:</span>
-              <code className="text-xs text-neutral-300 bg-neutral-800 px-1.5 py-0.5 rounded font-mono">
+              <Hash className="h-3.5 w-3.5 text-[#999]" />
+              <span className="text-[#999] font-[IBM_Plex_Mono]">Query ID:</span>
+              <code className="text-xs text-[#5E5E5E] bg-[#F5F5F5] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]">
                 {metadata.query_id}
               </code>
               <Button
@@ -209,7 +209,7 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
                 {copiedQueryId ? (
                   <Check className="h-3 w-3 text-green-500" />
                 ) : (
-                  <Copy className="h-3 w-3 text-neutral-400" />
+                  <Copy className="h-3 w-3 text-[#999]" />
                 )}
               </Button>
             </div>

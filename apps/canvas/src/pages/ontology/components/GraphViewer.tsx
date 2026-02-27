@@ -32,10 +32,10 @@ const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
             'text-halign': 'center',
             'text-margin-y': 6,
             'font-size': 11,
-            color: '#d4d4d4',
+            color: '#333333',
             'text-outline-width': 2,
-            'text-outline-color': '#111111',
-            'background-color': '#666',
+            'text-outline-color': '#F5F5F5',
+            'background-color': '#999',
             width: 'mapData(weight, 1, 10, 24, 56)',
             height: 'mapData(weight, 1, 10, 24, 56)',
             'border-width': 0,
@@ -64,17 +64,17 @@ const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
         selector: 'edge',
         style: {
             width: 1.5,
-            'line-color': '#404040',
-            'target-arrow-color': '#404040',
+            'line-color': '#CCCCCC',
+            'target-arrow-color': '#CCCCCC',
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
             'arrow-scale': 0.8,
             label: 'data(label)',
             'font-size': 9,
-            color: '#737373',
+            color: '#999999',
             'text-rotation': 'autorotate',
             'text-outline-width': 1.5,
-            'text-outline-color': '#111111',
+            'text-outline-color': '#F5F5F5',
             'overlay-opacity': 0,
         },
     },
@@ -83,7 +83,7 @@ const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
         selector: 'node:selected',
         style: {
             'border-width': 3,
-            'border-color': '#ffffff',
+            'border-color': '#DC2626',
         },
     },
     // Highlighted (neighbor or path) nodes & edges
@@ -91,15 +91,15 @@ const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
         selector: 'node.highlighted',
         style: {
             'border-width': 2,
-            'border-color': '#ffffff',
+            'border-color': '#333333',
             'z-index': 10,
         },
     },
     {
         selector: 'edge.highlighted',
         style: {
-            'line-color': '#ffffff',
-            'target-arrow-color': '#ffffff',
+            'line-color': '#333333',
+            'target-arrow-color': '#333333',
             width: 2.5,
             'z-index': 10,
         },
@@ -288,13 +288,13 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
     }, []);
 
     return (
-        <div className="flex-1 w-full h-full bg-[#111111] overflow-hidden relative"
+        <div className="flex-1 w-full h-full bg-[#F5F5F5] overflow-hidden relative"
             role="application"
             aria-label={`온톨로지 그래프. 노드 ${data.nodes.length}개 표출됨. 마우스 드래그로 이동.`}>
             {data.nodes.length > 0 ? (
                 <div ref={containerRef} className="w-full h-full" />
             ) : (
-                <div className="w-full h-full flex items-center justify-center text-neutral-500">
+                <div className="w-full h-full flex items-center justify-center text-[#999]">
                     데이터가 없습니다.
                 </div>
             )}

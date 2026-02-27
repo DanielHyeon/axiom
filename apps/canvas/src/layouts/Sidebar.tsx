@@ -1,102 +1,95 @@
 import { NavLink } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/lib/routes/routes';
 import { useRole } from '@/shared/hooks/useRole';
 import {
   LayoutDashboard,
-  FolderKanban,
   MessageSquareText,
   BarChart3,
+  Lightbulb,
   Network,
   Database,
-  Workflow,
-  ShieldAlert,
+  Eye,
   Settings,
-  Lightbulb,
 } from 'lucide-react';
 
-const navItemClass = ({ isActive }: { isActive: boolean }) =>
-  [
-    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-all duration-200',
-    isActive
-      ? 'bg-primary/15 text-primary shadow-sm shadow-primary/10'
-      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground',
-  ].join(' ');
-
-function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="mt-6 mb-2 px-3 text-[10px] font-semibold uppercase tracking-widest text-muted-foreground/50">
-      {children}
-    </div>
-  );
-}
+const navItems = [
+  { to: ROUTES.DASHBOARD, icon: LayoutDashboard, label: 'Dashboard' },
+  { to: ROUTES.ANALYSIS.NL2SQL, icon: MessageSquareText, label: 'NL2SQL' },
+  { to: ROUTES.ANALYSIS.OLAP, icon: BarChart3, label: 'OLAP Pivot' },
+  { to: ROUTES.ANALYSIS.INSIGHT, icon: Lightbulb, label: 'Insight' },
+  { to: ROUTES.DATA.ONTOLOGY, icon: Network, label: 'Ontology' },
+  { to: ROUTES.DATA.DATASOURCES, icon: Database, label: 'Data' },
+  { to: ROUTES.WATCH, icon: Eye, label: 'Watch' },
+];
 
 export const Sidebar: React.FC = () => {
-  const { t } = useTranslation();
   const isAdmin = useRole(['admin']);
+
   return (
-    <aside className="glass-header w-60 shrink-0 flex flex-col border-b-0 border-r border-r-[hsl(var(--sidebar-border)/0.4)]">
-      <div className="flex items-center gap-2.5 px-5 py-5">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-blue-400 text-white text-sm font-bold shadow-lg shadow-primary/25">
-          A
+    <aside className="w-16 shrink-0 flex flex-col justify-between bg-black">
+      {/* Top: Logo + Nav */}
+      <div className="flex flex-col items-center pt-8">
+        {/* Logo */}
+        <div className="flex items-center justify-center w-16 h-16">
+          <span className="text-base font-bold text-[#FAFAFA] font-[Sora]">A</span>
         </div>
-        <span className="text-lg font-bold text-foreground tracking-tight">Axiom</span>
+
+        {/* Nav items */}
+        <nav className="flex flex-col w-full">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              title={item.label}
+              className={({ isActive }) =>
+                `flex items-center justify-center w-16 h-16 relative group transition-colors ${
+                  isActive ? 'text-[#FAFAFA]' : 'text-[#666] hover:text-[#999]'
+                }`
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-red-600 rounded-r" />
+                  )}
+                  <item.icon className="h-[18px] w-[18px]" />
+                  {/* Tooltip */}
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                    {item.label}
+                  </div>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </nav>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 pb-4 space-y-0.5">
-        <NavLink to={ROUTES.DASHBOARD} className={navItemClass}>
-          <LayoutDashboard className="h-4 w-4" />
-          {t('nav.dashboard')}
-        </NavLink>
-        <NavLink to={ROUTES.CASES.LIST} className={navItemClass}>
-          <FolderKanban className="h-4 w-4" />
-          {t('nav.cases')}
-        </NavLink>
-
-        <SectionLabel>분석</SectionLabel>
-        <NavLink to={ROUTES.ANALYSIS.NL2SQL} className={navItemClass}>
-          <MessageSquareText className="h-4 w-4" />
-          NL-to-SQL
-        </NavLink>
-        <NavLink to={ROUTES.ANALYSIS.OLAP} className={navItemClass}>
-          <BarChart3 className="h-4 w-4" />
-          OLAP Pivot
-        </NavLink>
-        <NavLink to={ROUTES.ANALYSIS.INSIGHT} className={navItemClass}>
-          <Lightbulb className="h-4 w-4" />
-          Insight
-        </NavLink>
-
-        <SectionLabel>데이터</SectionLabel>
-        <NavLink to={ROUTES.DATA.ONTOLOGY} className={navItemClass}>
-          <Network className="h-4 w-4" />
-          Ontology
-        </NavLink>
-        <NavLink to={ROUTES.DATA.DATASOURCES} className={navItemClass}>
-          <Database className="h-4 w-4" />
-          {t('nav.data')}
-        </NavLink>
-
-        <SectionLabel>프로세스 &amp; 관제</SectionLabel>
-        <NavLink to={ROUTES.PROCESS_DESIGNER.LIST} className={navItemClass}>
-          <Workflow className="h-4 w-4" />
-          {t('nav.processDesigner')}
-        </NavLink>
-        <NavLink to={ROUTES.WATCH} className={navItemClass}>
-          <ShieldAlert className="h-4 w-4" />
-          {t('nav.watch')}
-        </NavLink>
-
+      {/* Bottom: Settings */}
+      <div className="flex flex-col items-center pb-4">
         {isAdmin && (
-          <>
-            <SectionLabel>관리</SectionLabel>
-            <NavLink to={ROUTES.SETTINGS} className={navItemClass}>
-              <Settings className="h-4 w-4" />
-              {t('nav.settings')}
-            </NavLink>
-          </>
+          <NavLink
+            to={ROUTES.SETTINGS}
+            title="Settings"
+            className={({ isActive }) =>
+              `flex items-center justify-center w-16 h-16 relative group transition-colors ${
+                isActive ? 'text-[#FAFAFA]' : 'text-[#666] hover:text-[#999]'
+              }`
+            }
+          >
+            {({ isActive }) => (
+              <>
+                {isActive && (
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 bg-red-600 rounded-r" />
+                )}
+                <Settings className="h-[18px] w-[18px]" />
+                <div className="absolute left-full ml-2 px-2 py-1 bg-neutral-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50 transition-opacity">
+                  Settings
+                </div>
+              </>
+            )}
+          </NavLink>
         )}
-      </nav>
+      </div>
     </aside>
   );
 };

@@ -66,24 +66,24 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
     : null;
 
   return (
-    <div className="rounded border border-amber-900/50 bg-amber-950/10">
+    <div className="rounded border border-amber-200 bg-amber-50/50">
       {/* Collapse header */}
       <button
         type="button"
         onClick={() => setExpanded((prev) => !prev)}
-        className="flex w-full items-center justify-between px-3 py-2 hover:bg-amber-900/10 transition-colors"
+        className="flex w-full items-center justify-between px-3 py-2 hover:bg-amber-50 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <ShieldAlert className="h-4 w-4 text-amber-500" />
-          <span className="text-sm font-medium text-amber-400">Direct SQL (Admin)</span>
-          <Badge variant="outline" className="text-[10px] border-amber-700 text-amber-500">
+          <ShieldAlert className="h-4 w-4 text-amber-600" />
+          <span className="text-sm font-medium text-amber-700 font-[Sora]">Direct SQL (Admin)</span>
+          <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 font-[IBM_Plex_Mono]">
             ADMIN ONLY
           </Badge>
         </div>
         {expanded ? (
-          <ChevronUp className="h-4 w-4 text-amber-500" />
+          <ChevronUp className="h-4 w-4 text-amber-600" />
         ) : (
-          <ChevronDown className="h-4 w-4 text-amber-500" />
+          <ChevronDown className="h-4 w-4 text-amber-600" />
         )}
       </button>
 
@@ -91,7 +91,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
       {expanded && (
         <div className="px-3 pb-3 space-y-3">
           {/* SQL Editor */}
-          <div className="border border-neutral-800 rounded-md overflow-hidden bg-[#1e1e1e]">
+          <div className="border border-[#E5E5E5] rounded-md overflow-hidden bg-[#1e1e1e]">
             <MonacoEditor
               language="sql"
               theme="vs-dark"
@@ -131,7 +131,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
               {loading ? '실행 중...' : 'SQL 실행'}
             </Button>
             {!datasourceId && (
-              <span className="text-xs text-neutral-500">
+              <span className="text-xs text-[#999] font-[IBM_Plex_Mono]">
                 데이터소스를 먼저 선택하세요.
               </span>
             )}
@@ -139,7 +139,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
 
           {/* Error */}
           {error && (
-            <div className="rounded border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-200">
+            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
@@ -159,7 +159,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
 
           {/* Empty result */}
           {result && normalizedColumns.length === 0 && (
-            <div className="text-sm text-neutral-500 py-2">
+            <div className="text-sm text-[#999] py-2 font-[IBM_Plex_Mono]">
               실행 완료 (결과 없음, {result.result.row_count} rows affected)
             </div>
           )}

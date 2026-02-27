@@ -21,7 +21,6 @@ import { DirectSqlPanel } from './components/DirectSqlPanel';
 
 import { useRole } from '@/shared/hooks/useRole';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { Button } from '@/components/ui/button';
 import {
   Select,
   SelectContent,
@@ -29,7 +28,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Database, Trash2 } from 'lucide-react';
+import { Database, Trash2, ArrowRight, Download, MessageSquare } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const EXAMPLE_QUESTIONS = [
@@ -264,45 +263,52 @@ export function NL2SQLPage() {
   const isEmpty = messages.length === 0 && !loading;
 
   return (
-    <div className="flex h-full gap-4 p-4">
-      {/* Main panel */}
-      <div className="flex-1 flex flex-col min-w-0 rounded border border-neutral-800 bg-neutral-950">
-        {/* Header */}
-        <div className="p-4 border-b border-neutral-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-white">NL2SQL</h2>
-              <p className="text-sm text-neutral-500">
-                자연어로 질문하면 Oracle API가 SQL로 변환·실행합니다.
-              </p>
-            </div>
-            <DatasourceSelector value={datasourceId} onChange={handleDatasourceChange} />
+    <div className="flex h-full">
+      {/* Content Column */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Content Body */}
+        <div className="flex-1 overflow-auto p-12 space-y-10">
+          {/* Title Section */}
+          <div className="space-y-2">
+            <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">NL2SQL</h1>
+            <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+              자연어를 SQL로 변환하여 데이터베이스를 쉽게 조회하세요
+            </p>
           </div>
-          <div className="mt-2 flex items-center gap-2 flex-wrap">
-            <button
-              type="button"
-              onClick={() => setMode('react')}
-              className={cn(
-                'rounded px-2 py-1 text-sm',
-                mode === 'react' ? 'bg-blue-600 text-white' : 'bg-neutral-800 text-neutral-400'
-              )}
-            >
-              ReAct 스트림
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('ask')}
-              className={cn(
-                'rounded px-2 py-1 text-sm',
-                mode === 'ask' ? 'bg-blue-600 text-white' : 'bg-neutral-800 text-neutral-400'
-              )}
-            >
-              단일 요청
-            </button>
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs text-neutral-500">Rows:</span>
+
+          {/* Query Section */}
+          <div className="space-y-4">
+            {/* Connection badges + controls */}
+            <div className="flex items-center gap-3">
+              <DatasourceSelector value={datasourceId} onChange={handleDatasourceChange} />
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode('react')}
+                  className={cn(
+                    'px-3 py-1 text-[11px] font-medium font-[IBM_Plex_Mono] rounded transition-colors',
+                    mode === 'react'
+                      ? 'bg-[#F5F5F5] text-black'
+                      : 'text-[#999] hover:text-[#666]'
+                  )}
+                >
+                  ReAct
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('ask')}
+                  className={cn(
+                    'px-3 py-1 text-[11px] font-medium font-[IBM_Plex_Mono] rounded transition-colors',
+                    mode === 'ask'
+                      ? 'bg-[#F5F5F5] text-black'
+                      : 'text-[#999] hover:text-[#666]'
+                  )}
+                >
+                  Ask
+                </button>
+              </div>
               <Select value={String(rowLimit)} onValueChange={(v) => setRowLimit(Number(v))}>
-                <SelectTrigger className="h-7 w-24 border-neutral-700 bg-neutral-900 text-xs">
+                <SelectTrigger className="h-7 w-20 border-[#E5E5E5] bg-white text-xs text-[#5E5E5E]">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -313,48 +319,73 @@ export function NL2SQLPage() {
                   ))}
                 </SelectContent>
               </Select>
+              {messages.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="flex items-center gap-1 text-xs text-[#999] hover:text-red-500 transition-colors"
+                >
+                  <Trash2 className="h-3 w-3" />
+                  초기화
+                </button>
+              )}
             </div>
-            <button
-              type="button"
-              onClick={() => setHistoryOpen((o) => !o)}
-              className="rounded px-2 py-1 text-sm bg-neutral-800 text-neutral-400"
-            >
-              {historyOpen ? '이력 숨기기' : '이력 보기'}
-            </button>
-            {messages.length > 0 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1 text-xs text-neutral-500 hover:text-red-400"
-                onClick={handleClear}
-              >
-                <Trash2 className="h-3 w-3" />
-                대화 초기화
-              </Button>
+
+            {/* Query input row */}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+              <div className="flex items-end gap-3">
+                <div className="flex-1 flex items-center gap-3 px-5 py-3.5 border border-[#E5E5E5] rounded">
+                  <MessageSquare className="h-4 w-4 text-[#999] shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="예: 최근 3개월간 매출이 가장 높은 상품 10개를 조회하세요"
+                    className="flex-1 bg-transparent text-[13px] text-black placeholder:text-[#999] font-[IBM_Plex_Mono] outline-none"
+                    {...register('prompt')}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading || !promptValue?.trim() || !datasourceId}
+                  className="flex items-center gap-2 px-4 py-2.5 bg-red-600 text-white text-[12px] font-medium font-[Sora] rounded disabled:opacity-50 hover:bg-red-700 transition-colors shrink-0"
+                >
+                  <ArrowRight className="h-3.5 w-3.5" />
+                  실행
+                </button>
+              </div>
+              {errors.prompt && <p className="text-xs text-red-500">{errors.prompt.message}</p>}
+            </form>
+
+            {/* SQL Preview */}
+            {resultData?.sql && (
+              <div className="bg-[#F5F5F5] rounded py-4 px-5 space-y-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-[#999] font-[IBM_Plex_Mono] uppercase tracking-[1px]">Generated SQL</span>
+                </div>
+                <pre className="text-[12px] text-black font-[IBM_Plex_Mono] whitespace-pre-wrap break-words">
+                  {resultData.sql}
+                </pre>
+              </div>
             )}
           </div>
-        </div>
 
-        {/* Content area */}
-        <div className="flex-1 overflow-auto p-4 space-y-4">
-          {/* Direct SQL panel — admin only */}
+          {/* Admin: Direct SQL */}
           {isAdmin && <DirectSqlPanel datasourceId={datasourceId} />}
 
           {/* Empty state */}
           {isEmpty && (
-            <div className="flex flex-col items-center py-12">
+            <div className="flex flex-col items-center py-16">
               <EmptyState
                 icon={Database}
                 title="AI SQL 어시스턴트"
                 description="질문을 입력하면 AI가 SQL을 생성하고 실행합니다."
               />
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mt-6">
                 {EXAMPLE_QUESTIONS.map((q) => (
                   <button
                     key={q}
                     type="button"
                     onClick={() => handleExampleClick(q)}
-                    className="rounded-full border border-neutral-700 bg-neutral-900 px-3 py-1.5 text-xs text-neutral-400 hover:text-white hover:border-neutral-500 transition-colors"
+                    className="rounded-full border border-[#E5E5E5] bg-white px-3 py-1.5 text-xs text-[#666] hover:text-black hover:border-[#999] transition-colors"
                   >
                     {q}
                   </button>
@@ -365,7 +396,7 @@ export function NL2SQLPage() {
 
           {/* Error banner */}
           {error && (
-            <div className="rounded border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-200">
+            <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">
               {error}
             </div>
           )}
@@ -375,30 +406,30 @@ export function NL2SQLPage() {
             <div
               key={i}
               className={cn(
-                'rounded border p-3',
+                'rounded p-4',
                 msg.role === 'user'
-                  ? 'border-blue-900/50 bg-blue-900/20 ml-8'
-                  : 'border-neutral-800 bg-neutral-900/50 mr-8'
+                  ? 'bg-[#F5F5F5] ml-12'
+                  : 'border border-[#E5E5E5] mr-12'
               )}
             >
-              <span className="text-xs font-medium text-neutral-500">
+              <span className="text-[11px] font-medium text-[#999] font-[IBM_Plex_Mono] uppercase">
                 {msg.role === 'user' ? '질문' : '응답'}
               </span>
-              <p className="text-sm text-neutral-300 mt-1">
+              <p className="text-sm text-black mt-1">
                 {msg.content ||
                   (msg.role === 'assistant' && 'streaming' in msg && msg.streaming
                     ? '처리 중...'
                     : '')}
               </p>
               {msg.role === 'assistant' && msg.result?.result && msg.result.result.columns.length > 0 && (
-                <div className="mt-2 overflow-auto">
+                <div className="mt-3 overflow-auto">
                   <table className="w-full border-collapse text-sm">
                     <thead>
                       <tr>
                         {msg.result.result.columns.map((col) => (
                           <th
                             key={col.name}
-                            className="border border-neutral-700 bg-neutral-800 px-2 py-1 text-left text-neutral-300"
+                            className="bg-[#F5F5F5] px-3 py-2 text-left text-[11px] font-medium text-[#666] font-[IBM_Plex_Mono] uppercase border-b border-[#E5E5E5]"
                           >
                             {col.name}
                           </th>
@@ -407,11 +438,11 @@ export function NL2SQLPage() {
                     </thead>
                     <tbody>
                       {(msg.result.result.rows ?? []).slice(0, 5).map((row, ri) => (
-                        <tr key={ri}>
+                        <tr key={ri} className="border-b border-[#E5E5E5] last:border-0">
                           {row.map((cell, ci) => (
                             <td
                               key={ci}
-                              className="border border-neutral-700 px-2 py-1 text-neutral-400"
+                              className="px-3 py-2 text-[13px] text-[#333] font-[IBM_Plex_Mono]"
                             >
                               {cell == null ? '--' : String(cell)}
                             </td>
@@ -421,7 +452,7 @@ export function NL2SQLPage() {
                     </tbody>
                   </table>
                   {(msg.result.result.rows?.length ?? 0) > 5 && (
-                    <p className="text-xs text-neutral-500 mt-1">
+                    <p className="text-xs text-[#999] mt-2">
                       상위 5행만 표시 (총 {msg.result.result.row_count}행)
                     </p>
                   )}
@@ -435,47 +466,47 @@ export function NL2SQLPage() {
             <ReactProgressTimeline steps={reactSteps} isRunning={loading} />
           )}
 
-          {/* Result panel (chart/table/sql tabs) */}
+          {/* Results section */}
           {resultData && resultColumns.length > 0 && (
-            <ResultPanel
-              sql={resultData.sql}
-              columns={resultColumns}
-              rows={resultRows}
-              rowCount={resultData.result?.row_count ?? 0}
-              chartConfig={effectiveChartConfig}
-              summary={resultData.summary ?? null}
-              metadata={(resultData.metadata as ExecutionMetadata) ?? null}
-            />
-          )}
-        </div>
-
-        {/* Input form */}
-        <div className="p-4 border-t border-neutral-800">
-          <form onSubmit={handleSubmit(onSubmit)} className="flex gap-2">
-            <div className="flex-1 flex flex-col gap-1">
-              <input
-                type="text"
-                placeholder="예: 2024년 매출 성장률이 가장 높은 사업부는?"
-                className="w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-white placeholder:text-neutral-500"
-                {...register('prompt')}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h2 className="text-[14px] font-semibold text-black font-[Sora]">조회 결과</h2>
+                  <span className="bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+                    {resultData.result?.row_count ?? 0} rows
+                  </span>
+                </div>
+                <button type="button" className="flex items-center gap-2 px-4 py-2.5 text-[12px] font-medium text-black border border-[#E5E5E5] rounded hover:bg-[#F5F5F5] transition-colors font-[Sora]">
+                  <Download className="h-3.5 w-3.5" />
+                  Export
+                </button>
+              </div>
+              <ResultPanel
+                sql={resultData.sql}
+                columns={resultColumns}
+                rows={resultRows}
+                rowCount={resultData.result?.row_count ?? 0}
+                chartConfig={effectiveChartConfig}
+                summary={resultData.summary ?? null}
+                metadata={(resultData.metadata as ExecutionMetadata) ?? null}
               />
-              {errors.prompt && <p className="text-xs text-red-400">{errors.prompt.message}</p>}
             </div>
-            <button
-              type="submit"
-              disabled={loading || !promptValue?.trim() || !datasourceId}
-              className="rounded bg-blue-600 px-4 py-2 font-medium text-white disabled:opacity-50 hover:bg-blue-700"
-            >
-              {loading ? '처리 중...' : '질문'}
-            </button>
-          </form>
+          )}
         </div>
       </div>
 
-      {/* History sidebar */}
+      {/* Query History sidebar */}
       {historyOpen && (
-        <div className="w-72 flex-shrink-0">
-          <QueryHistoryPanel datasourceId={datasourceId} onSelect={handleSelectHistory} />
+        <div className="w-80 shrink-0 border-l border-[#E5E5E5] flex flex-col">
+          <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5]">
+            <span className="text-[13px] font-semibold text-black font-[Sora]">Query History</span>
+            <span className="bg-[#F5F5F5] px-2.5 py-1 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono] font-medium rounded">
+              12
+            </span>
+          </div>
+          <div className="flex-1 overflow-auto">
+            <QueryHistoryPanel datasourceId={datasourceId} onSelect={handleSelectHistory} />
+          </div>
         </div>
       )}
     </div>

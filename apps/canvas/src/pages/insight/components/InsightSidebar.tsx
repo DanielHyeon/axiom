@@ -1,5 +1,5 @@
 // pages/insight/components/InsightSidebar.tsx
-// Left sidebar: KPI selector + Driver ranking panel
+// Insight page: KPI selector + Driver ranking — now inline instead of sidebar
 
 import { KpiSelector } from '@/features/insight/components/KpiSelector';
 import { DriverRankingPanel } from '@/features/insight/components/DriverRankingPanel';
@@ -25,14 +25,14 @@ export function InsightSidebar({
   loading,
 }: InsightSidebarProps) {
   return (
-    <aside className="w-60 shrink-0 flex flex-col border-r border-neutral-800 bg-neutral-900/30 overflow-y-auto">
+    <div className="space-y-6">
       {/* KPI Selector section */}
-      <div className="p-3 border-b border-neutral-800">
+      <div>
         <KpiSelector onSelect={onKpiSelect} loading={loading} />
       </div>
 
       {/* Driver Ranking section */}
-      <div className="p-3 flex-1">
+      <div>
         <DriverRankingPanel
           graphData={graphData}
           impactEvidence={impactEvidence}
@@ -41,6 +41,6 @@ export function InsightSidebar({
           onHoverDriver={onHoverDriver}
         />
       </div>
-    </aside>
+    </div>
   );
 }

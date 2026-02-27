@@ -13,8 +13,8 @@ export function LayerFilter() {
     const { filters, toggleLayer } = useOntologyStore();
 
     return (
-        <div className="flex gap-4 items-center bg-[#1a1a1a] p-2 rounded-md border border-neutral-800">
-            <span className="text-xs text-neutral-500 mr-2">계층:</span>
+        <div className="flex gap-4 items-center bg-[#F5F5F5] p-2 rounded border border-[#E5E5E5]">
+            <span className="text-[11px] text-[#999] font-[IBM_Plex_Mono] mr-2">계층:</span>
             {LAYER_INFO.map(layer => (
                 <div key={layer.id} className="flex items-center space-x-2">
                     <Checkbox
@@ -24,7 +24,7 @@ export function LayerFilter() {
                     />
                     <label
                         htmlFor={`layer-${layer.id}`}
-                        className="text-sm cursor-pointer flex items-center gap-1.5 text-neutral-300"
+                        className="text-[13px] cursor-pointer flex items-center gap-1.5 text-[#5E5E5E] font-[Sora]"
                     >
                         <span className={`w-2.5 h-2.5 rounded-full ${layer.color}`} />
                         {layer.label}

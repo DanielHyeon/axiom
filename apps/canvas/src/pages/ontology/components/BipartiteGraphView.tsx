@@ -105,9 +105,9 @@ const BIPARTITE_STYLE: cytoscape.Stylesheet[] = [
         style: {
             label: 'data(label)',
             'font-size': 11,
-            color: '#d4d4d4',
+            color: '#333333',
             'text-outline-width': 2,
-            'text-outline-color': '#111111',
+            'text-outline-color': '#F5F5F5',
             width: 20,
             height: 20,
             'overlay-opacity': 0,
@@ -155,8 +155,8 @@ const BIPARTITE_STYLE: cytoscape.Stylesheet[] = [
         selector: 'edge',
         style: {
             width: 1.5,
-            'line-color': '#404040',
-            'target-arrow-color': '#404040',
+            'line-color': '#CCCCCC',
+            'target-arrow-color': '#CCCCCC',
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
             'arrow-scale': 0.7,
@@ -178,7 +178,7 @@ const BIPARTITE_STYLE: cytoscape.Stylesheet[] = [
     // Highlight / dim
     {
         selector: 'node.highlighted',
-        style: { 'border-width': 2, 'border-color': '#ffffff', 'z-index': 10 },
+        style: { 'border-width': 2, 'border-color': '#333333', 'z-index': 10 },
     },
     {
         selector: 'edge.highlighted',
@@ -282,18 +282,18 @@ export function BipartiteGraphView({
 
     if (mappings.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-neutral-600">
+            <div className="flex flex-col items-center justify-center py-12 text-[#999]">
                 <Link size={24} className="mb-2 opacity-30" />
-                <p className="text-sm">매핑이 없습니다. 위에서 새 매핑을 추가하면 시각화가 표시됩니다.</p>
+                <p className="text-sm font-[IBM_Plex_Mono]">매핑이 없습니다. 위에서 새 매핑을 추가하면 시각화가 표시됩니다.</p>
             </div>
         );
     }
 
     return (
-        <div className="w-full border border-neutral-800 rounded-lg bg-[#111111] overflow-hidden">
+        <div className="w-full border border-[#E5E5E5] rounded bg-[#F5F5F5] overflow-hidden">
             {/* Legend */}
-            <div className="flex items-center gap-4 px-3 py-2 border-b border-neutral-800/50 text-[10px] text-neutral-500">
-                <span className="font-medium text-neutral-400">범례:</span>
+            <div className="flex items-center gap-4 px-3 py-2 border-b border-[#E5E5E5] text-[10px] text-[#999] font-[IBM_Plex_Mono]">
+                <span className="font-medium text-[#5E5E5E]">범례:</span>
                 {Object.entries(LAYER_COLORS).map(([layer, color]) => (
                     <span key={layer} className="flex items-center gap-1">
                         <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
@@ -304,7 +304,7 @@ export function BipartiteGraphView({
                     <span className="w-2 h-2 rounded inline-block" style={{ backgroundColor: SCHEMA_COLOR }} />
                     Table
                 </span>
-                <span className="border-l border-neutral-700 pl-3 ml-1" />
+                <span className="border-l border-[#E5E5E5] pl-3 ml-1" />
                 {Object.entries(REL_COLORS).map(([rel, color]) => (
                     <span key={rel} className="flex items-center gap-1">
                         <span className="w-4 h-0.5 inline-block" style={{ backgroundColor: color }} />

@@ -23,16 +23,16 @@ export function SqlPreview({ sql, onRun }: SqlPreviewProps) {
   }, [sql]);
 
   return (
-    <div className="border border-neutral-800 rounded-md overflow-hidden bg-[#1e1e1e] my-3">
-      <div className="flex items-center justify-between px-3 py-1.5 bg-neutral-900 border-b border-neutral-800">
-        <span className="text-xs font-mono text-neutral-400">SQL</span>
+    <div className="border border-[#E5E5E5] rounded-md overflow-hidden bg-[#1e1e1e] my-3">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-[#F5F5F5] border-b border-[#E5E5E5]">
+        <span className="text-xs font-[IBM_Plex_Mono] text-[#999]">SQL</span>
         <div className="flex space-x-1">
           <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy} title="복사">
-            {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3 text-neutral-400" />}
+            {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3 text-[#999]" />}
           </Button>
           {onRun && (
             <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRun(sql)} title="실행">
-              <Play className="h-3 w-3 text-blue-400" />
+              <Play className="h-3 w-3 text-red-500" />
             </Button>
           )}
         </div>

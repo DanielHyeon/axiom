@@ -1,5 +1,6 @@
 import { getHistory, type HistoryItem } from '../api/oracleNl2sqlApi';
 import { useQuery } from '@tanstack/react-query';
+import { cn } from '@/lib/utils';
 
 interface QueryHistoryPanelProps {
   datasourceId?: string;
@@ -14,58 +15,83 @@ export function QueryHistoryPanel({ datasourceId, onSelect }: QueryHistoryPanelP
   });
 
   const history = data?.data?.history ?? [];
-  const pagination = data?.data?.pagination;
 
   if (isLoading) {
     return (
-      <div className="rounded border border-neutral-800 bg-neutral-900/50 p-3">
-        <h3 className="text-sm font-semibold text-white mb-2">최근 질의</h3>
-        <div className="space-y-2 animate-pulse">
-          <div className="h-12 bg-neutral-800 rounded" />
-          <div className="h-12 bg-neutral-800 rounded" />
-          <div className="h-12 bg-neutral-800 rounded" />
-        </div>
+      <div className="py-2 space-y-1 animate-pulse">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="py-3 px-6">
+            <div className="h-4 bg-[#E5E5E5] rounded w-3/4" />
+            <div className="h-3 bg-[#E5E5E5] rounded w-1/2 mt-2" />
+          </div>
+        ))}
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="rounded border border-neutral-800 bg-neutral-900/50 p-3">
-        <h3 className="text-sm font-semibold text-white mb-2">최근 질의</h3>
-        <p className="text-xs text-neutral-500">이력을 불러올 수 없습니다.</p>
+      <div className="py-8 text-center">
+        <p className="text-xs text-[#999] font-[IBM_Plex_Mono]">이력을 불러올 수 없습니다.</p>
+      </div>
+    );
+  }
+
+  if (history.length === 0) {
+    return (
+      <div className="py-8 text-center">
+        <p className="text-xs text-[#999] font-[IBM_Plex_Mono]">최근 질의가 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded border border-neutral-800 bg-neutral-900/50 p-3">
-      <h3 className="text-sm font-semibold text-white mb-2">최근 질의</h3>
-      <ul className="space-y-2 max-h-64 overflow-auto">
-        {history.map((item) => (
-          <li key={item.id}>
-            <button
-              type="button"
-              onClick={() => onSelect?.(item)}
-              className="w-full text-left rounded border border-neutral-800 bg-neutral-950 px-2 py-2 hover:bg-neutral-800/50 transition text-sm"
-            >
-              <span className="line-clamp-2 text-neutral-300">{item.question}</span>
-              <span className="mt-1 block text-xs text-neutral-500">
-                {item.status === 'success' ? '성공' : '오류'} · {item.row_count ?? '—'}행
-                {item.created_at && ` · ${new Date(item.created_at).toLocaleDateString('ko-KR')}`}
-              </span>
-            </button>
-          </li>
-        ))}
-        {history.length === 0 && (
-          <li className="text-sm text-neutral-500">최근 질의가 없습니다.</li>
-        )}
-      </ul>
-      {pagination && pagination.total_count > 0 && (
-        <p className="mt-2 text-xs text-neutral-500">
-          총 {pagination.total_count}건
-        </p>
-      )}
+    <div className="flex flex-col py-2">
+      {history.map((item, idx) => (
+        <button
+          key={item.id}
+          type="button"
+          onClick={() => onSelect?.(item)}
+          className={cn(
+            'w-full text-left py-3 px-6 transition-colors hover:bg-[#F5F5F5]',
+            idx === 0 && 'bg-[#F5F5F5]'
+          )}
+        >
+          <span
+            className={cn(
+              'block text-[13px] font-[Sora] line-clamp-2',
+              idx === 0 ? 'text-black font-medium' : 'text-[#5E5E5E]'
+            )}
+          >
+            {item.question}
+          </span>
+          <span className="mt-1.5 flex items-center gap-2 text-[11px] text-[#999] font-[IBM_Plex_Mono]">
+            {item.created_at && (
+              <span>{formatTimeAgo(item.created_at)}</span>
+            )}
+            {item.row_count != null && (
+              <>
+                <span>·</span>
+                <span>{item.row_count} rows</span>
+              </>
+            )}
+          </span>
+        </button>
+      ))}
     </div>
   );
+}
+
+function formatTimeAgo(dateStr: string): string {
+  const now = Date.now();
+  const then = new Date(dateStr).getTime();
+  const diff = now - then;
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} min ago`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return 'Yesterday';
+  return `${days} days ago`;
 }

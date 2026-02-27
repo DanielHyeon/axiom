@@ -84,16 +84,16 @@ export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelin
   }
 
   return (
-    <div className="rounded border border-neutral-800 bg-neutral-900/50 p-3">
+    <div className="rounded border border-[#E5E5E5] p-3">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-xs font-medium text-neutral-400">
+        <span className="text-xs font-medium text-[#999] font-[IBM_Plex_Mono]">
           ReAct Loop {currentIteration > 1 ? `(iteration ${currentIteration})` : ''}
         </span>
         {hasResult && (
-          <span className="text-xs text-green-400">Complete</span>
+          <span className="text-xs text-green-600 font-[IBM_Plex_Mono]">Complete</span>
         )}
         {hasError && (
-          <span className="text-xs text-red-400">Failed</span>
+          <span className="text-xs text-red-600 font-[IBM_Plex_Mono]">Failed</span>
         )}
       </div>
       <div className="space-y-1">
@@ -111,27 +111,27 @@ export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelin
               <div
                 className={cn(
                   'flex h-5 w-5 items-center justify-center rounded-full',
-                  isDone && !isErrorStep && 'bg-green-900/50 text-green-400',
-                  isActive && 'bg-blue-900/50 text-blue-400 animate-pulse',
-                  isErrorStep && 'bg-red-900/50 text-red-400',
-                  !isDone && !isActive && !isErrorStep && 'bg-neutral-800 text-neutral-600'
+                  isDone && !isErrorStep && 'bg-green-50 text-green-600',
+                  isActive && 'bg-blue-50 text-blue-600 animate-pulse',
+                  isErrorStep && 'bg-red-50 text-red-600',
+                  !isDone && !isActive && !isErrorStep && 'bg-[#E5E5E5] text-[#999]'
                 )}
               >
                 <Icon className="h-3 w-3" />
               </div>
               <span
                 className={cn(
-                  'text-xs',
-                  isDone && !isErrorStep && 'text-neutral-300',
-                  isActive && 'text-blue-300',
-                  isErrorStep && 'text-red-300',
-                  !isDone && !isActive && !isErrorStep && 'text-neutral-600'
+                  'text-xs font-[IBM_Plex_Mono]',
+                  isDone && !isErrorStep && 'text-[#5E5E5E]',
+                  isActive && 'text-blue-600',
+                  isErrorStep && 'text-red-600',
+                  !isDone && !isActive && !isErrorStep && 'text-[#999]'
                 )}
               >
                 {meta.label}
               </span>
               {summary && (
-                <span className="text-xs text-neutral-500 ml-auto truncate max-w-[200px]">
+                <span className="text-xs text-[#999] ml-auto truncate max-w-[200px] font-[IBM_Plex_Mono]">
                   {summary}
                 </span>
               )}

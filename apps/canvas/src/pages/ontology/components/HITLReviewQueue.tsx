@@ -20,10 +20,10 @@ interface HITLReviewQueueProps {
 }
 
 const LAYER_BADGE: Record<string, string> = {
-  kpi: 'border-violet-700 text-violet-300',
-  measure: 'border-blue-700 text-blue-300',
-  process: 'border-emerald-700 text-emerald-300',
-  resource: 'border-amber-700 text-amber-300',
+  kpi: 'border-violet-300 text-violet-600',
+  measure: 'border-blue-300 text-blue-600',
+  process: 'border-emerald-300 text-emerald-600',
+  resource: 'border-amber-300 text-amber-600',
 };
 
 export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
@@ -100,51 +100,51 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
   const hasMore = items.length < total;
 
   return (
-    <div className="w-80 border-l border-neutral-800 bg-[#161616] flex flex-col shrink-0 overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden">
       {/* Header */}
-      <div className="h-12 border-b border-neutral-800 flex items-center justify-between px-3 shrink-0">
+      <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5] shrink-0">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-neutral-200">검토 대기열</span>
-          <Badge variant="outline" className="text-[10px] border-neutral-700 tabular-nums">
+          <span className="text-[13px] font-semibold text-black font-[Sora]">검토 대기열</span>
+          <Badge variant="outline" className="text-[10px] border-[#E5E5E5] tabular-nums font-[IBM_Plex_Mono]">
             {total}
           </Badge>
         </div>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={onClose}>
-          <X className="h-4 w-4 text-neutral-400" />
-        </Button>
+        <button type="button" onClick={onClose} className="text-[#999] hover:text-black text-lg transition-colors">
+          ×
+        </button>
       </div>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto">
         {loading && items.length === 0 && (
           <div className="flex items-center justify-center py-8">
-            <Loader2 className="h-5 w-5 animate-spin text-neutral-500" />
+            <Loader2 className="h-5 w-5 animate-spin text-[#999]" />
           </div>
         )}
 
         {error && (
-          <div className="m-3 rounded border border-red-900/50 bg-red-900/20 p-3 text-sm text-red-200">
+          <div className="m-3 rounded border border-red-200 bg-red-50 p-3 text-sm text-red-600">
             {error}
           </div>
         )}
 
         {!loading && items.length === 0 && !error && (
-          <div className="flex flex-col items-center justify-center py-8 text-neutral-500 gap-1">
+          <div className="flex flex-col items-center justify-center py-8 text-[#999] gap-1">
             <CheckCircle className="h-6 w-6 opacity-40" />
-            <span className="text-xs">검토 대기 항목이 없습니다</span>
+            <span className="text-xs font-[IBM_Plex_Mono]">검토 대기 항목이 없습니다</span>
           </div>
         )}
 
-        <div className="divide-y divide-neutral-800/50">
+        <div className="divide-y divide-[#E5E5E5]">
           {items.map((item) => {
             const isActioning = actioningId === item.id;
             const showComment = commentId === item.id;
             return (
-              <div key={item.id} className="p-3 space-y-2">
+              <div key={item.id} className="p-4 space-y-2">
                 {/* Item header */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
-                    <div className="text-sm text-neutral-200 truncate">
+                    <div className="text-[13px] text-black truncate font-[Sora]">
                       {item.node_name || item.node_id}
                     </div>
                     <div className="flex items-center gap-1.5 mt-1">
@@ -152,14 +152,14 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
                         <Badge
                           variant="outline"
                           className={cn(
-                            'text-[10px] capitalize',
-                            LAYER_BADGE[item.node_layer] ?? 'border-neutral-700 text-neutral-400',
+                            'text-[10px] capitalize font-[IBM_Plex_Mono]',
+                            LAYER_BADGE[item.node_layer] ?? 'border-[#E5E5E5] text-[#999]',
                           )}
                         >
                           {item.node_layer}
                         </Badge>
                       )}
-                      <span className="text-[10px] text-neutral-600 flex items-center gap-0.5">
+                      <span className="text-[10px] text-[#999] flex items-center gap-0.5 font-[IBM_Plex_Mono]">
                         <Clock className="h-2.5 w-2.5" />
                         {new Date(item.submitted_at).toLocaleDateString('ko-KR')}
                       </span>
@@ -170,7 +170,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
                 {/* Comment toggle */}
                 {showComment && (
                   <textarea
-                    className="w-full h-16 rounded border border-neutral-700 bg-neutral-900 p-2 text-xs text-neutral-300 resize-none focus:outline-none focus:border-neutral-600"
+                    className="w-full h-16 rounded border border-[#E5E5E5] bg-white p-2 text-xs text-black font-[IBM_Plex_Mono] resize-none focus:outline-none focus:border-[#999]"
                     placeholder="검토 코멘트 (선택)"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
@@ -182,7 +182,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-green-400 hover:text-green-300 hover:bg-green-900/20"
+                    className="h-7 px-2 text-green-600 hover:text-green-700 hover:bg-green-50"
                     disabled={isActioning}
                     onClick={() => handleApprove(item.id)}
                   >
@@ -191,17 +191,17 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
                     ) : (
                       <CheckCircle className="h-3.5 w-3.5" />
                     )}
-                    <span className="ml-1 text-xs">승인</span>
+                    <span className="ml-1 text-xs font-[Sora]">승인</span>
                   </Button>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="h-7 px-2 text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                    className="h-7 px-2 text-red-500 hover:text-red-600 hover:bg-red-50"
                     disabled={isActioning}
                     onClick={() => handleReject(item.id)}
                   >
                     <XCircle className="h-3.5 w-3.5" />
-                    <span className="ml-1 text-xs">반려</span>
+                    <span className="ml-1 text-xs font-[Sora]">반려</span>
                   </Button>
                   <Button
                     variant="ghost"
@@ -218,7 +218,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
                     }}
                   >
                     <MessageSquare
-                      className={cn('h-3.5 w-3.5', showComment ? 'text-blue-400' : 'text-neutral-500')}
+                      className={cn('h-3.5 w-3.5', showComment ? 'text-blue-500' : 'text-[#999]')}
                     />
                   </Button>
                 </div>
@@ -233,7 +233,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
             <Button
               variant="ghost"
               size="sm"
-              className="w-full h-8 text-xs text-neutral-400"
+              className="w-full h-8 text-xs text-[#999] font-[Sora]"
               disabled={loading}
               onClick={() => fetchItems(offset + LIMIT)}
             >
