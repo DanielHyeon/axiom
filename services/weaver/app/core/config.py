@@ -42,6 +42,10 @@ class Settings:
             "WEAVER_CORS_ALLOWED_HEADERS",
             "Authorization,Content-Type,X-Request-Id,X-Tenant-Id,Idempotency-Key",
         )
+        # Service-to-service token for internal calls (e.g. Oracle → Weaver /logs).
+        # When set, requests carrying this token bypass JWT verification and use
+        # X-Tenant-Id header to determine the tenant.
+        self.insight_service_token: str = os.getenv("WEAVER_INSIGHT_SERVICE_TOKEN", "")
 
 
 settings = Settings()

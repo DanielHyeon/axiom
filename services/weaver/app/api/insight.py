@@ -7,7 +7,7 @@ import logging
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import JSONResponse
 
 from app.core.insight_auth import get_current_insight_user, get_effective_tenant_id
@@ -35,7 +35,17 @@ from app.services.insight_job_store import (
 )
 from app.services.sql_normalize import normalize_sql, mask_pii
 from app.services.idempotency import realtime_query_id, batch_query_id
-from app.services.insight_query_store import insert_logs, insert_batch_record
+from app.services.insight_query_store import (
+    insert_logs,
+    insert_batch_record,
+    parse_time_range_days,
+    fetch_kpis,
+    fetch_drivers,
+    fetch_driver_score,
+    fetch_driver_evidence,
+    fetch_kpi_activity,
+    fetch_schema_coverage,
+)
 from app.worker.impact_task import run_impact_task
 
 logger = logging.getLogger("weaver.insight_api")
@@ -557,3 +567,180 @@ async def query_subgraph(
     }
 
     return {"parse_result": parse_result_data, "graph": graph, "trace_id": trace_id}
+
+
+# ── GET /kpis ─────────────────────────────────────────────────
+
+@router.get("/kpis")
+async def list_kpis(
+    datasource: str | None = Query(default=None),
+    time_range: str = Query(default="30d"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=50, le=200),
+    tenant_id: str = Depends(get_effective_tenant_id),
+):
+    try:
+        days = parse_time_range_days(time_range)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    try:
+        pool = await insight_store.get_pool()
+    except InsightStoreUnavailableError as exc:
+        raise InsightError(
+            status_code=503, error_code="STORE_UNAVAILABLE",
+            error_message=str(exc), retryable=True,
+        ) from exc
+
+    async with rls_session(pool, tenant_id) as conn:
+        kpis, total = await fetch_kpis(conn, tenant_id, datasource, days, offset, limit)
+
+    return {
+        "kpis": kpis,
+        "total": total,
+        "pagination": {
+            "offset": offset,
+            "limit": limit,
+            "has_more": (offset + limit) < total,
+        },
+    }
+
+
+# ── GET /drivers ─────────────────────────────────────────────
+
+@router.get("/drivers")
+async def list_drivers(
+    datasource: str | None = Query(default=None),
+    kpi_fingerprint: str | None = Query(default=None),
+    time_range: str = Query(default="30d"),
+    offset: int = Query(default=0, ge=0),
+    limit: int = Query(default=30, le=100),
+    tenant_id: str = Depends(get_effective_tenant_id),
+):
+    try:
+        days = parse_time_range_days(time_range)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    try:
+        pool = await insight_store.get_pool()
+    except InsightStoreUnavailableError as exc:
+        raise InsightError(
+            status_code=503, error_code="STORE_UNAVAILABLE",
+            error_message=str(exc), retryable=True,
+        ) from exc
+
+    async with rls_session(pool, tenant_id) as conn:
+        drivers, total = await fetch_drivers(
+            conn, tenant_id, datasource, kpi_fingerprint, days, offset, limit
+        )
+
+    source = "driver_scores" if drivers else "empty"
+    return {
+        "drivers": drivers,
+        "total": total,
+        "pagination": {"offset": offset, "limit": limit, "has_more": (offset + limit) < total},
+        "meta": {
+            "source": source,
+            "kpi_fingerprint": kpi_fingerprint,
+            "datasource": datasource,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+        },
+    }
+
+
+# ── GET /drivers/detail ───────────────────────────────────────
+
+@router.get("/drivers/detail")
+async def get_driver_detail(
+    driver_key: str = Query(..., description="column_key (예: customers.region)"),
+    time_range: str = Query(default="30d"),
+    tenant_id: str = Depends(get_effective_tenant_id),
+):
+    try:
+        days = parse_time_range_days(time_range)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    try:
+        pool = await insight_store.get_pool()
+    except InsightStoreUnavailableError as exc:
+        raise InsightError(
+            status_code=503, error_code="STORE_UNAVAILABLE",
+            error_message=str(exc), retryable=True,
+        ) from exc
+
+    async with rls_session(pool, tenant_id) as conn:
+        driver = await fetch_driver_score(conn, tenant_id, driver_key)
+        if not driver:
+            raise HTTPException(
+                status_code=404,
+                detail="Driver score not found. Run impact analysis first.",
+            )
+        evidence = await fetch_driver_evidence(conn, tenant_id, driver_key, days)
+
+    return {"driver": driver, "evidence": evidence}
+
+
+# ── GET /kpi/activity ─────────────────────────────────────────
+
+@router.get("/kpi/activity")
+async def kpi_activity(
+    kpi_fingerprint: str = Query(...),
+    driver_key: str | None = Query(default=None),
+    time_range: str = Query(default="30d"),
+    granularity: str = Query(default="day", pattern="^(day|week)$"),
+    tenant_id: str = Depends(get_effective_tenant_id),
+):
+    try:
+        days = parse_time_range_days(time_range)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    try:
+        pool = await insight_store.get_pool()
+    except InsightStoreUnavailableError as exc:
+        raise InsightError(
+            status_code=503, error_code="STORE_UNAVAILABLE",
+            error_message=str(exc), retryable=True,
+        ) from exc
+
+    async with rls_session(pool, tenant_id) as conn:
+        series = await fetch_kpi_activity(
+            conn, tenant_id, kpi_fingerprint, driver_key, days, granularity
+        )
+
+    return {
+        "kpi_fingerprint": kpi_fingerprint,
+        "series_type": "activity",
+        "granularity": granularity,
+        "series": series,
+    }
+
+
+# ── GET /schema-coverage ──────────────────────────────────────
+
+@router.get("/schema-coverage")
+async def schema_coverage(
+    table: str = Query(...),
+    column: str | None = Query(default=None),
+    time_range: str = Query(default="30d"),
+    tenant_id: str = Depends(get_effective_tenant_id),
+):
+    try:
+        days = parse_time_range_days(time_range)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+
+    try:
+        pool = await insight_store.get_pool()
+    except InsightStoreUnavailableError as exc:
+        raise InsightError(
+            status_code=503, error_code="STORE_UNAVAILABLE",
+            error_message=str(exc), retryable=True,
+        ) from exc
+
+    async with rls_session(pool, tenant_id) as conn:
+        result = await fetch_schema_coverage(conn, tenant_id, table, column, days)
+
+    return result

@@ -181,6 +181,8 @@ class InsightStore:
             for col, col_type in [
                 ("parse_mode", "TEXT"),
                 ("parse_confidence", "DOUBLE PRECISION"),
+                ("kpi_fingerprint", "TEXT"),   # P0-A Option A: KPI fingerprint tag
+                ("kpi_name", "TEXT"),           # P0-A Option A: KPI display name
             ]:
                 await conn.execute(f"""
                     DO $$

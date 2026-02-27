@@ -152,22 +152,30 @@ async def load_kpi_definitions(
     Returns an empty list if the table does not exist (graceful degradation
     for environments where the ontology module is not yet deployed).
     """
-    try:
-        rows = await conn.fetch(
-            """
-            SELECT kpi_id, name, metric_sql, aliases, table_hint
-            FROM weaver.ontology_kpi_definitions
-            WHERE tenant_id = $1 AND datasource_id = $2
-            """,
-            tenant_id, datasource_id,
+    # Check table existence first to avoid aborting the outer PostgreSQL
+    # transaction on UndefinedTableError (catching a SQL error inside an open
+    # transaction leaves the connection in an aborted state).
+    table_exists = await conn.fetchval(
+        """
+        SELECT EXISTS(
+            SELECT 1 FROM information_schema.tables
+            WHERE table_schema = 'weaver'
+              AND table_name = 'ontology_kpi_definitions'
         )
-    except Exception as exc:
-        # Table may not exist in early deployments
-        err_msg = str(exc).lower()
-        if "does not exist" in err_msg or "undefined_table" in err_msg:
-            logger.info("ontology_kpi_definitions table not found — returning empty list")
-            return []
-        raise
+        """
+    )
+    if not table_exists:
+        logger.info("ontology_kpi_definitions table not found — returning empty list")
+        return []
+
+    rows = await conn.fetch(
+        """
+        SELECT kpi_id, name, metric_sql, aliases, table_hint
+        FROM weaver.ontology_kpi_definitions
+        WHERE tenant_id = $1 AND datasource_id = $2
+        """,
+        tenant_id, datasource_id,
+    )
 
     definitions: List[KpiDefinition] = []
     for row in rows:

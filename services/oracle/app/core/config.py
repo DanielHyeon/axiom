@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     ORACLE_SQL_EXECUTION_TIMEOUT_SEC: int = 15
     ORACLE_DATASOURCES_JSON: str = "[]"
     QUERY_HISTORY_DATABASE_URL: str = "postgresql://arkos:arkos@localhost:5432/insolvency_os"
+    # Weaver Insight auto-ingest (P1-B).  Leave WEAVER_INSIGHT_TOKEN empty to disable.
+    WEAVER_INSIGHT_URL: str = "http://weaver:8001/api/insight/logs"
+    WEAVER_INSIGHT_TOKEN: str = ""   # must match WEAVER_INSIGHT_SERVICE_TOKEN in Weaver
 
     model_config = ConfigDict(env_file=".env")
 

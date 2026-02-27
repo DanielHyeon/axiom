@@ -231,6 +231,54 @@ export interface JobStatusResponse {
   trace_id?: string;
 }
 
+// ---------------------------------------------------------------------------
+// KPI List (P0-A)
+// ---------------------------------------------------------------------------
+
+export interface KpiListItem {
+  id: string;
+  name: string;
+  source: 'ontology' | 'query_log' | 'merged';
+  primary: boolean;
+  fingerprint: string;
+  datasource: string;
+  query_count: number;
+  last_seen: string | null;
+  trend: 'up' | 'down' | 'flat' | null;
+  aliases: string[];
+}
+
+export interface KpiListResponse {
+  kpis: KpiListItem[];
+  total: number;
+  pagination: { offset: number; limit: number; has_more: boolean };
+}
+
+// ---------------------------------------------------------------------------
+// Driver List (P0-B)
+// ---------------------------------------------------------------------------
+
+export interface DriverListItem {
+  driver_key: string;
+  role: string;
+  score: number;
+  breakdown: Record<string, number>;
+  kpi_fingerprint: string;
+  created_at: string | null;
+}
+
+export interface DriverListResponse {
+  drivers: DriverListItem[];
+  total: number;
+  pagination: { offset: number; limit: number; has_more: boolean };
+  meta: {
+    source: 'driver_scores' | 'empty';
+    kpi_fingerprint: string | null;
+    datasource: string | null;
+    generated_at: string;
+  };
+}
+
 /** Driver detail response (from GET /api/insight/drivers/{id}) */
 export interface DriverDetailResponse {
   driver: {

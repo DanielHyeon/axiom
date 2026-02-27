@@ -12,9 +12,9 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Sequence
 
-from app.services.driver_scorer import DriverScoreConfig, score_candidates
+from app.services.driver_scorer import DriverScoreConfig, ScoredCandidate, score_candidates
 from app.services.impact_graph_builder import GraphLimits, build_impact_graph
 from app.services.insight_job_store import (
     TTL_DONE,
@@ -26,6 +26,59 @@ from app.services.insight_job_store import (
 from app.services.query_log_analyzer import AnalyzerConfig, analyze_query_logs
 
 logger = logging.getLogger("weaver.impact_task")
+
+
+async def _persist_driver_scores(
+    conn,
+    tenant_id: str,
+    datasource_id: str,
+    kpi_fingerprint: str,
+    time_range: str,
+    candidates: Sequence[ScoredCandidate],
+) -> None:
+    """Upsert scored candidates into insight_driver_scores (E4 fix).
+
+    Uses INSERT … ON CONFLICT DO UPDATE so repeated runs overwrite stale scores.
+    There is no unique constraint on (tenant_id, datasource_id, kpi_fingerprint, column_key),
+    so we DELETE matching rows first then bulk-insert to keep it simple.
+    """
+    if not candidates:
+        return
+
+    # Remove previous scores for this (tenant, datasource, kpi, time_range) combination
+    await conn.execute(
+        """
+        DELETE FROM weaver.insight_driver_scores
+        WHERE tenant_id = $1
+          AND datasource_id = $2
+          AND kpi_fingerprint = $3
+          AND time_range = $4
+        """,
+        tenant_id,
+        datasource_id,
+        kpi_fingerprint,
+        time_range,
+    )
+
+    now = datetime.now(timezone.utc)
+    for c in candidates:
+        await conn.execute(
+            """
+            INSERT INTO weaver.insight_driver_scores
+                (tenant_id, datasource_id, kpi_fingerprint, column_key,
+                 role, score, breakdown, time_range, created_at)
+            VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9)
+            """,
+            tenant_id,
+            datasource_id,
+            kpi_fingerprint,
+            c.column_key,
+            c.role,
+            c.score,
+            json.dumps(c.breakdown),
+            time_range,
+            now,
+        )
 
 
 def _parse_time_range(time_range: str) -> tuple[str, str]:
@@ -127,7 +180,16 @@ async def run_impact_task(
         graph_meta["explain"]["drivers_scored"] = len(drivers)
         graph_meta["explain"]["dimensions_scored"] = len(dimensions)
 
-        # Step 5: Store result in cache + mark done
+        # Step 5: Persist driver scores to DB (E4 fix), then cache + mark done
+        try:
+            async with conn.transaction():
+                await _persist_driver_scores(
+                    conn, tenant_id, datasource_id, kpi_fingerprint,
+                    time_range, list(drivers) + list(dimensions),
+                )
+        except Exception as exc:
+            logger.warning("_persist_driver_scores failed (non-fatal): %s", exc)
+
         cache_key = _build_cache_key(tenant_id, datasource_id, kpi_fingerprint, time_range, top)
         cache_payload = {"job_id": job_id, "result": result}
         await rd.set(

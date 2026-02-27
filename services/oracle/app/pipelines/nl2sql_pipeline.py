@@ -1,16 +1,72 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Any, Dict
 import asyncio
+import logging
+import random
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from typing import Any, Dict
+from uuid import uuid4
+
+import httpx
 
 from app.core.auth import CurrentUser
+from app.core.config import settings
 from app.core.llm_factory import llm_factory
 from app.core.sql_exec import sql_executor
 from app.core.sql_guard import GuardConfig, sql_guard
 from app.core.visualize import recommend_visualization
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, TableInfo, OntologyContext
 from app.pipelines.cache_postprocess import cache_postprocessor
+
+logger = logging.getLogger("oracle.nl2sql_pipeline")
+
+# Semaphore caps concurrent insight forwarding calls (E8 fix)
+_INSIGHT_SEMAPHORE = asyncio.Semaphore(10)
+
+
+async def _forward_to_insight(
+    tenant_id: str,
+    sql: str,
+    datasource: str,
+    duration_ms: int,
+    row_count: int | None,
+    nl_query: str | None,
+    trace_id: str,
+) -> None:
+    """Fire-and-forget: POST executed SQL to Weaver /api/insight/logs (P1-B)."""
+    if not settings.WEAVER_INSIGHT_TOKEN:
+        return  # forwarding disabled
+
+    entry = {
+        "request_id": str(uuid4()),
+        "trace_id": trace_id,
+        "datasource_id": datasource,
+        "dialect": "postgresql",
+        "executed_at": datetime.now(timezone.utc).isoformat(),
+        "status": "success",
+        "duration_ms": duration_ms,
+        "row_count": row_count,
+        "nl_query": nl_query,
+        "raw_sql": sql,
+    }
+
+    async with _INSIGHT_SEMAPHORE:
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                await client.post(
+                    settings.WEAVER_INSIGHT_URL,
+                    json={"logs": [entry], "source": "oracle-nl2sql"},
+                    headers={
+                        "Authorization": f"Bearer {settings.WEAVER_INSIGHT_TOKEN}",
+                        "X-Tenant-Id": tenant_id,
+                        "X-Source": "oracle-nl2sql",
+                    },
+                )
+        except Exception as exc:
+            # Sample 10% of failures to avoid log spam (E8)
+            if random.random() < 0.1:
+                logger.warning("insight_forward_failed: %s", exc)
 
 
 @dataclass
@@ -278,6 +334,22 @@ class NL2SQLPipeline:
                     result_preview=preview_rows,
                     datasource_id=datasource_id,
                     tenant_id=tenant_id,
+                )
+            )
+        except RuntimeError:
+            pass
+
+        # 10. Insight log forwarding (P1-B, fire-and-forget)
+        try:
+            asyncio.create_task(
+                _forward_to_insight(
+                    tenant_id=tenant_id,
+                    sql=guard_res.sql,
+                    datasource=datasource_id,
+                    duration_ms=exec_res.execution_time_ms or 0,
+                    row_count=exec_res.row_count,
+                    nl_query=question,
+                    trace_id=str(uuid4()),
                 )
             )
         except RuntimeError:

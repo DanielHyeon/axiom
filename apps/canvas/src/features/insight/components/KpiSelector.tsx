@@ -1,26 +1,30 @@
 // features/insight/components/KpiSelector.tsx
-// Manual KPI fingerprint input with sample KPI quick buttons
+// KPI selector — fetches KPI list from API, falls back to manual input
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Zap } from 'lucide-react';
+import { fetchKpis } from '../api/insightApi';
+import type { KpiListItem } from '../types/insight';
 
 interface KpiSelectorProps {
   onSelect: (kpiId: string, fingerprint: string) => void;
   loading?: boolean;
 }
 
-const SAMPLE_KPIS = [
-  { id: 'orders_pending_count', label: 'Orders Pending' },
-  { id: 'revenue_total', label: 'Revenue Total' },
-  { id: 'invoice_count', label: 'Invoice Count' },
-  { id: 'ar_balance', label: 'AR Balance' },
-  { id: 'customer_churn_rate', label: 'Churn Rate' },
-];
-
 export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
   const [inputValue, setInputValue] = useState('');
+  const [kpis, setKpis] = useState<KpiListItem[]>([]);
+  const [kpisLoading, setKpisLoading] = useState(true);
+
+  useEffect(() => {
+    setKpisLoading(true);
+    fetchKpis({ limit: 10 })
+      .then((res) => setKpis(res.kpis))
+      .catch(() => setKpis([]))
+      .finally(() => setKpisLoading(false));
+  }, []);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -34,9 +38,9 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
   );
 
   const handleQuickSelect = useCallback(
-    (kpi: { id: string; label: string }) => {
-      setInputValue(kpi.id);
-      onSelect(kpi.id, kpi.id);
+    (kpi: KpiListItem) => {
+      setInputValue(kpi.fingerprint);
+      onSelect(kpi.id, kpi.fingerprint);
     },
     [onSelect],
   );
@@ -69,20 +73,23 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
 
       <div className="space-y-1">
         <div className="text-[10px] font-medium text-neutral-500 uppercase tracking-wider">
-          샘플 KPI
+          {kpisLoading ? '로드 중...' : kpis.length > 0 ? '최근 KPI' : 'KPI 없음 — 직접 입력'}
         </div>
-        <div className="flex flex-wrap gap-1">
-          {SAMPLE_KPIS.map((kpi) => (
-            <button
-              key={kpi.id}
-              onClick={() => handleQuickSelect(kpi)}
-              disabled={loading}
-              className="rounded-full border border-neutral-700 bg-neutral-800/30 px-2.5 py-0.5 text-[10px] text-neutral-400 transition-colors hover:border-primary/50 hover:text-primary hover:bg-primary/10 disabled:opacity-50"
-            >
-              {kpi.label}
-            </button>
-          ))}
-        </div>
+        {kpis.length > 0 && (
+          <div className="flex flex-wrap gap-1">
+            {kpis.map((kpi) => (
+              <button
+                key={kpi.id}
+                type="button"
+                onClick={() => handleQuickSelect(kpi)}
+                disabled={loading}
+                className="rounded-full border border-neutral-700 bg-neutral-800/30 px-2.5 py-0.5 text-[10px] text-neutral-400 transition-colors hover:border-primary/50 hover:text-primary hover:bg-primary/10 disabled:opacity-50"
+              >
+                {kpi.name}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -8,8 +8,13 @@ import type {
   ImpactJobResponse,
   JobStatusResponse,
   DriverDetailResponse,
+  DriverListResponse,
+  KpiListResponse,
   TimeRange,
 } from '../types/insight';
+
+type Post<T> = (url: string, body: unknown) => Promise<T>;
+type Get<T> = (url: string) => Promise<T>;
 
 // ---------------------------------------------------------------------------
 // POST /api/insight/impact — KPI Impact Graph (returns 200 or 202)
@@ -37,16 +42,10 @@ export async function requestImpact(
     datasource_id: params.datasource_id ?? '',
   };
 
-  // weaverApi interceptor returns `response.data` directly
-  const data = await (weaverApi.post as unknown as (
-    url: string,
-    body: unknown,
-  ) => Promise<ImpactResponse | ImpactJobResponse>)(
+  return (weaverApi.post as unknown as Post<ImpactResponse | ImpactJobResponse>)(
     '/api/insight/impact',
     body,
   );
-
-  return data;
 }
 
 /**
@@ -62,11 +61,10 @@ export function isJobResponse(
 // GET /api/insight/jobs/{job_id} — Poll job status
 // ---------------------------------------------------------------------------
 
-export async function getJobStatus(jobId: string): Promise<JobStatusResponse> {
-  const data = await (weaverApi.get as unknown as (
-    url: string,
-  ) => Promise<JobStatusResponse>)(`/api/insight/jobs/${jobId}`);
-  return data;
+export function getJobStatus(jobId: string): Promise<JobStatusResponse> {
+  return (weaverApi.get as unknown as Get<JobStatusResponse>)(
+    `/api/insight/jobs/${jobId}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -94,86 +92,125 @@ export interface QuerySubgraphResponse {
   trace_id: string;
 }
 
-export async function postQuerySubgraph(
+export function postQuerySubgraph(
   req: QuerySubgraphRequest,
 ): Promise<QuerySubgraphResponse> {
-  const data = await (weaverApi.post as unknown as (
-    url: string,
-    body: unknown,
-  ) => Promise<QuerySubgraphResponse>)('/api/insight/query-subgraph', req);
-  return data;
+  return (weaverApi.post as unknown as Post<QuerySubgraphResponse>)(
+    '/api/insight/query-subgraph',
+    req,
+  );
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/insight/kpis — KPI list (NOT YET IMPLEMENTED on backend)
+// GET /api/insight/kpis — KPI list
 // ---------------------------------------------------------------------------
 
-export interface KpiListItem {
-  id: string;
-  name: string;
-  fingerprint: string;
-  source: string;
-  table?: string;
-  column?: string;
-  aggregate?: string;
-  query_count?: number;
-  last_value?: number;
-  trend?: 'up' | 'down' | 'stable';
-  change_pct?: number;
-}
-
-export async function getKpiList(
-  _timeRange?: TimeRange,
-  _datasource?: string,
-): Promise<KpiListItem[]> {
-  // API not implemented yet — return empty mock
-  return [];
+export function fetchKpis(params?: {
+  datasource?: string;
+  time_range?: TimeRange;
+  offset?: number;
+  limit?: number;
+}): Promise<KpiListResponse> {
+  const qs = new URLSearchParams();
+  if (params?.datasource) qs.set('datasource', params.datasource);
+  if (params?.time_range) qs.set('time_range', params.time_range);
+  if (params?.offset != null) qs.set('offset', String(params.offset));
+  if (params?.limit != null) qs.set('limit', String(params.limit));
+  const query = qs.toString();
+  return (weaverApi.get as unknown as Get<KpiListResponse>)(
+    `/api/insight/kpis${query ? `?${query}` : ''}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/insight/drivers — Driver ranking (NOT YET IMPLEMENTED)
+// GET /api/insight/drivers — Driver ranking
 // ---------------------------------------------------------------------------
 
-export async function getDriverList(
-  _kpiFingerprint?: string,
-  _timeRange?: TimeRange,
-): Promise<unknown[]> {
-  // API not implemented yet — return empty
-  return [];
+export function fetchDriverList(params?: {
+  datasource?: string;
+  kpi_fingerprint?: string;
+  time_range?: TimeRange;
+  offset?: number;
+  limit?: number;
+}): Promise<DriverListResponse> {
+  const qs = new URLSearchParams();
+  if (params?.datasource) qs.set('datasource', params.datasource);
+  if (params?.kpi_fingerprint) qs.set('kpi_fingerprint', params.kpi_fingerprint);
+  if (params?.time_range) qs.set('time_range', params.time_range);
+  if (params?.offset != null) qs.set('offset', String(params.offset));
+  if (params?.limit != null) qs.set('limit', String(params.limit));
+  const query = qs.toString();
+  return (weaverApi.get as unknown as Get<DriverListResponse>)(
+    `/api/insight/drivers${query ? `?${query}` : ''}`,
+  );
 }
 
 // ---------------------------------------------------------------------------
-// GET /api/insight/drivers/{id} — Driver detail (NOT YET IMPLEMENTED)
+// GET /api/insight/drivers/detail — Driver detail + evidence
 // ---------------------------------------------------------------------------
 
-export async function getDriverDetail(
-  driverId: string,
-  _timeRange?: TimeRange,
+export function fetchDriverDetail(
+  driverKey: string,
+  timeRange: TimeRange = '30d',
 ): Promise<DriverDetailResponse> {
-  // Return mock data since API is not yet implemented
-  return {
-    driver: {
-      driver_id: driverId,
-      label: driverId.replace('drv_', '').replace(/_/g, '.'),
-      type: 'DRIVER',
-      source: 'query_log',
-      score: 0.75,
-      breakdown: {
-        usage: 0.25,
-        kpi_connection: 0.20,
-        centrality: 0.15,
-        discriminative: 0.08,
-        volatility: 0.07,
-        cardinality_adjust: -0.03,
-        sample_size_guard: 0.03,
-      },
-      cardinality_est: 100,
-      sample_size: 50,
-      total_rows: 10000,
-    },
-    evidence: {
-      top_queries: [],
-      paths: [],
-    },
-  };
+  const qs = new URLSearchParams({ driver_key: driverKey, time_range: timeRange });
+  return (weaverApi.get as unknown as Get<DriverDetailResponse>)(
+    `/api/insight/drivers/detail?${qs}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/insight/kpi/activity — KPI activity timeseries (P2-A)
+// ---------------------------------------------------------------------------
+
+export interface ActivityPoint {
+  date: string;
+  value: number;
+}
+
+export interface KpiActivityResponse {
+  kpi_fingerprint: string;
+  series_type: 'activity';
+  granularity: 'day' | 'week';
+  series: ActivityPoint[];
+}
+
+export function fetchKpiActivity(params: {
+  kpiFingerprint: string;
+  driverKey?: string;
+  timeRange?: TimeRange;
+  granularity?: 'day' | 'week';
+}): Promise<KpiActivityResponse> {
+  const qs = new URLSearchParams({ kpi_fingerprint: params.kpiFingerprint });
+  if (params.driverKey) qs.set('driver_key', params.driverKey);
+  if (params.timeRange) qs.set('time_range', params.timeRange);
+  if (params.granularity) qs.set('granularity', params.granularity);
+  return (weaverApi.get as unknown as Get<KpiActivityResponse>)(
+    `/api/insight/kpi/activity?${qs}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/insight/schema-coverage — Ontology node coverage (P2-B)
+// ---------------------------------------------------------------------------
+
+export interface SchemaCoverageResponse {
+  table: string;
+  column: string | null;
+  query_count: number;
+  last_seen: string | null;
+  driver_score: { score: number; role: string; kpi_fingerprint: string } | null;
+}
+
+export function fetchSchemaCoverage(params: {
+  table: string;
+  column?: string;
+  timeRange?: TimeRange;
+}): Promise<SchemaCoverageResponse> {
+  const qs = new URLSearchParams({ table: params.table });
+  if (params.column) qs.set('column', params.column);
+  if (params.timeRange) qs.set('time_range', params.timeRange);
+  return (weaverApi.get as unknown as Get<SchemaCoverageResponse>)(
+    `/api/insight/schema-coverage?${qs}`,
+  );
 }
