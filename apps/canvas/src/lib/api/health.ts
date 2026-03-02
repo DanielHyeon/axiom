@@ -3,9 +3,15 @@
  * 헬스 엔드포인트는 인증 없이 호출 가능하다고 가정.
  */
 
+const FALLBACKS: Record<string, string> = {
+    VITE_CORE_URL: 'http://localhost:9002',
+    VITE_VISION_URL: 'http://localhost:9003',
+    VITE_ORACLE_URL: 'http://localhost:9004',
+};
+
 const getBaseUrl = (key: string): string => {
     const url = import.meta.env[key];
-    if (!url) return key === 'VITE_CORE_URL' ? 'http://localhost:8000' : 'http://localhost:8000';
+    if (!url) return FALLBACKS[key] ?? 'http://localhost:8000';
     return (url as string).replace(/\/$/, '');
 };
 
@@ -21,7 +27,7 @@ async function checkOne(
         }
         const data = await res.json().catch(() => ({}));
         const statusVal = (data?.status ?? data?.checks ?? '').toString().toLowerCase();
-        const healthy = res.ok && (statusVal === 'healthy' || statusVal === 'ok' || statusVal === '');
+        const healthy = res.ok && (statusVal === 'healthy' || statusVal === 'ok' || statusVal === 'alive' || statusVal === '');
         return { name, status: healthy ? 'up' : 'down' };
     } catch (e) {
         return {

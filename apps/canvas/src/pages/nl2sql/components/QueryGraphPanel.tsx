@@ -4,13 +4,13 @@
 import { QuerySubgraphViewer } from '@/features/insight/components/QuerySubgraphViewer';
 
 interface QueryGraphPanelProps {
-  sql?: string;
+ sql?: string;
 }
 
 export function QueryGraphPanel({ sql }: QueryGraphPanelProps) {
-  return (
-    <div className="p-3">
-      <QuerySubgraphViewer sql={sql} />
-    </div>
-  );
+ return (
+ <div className="p-3">
+ <QuerySubgraphViewer sql={sql} />
+ </div>
+ );
 }

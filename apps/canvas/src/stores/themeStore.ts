@@ -17,8 +17,8 @@ interface ThemeStore {
 export const useThemeStore = create<ThemeStore>()(
   persist(
     (set, _get) => ({
-      mode: 'dark',
-      resolved: 'dark',
+      mode: 'light',
+      resolved: 'light',
       setMode: (mode) => {
         const resolved = mode === 'system' ? getSystemTheme() : mode;
         set({ mode, resolved });

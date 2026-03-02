@@ -6,10 +6,12 @@ import { createApiClient } from './createApiClient';
 const getEnvUrl = (key: string): string => {
     const url = import.meta.env[key];
     if (!url) {
-        if (key === 'VITE_CORE_URL') return 'http://localhost:8000';
-        if (key === 'VITE_ORACLE_URL') return 'http://localhost:8004';
+        if (key === 'VITE_CORE_URL') return 'http://localhost:9002';
+        if (key === 'VITE_ORACLE_URL') return 'http://localhost:9004';
+        if (key === 'VITE_WEAVER_URL') return 'http://localhost:9001';
+        if (key === 'VITE_SYNAPSE_URL') return 'http://localhost:9003';
         console.warn(`Environment variable ${key} is not defined. API calls to this service may fail.`);
-        return 'http://localhost:8000';
+        return 'http://localhost:9002';
     }
     return (url as string).replace(/\/$/, '');
 };

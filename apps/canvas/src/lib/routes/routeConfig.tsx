@@ -32,84 +32,84 @@ const SettingsUsersPage = lazy(() => import('@/pages/settings/SettingsUsersPage'
 const SettingsConfigPage = lazy(() => import('@/pages/settings/SettingsConfigPage').then((m) => ({ default: m.SettingsConfigPage })));
 
 function PageFallback() {
-  const { t } = useTranslation();
-  return <div className="flex items-center justify-center p-8">{t('common.loading')}</div>;
+ const { t } = useTranslation();
+ return <div className="flex items-center justify-center p-8">{t('common.loading')}</div>;
 }
 
 function SuspensePage({ children }: { children: React.ReactNode }) {
-  return <Suspense fallback={<PageFallback />}>{children}</Suspense>;
+ return <Suspense fallback={<PageFallback />}>{children}</Suspense>;
 }
 
 export const router = createBrowserRouter([
-  {
-    path: '/',
-    element: <RootLayout />,
-    children: [
-      { path: 'login', element: <Navigate to={ROUTES.AUTH.LOGIN} replace /> },
-      { path: 'auth/login', element: <SuspensePage><LoginPage /></SuspensePage> },
-      { path: 'auth/callback', element: <SuspensePage><CallbackPage /></SuspensePage> },
-      {
-        element: <ProtectedRoute />,
-        children: [
-          {
-            element: <MainLayout />,
-            children: [
-              { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
-              { path: 'dashboard', element: <SuspensePage><CaseDashboardPage /></SuspensePage> },
-              {
-                path: 'cases',
-                children: [
-                  { index: true, element: <SuspensePage><CaseListPage /></SuspensePage> },
-                  {
-                    path: ':caseId',
-                    children: [
-                      { index: true, element: <SuspensePage><CaseDetailPage /></SuspensePage> },
-                      {
-                        path: 'documents',
-                        children: [
-                          { index: true, element: <SuspensePage><CaseDocumentsListPage /></SuspensePage> },
-                          { path: ':docId', element: <SuspensePage><CaseDocumentEditorPage /></SuspensePage> },
-                          { path: ':docId/review', element: <SuspensePage><DocumentReviewPage /></SuspensePage> },
-                        ],
-                      },
-                      { path: 'scenarios', element: <SuspensePage><WhatIfPage /></SuspensePage> },
-                    ],
-                  },
-                ],
-              },
-              { path: 'analysis/olap', element: <SuspensePage><OlapPivotPage /></SuspensePage> },
-              { path: 'analysis/nl2sql', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><Nl2SqlPage /></SuspensePage></RoleGuard> },
-              { path: 'analysis/insight', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><InsightPage /></SuspensePage></RoleGuard> },
-              { path: 'data/ontology', element: <SuspensePage><OntologyPage /></SuspensePage> },
-              { path: 'data/datasources', element: <SuspensePage><DatasourcePage /></SuspensePage> },
-              {
-                path: 'process-designer',
-                children: [
-                  { index: true, element: <SuspensePage><ProcessDesignerListPage /></SuspensePage> },
-                  { path: ':boardId', element: <SuspensePage><ProcessDesignerPage /></SuspensePage> },
-                ],
-              },
-              { path: 'watch', element: <SuspensePage><WatchDashboardPage /></SuspensePage> },
-              {
-                path: 'settings',
-                element: (
-                  <RoleGuard roles={['admin']}>
-                    <SuspensePage><SettingsPage /></SuspensePage>
-                  </RoleGuard>
-                ),
-                children: [
-                  { index: true, element: <Navigate to={ROUTES.SETTINGS_SYSTEM} replace /> },
-                  { path: 'system', element: <SuspensePage><SettingsSystemPage /></SuspensePage> },
-                  { path: 'logs', element: <SuspensePage><SettingsLogsPage /></SuspensePage> },
-                  { path: 'users', element: <SuspensePage><SettingsUsersPage /></SuspensePage> },
-                  { path: 'config', element: <SuspensePage><SettingsConfigPage /></SuspensePage> },
-                ],
-              },
-              { path: '*', element: <NotFoundPage /> },
-            ],
-          },
-        ],
-      },
-    ],
-  },
+ {
+ path: '/',
+ element: <RootLayout />,
+ children: [
+ { path: 'login', element: <Navigate to={ROUTES.AUTH.LOGIN} replace /> },
+ { path: 'auth/login', element: <SuspensePage><LoginPage /></SuspensePage> },
+ { path: 'auth/callback', element: <SuspensePage><CallbackPage /></SuspensePage> },
+ {
+ element: <ProtectedRoute />,
+ children: [
+ {
+ element: <MainLayout />,
+ children: [
+ { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
+ { path: 'dashboard', element: <SuspensePage><CaseDashboardPage /></SuspensePage> },
+ {
+ path: 'cases',
+ children: [
+ { index: true, element: <SuspensePage><CaseListPage /></SuspensePage> },
+ {
+ path: ':caseId',
+ children: [
+ { index: true, element: <SuspensePage><CaseDetailPage /></SuspensePage> },
+ {
+ path: 'documents',
+ children: [
+ { index: true, element: <SuspensePage><CaseDocumentsListPage /></SuspensePage> },
+ { path: ':docId', element: <SuspensePage><CaseDocumentEditorPage /></SuspensePage> },
+ { path: ':docId/review', element: <SuspensePage><DocumentReviewPage /></SuspensePage> },
+ ],
+ },
+ { path: 'scenarios', element: <SuspensePage><WhatIfPage /></SuspensePage> },
+ ],
+ },
+ ],
+ },
+ { path: 'analysis/olap', element: <SuspensePage><OlapPivotPage /></SuspensePage> },
+ { path: 'analysis/nl2sql', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><Nl2SqlPage /></SuspensePage></RoleGuard> },
+ { path: 'analysis/insight', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><InsightPage /></SuspensePage></RoleGuard> },
+ { path: 'data/ontology', element: <SuspensePage><OntologyPage /></SuspensePage> },
+ { path: 'data/datasources', element: <SuspensePage><DatasourcePage /></SuspensePage> },
+ {
+ path: 'process-designer',
+ children: [
+ { index: true, element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer', 'staff', 'viewer']}><SuspensePage><ProcessDesignerListPage /></SuspensePage></RoleGuard> },
+ { path: ':boardId', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer', 'staff', 'viewer']}><SuspensePage><ProcessDesignerPage /></SuspensePage></RoleGuard> },
+ ],
+ },
+ { path: 'watch', element: <SuspensePage><WatchDashboardPage /></SuspensePage> },
+ {
+ path: 'settings',
+ element: (
+ <RoleGuard roles={['admin']}>
+ <SuspensePage><SettingsPage /></SuspensePage>
+ </RoleGuard>
+ ),
+ children: [
+ { index: true, element: <Navigate to={ROUTES.SETTINGS_SYSTEM} replace /> },
+ { path: 'system', element: <SuspensePage><SettingsSystemPage /></SuspensePage> },
+ { path: 'logs', element: <SuspensePage><SettingsLogsPage /></SuspensePage> },
+ { path: 'users', element: <SuspensePage><SettingsUsersPage /></SuspensePage> },
+ { path: 'config', element: <SuspensePage><SettingsConfigPage /></SuspensePage> },
+ ],
+ },
+ { path: '*', element: <NotFoundPage /> },
+ ],
+ },
+ ],
+ },
+ ],
+ },
 ]);

@@ -11,6 +11,30 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/proxy/core': {
+        target: 'http://localhost:9002',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/core/, ''),
+      },
+      '/proxy/weaver': {
+        target: 'http://localhost:9001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/weaver/, ''),
+      },
+      '/proxy/oracle': {
+        target: 'http://localhost:9004',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/oracle/, ''),
+      },
+      '/proxy/synapse': {
+        target: 'http://localhost:9003',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/synapse/, ''),
+      },
+    },
+  },
   build: {
     rollupOptions: {
       output: {

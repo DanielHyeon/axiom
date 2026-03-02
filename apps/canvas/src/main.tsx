@@ -8,11 +8,11 @@ import { queryClient } from './lib/queryClient'
 import { ThemeProvider } from './providers/ThemeProvider'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </QueryClientProvider>
-  </StrictMode>,
+ <StrictMode>
+ <QueryClientProvider client={queryClient}>
+ <ThemeProvider>
+ <App />
+ </ThemeProvider>
+ </QueryClientProvider>
+ </StrictMode>,
 )

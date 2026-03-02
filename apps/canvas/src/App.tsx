@@ -6,13 +6,13 @@ import { WatchToastListener } from './features/watch/components/WatchToastListen
 import { router } from './lib/routes/routeConfig';
 
 export const App: React.FC = () => {
-  return (
-    <GlobalErrorBoundary>
-      <Toaster richColors position="top-right" />
-      <WatchToastListener />
-      <RouterProvider router={router} />
-    </GlobalErrorBoundary>
-  );
+ return (
+ <GlobalErrorBoundary>
+ <Toaster richColors position="top-right" />
+ <WatchToastListener />
+ <RouterProvider router={router} />
+ </GlobalErrorBoundary>
+ );
 };
 
 export default App;

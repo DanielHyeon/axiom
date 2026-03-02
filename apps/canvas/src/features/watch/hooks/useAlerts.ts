@@ -102,28 +102,37 @@ export function useAlerts() {
             return () => clearInterval(interval);
         } else {
             const token = useAuthStore.getState().accessToken;
-            const baseUrl = import.meta.env.VITE_CORE_URL ?? 'http://localhost:8000';
+            const baseUrl = import.meta.env.VITE_CORE_URL ?? 'http://localhost:9002';
             if (!token) return;
 
-            return subscribeWatchStream(baseUrl, token, {
-                onAlert: (data: Record<string, unknown>) => {
-                    const newAlert: Alert = {
-                        id: (data.alert_id as string) ?? '',
-                        title: (data.message as string) ?? '',
-                        description: (data.details as string) ?? `이벤트: ${(data.event_type as string) ?? ''}`,
-                        severity: ((data.severity as string) ?? 'info').toLowerCase() as AlertSeverity,
-                        timestamp: (data.triggered_at as string) ?? new Date().toISOString(),
-                        isRead: (data.status as string) === 'acknowledged',
-                        metadata: data.metadata as Record<string, string> | undefined,
-                        sourceNodeId: data.case_id as string | undefined
-                    };
-                    setAlerts(prev => [newAlert, ...prev]);
-                    window.dispatchEvent(new CustomEvent('axiom:new_alert', { detail: newAlert }));
-                },
-                onAlertUpdate: (data) => {
-                    setAlerts(prev => prev.map(a => a.id === data.alert_id ? { ...a, isRead: data.status === 'acknowledged' } : a));
+            const onAlert = (data: Record<string, unknown>) => {
+                const newAlert: Alert = {
+                    id: (data.alert_id as string) ?? '',
+                    title: (data.message as string) ?? '',
+                    description: (data.details as string) ?? `이벤트: ${(data.event_type as string) ?? ''}`,
+                    severity: ((data.severity as string) ?? 'info').toLowerCase() as AlertSeverity,
+                    timestamp: (data.triggered_at as string) ?? new Date().toISOString(),
+                    isRead: (data.status as string) === 'acknowledged',
+                    metadata: data.metadata as Record<string, string> | undefined,
+                    sourceNodeId: data.case_id as string | undefined
+                };
+                setAlerts(prev => [newAlert, ...prev]);
+                window.dispatchEvent(new CustomEvent('axiom:new_alert', { detail: newAlert }));
+            };
+            const onAlertUpdate = (data: { alert_id: string; status: string }) => {
+                setAlerts(prev => prev.map(a => a.id === data.alert_id ? { ...a, isRead: data.status === 'acknowledged' } : a));
+            };
+
+            let unsubscribe = subscribeWatchStream(baseUrl, token, { onAlert, onAlertUpdate,
+                onError: () => {
+                    // On any SSE error, attempt token refresh and reconnect once
+                    useAuthStore.getState().refreshAccessToken().then((newToken) => {
+                        unsubscribe();
+                        unsubscribe = subscribeWatchStream(baseUrl, newToken, { onAlert, onAlertUpdate });
+                    }).catch(() => { /* refresh failed — stay disconnected */ });
                 }
             });
+            return () => unsubscribe();
         }
     }, [isLoading]);
 
