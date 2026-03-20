@@ -6,6 +6,7 @@ Thumbs.db
 
 # AI context (세션 요약 등 로컬 전용)
 .ai-context/
+save-session.sh
 *.swp
 *.swo
 
