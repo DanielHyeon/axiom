@@ -241,3 +241,97 @@ className="bg-gray-100 text-gray-800"      // Tailwind
 11. E2E 테스트 확장 — 2일
 
 **총 예상**: ~18일 (3 스프린트)
+
+---
+
+## 8. KAIR 프론트엔드 대비 갭 분석
+
+> KAIR 소스: `/media/daniel/E/AXIPIENT/projects/KAIR/robo-data-frontend/src/`
+> 프레임워크: Vue.js 3 + TypeScript 5.3 + Pinia (165개 Vue 컴포넌트)
+
+### 8.1 KAIR에 있고 Axiom에 없는 기능 (10개 카테고리)
+
+#### P0: 엔터프라이즈 핵심
+
+| 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
+|----------|-----------------|----------|-----------|
+| **도메인 레이어 (ObjectType)** | 15개 | `ObjectTypeModeler.vue`, `BehaviorDialog.vue` | ❌ 없음 |
+| **보안/감사 관리** | 6개 | `SecurityGuardTab.vue`, `AuditLogs.vue` | ❌ Core에만 API |
+| **What-if 고도화** | 12개 | `WhatIfSimulator.vue` (5단계 위자드) | 🟡 단순 버전만 |
+
+**도메인 레이어**: KAIR의 ObjectType 시스템은 DB 스키마를 비즈니스 친화적 "도메인 객체"로 추상화하는 핵심 기능. Materialized View + Behavior(REST/JS/Python/DMN) 지원. Axiom의 온톨로지는 그래프 구조만 있고 도메인 모델링 도구가 없음.
+
+**보안 관리**: KAIR는 사용자/역할 관리, 테이블 권한, 감사 로그를 UI에서 직접 관리. Axiom은 Core 서비스 API만 있고 프론트엔드 관리 UI 없음.
+
+**What-if 5단계**: ① 시나리오 정의 → ② 데이터 선택 → ③ 인과 관계 발견 → ④ 모델 학습 → ⑤ 검증/시뮬레이션. Axiom은 파라미터 슬라이더 + DAG 전파만 있음.
+
+#### P1: 데이터 관리
+
+| 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
+|----------|-----------------|----------|-----------|
+| **데이터 수집/파이프라인** | 8개 | `UploadTab.vue`, `PipelineControlPanel.vue` | ❌ 없음 |
+| **데이터 품질/관측성** | 10개 | `WatchAgent.vue` (Vue Flow), `DataQuality.vue` | 🟡 기본 Watch만 |
+| **온톨로지 고도화** | 10개 | `OntologyWizard.vue`, `SchemaBasedGenerator.vue` | 🟡 브라우저만 |
+| **NL2SQL 고도화** | 17개 | `SchemaCanvas.vue`, `DatabaseTree.vue` | 🟡 채팅만 |
+
+**데이터 수집**: KAIR는 파일 드래그&드롭 업로드 + ETL 파이프라인 제어 + 실시간 진행률 UI. Axiom은 데이터소스 연결만 있고 업로드/ETL 관리 없음.
+
+**WatchAgent**: KAIR는 Vue Flow 기반 워크플로 에디터로 SQL/조건/액션 노드를 시각적 연결. Axiom의 Watch는 규칙 목록 + 알림 피드 수준.
+
+**NL2SQL**: KAIR는 스키마 캔버스(ERD 드래그&드롭), DB 트리 네비게이터, 관계 편집기, 상세 메타데이터 패널이 추가. Axiom은 채팅 + 결과 테이블 중심.
+
+#### P2: 시맨틱 레이어
+
+| 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
+|----------|-----------------|----------|-----------|
+| **데이터 리니지** | 10개 | `LineageTab.vue`, `LineageGraph.vue` | ❌ 없음 |
+| **비즈니스 글로서리** | 6개 | `GlossaryTab.vue`, `TermModal.vue` | ❌ 없음 |
+| **오브젝트 탐색기** | 6개 | `ObjectExplorerTab.vue`, `ObjectExplorerGraph.vue` | ❌ 없음 |
+
+### 8.2 KAIR 아키텍처 패턴 비교
+
+| 패턴 | KAIR | Axiom | 갭 |
+|------|------|-------|---|
+| 도메인 레이어 | ObjectType + Behavior | 온톨로지 그래프 | 비즈니스 로직 바인딩 없음 |
+| 워크플로 에디터 | Vue Flow 기반 | 없음 (Watch는 목록) | 시각적 자동화 불가 |
+| 멀티스텝 위자드 | What-if 5단계, Ontology 위자드 | 단일 뷰 | 가이드 UX 부족 |
+| 스트리밍 진행률 | AnalysisProgressModal | 기본 로딩 | 세부 진행률 없음 |
+| 보안 관리 | RBAC + RLS + Audit UI | API만 | 관리자 UI 없음 |
+| 데이터 리니지 | 그래프 시각화 | Neo4j에 데이터만 | 시각화 없음 |
+
+### 8.3 구현 우선순위 로드맵
+
+#### Phase 1: 엔터프라이즈 기반 (4-6주)
+| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
+|------|---------|-------------|--------|
+| 보안/감사 관리 UI | ~1,200 | 6개 | Core RBAC API |
+| 도메인 레이어 모델러 | ~3,000 | 15개 | Synapse 확장 |
+| What-if 5단계 위자드 | ~2,500 | 12개 | Vision DAG 엔진 |
+
+#### Phase 2: 데이터 관리 (3-4주)
+| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
+|------|---------|-------------|--------|
+| 파일 업로드 + ETL 파이프라인 | ~1,200 | 8개 | Weaver 확장 |
+| 데이터 품질 대시보드 | ~1,800 | 10개 | Watch 확장 |
+| 온톨로지 위자드 + 자동 생성 | ~1,800 | 10개 | Synapse |
+
+#### Phase 3: 시맨틱 레이어 (3-4주)
+| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
+|------|---------|-------------|--------|
+| 데이터 리니지 시각화 | ~1,500 | 10개 | Neo4j 리니지 |
+| 비즈니스 글로서리 | ~1,500 | 6개 | Weaver 카탈로그 |
+| 오브젝트 탐색기 | ~900 | 6개 | 도메인 레이어 |
+
+**총 예상**: ~90개 컴포넌트, ~16,300 LOC, 10-14주
+
+### 8.4 참조해야 할 KAIR 핵심 파일
+
+| 파일 | 용도 | Axiom 대응 |
+|------|------|-----------|
+| `views/HomeView.vue` | 19개 탭 정의 (전체 네비게이션) | `routeConfig.tsx` |
+| `components/text2sql/Text2SqlTab.vue` | NL2SQL 모드 전환 패턴 | `Nl2SqlPage.tsx` |
+| `components/domain/ObjectTypeModeler.vue` | 도메인 레이어 핵심 | **신규 필요** |
+| `components/whatif/WhatIfSimulator.vue` | 5단계 위자드 패턴 | `WhatIfPage.tsx` 확장 |
+| `components/observability/WatchAgent.vue` | 워크플로 에디터 | **신규 필요** |
+| `stores/text2sql.ts` | Pinia 스토어 패턴 | Zustand 스토어 참조 |
+| `services/api.ts` | API 게이트웨이 + 스트리밍 | `createApiClient.ts` |
