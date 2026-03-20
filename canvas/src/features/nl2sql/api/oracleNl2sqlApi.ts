@@ -149,7 +149,8 @@ export async function getHistory(params?: {
   return res as unknown as HistoryResponse;
 }
 
-/** POST /text2sql/react — NDJSON 스트림. streamManager 사용, URL은 oracleApi base와 동일. */
+/** POST /text2sql/react — NDJSON 스트림. streamManager 사용, URL은 oracleApi base와 동일.
+ *  HIL 지원: session_state + user_response 전달 시 에이전트 세션을 이어서 진행한다. */
 export function postReactStream(
   question: string,
   datasourceId: string,
@@ -158,20 +159,26 @@ export function postReactStream(
     onComplete: () => void;
     onError: (error: Error) => void;
   },
-  options?: { case_id?: string; row_limit?: number }
+  options?: {
+    case_id?: string;
+    row_limit?: number;
+    session_state?: string;
+    user_response?: string;
+  }
 ): Promise<AbortController> {
   const base = (oracleApi.defaults.baseURL || '').replace(/\/$/, '');
   const url = `${base}/text2sql/react`;
-  return createNdjsonStream<ReactStreamStep>(
-    url,
-    {
-      question,
-      datasource_id: datasourceId,
-      case_id: options?.case_id || undefined,
-      options: { max_iterations: 5, stream: true, row_limit: options?.row_limit ?? 1000 },
-    },
-    callbacks
-  );
+  const body: Record<string, unknown> = {
+    question,
+    datasource_id: datasourceId,
+    case_id: options?.case_id || undefined,
+    options: { max_iterations: 5, stream: true, row_limit: options?.row_limit ?? 1000 },
+  };
+  // HIL 재개 시 세션 상태와 사용자 응답 추가
+  if (options?.session_state) body.session_state = options.session_state;
+  if (options?.user_response) body.user_response = options.user_response;
+
+  return createNdjsonStream<ReactStreamStep>(url, body, callbacks);
 }
 
 // ---------------------------------------------------------------------------

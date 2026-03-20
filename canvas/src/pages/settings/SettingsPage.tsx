@@ -19,6 +19,7 @@ export const SettingsPage: React.FC = () => (
  <NavLink to={ROUTES.SETTINGS_LOGS} className={tabClass} role="tab">로그</NavLink>
  <NavLink to={ROUTES.SETTINGS_USERS} className={tabClass} role="tab">사용자</NavLink>
  <NavLink to={ROUTES.SETTINGS_CONFIG} className={tabClass} role="tab">구성</NavLink>
+ <NavLink to={ROUTES.SETTINGS_FEEDBACK} className={tabClass} role="tab">피드백</NavLink>
  </nav>
  <Outlet />
  </div>

@@ -30,6 +30,7 @@ const SettingsSystemPage = lazy(() => import('@/pages/settings/SettingsSystemPag
 const SettingsLogsPage = lazy(() => import('@/pages/settings/SettingsLogsPage').then((m) => ({ default: m.SettingsLogsPage })));
 const SettingsUsersPage = lazy(() => import('@/pages/settings/SettingsUsersPage').then((m) => ({ default: m.SettingsUsersPage })));
 const SettingsConfigPage = lazy(() => import('@/pages/settings/SettingsConfigPage').then((m) => ({ default: m.SettingsConfigPage })));
+const SettingsFeedbackPage = lazy(() => import('@/pages/settings/SettingsFeedbackPage').then((m) => ({ default: m.SettingsFeedbackPage })));
 
 function PageFallback() {
  const { t } = useTranslation();
@@ -103,6 +104,7 @@ export const router = createBrowserRouter([
  { path: 'logs', element: <SuspensePage><SettingsLogsPage /></SuspensePage> },
  { path: 'users', element: <SuspensePage><SettingsUsersPage /></SuspensePage> },
  { path: 'config', element: <SuspensePage><SettingsConfigPage /></SuspensePage> },
+ { path: 'feedback', element: <SuspensePage><SettingsFeedbackPage /></SuspensePage> },
  ],
  },
  { path: '*', element: <NotFoundPage /> },

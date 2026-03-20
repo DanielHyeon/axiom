@@ -2,8 +2,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
 import type { OntologyLayer } from '@/features/ontology/types/ontology';
 
+// 5계층 온톨로지 필터 (Driver 추가: KPI > Driver > Measure > Process > Resource)
 const LAYER_INFO: { id: OntologyLayer; label: string; color: string }[] = [
  { id: 'kpi', label: 'KPI', color: 'bg-destructive' },
+ { id: 'driver', label: 'Driver', color: 'bg-amber-500' },
  { id: 'measure', label: 'Measure', color: 'bg-warning' },
  { id: 'process', label: 'Process', color: 'bg-primary' },
  { id: 'resource', label: 'Resource', color: 'bg-success' }

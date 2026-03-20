@@ -38,4 +38,5 @@ export const ROUTES = {
   SETTINGS_LOGS: '/settings/logs',
   SETTINGS_USERS: '/settings/users',
   SETTINGS_CONFIG: '/settings/config',
+  SETTINGS_FEEDBACK: '/settings/feedback',
 } as const;

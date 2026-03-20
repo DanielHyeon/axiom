@@ -8,6 +8,7 @@ Select -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage
   - CRITICAL 수정: (preview or {}).get("row_count") 안전 접근 (C7)
 """
 
+import base64
 import json
 from typing import AsyncGenerator, Dict, Any, List
 
@@ -48,6 +49,9 @@ class ReactSession(BaseModel):
     max_iterations: int = 5
     current_iteration: int = 0
     status: str = "running"
+    # HIL (Human-in-the-Loop) — 사용자 응답으로 세션 재개 시 사용
+    session_state: str | None = None
+    user_response: str | None = None
 
 
 def _step_line(step: str, iteration: int, data: Dict[str, Any]) -> str:
@@ -157,12 +161,44 @@ class ReactAgent:
             return TriageDecision(action="FAIL", reason="결과 품질이 기준에 미달합니다")
         return TriageDecision(action="CONTINUE", next_question=quality_result.get("next_question", ""))
 
+    def _encode_session_state(self, data: dict) -> str:
+        """세션 상태를 HMAC 서명 + base64로 인코딩한다 (위변조 방지)."""
+        import hmac, hashlib
+        payload = json.dumps(data).encode()
+        secret = os.getenv("JWT_SECRET_KEY", "axiom-dev-secret-key").encode()
+        sig = hmac.new(secret, payload, hashlib.sha256).hexdigest()
+        wrapper = json.dumps({"p": payload.decode(), "s": sig})
+        return base64.b64encode(wrapper.encode()).decode()
+
+    def _decode_session_state(self, token: str) -> dict:
+        """HMAC 서명 검증 후 세션 상태를 복원한다. 위변조 시 빈 dict 반환."""
+        import hmac, hashlib
+        try:
+            wrapper = json.loads(base64.b64decode(token).decode())
+            payload = wrapper["p"].encode()
+            secret = os.getenv("JWT_SECRET_KEY", "axiom-dev-secret-key").encode()
+            expected_sig = hmac.new(secret, payload, hashlib.sha256).hexdigest()
+            if not hmac.compare_digest(wrapper["s"], expected_sig):
+                logger.warning("hil_session_tampered: 서명 불일치")
+                return {}
+            return json.loads(payload)
+        except Exception:
+            return {}
+
     async def stream_react_loop(
         self, session: ReactSession, user: CurrentUser | None = None
     ) -> AsyncGenerator[str, None]:
         row_limit = session.options.get("row_limit", 1000)
         tenant_id = str(user.tenant_id) if user else ""
         dialect = session.options.get("dialect", "postgres")
+
+        # HIL 세션 재개: 사용자 응답이 있으면 질문을 보강한다
+        if session.session_state and session.user_response:
+            restored = self._decode_session_state(session.session_state)
+            original_q = restored.get("question", session.question)
+            # 원래 질문 + 사용자 추가 정보를 결합
+            session.question = f"{original_q}\n\n[추가 정보]: {session.user_response}"
+            logger.info("hil_session_resumed", original_question=original_q)
 
         try:
             for iteration in range(1, session.max_iterations + 1):
@@ -200,10 +236,20 @@ class ReactAgent:
                         {"original_sql": sql, "fixed_sql": val_res.sql, "fixes": val_res.fixes},
                     )
                     if not val_res.passed:
-                        yield _step_line(
-                            "triage", iteration, {"action": "fail", "reason": "Fix loop failed repeatedly"}
-                        )
-                        yield _error_step(iteration, "SQL_GUARD_REJECT", "SQL 수정 후에도 검증을 통과하지 못했습니다.")
+                        # HIL: 검증 실패 시 사용자에게 추가 정보를 요청한다
+                        session_token = self._encode_session_state({
+                            "question": session.question,
+                            "sql": sql,
+                            "violations": val_res.violations,
+                            "iteration": iteration,
+                        })
+                        yield _step_line("needs_user_input", iteration, {
+                            "type": "text",
+                            "question_to_user": f"SQL 검증에 실패했습니다. 다음 문제가 있습니다: {'; '.join(val_res.violations)}. 질문을 더 구체적으로 설명해주세요.",
+                            "session_state": session_token,
+                            "partial_sql": sql,
+                            "context": f"위반 사항: {', '.join(val_res.violations)}",
+                        })
                         return
                     yield _step_line("validate", iteration, {"status": "PASS", "sql": val_res.sql, "fixes": val_res.fixes})
                 else:
@@ -267,6 +313,23 @@ class ReactAgent:
                     )
                     return
                 if triage.action == "FAIL":
+                    # HIL: 품질 실패 시에도 사용자에게 추가 정보 요청 (첫 번째 실패만)
+                    if iteration <= 2 and not session.user_response:
+                        session_token = self._encode_session_state({
+                            "question": session.question,
+                            "sql": val_res.sql,
+                            "quality_score": qual.get("score"),
+                            "feedback": qual.get("feedback", ""),
+                            "iteration": iteration,
+                        })
+                        yield _step_line("needs_user_input", iteration, {
+                            "type": "text",
+                            "question_to_user": f"생성된 SQL의 품질 점수가 낮습니다 ({qual.get('score', 0):.2f}). {qual.get('feedback', '')} 질문을 더 구체적으로 설명해주시겠습니까?",
+                            "session_state": session_token,
+                            "partial_sql": val_res.sql,
+                        })
+                        return
+
                     session.status = "failed"
                     yield _error_step(
                         iteration,

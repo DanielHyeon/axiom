@@ -12,6 +12,7 @@ import {
  GitBranch,
  CheckCircle2,
  XCircle,
+ HelpCircle,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
@@ -39,6 +40,7 @@ const STEP_META: Record<ReactStepType, { label: string; icon: LucideIcon }> = {
  triage: { label: 'Triage', icon: GitBranch },
  result: { label: 'Result', icon: CheckCircle2 },
  error: { label: 'Error', icon: XCircle },
+ needs_user_input: { label: 'User Input', icon: HelpCircle },
 };
 
 function extractSummary(step: ReactStreamStep): string {
@@ -67,6 +69,8 @@ function extractSummary(step: ReactStreamStep): string {
  return String(d.action ?? '');
  case 'error':
  return String(d.message ?? '').slice(0, 60);
+ case 'needs_user_input':
+ return '사용자 입력 대기 중';
  default:
  return '';
  }

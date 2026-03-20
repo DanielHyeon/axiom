@@ -25,7 +25,8 @@ const VIEW_MODES: { key: ViewMode; label: string }[] = [
  { key: 'table', label: 'API' },
 ];
 
-const LAYER_TABS = ['All', 'Metrics', 'KPI', 'Measure', 'Resource'];
+// 5계층 온톨로지 탭 (Driver 추가)
+const LAYER_TABS = ['All', 'Metrics', 'KPI', 'Driver', 'Measure', 'Process', 'Resource'];
 
 export function OntologyPage() {
  const [searchParams] = useSearchParams();

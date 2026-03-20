@@ -1,5 +1,16 @@
-export type OntologyLayer = 'kpi' | 'measure' | 'process' | 'resource';
-export type OntologyRelation = '달성' | '측정' | '참여' | '매핑';
+// 5계층 온톨로지 레이어 (KAIR 호환: KPI > Driver > Measure > Process > Resource)
+export type OntologyLayer = 'kpi' | 'driver' | 'measure' | 'process' | 'resource';
+
+// 8관계 타입 (Driver 계층 추가: 인과, 영향, 생산, 사용)
+export type OntologyRelation =
+  | '달성'      // KPI 달성 (ACHIEVES)
+  | '측정'      // Measure -> KPI (MEASURES)
+  | '참여'      // Resource -> Process (PARTICIPATES)
+  | '매핑'      // 데이터 매핑 (MAPS_TO)
+  | '인과'      // Driver -> Measure -> KPI (CAUSES)
+  | '영향'      // Driver -> Process (INFLUENCES)
+  | '생산'      // Process -> Measure (PRODUCES)
+  | '사용';     // Resource -> Process (USED_WHEN)
 
 export interface OntologyNode {
     id: string;

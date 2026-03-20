@@ -13,6 +13,11 @@ const mockNodes: OntologyNode[] = [
     { id: 'm_efficiency', label: '효율측정', layer: 'measure', properties: { unit: '시간' } },
     { id: 'm_cost', label: '비용측정', layer: 'measure', properties: { unit: '금액' } },
 
+    // Drivers (5계층 추가: 외부 요인/변동 원인)
+    { id: 'd_exchange', label: '환율변동', layer: 'driver', properties: { category: '외부요인' } },
+    { id: 'd_demand', label: '수요변동', layer: 'driver', properties: { category: '시장요인' } },
+    { id: 'd_fuel', label: '유가변동', layer: 'driver', properties: { category: '비용요인' } },
+
     // Processes
     { id: 'p_inbound', label: '입고처리', layer: 'process', type: '핵심업무프로세스', properties: { dept: '물류관리팀' } },
     { id: 'p_delivery', label: '배송관리', layer: 'process', type: '핵심업무프로세스', properties: { dept: '배송팀' } },
@@ -39,6 +44,13 @@ const mockEdges: OntologyEdge[] = [
     { source: 'm_cost', target: 'kpi_corp', type: '달성', label: '비용절감달성' },
     { source: 'kpi_logistics', target: 'kpi_corp', type: '달성', label: '전사기여' },
     { source: 'kpi_efficiency', target: 'kpi_corp', type: '달성', label: '전사기여' },
+
+    // Driver -> Measure (인과: CAUSES)
+    { source: 'd_exchange', target: 'm_cost', type: '인과', label: '환율→비용' },
+    { source: 'd_demand', target: 'm_logistics', type: '인과', label: '수요→물류' },
+    // Driver -> Process (영향: INFLUENCES)
+    { source: 'd_fuel', target: 'p_delivery', type: '영향', label: '유가→배송' },
+    { source: 'd_demand', target: 'p_picking', type: '영향', label: '수요→피킹' },
 
     // Resource -> Process (참여)
     { source: 'r_centerA', target: 'p_inbound', type: '참여', label: '입고장소' },

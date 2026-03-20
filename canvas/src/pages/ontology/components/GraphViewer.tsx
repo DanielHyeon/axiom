@@ -10,15 +10,19 @@ import type { OntologyGraphData } from '@/features/ontology/types/ontology';
 cytoscape.use(dagre);
 cytoscape.use(coseBilkent);
 
+// 5계층 노드 색상 (Driver: amber-500 추가)
 const LAYER_COLORS: Record<string, string> = {
  kpi: '#EF4444',
- measure: '#F59E0B',
+ driver: '#F59E0B',
+ measure: '#F97316',
  process: '#3B82F6',
  resource: '#10B981',
 };
 
+// 5계층 노드 모양 (Driver: hexagon 추가)
 const LAYER_SHAPES: Record<string, string> = {
  kpi: 'ellipse',
+ driver: 'hexagon',
  measure: 'diamond',
  process: 'round-rectangle',
  resource: 'rectangle',
@@ -47,6 +51,10 @@ const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
  {
  selector: 'node.kpi',
  style: { 'background-color': LAYER_COLORS.kpi, shape: LAYER_SHAPES.kpi as any },
+ },
+ {
+ selector: 'node.driver',
+ style: { 'background-color': LAYER_COLORS.driver, shape: LAYER_SHAPES.driver as any },
  },
  {
  selector: 'node.measure',

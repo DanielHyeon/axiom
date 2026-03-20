@@ -20,7 +20,30 @@ export type ReactStepType =
     | 'quality'   // Quality check
     | 'triage'    // Triage
     | 'result'    // Final result
-    | 'error';    // Error
+    | 'error'     // Error
+    | 'needs_user_input';  // HIL: 에이전트가 사용자 입력을 요청
+
+/** HIL: 에이전트가 제시하는 선택지 */
+export interface HilOption {
+    label: string;
+    value: string;
+    description?: string;
+}
+
+/** HIL: 에이전트가 사용자에게 보내는 입력 요청 */
+export interface HilRequest {
+    type: 'select' | 'confirm' | 'text';
+    question: string;
+    options?: HilOption[];
+    context?: string;
+    session_state: string;  // base64 인코딩된 세션 상태
+}
+
+/** HIL: 사용자가 에이전트에게 보내는 응답 */
+export interface HilResponse {
+    session_state: string;
+    user_response: string;
+}
 
 export interface Nl2SqlState {
     status: 'idle' | 'thinking' | 'sql_generated' | 'executing' | 'result' | 'error';

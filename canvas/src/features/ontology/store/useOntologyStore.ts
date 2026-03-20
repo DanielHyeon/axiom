@@ -21,7 +21,7 @@ interface OntologyState {
 
 const defaultFilters: OntologyFilters = {
     query: '',
-    layers: new Set(['kpi', 'measure', 'process', 'resource']),
+    layers: new Set(['kpi', 'driver', 'measure', 'process', 'resource']),
     depth: 2
 };
 
@@ -58,7 +58,7 @@ export const useOntologyStore = create<OntologyState>((set) => ({
     resetFilters: () => set({
         filters: {
             query: '',
-            layers: new Set(['kpi', 'measure', 'process', 'resource']),
+            layers: new Set(['kpi', 'driver', 'measure', 'process', 'resource']),
             depth: 2
         },
         selectedNodeId: null,

@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from app.api.text2sql import router as text2sql_router
 from app.api.health import router as health_router
 from app.api.feedback import router as feedback_router
+from app.api.feedback_stats import router as feedback_stats_router
 from app.api.meta import router as meta_router
 from app.api.events import router as events_router, watch_agent_router
 from app.core.rate_limit import RateLimitExceeded
@@ -306,6 +307,7 @@ async def rate_limit_exceeded_handler(request, exc: RateLimitExceeded):
 app.include_router(text2sql_router)
 app.include_router(health_router)
 app.include_router(feedback_router)
+app.include_router(feedback_stats_router)
 app.include_router(meta_router)
 app.include_router(events_router)
 app.include_router(watch_agent_router)

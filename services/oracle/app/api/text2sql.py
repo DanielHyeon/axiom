@@ -63,6 +63,9 @@ class ReactRequest(BaseModel):
     datasource_id: str
     case_id: str | None = None  # O3: ontology context
     options: ReactOptions = Field(default_factory=ReactOptions)
+    # HIL (Human-in-the-Loop) 필드 — ask_user 이후 세션 재개 시 사용
+    session_state: str | None = Field(default=None, description="이전 세션 상태 토큰 (ask_user 이후 재개용)")
+    user_response: str | None = Field(default=None, description="ask_user에 대한 사용자 응답")
 
 class DirectSqlRequest(BaseModel):
     sql: str
@@ -120,6 +123,10 @@ async def react_stream(request_payload: ReactRequest, user: CurrentUser = Depend
         options=request_payload.options.model_dump(),
         max_iterations=request_payload.options.max_iterations,
     )
+    # HIL: 사용자 응답이 있으면 세션에 전달하여 루프 재개
+    if request_payload.session_state and request_payload.user_response:
+        session.session_state = request_payload.session_state
+        session.user_response = request_payload.user_response
     # Return NDJSON stream directly from generator
     return StreamingResponse(
         react_agent.stream_react_loop(session, user),
