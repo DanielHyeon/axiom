@@ -17,8 +17,10 @@ import { ConceptMapView } from './components/ConceptMapView';
 import { QualityDashboard } from './components/QualityDashboard';
 import { HITLReviewQueue } from './components/HITLReviewQueue';
 import { useTranslation } from 'react-i18next';
-import { Share2, ShieldCheck, ClipboardList, Download, Plus, Search } from 'lucide-react';
+import { Share2, ShieldCheck, ClipboardList, Download, Plus, Search, Wand2 } from 'lucide-react';
 import type { ViewMode } from '@/features/ontology/types/ontology';
+import { OntologyWizard } from '@/features/ontology/components/OntologyWizard';
+import { useOntologyWizardStore } from '@/features/ontology/store/useOntologyWizardStore';
 
 const VIEW_MODES: { key: ViewMode; label: string }[] = [
  { key: 'graph', label: 'All' },
@@ -35,6 +37,7 @@ export function OntologyPage() {
  const caseId = searchParams.get('caseId');
 
  const { filters, viewMode, setViewMode, setCaseId } = useOntologyStore();
+ const { openWizard } = useOntologyWizardStore();
  const { getFilteredGraph, findShortestPath, isLoading } = useOntologyData(caseId);
  const [pathNodeIds, setPathNodeIds] = useState<string[]>([]);
  const [pathModeSource, setPathModeSource] = useState<string | null>(null);
@@ -104,6 +107,14 @@ export function OntologyPage() {
  <Search className="h-3.5 w-3.5 text-foreground/60" />
  <span className="text-[13px] text-foreground/60 font-[IBM_Plex_Mono]">{t('ontology.searchNode')}</span>
  </div>
+ <button
+ type="button"
+ onClick={openWizard}
+ className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E5E5] text-[12px] font-medium font-[Sora] rounded hover:bg-[#F5F5F5] transition-colors"
+ >
+ <Wand2 className="h-3.5 w-3.5" />
+ 위자드
+ </button>
  <button
  type="button"
  className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors"
@@ -240,6 +251,10 @@ export function OntologyPage() {
  )}
  </div>
  </div>
+ </div>
+
+ {/* 온톨로지 위자드 모달 */}
+ <OntologyWizard />
  </div>
  );
 }

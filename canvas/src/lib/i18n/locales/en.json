@@ -47,7 +47,9 @@
     "processDesigner": "Process Designer",
     "watch": "Watch",
     "settings": "Settings",
-    "domainModeler": "Domain Model"
+    "ingestion": "Ingestion",
+    "domainModeler": "Domain Model",
+    "dataQuality": "Data Quality"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -236,6 +238,14 @@
       "partial": "Partial",
       "pagination": "{{from}}-{{to}} of {{total}}"
     }
+  },
+  "dataQuality": {
+    "title": "Data Quality",
+    "subtitle": "Build trust in your data with quality tests."
+  },
+  "ontologyWizard": {
+    "title": "Ontology Wizard",
+    "subtitle": "Auto-generate ontology from DB schema"
   },
   "processDesigner": {
     "toolbox": "Toolbox",

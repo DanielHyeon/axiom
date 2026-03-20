@@ -6,6 +6,9 @@
  *  - Ask 단일 요청 모드
  *  - HIL (Human-in-the-Loop): 에이전트가 추가 정보를 요청할 때 사용자 입력 UI 표시
  *  - 결과에 대한 피드백 위젯 (thumbs up/down + SQL 수정)
+ *  - 좌측 사이드바: DatabaseTree (스키마 트리 탐색)
+ *  - 하단 탭: SchemaCanvas (ERD 시각화)
+ *  - ReactSummaryPanel (ReAct 실행 요약)
  */
 import { useState, useRef, useCallback } from 'react';
 import { useForm } from 'react-hook-form';
@@ -22,8 +25,15 @@ import { AppError } from '@/lib/api/errors';
 import { QueryHistoryPanel } from '@/features/nl2sql/components/QueryHistoryPanel';
 import { HumanInTheLoopInput } from '@/features/nl2sql/components/HumanInTheLoopInput';
 import { FeedbackWidget } from '@/features/nl2sql/components/FeedbackWidget';
+import { DatabaseTree } from '@/features/nl2sql/components/DatabaseTree';
+import { SchemaSearchBar } from '@/features/nl2sql/components/SchemaSearchBar';
+import { TableDetailPanel } from '@/features/nl2sql/components/TableDetailPanel';
+import { SchemaCanvas } from '@/features/nl2sql/components/SchemaCanvas';
+import { ReactSummaryPanel } from '@/features/nl2sql/components/ReactSummaryPanel';
+import { useSchemaTree } from '@/features/nl2sql/hooks/useSchemaTree';
+import { useTableDetail } from '@/features/nl2sql/hooks/useTableDetail';
 import { nl2sqlPromptSchema, type Nl2sqlPromptFormValues } from './nl2sqlFormSchema';
-import type { ChartConfig, ExecutionMetadata, HilRequest, HilResponse } from '@/features/nl2sql/types/nl2sql';
+import type { ChartConfig, ExecutionMetadata, HilRequest, HilResponse, ColumnMeta } from '@/features/nl2sql/types/nl2sql';
 
 import { DatasourceSelector } from './components/DatasourceSelector';
 import { ResultPanel } from './components/ResultPanel';
@@ -39,7 +49,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Database, Trash2, ArrowRight, Download, MessageSquare } from 'lucide-react';
+import { Database, Trash2, ArrowRight, Download, MessageSquare, PanelLeftClose, PanelLeftOpen, LayoutGrid, Table2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
@@ -83,6 +93,66 @@ export function NL2SQLPage() {
   const [mode, setMode] = useState<'react' | 'ask'>('react');
   const [historyOpen, setHistoryOpen] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
+
+  // === 스키마 트리 + 캔버스 상태 ===
+  const [schemaTreeOpen, setSchemaTreeOpen] = useState(false);
+  const [expandedTables, setExpandedTables] = useState<Set<string>>(new Set());
+  const [bottomTab, setBottomTab] = useState<'results' | 'schema'>('results');
+  // 캔버스 테이블 목록: 사용자가 트리에서 선택한 테이블 (ERD 표시 + NL2SQL 컨텍스트 제어)
+  const [canvasTables, setCanvasTables] = useState<
+    { tableName: string; schema: string; columns: ColumnMeta[]; includedInContext: boolean }[]
+  >([]);
+
+  // 스키마 트리 훅
+  const schemaTree = useSchemaTree(datasourceId || null);
+
+  // 선택된 테이블의 상세 정보
+  const selectedTableName = schemaTree.selection?.type === 'table' ? schemaTree.selection.table : null;
+  const selectedTableSchema = schemaTree.selection?.type === 'table' ? schemaTree.selection.schema : null;
+  const tableDetail = useTableDetail(selectedTableName, datasourceId || null, selectedTableSchema ?? undefined);
+
+  // 테이블 선택 시 캔버스에 자동 추가
+  const handleSelectTableInTree = useCallback((schema: string, table: string) => {
+    schemaTree.selectTable(schema, table);
+    // 테이블 상세 패널용 컬럼 로드
+    schemaTree.loadColumnsForTable(table);
+    // 캔버스에 아직 없으면 추가
+    setCanvasTables((prev) => {
+      if (prev.some((t) => t.tableName === table)) return prev;
+      const cols = schemaTree.getColumns(table) ?? [];
+      return [...prev, { tableName: table, schema, columns: cols, includedInContext: true }];
+    });
+  }, [schemaTree]);
+
+  // 캔버스 테이블 컨텍스트 토글
+  const handleToggleContext = useCallback((tableName: string) => {
+    setCanvasTables((prev) =>
+      prev.map((t) => (t.tableName === tableName ? { ...t, includedInContext: !t.includedInContext } : t))
+    );
+  }, []);
+
+  // 캔버스 테이블 제거
+  const handleRemoveCanvasTable = useCallback((tableName: string) => {
+    setCanvasTables((prev) => prev.filter((t) => t.tableName !== tableName));
+  }, []);
+
+  // 테이블 펼침 토글 (컬럼 표시)
+  const handleToggleTableExpand = useCallback((tableName: string) => {
+    setExpandedTables((prev) => {
+      const next = new Set(prev);
+      if (next.has(tableName)) next.delete(tableName);
+      else next.add(tableName);
+      return next;
+    });
+  }, []);
+
+  // 검색 결과 선택 시 트리 노드로 이동
+  const handleSearchResultSelect = useCallback((result: { type: string; schema: string; tableName: string }) => {
+    schemaTree.toggleSchema(result.schema); // 스키마 펼치기
+    if (result.type === 'table') {
+      handleSelectTableInTree(result.schema, result.tableName);
+    }
+  }, [schemaTree, handleSelectTableInTree]);
 
   // === HIL 상태 ===
   const [hilRequest, setHilRequest] = useState<HilRequest | null>(null);
@@ -376,6 +446,48 @@ export function NL2SQLPage() {
 
   return (
     <div className="flex h-full">
+      {/* === 좌측 사이드바: DatabaseTree (토글 가능) === */}
+      {schemaTreeOpen && (
+        <div className="w-64 shrink-0 border-r border-[#E5E5E5] flex flex-col bg-white">
+          {/* 검색 바 */}
+          <SchemaSearchBar
+            value={schemaTree.searchQuery}
+            onChange={schemaTree.setSearchQuery}
+            results={schemaTree.searchResults}
+            onSelectResult={handleSearchResultSelect}
+          />
+          {/* 트리 */}
+          <div className="flex-1 overflow-hidden">
+            <DatabaseTree
+              schemaGroups={schemaTree.schemaGroups}
+              isLoading={schemaTree.isLoading}
+              expandedSchemas={schemaTree.expandedSchemas}
+              onToggleSchema={schemaTree.toggleSchema}
+              selection={schemaTree.selection}
+              onSelectTable={handleSelectTableInTree}
+              getColumns={schemaTree.getColumns}
+              loadingColumns={schemaTree.loadingColumns}
+              onLoadColumns={schemaTree.loadColumnsForTable}
+              expandedTables={expandedTables}
+              onToggleTable={handleToggleTableExpand}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* === 선택된 테이블 상세 패널 === */}
+      {schemaTreeOpen && selectedTableName && tableDetail.detail && (
+        <div className="w-72 shrink-0">
+          <TableDetailPanel
+            tableName={selectedTableName}
+            schema={selectedTableSchema ?? 'public'}
+            columns={tableDetail.detail.columns}
+            isLoading={tableDetail.isLoading}
+            onClose={schemaTree.clearSelection}
+          />
+        </div>
+      )}
+
       {/* Content Column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Content Body */}
@@ -392,6 +504,25 @@ export function NL2SQLPage() {
           <div className="space-y-4">
             {/* Connection badges + controls */}
             <div className="flex items-center gap-3">
+              {/* 스키마 트리 토글 버튼 */}
+              <button
+                type="button"
+                onClick={() => setSchemaTreeOpen((v) => !v)}
+                className={cn(
+                  'p-2 rounded transition-colors',
+                  schemaTreeOpen
+                    ? 'bg-blue-50 text-blue-600'
+                    : 'text-foreground/40 hover:text-foreground/60 hover:bg-[#F5F5F5]'
+                )}
+                title={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
+                aria-label={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
+              >
+                {schemaTreeOpen ? (
+                  <PanelLeftClose className="h-4 w-4" />
+                ) : (
+                  <PanelLeftOpen className="h-4 w-4" />
+                )}
+              </button>
               <DatasourceSelector value={datasourceId} onChange={handleDatasourceChange} />
               <div className="flex items-center gap-2">
                 <button
@@ -595,13 +726,58 @@ export function NL2SQLPage() {
             />
           )}
 
-          {/* ReAct progress timeline */}
+          {/* ReAct progress + summary 패널 */}
           {mode === 'react' && reactSteps.length > 0 && (
-            <ReactProgressTimeline steps={reactSteps} isRunning={loading} />
+            <div className="space-y-3">
+              <ReactProgressTimeline steps={reactSteps} isRunning={loading} />
+              <ReactSummaryPanel steps={reactSteps} isRunning={loading} />
+            </div>
           )}
 
-          {/* Results section */}
-          {resultData && resultColumns.length > 0 && (
+          {/* 결과 탭 전환: Results | Schema Canvas */}
+          {(resultData || canvasTables.length > 0) && (
+            <div className="flex items-center gap-1 border-b border-[#E5E5E5]">
+              <button
+                type="button"
+                onClick={() => setBottomTab('results')}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-[Sora] border-b-2 transition-colors',
+                  bottomTab === 'results'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-foreground/40 hover:text-foreground/60'
+                )}
+              >
+                <Table2 className="h-3.5 w-3.5" />
+                {t('nl2sql.queryResult')}
+                {resultData?.result?.row_count != null && (
+                  <span className="ml-1 bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] text-[#5E5E5E] font-[IBM_Plex_Mono] rounded">
+                    {resultData.result.row_count}
+                  </span>
+                )}
+              </button>
+              <button
+                type="button"
+                onClick={() => setBottomTab('schema')}
+                className={cn(
+                  'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-[Sora] border-b-2 transition-colors',
+                  bottomTab === 'schema'
+                    ? 'border-black text-black'
+                    : 'border-transparent text-foreground/40 hover:text-foreground/60'
+                )}
+              >
+                <LayoutGrid className="h-3.5 w-3.5" />
+                Schema Canvas
+                {canvasTables.length > 0 && (
+                  <span className="ml-1 bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] text-[#5E5E5E] font-[IBM_Plex_Mono] rounded">
+                    {canvasTables.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Results 탭 */}
+          {bottomTab === 'results' && resultData && resultColumns.length > 0 && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -628,6 +804,17 @@ export function NL2SQLPage() {
               <FeedbackWidget
                 queryId={resultData.metadata?.query_id}
                 sql={resultData.sql}
+              />
+            </div>
+          )}
+
+          {/* Schema Canvas 탭 */}
+          {bottomTab === 'schema' && (
+            <div className="border border-[#E5E5E5] rounded overflow-hidden" style={{ minHeight: 400 }}>
+              <SchemaCanvas
+                tables={canvasTables}
+                onToggleContext={handleToggleContext}
+                onRemoveTable={handleRemoveCanvasTable}
               />
             </div>
           )}

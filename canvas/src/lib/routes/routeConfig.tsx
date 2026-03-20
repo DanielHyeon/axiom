@@ -23,7 +23,9 @@ const Nl2SqlPage = lazy(() => import('@/pages/nl2sql/Nl2SqlPage').then((m) => ({
 const InsightPage = lazy(() => import('@/pages/insight/InsightPage').then((m) => ({ default: m.InsightPage })));
 const OntologyPage = lazy(() => import('@/pages/ontology/OntologyPage').then((m) => ({ default: m.OntologyPage })));
 const DatasourcePage = lazy(() => import('@/pages/data/DatasourcePage').then((m) => ({ default: m.DatasourcePage })));
+const DataIngestionPage = lazy(() => import('@/pages/data/DataIngestionPage').then((m) => ({ default: m.DataIngestionPage })));
 const DomainModelerPage = lazy(() => import('@/pages/domain/DomainModelerPage').then((m) => ({ default: m.DomainModelerPage })));
+const DataQualityPage = lazy(() => import('@/pages/data/DataQualityPage').then((m) => ({ default: m.DataQualityPage })));
 const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage').then((m) => ({ default: m.ProcessDesignerListPage })));
 const ProcessDesignerPage = lazy(() => import('@/pages/process/ProcessDesignerPage').then((m) => ({ default: m.ProcessDesignerPage })));
 const WatchDashboardPage = lazy(() => import('@/pages/watch/WatchDashboardPage').then((m) => ({ default: m.WatchDashboardPage })));
@@ -87,7 +89,9 @@ export const router = createBrowserRouter([
 { path: 'analysis/whatif/wizard', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><WhatIfWizardPage /></SuspensePage></RoleGuard> },
  { path: 'data/ontology', element: <SuspensePage><OntologyPage /></SuspensePage> },
  { path: 'data/datasources', element: <SuspensePage><DatasourcePage /></SuspensePage> },
+ { path: 'data/ingestion', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DataIngestionPage /></SuspensePage></RoleGuard> },
  { path: 'data/domain', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DomainModelerPage /></SuspensePage></RoleGuard> },
+ { path: 'data/quality', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DataQualityPage /></SuspensePage></RoleGuard> },
  {
  path: 'process-designer',
  children: [

@@ -10,10 +10,12 @@ import {
  FlaskConical,
  Network,
  Database,
+ Upload,
  Boxes,
  Eye,
  Workflow,
  Settings,
+ ShieldCheck,
 } from 'lucide-react';
 
 /** 사이드바 네비게이션 아이템 — i18n 키를 labelKey로 사용 */
@@ -25,7 +27,9 @@ const navItems = [
  { to: ROUTES.ANALYSIS.WHATIF_WIZARD, icon: FlaskConical, labelKey: 'sidebar.whatif' },
  { to: ROUTES.DATA.ONTOLOGY, icon: Network, labelKey: 'sidebar.ontology' },
  { to: ROUTES.DATA.DATASOURCES, icon: Database, labelKey: 'sidebar.data' },
+ { to: ROUTES.DATA.INGESTION, icon: Upload, labelKey: 'sidebar.ingestion' },
  { to: ROUTES.DATA.DOMAIN_MODELER, icon: Boxes, labelKey: 'sidebar.domainModeler' },
+ { to: ROUTES.DATA.QUALITY, icon: ShieldCheck, labelKey: 'sidebar.dataQuality' },
  { to: ROUTES.PROCESS_DESIGNER.LIST, icon: Workflow, labelKey: 'sidebar.processDesigner' },
  { to: ROUTES.WATCH, icon: Eye, labelKey: 'sidebar.watch' },
 ];
