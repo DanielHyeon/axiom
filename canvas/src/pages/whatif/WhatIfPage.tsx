@@ -1,7 +1,8 @@
 // src/pages/whatif/WhatIfPage.tsx
 
 import { useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/lib/routes/routes';
 import { useWhatIfStore } from '@/features/whatif/store/useWhatIfStore';
 import { useWhatIfVision } from '@/features/whatif/hooks/useWhatIfVision';
 import type { ScenarioResult } from '@/features/whatif/types/whatif';
@@ -28,6 +29,7 @@ function mapVisionResultToStore(visionResult: Record<string, unknown> | undefine
 
 export function WhatIfPage() {
  const { caseId } = useParams<{ caseId: string }>();
+ const navigate = useNavigate();
  const {
  setCaseId,
  scenarios,
@@ -117,7 +119,10 @@ export function WhatIfPage() {
  {activeScenario?.name}
  </span>
  </div>
- <div>
+ <div className="flex items-center gap-2">
+ <Button variant="outline" size="sm" className="h-8" onClick={() => navigate(ROUTES.ANALYSIS.WHATIF_WIZARD)}>
+ 고급 분석 (Wizard)
+ </Button>
  <Button variant="outline" size="sm" className="h-8" onClick={handleCompare}>
  시나리오 비교 (Compare)
  </Button>

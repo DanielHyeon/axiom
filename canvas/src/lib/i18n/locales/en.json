@@ -41,11 +41,13 @@
     "nl2sql": "NL2SQL",
     "olapPivot": "OLAP Pivot",
     "insight": "Insight",
+    "whatif": "What-if",
     "ontology": "Ontology",
     "data": "Data",
     "processDesigner": "Process Designer",
     "watch": "Watch",
-    "settings": "Settings"
+    "settings": "Settings",
+    "domainModeler": "Domain Model"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -168,7 +170,8 @@
       "logs": "Logs",
       "users": "Users",
       "config": "Config",
-      "feedback": "Feedback"
+      "feedback": "Feedback",
+      "security": "Security"
     }
   },
   "watch": {

@@ -17,11 +17,13 @@ const CaseDocumentsListPage = lazy(() => import('@/pages/cases/CaseDocumentsList
 const CaseDocumentEditorPage = lazy(() => import('@/pages/cases/CaseDocumentEditorPage').then((m) => ({ default: m.CaseDocumentEditorPage })));
 const DocumentReviewPage = lazy(() => import('@/pages/documents/DocumentReviewPage').then((m) => ({ default: m.DocumentReviewPage })));
 const WhatIfPage = lazy(() => import('@/pages/whatif/WhatIfPage').then((m) => ({ default: m.WhatIfPage })));
+const WhatIfWizardPage = lazy(() => import('@/pages/whatif/WhatIfWizardPage').then((m) => ({ default: m.WhatIfWizardPage })));
 const OlapPivotPage = lazy(() => import('@/pages/olap/OlapPivotPage').then((m) => ({ default: m.OlapPivotPage })));
 const Nl2SqlPage = lazy(() => import('@/pages/nl2sql/Nl2SqlPage').then((m) => ({ default: m.NL2SQLPage })));
 const InsightPage = lazy(() => import('@/pages/insight/InsightPage').then((m) => ({ default: m.InsightPage })));
 const OntologyPage = lazy(() => import('@/pages/ontology/OntologyPage').then((m) => ({ default: m.OntologyPage })));
 const DatasourcePage = lazy(() => import('@/pages/data/DatasourcePage').then((m) => ({ default: m.DatasourcePage })));
+const DomainModelerPage = lazy(() => import('@/pages/domain/DomainModelerPage').then((m) => ({ default: m.DomainModelerPage })));
 const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage').then((m) => ({ default: m.ProcessDesignerListPage })));
 const ProcessDesignerPage = lazy(() => import('@/pages/process/ProcessDesignerPage').then((m) => ({ default: m.ProcessDesignerPage })));
 const WatchDashboardPage = lazy(() => import('@/pages/watch/WatchDashboardPage').then((m) => ({ default: m.WatchDashboardPage })));
@@ -31,6 +33,7 @@ const SettingsLogsPage = lazy(() => import('@/pages/settings/SettingsLogsPage').
 const SettingsUsersPage = lazy(() => import('@/pages/settings/SettingsUsersPage').then((m) => ({ default: m.SettingsUsersPage })));
 const SettingsConfigPage = lazy(() => import('@/pages/settings/SettingsConfigPage').then((m) => ({ default: m.SettingsConfigPage })));
 const SettingsFeedbackPage = lazy(() => import('@/pages/settings/SettingsFeedbackPage').then((m) => ({ default: m.SettingsFeedbackPage })));
+const SettingsSecurityPage = lazy(() => import('@/pages/settings/SettingsSecurityPage').then((m) => ({ default: m.SettingsSecurityPage })));
 
 function PageFallback() {
  const { t } = useTranslation();
@@ -81,8 +84,10 @@ export const router = createBrowserRouter([
  { path: 'analysis/olap', element: <SuspensePage><OlapPivotPage /></SuspensePage> },
  { path: 'analysis/nl2sql', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><Nl2SqlPage /></SuspensePage></RoleGuard> },
  { path: 'analysis/insight', element: <RoleGuard roles={['admin', 'manager', 'attorney', 'analyst', 'engineer']}><SuspensePage><InsightPage /></SuspensePage></RoleGuard> },
+{ path: 'analysis/whatif/wizard', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><WhatIfWizardPage /></SuspensePage></RoleGuard> },
  { path: 'data/ontology', element: <SuspensePage><OntologyPage /></SuspensePage> },
  { path: 'data/datasources', element: <SuspensePage><DatasourcePage /></SuspensePage> },
+ { path: 'data/domain', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DomainModelerPage /></SuspensePage></RoleGuard> },
  {
  path: 'process-designer',
  children: [
@@ -105,6 +110,7 @@ export const router = createBrowserRouter([
  { path: 'users', element: <SuspensePage><SettingsUsersPage /></SuspensePage> },
  { path: 'config', element: <SuspensePage><SettingsConfigPage /></SuspensePage> },
  { path: 'feedback', element: <SuspensePage><SettingsFeedbackPage /></SuspensePage> },
+ { path: 'security', element: <SuspensePage><SettingsSecurityPage /></SuspensePage> },
  ],
  },
  { path: '*', element: <NotFoundPage /> },

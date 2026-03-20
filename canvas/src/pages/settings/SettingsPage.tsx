@@ -23,6 +23,7 @@ export const SettingsPage: React.FC = () => {
  <NavLink to={ROUTES.SETTINGS_USERS} className={tabClass} role="tab">{t('settings.tabs.users')}</NavLink>
  <NavLink to={ROUTES.SETTINGS_CONFIG} className={tabClass} role="tab">{t('settings.tabs.config')}</NavLink>
  <NavLink to={ROUTES.SETTINGS_FEEDBACK} className={tabClass} role="tab">{t('settings.tabs.feedback')}</NavLink>
+ <NavLink to={ROUTES.SETTINGS_SECURITY} className={tabClass} role="tab">{t('settings.tabs.security')}</NavLink>
  </nav>
  <Outlet />
  </div>

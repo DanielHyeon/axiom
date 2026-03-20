@@ -22,11 +22,13 @@ export const ROUTES = {
     OLAP: '/analysis/olap',
     NL2SQL: '/analysis/nl2sql',
     INSIGHT: '/analysis/insight',
+    WHATIF_WIZARD: '/analysis/whatif/wizard',
   },
   DATA: {
     ONTOLOGY: '/data/ontology',
     ONTOLOGY_CASE: (caseId: string) => `/data/ontology?caseId=${encodeURIComponent(caseId)}`,
     DATASOURCES: '/data/datasources',
+    DOMAIN_MODELER: '/data/domain',
   },
   PROCESS_DESIGNER: {
     LIST: '/process-designer',
@@ -39,4 +41,5 @@ export const ROUTES = {
   SETTINGS_USERS: '/settings/users',
   SETTINGS_CONFIG: '/settings/config',
   SETTINGS_FEEDBACK: '/settings/feedback',
+  SETTINGS_SECURITY: '/settings/security',
 } as const;
