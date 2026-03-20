@@ -30,10 +30,12 @@ export const ROUTES = {
     DATASOURCES: '/data/datasources',
     INGESTION: '/data/ingestion',
     DOMAIN_MODELER: '/data/domain',
+    KINETIC_MODELER: '/data/domain/kinetic',
     QUALITY: '/data/quality',
     LINEAGE: '/data/lineage',
     EXPLORER: '/data/explorer',
     GLOSSARY: '/data/glossary',
+    WORKFLOW_EDITOR: '/data/workflow',
   },
   PROCESS_DESIGNER: {
     LIST: '/process-designer',

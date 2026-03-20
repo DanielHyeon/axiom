@@ -39,6 +39,21 @@ EVENT_CONTRACTS: dict[str, EventContract] = {
         payload_schema="vision/root_cause_detected/v1",
         idempotency_key_rule="event_type:aggregate_id",
     ),
+    # ── Event Fork Engine 이벤트 (Phase 2-A) ──
+    "WHATIF_FORK_CREATED": EventContract(
+        event_name="WHATIF_FORK_CREATED",
+        owner_service="vision",
+        version="1.0.0",
+        payload_schema="vision/whatif_fork_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "WHATIF_FORK_COMPLETED": EventContract(
+        event_name="WHATIF_FORK_COMPLETED",
+        owner_service="vision",
+        version="1.0.0",
+        payload_schema="vision/whatif_fork_completed/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
 }
 
 

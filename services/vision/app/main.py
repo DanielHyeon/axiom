@@ -12,6 +12,7 @@ from app.api.olap import router as olap_router
 from app.api.root_cause import router as root_cause_router
 from app.api.what_if import router as what_if_router
 from app.api.whatif_dag import router as whatif_dag_router
+from app.api.whatif_fork import router as whatif_fork_router
 from app.services.vision_runtime import vision_runtime
 
 logger = logging.getLogger("axiom.vision")
@@ -81,6 +82,7 @@ app.include_router(what_if_router)
 app.include_router(whatif_dag_router)
 app.include_router(olap_router)
 app.include_router(root_cause_router)
+app.include_router(whatif_fork_router)
 
 # ── DDD-P2-03: CaseEventConsumer background task ── #
 _consumer_task: asyncio.Task | None = None
@@ -126,6 +128,16 @@ async def _start_vision_relay():
         logger.info("VisionRelayWorker background task started")
     except Exception:
         logger.warning("VisionRelayWorker failed to start", exc_info=True)
+
+
+@app.on_event("startup")
+async def _ensure_simulation_tables():
+    """Event Fork Engine용 simulation_branches/events 테이블 보장."""
+    try:
+        from app.db.simulation_schema import ensure_simulation_tables
+        ensure_simulation_tables()
+    except Exception:
+        logger.warning("simulation tables DDL failed (PG may be unavailable)", exc_info=True)
 
 
 @app.on_event("shutdown")

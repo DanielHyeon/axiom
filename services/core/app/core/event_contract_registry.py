@@ -78,6 +78,14 @@ EVENT_CONTRACTS: dict[str, EventContract] = {
         payload_schema="core/watch_alert_triggered/v1",
         idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
     ),
+    # ── Kinetic Layer: PolicyExecutor 이벤트 ──
+    "POLICY_COMMAND": EventContract(
+        event_name="POLICY_COMMAND",
+        owner_service="core",
+        version="1.0.0",
+        payload_schema="core/policy_command/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
 }
 
 

@@ -204,3 +204,44 @@ class SynapseRelayWorker:
 
 # 싱글턴
 event_publisher = EventPublisher()
+
+
+# ── AsyncEventPublisher ───────────────────────────────────────── #
+
+class AsyncEventPublisher:
+    """GWT Consumer 등 async 워커에서 동기 EventPublisher를 안전하게 호출하는 래퍼.
+
+    EventPublisher.publish()는 psycopg2를 사용하는 동기 함수이므로,
+    asyncio 이벤트 루프를 블로킹하지 않도록 asyncio.to_thread()로
+    별도 스레드에서 실행한다.
+    """
+
+    @staticmethod
+    async def publish(
+        event_type: str,
+        aggregate_type: str,
+        aggregate_id: str,
+        payload: dict[str, Any],
+        tenant_id: str = "",
+        conn=None,
+    ) -> str:
+        """Outbox 테이블에 이벤트를 비동기로 INSERT한다.
+
+        내부적으로 동기 EventPublisher.publish()를 별도 스레드에서 호출하므로
+        이벤트 루프가 멈추지 않는다. 반환값은 생성된 event_id 문자열이다.
+        """
+        # asyncio.to_thread()는 동기 함수를 기본 executor 스레드풀에서 실행한다
+        event_id = await asyncio.to_thread(
+            EventPublisher.publish,
+            event_type=event_type,
+            aggregate_type=aggregate_type,
+            aggregate_id=aggregate_id,
+            payload=payload,
+            tenant_id=tenant_id,
+            conn=conn,
+        )
+        return event_id
+
+
+# 싱글턴: async 컨텍스트에서 import해서 바로 사용
+async_event_publisher = AsyncEventPublisher()

@@ -10,6 +10,7 @@ from app.api.insight import router as insight_router
 from app.api.insight_ontology import router as insight_ontology_router
 from app.api.metadata_catalog import router as metadata_catalog_router
 from app.api.query import router as query_router
+from app.api.document_ingestion import router as document_ingestion_router
 from app.core.config import settings
 from app.core.error_codes import public_error_message
 from app.core.insight_errors import InsightError, insight_error_handler
@@ -42,6 +43,7 @@ app.include_router(insight_router)
 app.include_router(insight_ontology_router)
 app.include_router(query_router)
 app.include_router(metadata_catalog_router)
+app.include_router(document_ingestion_router)
 
 # ── DDD-P3-01: Weaver Outbox Relay ── #
 _relay_task: asyncio.Task | None = None
@@ -75,6 +77,19 @@ async def _stop_weaver_relay():
             await _relay_task
         except asyncio.CancelledError:
             pass
+
+
+# ── Phase 2-D: Document→Ontology 파이프라인 테이블 보장 ── #
+@app.on_event("startup")
+async def _ensure_document_tables():
+    """문서 업로드 + DDD 추출 파이프라인용 테이블 생성 보장."""
+    if not settings.metadata_pg_mode:
+        return
+    try:
+        from app.db.document_schema import ensure_document_tables
+        await ensure_document_tables()
+    except Exception:
+        logger.warning("Document tables DDL failed (non-fatal)", exc_info=True)
 
 
 @app.on_event("startup")

@@ -19,6 +19,7 @@ import {
  GitBranch,
  SearchCode,
  BookOpen,
+ Route,
 } from 'lucide-react';
 
 /** 사이드바 네비게이션 아이템 — i18n 키를 labelKey로 사용 */
@@ -36,6 +37,7 @@ const navItems = [
  { to: ROUTES.DATA.GLOSSARY, icon: BookOpen, labelKey: 'sidebar.glossary' },
  { to: ROUTES.DATA.QUALITY, icon: ShieldCheck, labelKey: 'sidebar.dataQuality' },
  { to: ROUTES.DATA.EXPLORER, icon: SearchCode, labelKey: 'sidebar.objectExplorer' },
+ { to: ROUTES.DATA.WORKFLOW_EDITOR, icon: Route, labelKey: 'sidebar.workflowEditor' },
  { to: ROUTES.PROCESS_DESIGNER.LIST, icon: Workflow, labelKey: 'sidebar.processDesigner' },
  { to: ROUTES.WATCH, icon: Eye, labelKey: 'sidebar.watch' },
 ];
