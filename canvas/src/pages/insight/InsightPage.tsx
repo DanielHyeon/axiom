@@ -1,4 +1,3 @@
-// @ts-nocheck
 // pages/insight/InsightPage.tsx
 // Main Insight page — redesigned with light theme
 
@@ -13,9 +12,11 @@ import { InsightHeader } from './components/InsightHeader';
 import { InsightSidebar } from './components/InsightSidebar';
 import { getFingerprintFromParams } from '@/features/insight/utils/fingerprintUtils';
 import type { GraphNode } from '@/features/insight/types/insight';
+import { useTranslation } from 'react-i18next';
 import { Info, ExternalLink, ArrowUpRight } from 'lucide-react';
 
 export function InsightPage() {
+ const { t } = useTranslation();
  const [searchParams, setSearchParams] = useSearchParams();
 
  const {
@@ -147,7 +148,7 @@ export function InsightPage() {
 
  {/* KPI filter tabs */}
  <div className="flex items-center gap-2.5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">선택 KPI</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">{t('insight.selectedKpi')}</span>
  {KPI_FILTERS.map((tab, i) => (
  <button
  key={tab}
@@ -189,7 +190,7 @@ export function InsightPage() {
  {/* Impact Driver Ranking */}
  <div className="space-y-4">
  <div className="flex items-center justify-between">
- <h2 className="text-sm font-semibold text-black font-[Sora]">Impact Driver Ranking</h2>
+ <h2 className="text-sm font-semibold text-black font-[Sora]">{t('insight.impactDriverRanking')}</h2>
  <div className="flex items-center gap-2">
  <button type="button" title="Grid view" className="p-1.5 rounded text-foreground/60 hover:text-muted-foreground transition-colors">
  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="8" y="1" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="1" y="8" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="8" y="8" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /></svg>
@@ -232,7 +233,7 @@ export function InsightPage() {
  {nodeDetailOpen && (
  <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white flex flex-col">
  <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5]">
- <span className="text-[13px] font-semibold text-black font-[Sora]">Driver Detail</span>
+ <span className="text-[13px] font-semibold text-black font-[Sora]">{t('insight.driverDetail')}</span>
  <button
  type="button"
  onClick={() => selectDriver(null)}

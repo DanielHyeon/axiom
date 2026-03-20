@@ -5,6 +5,7 @@
  * 하위 컴포넌트(KPI 카드, 트렌드 차트, 피드백 테이블)를 조합한다.
  */
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -36,6 +37,7 @@ function getDefaultDateRange() {
 }
 
 export function FeedbackDashboard() {
+  const { t } = useTranslation();
   const defaultRange = useMemo(() => getDefaultDateRange(), []);
   const [dateFrom, setDateFrom] = useState(defaultRange.from);
   const [dateTo, setDateTo] = useState(defaultRange.to);
@@ -61,7 +63,7 @@ export function FeedbackDashboard() {
       {/* 필터 바 */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-[IBM_Plex_Mono]">기간:</label>
+          <label className="text-xs text-muted-foreground font-[IBM_Plex_Mono]">{t('feedback.dashboard.periodLabel')}</label>
           <Input
             type="date"
             value={dateFrom}
@@ -91,8 +93,8 @@ export function FeedbackDashboard() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="day">일별</SelectItem>
-            <SelectItem value="week">주별</SelectItem>
+            <SelectItem value="day">{t('common.daily')}</SelectItem>
+            <SelectItem value="week">{t('common.weekly')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -104,13 +106,13 @@ export function FeedbackDashboard() {
           }}
         >
           <SelectTrigger className="h-8 w-28 text-xs">
-            <SelectValue placeholder="평가 필터" />
+            <SelectValue placeholder={t('feedback.dashboard.ratingFilter')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">전체</SelectItem>
-            <SelectItem value="positive">긍정</SelectItem>
-            <SelectItem value="negative">부정</SelectItem>
-            <SelectItem value="partial">수정</SelectItem>
+            <SelectItem value="all">{t('feedback.dashboard.allRatings')}</SelectItem>
+            <SelectItem value="positive">{t('feedback.dashboard.positive')}</SelectItem>
+            <SelectItem value="negative">{t('feedback.dashboard.negative')}</SelectItem>
+            <SelectItem value="partial">{t('feedback.dashboard.partial')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -124,7 +126,7 @@ export function FeedbackDashboard() {
             feedbackList.refetch();
           }}
         >
-          새로고침
+          {t('feedback.dashboard.refresh')}
         </Button>
       </div>
 

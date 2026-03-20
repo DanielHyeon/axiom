@@ -4,6 +4,7 @@
 // and calls GET /api/insight/schema-coverage.
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { fetchSchemaCoverage } from '@/features/insight/api/insightApi';
 import type { SchemaCoverageResponse } from '@/features/insight/api/insightApi';
 
@@ -41,7 +42,11 @@ export function useNodeDataPreview(nodeId: string | null): SchemaCoverageRespons
     }
     fetchSchemaCoverage(parsed)
       .then(setPreview)
-      .catch(() => setPreview(null));
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+        toast.error('노드 데이터 프리뷰 로딩 실패', { description: msg });
+        setPreview(null);
+      });
   }, [nodeId]);
 
   return preview;

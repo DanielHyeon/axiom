@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -42,6 +43,15 @@ export default defineConfig({
           cytoscape: ['cytoscape', 'cytoscape-dagre', 'cytoscape-cose-bilkent'],
         },
       },
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    include: ['src/**/*.{test,spec}.{ts,tsx}'],
+    coverage: {
+      provider: 'v8',
+      include: ['src/features/**/utils/**', 'src/lib/**'],
     },
   },
 })

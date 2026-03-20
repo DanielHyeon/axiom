@@ -4,6 +4,7 @@
  * 개별 피드백 항목을 테이블 형태로 표시하고,
  * 평가 유형별 필터링과 페이지네이션을 지원한다.
  */
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Edit3, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -17,25 +18,26 @@ interface FeedbackTableProps {
   onPageChange: (page: number) => void;
 }
 
-/** 평가 유형에 따른 배지 표시 */
+/** 평가 유형에 따른 배지 표시 — i18n 적용 */
 function RatingBadge({ rating }: { rating: FeedbackEntry['rating'] }) {
+  const { t } = useTranslation();
   switch (rating) {
     case 'positive':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700">
-          <ThumbsUp className="h-3 w-3" /> 긍정
+          <ThumbsUp className="h-3 w-3" /> {t('feedback.table.positive')}
         </span>
       );
     case 'negative':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-red-50 text-red-700">
-          <ThumbsDown className="h-3 w-3" /> 부정
+          <ThumbsDown className="h-3 w-3" /> {t('feedback.table.negative')}
         </span>
       );
     case 'partial':
       return (
         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs bg-amber-50 text-amber-700">
-          <Edit3 className="h-3 w-3" /> 수정
+          <Edit3 className="h-3 w-3" /> {t('feedback.table.partial')}
         </span>
       );
     default:
@@ -49,13 +51,14 @@ export function FeedbackTable({
   page,
   onPageChange,
 }: FeedbackTableProps) {
+  const { t } = useTranslation();
   const items = data?.items ?? [];
   const pagination = data?.pagination;
 
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold font-[Sora]">피드백 목록</CardTitle>
+        <CardTitle className="text-sm font-semibold font-[Sora]">{t('feedback.table.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -66,7 +69,7 @@ export function FeedbackTable({
           </div>
         ) : items.length === 0 ? (
           <div className="py-8 text-center text-xs text-muted-foreground">
-            피드백 데이터가 없습니다
+            {t('feedback.table.noData')}
           </div>
         ) : (
           <>
@@ -75,16 +78,16 @@ export function FeedbackTable({
                 <thead>
                   <tr className="border-b border-border">
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
-                      날짜
+                      {t('feedback.table.date')}
                     </th>
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
-                      질문
+                      {t('feedback.table.question')}
                     </th>
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
-                      평가
+                      {t('feedback.table.rating')}
                     </th>
                     <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
-                      코멘트
+                      {t('feedback.table.comment')}
                     </th>
                   </tr>
                 </thead>

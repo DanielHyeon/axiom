@@ -14,6 +14,7 @@ import {
   ResponsiveContainer,
   Legend,
 } from 'recharts';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { FeedbackTrendPoint } from '../types/feedback';
 
@@ -23,19 +24,20 @@ interface FeedbackTrendChartProps {
 }
 
 export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps) {
+  const { t } = useTranslation();
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold font-[Sora]">피드백 추이</CardTitle>
+        <CardTitle className="text-sm font-semibold font-[Sora]">{t('feedback.trend.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
           <div className="h-64 flex items-center justify-center">
-            <div className="animate-pulse text-xs text-muted-foreground">로딩 중...</div>
+            <div className="animate-pulse text-xs text-muted-foreground">{t('feedback.trend.loading')}</div>
           </div>
         ) : !data || data.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-xs text-muted-foreground">
-            데이터가 없습니다
+            {t('feedback.trend.noData')}
           </div>
         ) : (
           <ResponsiveContainer width="100%" height={280}>
@@ -65,7 +67,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
               <Area
                 type="monotone"
                 dataKey="positive"
-                name="긍정"
+                name={t('feedback.trend.positive')}
                 stackId="1"
                 stroke="#22c55e"
                 fill="#22c55e"
@@ -74,7 +76,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
               <Area
                 type="monotone"
                 dataKey="negative"
-                name="부정"
+                name={t('feedback.trend.negative')}
                 stackId="1"
                 stroke="#ef4444"
                 fill="#ef4444"
@@ -83,7 +85,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
               <Area
                 type="monotone"
                 dataKey="partial"
-                name="수정"
+                name={t('feedback.trend.partial')}
                 stackId="1"
                 stroke="#f59e0b"
                 fill="#f59e0b"

@@ -5,12 +5,43 @@
     "list": "List",
     "cancel": "Cancel",
     "confirm": "Confirm",
-    "error": "An error occurred."
+    "error": "An error occurred.",
+    "retry": "Retry",
+    "delete": "Delete",
+    "search": "Search...",
+    "noData": "No data available",
+    "refresh": "Refresh",
+    "export": "Export",
+    "close": "Close",
+    "reset": "Reset",
+    "run": "Run",
+    "analyze": "Analyze",
+    "add": "Add",
+    "filter": "Filter",
+    "all": "All",
+    "rows": "rows",
+    "processing": "Processing...",
+    "showMore": "Show more",
+    "noSearchResults": "No search results",
+    "period": "Period:",
+    "daily": "Daily",
+    "weekly": "Weekly"
   },
   "nav": {
     "dashboard": "Dashboard",
     "cases": "Cases",
     "analysis": "Analysis",
+    "data": "Data",
+    "processDesigner": "Process Designer",
+    "watch": "Watch",
+    "settings": "Settings"
+  },
+  "sidebar": {
+    "dashboard": "Dashboard",
+    "nl2sql": "NL2SQL",
+    "olapPivot": "OLAP Pivot",
+    "insight": "Insight",
+    "ontology": "Ontology",
     "data": "Data",
     "processDesigner": "Process Designer",
     "watch": "Watch",
@@ -34,6 +65,174 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+  "locale": {
+    "switchToKo": "한국어로 전환",
+    "switchToEn": "Switch to English"
+  },
+  "nl2sql": {
+    "title": "NL2SQL",
+    "subtitle": "Convert natural language to SQL and query your database easily",
+    "placeholder": "e.g. Show the top 10 products by revenue in the last 3 months",
+    "run": "Run",
+    "reset": "Reset",
+    "generatedSql": "Generated SQL",
+    "queryResult": "Query Result",
+    "export": "Export",
+    "queryHistory": "Query History",
+    "emptyTitle": "AI SQL Assistant",
+    "emptyDescription": "Enter a question and AI will generate and execute SQL.",
+    "queryComplete": "Query execution completed.",
+    "requestFailed": "Request processing failed.",
+    "oracleApiFailed": "Oracle API call failed.",
+    "streamFailed": "Stream connection failed.",
+    "reactError": "An error occurred during ReAct step.",
+    "hilResumeFailed": "Failed to resume HIL session.",
+    "startFailed": "Failed to start request.",
+    "hilNeedInfo": "Additional information is required.",
+    "chatUser": "Question",
+    "chatAssistant": "Response",
+    "chatHilQuestion": "Agent Question",
+    "topRowsOnly": "Showing top 5 rows ({{count}} total)",
+    "exampleQuestions": {
+      "q1": "What was Seoul Electronics' revenue on 2024-06-20?",
+      "q2": "Which company had the highest revenue growth rate in 2024?",
+      "q3": "Processing volume trend for the last 3 months",
+      "q4": "Average processing time comparison by region"
+    }
+  },
+  "insight": {
+    "title": "Insight",
+    "subtitle": "Identify key drivers through KPI Impact analysis",
+    "searchKpi": "Search KPI...",
+    "selectedKpi": "Selected KPI",
+    "impactDriverRanking": "Impact Driver Ranking",
+    "driverDetail": "Driver Detail",
+    "impactScore": "Impact Score",
+    "driversFound": "Drivers Found",
+    "active": "active",
+    "metaPrimary": "Primary mode",
+    "metaFallback": "Fallback mode",
+    "metaQueries": "Queries: {{count}}",
+    "metaCached": "Cached ({{ttl}})",
+    "metaCachedHit": "Cached (hit)",
+    "kpiSelector": {
+      "title": "Select KPI",
+      "placeholder": "Enter KPI fingerprint...",
+      "analyze": "Analyze",
+      "loading": "Loading...",
+      "recentKpis": "Recent KPIs",
+      "noKpis": "No KPIs — enter manually"
+    },
+    "driverRanking": {
+      "title": "Driver / Dimension",
+      "count": "{{count}} items",
+      "searchPlaceholder": "Search...",
+      "noGraph": "Load the graph to view Driver rankings",
+      "noDrivers": "No Driver / Dimension nodes found",
+      "noResults": "No results for \"{{query}}\"",
+      "evidenceCount": "{{count}} evidence(s)"
+    }
+  },
+  "ontology": {
+    "title": "Ontology",
+    "subtitle": "Explore and manage the K-MRI ontology knowledge graph",
+    "searchNode": "Search nodes...",
+    "addNode": "Add Node",
+    "filter": "Filter",
+    "dataQuality": "Data Quality",
+    "reviewQueue": "Review Queue",
+    "exportMenu": "Export",
+    "loadingData": "Loading ontology data...",
+    "tableViewPlanned": "Table view for accessibility (coming soon)",
+    "caseSelector": {
+      "title": "Select a case to explore the ontology",
+      "noCases": "No cases registered."
+    }
+  },
+  "olap": {
+    "title": "OLAP Pivot Analysis",
+    "selectCube": "Select cube...",
+    "analysisResult": "Analysis Result",
+    "queryTime": "Query time: {{time}}ms",
+    "rowCount": "Rows: {{count}}",
+    "csvExport": "Export CSV",
+    "aggregating": "Aggregating data...",
+    "emptyHint": "Configure conditions and click \"Run Analysis\"."
+  },
+  "settings": {
+    "title": "Settings",
+    "menuLabel": "Settings menu",
+    "tabs": {
+      "system": "System",
+      "logs": "Logs",
+      "users": "Users",
+      "config": "Config",
+      "feedback": "Feedback"
+    }
+  },
+  "watch": {
+    "title": "Integrated Monitoring & Alerts",
+    "subtitle": "Real-time monitoring of network latency and system anomalies",
+    "viewToggle": "View toggle",
+    "views": {
+      "feed": "Feed",
+      "timeline": "Timeline",
+      "rules": "Alert Rules"
+    },
+    "feedLabel": "Alert feed",
+    "timelineLabel": "Event timeline",
+    "rulesLabel": "Alert rule settings"
+  },
+  "datasource": {
+    "erd": {
+      "errorTitle": "Failed to load ERD data.",
+      "retryBtn": "Retry",
+      "loading": "Loading table metadata...",
+      "noTables": "No tables found in this datasource.",
+      "noTablesHint": "Please run metadata extraction first."
+    }
+  },
+  "feedback": {
+    "dashboard": {
+      "periodLabel": "Period:",
+      "ratingFilter": "Rating filter",
+      "allRatings": "All",
+      "positive": "Positive",
+      "negative": "Negative",
+      "partial": "Partial",
+      "refresh": "Refresh"
+    },
+    "summary": {
+      "totalQueries": "Total Queries",
+      "feedbackCount": "{{count}} feedbacks",
+      "satisfactionRate": "Satisfaction Rate",
+      "positiveRatio": "Positive ratio",
+      "dissatisfactionRate": "Dissatisfaction Rate",
+      "negativeRatio": "Negative ratio",
+      "avgResponseTime": "Avg Response Time",
+      "sqlExecutionTime": "SQL execution time"
+    },
+    "trend": {
+      "title": "Feedback Trend",
+      "loading": "Loading...",
+      "noData": "No data available",
+      "positive": "Positive",
+      "negative": "Negative",
+      "partial": "Partial"
+    },
+    "table": {
+      "title": "Feedback List",
+      "noData": "No feedback data",
+      "date": "Date",
+      "question": "Question",
+      "rating": "Rating",
+      "comment": "Comment",
+      "positive": "Positive",
+      "negative": "Negative",
+      "partial": "Partial",
+      "pagination": "{{from}}-{{to}} of {{total}}"
+    }
   },
   "processDesigner": {
     "toolbox": "Toolbox",

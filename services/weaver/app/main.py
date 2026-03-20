@@ -7,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
 from app.api.datasource import router as datasource_router
 from app.api.insight import router as insight_router
+from app.api.insight_ontology import router as insight_ontology_router
 from app.api.metadata_catalog import router as metadata_catalog_router
 from app.api.query import router as query_router
 from app.core.config import settings
@@ -38,6 +39,7 @@ app.add_exception_handler(InsightError, insight_error_handler)
 
 app.include_router(datasource_router)
 app.include_router(insight_router)
+app.include_router(insight_ontology_router)
 app.include_router(query_router)
 app.include_router(metadata_catalog_router)
 

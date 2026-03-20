@@ -1,4 +1,3 @@
-// @ts-nocheck
 // features/insight/utils/graphTransformer.ts
 // Transform backend API graph response into Cytoscape.js elements
 

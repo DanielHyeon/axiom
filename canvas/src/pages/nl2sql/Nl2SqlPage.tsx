@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * NL2SQL 페이지 — 자연어 → SQL 변환 + 실행.
  *
@@ -41,14 +40,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Database, Trash2, ArrowRight, Download, MessageSquare } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
-
-const EXAMPLE_QUESTIONS = [
-  '2024-06-20 서울전자 매출은?',
-  '2024년 회사별 매출 성장률이 가장 높은 곳은?',
-  '최근 3개월 처리 건수 추이',
-  '지역별 평균 처리 시간 비교',
-];
 
 type ChatMessage =
   | { role: 'user'; content: string }
@@ -66,10 +59,19 @@ type ChatMessage =
 const ROW_LIMIT_OPTIONS = [100, 500, 1000, 2000, 5000, 10000];
 
 export function NL2SQLPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [searchParams] = useSearchParams();
   const caseId = searchParams.get('case_id') || undefined;
   const isAdmin = useRole(['admin']);
+
+  /** 예제 질문 목록 — i18n에서 가져옴 */
+  const EXAMPLE_QUESTIONS = [
+    t('nl2sql.exampleQuestions.q1'),
+    t('nl2sql.exampleQuestions.q2'),
+    t('nl2sql.exampleQuestions.q3'),
+    t('nl2sql.exampleQuestions.q4'),
+  ];
 
   const [datasourceId, setDatasourceId] = useState('');
   const [rowLimit, setRowLimit] = useState<number>(1000);
@@ -129,7 +131,7 @@ export function NL2SQLPage() {
         const d = step.data as Record<string, unknown>;
         const hilReq: HilRequest = {
           type: (d.type as HilRequest['type']) || 'text',
-          question: String(d.question_to_user ?? d.question ?? '추가 정보가 필요합니다.'),
+          question: String(d.question_to_user ?? d.question ?? t('nl2sql.hilNeedInfo')),
           options: d.options as HilRequest['options'],
           context: d.context ? String(d.context) : d.partial_sql ? String(d.partial_sql) : undefined,
           session_state: String(d.session_state ?? ''),
@@ -176,7 +178,7 @@ export function NL2SQLPage() {
               ...rest,
               {
                 role: 'assistant',
-                content: resultData.summary ?? '쿼리 실행이 완료되었습니다.',
+                content: resultData.summary ?? t('nl2sql.queryComplete'),
                 sql: resultData.sql,
                 result: resultData,
               },
@@ -189,7 +191,7 @@ export function NL2SQLPage() {
       // === 에러 이벤트 ===
       if (step.step === 'error' && step.data) {
         const msg =
-          (step.data as { message?: string }).message ?? 'ReAct 단계에서 오류가 발생했습니다.';
+          (step.data as { message?: string }).message ?? t('nl2sql.reactError');
         setError(msg);
         setMessages((prev) => {
           const rest = prev.slice(0, -1);
@@ -199,7 +201,7 @@ export function NL2SQLPage() {
     },
     onComplete: () => setLoading(false),
     onError: (err: Error) => {
-      const msg = err.message || '스트림 연결에 실패했습니다.';
+      const msg = err.message || t('nl2sql.streamFailed');
       setError(msg);
       setMessages((prev) => {
         const rest = prev.slice(0, -1);
@@ -238,7 +240,7 @@ export function NL2SQLPage() {
       const errMsg =
         err instanceof AppError
           ? err.userMessage
-          : (err as Error).message || 'HIL 재개에 실패했습니다.';
+          : (err as Error).message || t('nl2sql.hilResumeFailed');
       setError(errMsg);
       setMessages((prev) => {
         const rest = prev.slice(0, -1);
@@ -285,14 +287,14 @@ export function NL2SQLPage() {
             ...prev,
             {
               role: 'assistant',
-              content: d.summary ?? '쿼리 실행이 완료되었습니다.',
+              content: d.summary ?? t('nl2sql.queryComplete'),
               sql: d.sql,
               result: d,
             },
           ]);
           queryClient.invalidateQueries({ queryKey: ['nl2sql', 'history'] });
         } else {
-          const errMsg = res.error?.message ?? '요청 처리에 실패했습니다.';
+          const errMsg = res.error?.message ?? t('nl2sql.requestFailed');
           setError(errMsg);
           setMessages((prev) => [...prev, { role: 'assistant', content: errMsg, error: errMsg }]);
         }
@@ -300,7 +302,7 @@ export function NL2SQLPage() {
         const errMsg =
           err instanceof AppError
             ? err.userMessage
-            : (err as Error).message || 'Oracle API 호출에 실패했습니다.';
+            : (err as Error).message || t('nl2sql.oracleApiFailed');
         setError(errMsg);
         setMessages((prev) => [...prev, { role: 'assistant', content: errMsg, error: errMsg }]);
       } finally {
@@ -323,7 +325,7 @@ export function NL2SQLPage() {
       const errMsg =
         err instanceof AppError
           ? err.userMessage
-          : (err as Error).message || '요청을 시작하지 못했습니다.';
+          : (err as Error).message || t('nl2sql.startFailed');
       setError(errMsg);
       setMessages((prev) => {
         const rest = prev.slice(0, -1);
@@ -380,9 +382,9 @@ export function NL2SQLPage() {
         <div className="flex-1 overflow-auto p-12 space-y-10">
           {/* Title Section */}
           <div className="space-y-2">
-            <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">NL2SQL</h1>
+            <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">{t('nl2sql.title')}</h1>
             <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
-              자연어를 SQL로 변환하여 데이터베이스를 쉽게 조회하세요
+              {t('nl2sql.subtitle')}
             </p>
           </div>
 
@@ -436,7 +438,7 @@ export function NL2SQLPage() {
                   className="flex items-center gap-1 text-xs text-foreground/60 hover:text-destructive transition-colors"
                 >
                   <Trash2 className="h-3 w-3" />
-                  초기화
+                  {t('nl2sql.reset')}
                 </button>
               )}
             </div>
@@ -453,7 +455,7 @@ export function NL2SQLPage() {
                   <MessageSquare className="h-4 w-4 text-foreground/60 shrink-0" />
                   <input
                     type="text"
-                    placeholder="예: 최근 3개월간 매출이 가장 높은 상품 10개를 조회하세요"
+                    placeholder={t('nl2sql.placeholder')}
                     className="flex-1 bg-transparent text-[13px] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] outline-none"
                     disabled={!!hilRequest}
                     {...register('prompt')}
@@ -465,7 +467,7 @@ export function NL2SQLPage() {
                   className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded disabled:opacity-50 hover:bg-red-700 transition-colors shrink-0"
                 >
                   <ArrowRight className="h-3.5 w-3.5" />
-                  실행
+                  {t('nl2sql.run')}
                 </button>
               </div>
               {errors.prompt && <p className="text-xs text-destructive">{errors.prompt.message}</p>}
@@ -475,7 +477,7 @@ export function NL2SQLPage() {
             {resultData?.sql && (
               <div className="bg-[#F5F5F5] rounded py-4 px-5 space-y-2">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-[1px]">Generated SQL</span>
+                  <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-[1px]">{t('nl2sql.generatedSql')}</span>
                 </div>
                 <pre className="text-[12px] text-black font-[IBM_Plex_Mono] whitespace-pre-wrap break-words">
                   {resultData.sql}
@@ -492,8 +494,8 @@ export function NL2SQLPage() {
             <div className="flex flex-col items-center py-16">
               <EmptyState
                 icon={Database}
-                title="AI SQL 어시스턴트"
-                description="질문을 입력하면 AI가 SQL을 생성하고 실행합니다."
+                title={t('nl2sql.emptyTitle')}
+                description={t('nl2sql.emptyDescription')}
               />
               <div className="flex flex-wrap gap-2 mt-6">
                 {EXAMPLE_QUESTIONS.map((q) => (
@@ -532,15 +534,15 @@ export function NL2SQLPage() {
             >
               <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">
                 {msg.role === 'user'
-                  ? '질문'
+                  ? t('nl2sql.chatUser')
                   : msg.role === 'assistant' && 'isHilQuestion' in msg && msg.isHilQuestion
-                    ? '에이전트 질문'
-                    : '응답'}
+                    ? t('nl2sql.chatHilQuestion')
+                    : t('nl2sql.chatAssistant')}
               </span>
               <p className="text-sm text-black mt-1">
                 {msg.content ||
                   (msg.role === 'assistant' && 'streaming' in msg && msg.streaming
-                    ? '처리 중...'
+                    ? t('common.processing')
                     : '')}
               </p>
               {msg.role === 'assistant' && msg.result?.result && msg.result.result.columns.length > 0 && (
@@ -575,7 +577,7 @@ export function NL2SQLPage() {
                   </table>
                   {(msg.result.result.rows?.length ?? 0) > 5 && (
                     <p className="text-xs text-foreground/60 mt-2">
-                      상위 5행만 표시 (총 {msg.result.result.row_count}행)
+                      {t('nl2sql.topRowsOnly', { count: msg.result.result.row_count })}
                     </p>
                   )}
                 </div>
@@ -603,14 +605,14 @@ export function NL2SQLPage() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h2 className="text-[14px] font-semibold text-black font-[Sora]">조회 결과</h2>
+                  <h2 className="text-[14px] font-semibold text-black font-[Sora]">{t('nl2sql.queryResult')}</h2>
                   <span className="bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
                     {resultData.result?.row_count ?? 0} rows
                   </span>
                 </div>
                 <button type="button" className="flex items-center gap-2 px-4 py-2.5 text-[12px] font-medium text-black border border-[#E5E5E5] rounded hover:bg-[#F5F5F5] transition-colors font-[Sora]">
                   <Download className="h-3.5 w-3.5" />
-                  Export
+                  {t('nl2sql.export')}
                 </button>
               </div>
               <ResultPanel
@@ -636,7 +638,7 @@ export function NL2SQLPage() {
       {historyOpen && (
         <div className="w-80 shrink-0 border-l border-[#E5E5E5] flex flex-col">
           <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5]">
-            <span className="text-[13px] font-semibold text-black font-[Sora]">Query History</span>
+            <span className="text-[13px] font-semibold text-black font-[Sora]">{t('nl2sql.queryHistory')}</span>
             <span className="bg-[#F5F5F5] px-2.5 py-1 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono] font-medium rounded">
               12
             </span>

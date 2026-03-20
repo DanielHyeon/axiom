@@ -16,6 +16,7 @@ import { PathHighlighter } from './components/PathHighlighter';
 import { ConceptMapView } from './components/ConceptMapView';
 import { QualityDashboard } from './components/QualityDashboard';
 import { HITLReviewQueue } from './components/HITLReviewQueue';
+import { useTranslation } from 'react-i18next';
 import { Share2, ShieldCheck, ClipboardList, Download, Plus, Search } from 'lucide-react';
 import type { ViewMode } from '@/features/ontology/types/ontology';
 
@@ -29,6 +30,7 @@ const VIEW_MODES: { key: ViewMode; label: string }[] = [
 const LAYER_TABS = ['All', 'Metrics', 'KPI', 'Driver', 'Measure', 'Process', 'Resource'];
 
 export function OntologyPage() {
+ const { t } = useTranslation();
  const [searchParams] = useSearchParams();
  const caseId = searchParams.get('caseId');
 
@@ -92,29 +94,29 @@ export function OntologyPage() {
  {/* Title Row */}
  <div className="flex items-start justify-between">
  <div className="space-y-1.5">
- <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">Ontology</h1>
+ <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">{t('ontology.title')}</h1>
  <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
- K-MRI 온톨로지 지식 그래프를 탐색하고 관리합니다
+ {t('ontology.subtitle')}
  </p>
  </div>
  <div className="flex items-center gap-3">
  <div className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E5E5] rounded">
  <Search className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-[13px] text-foreground/60 font-[IBM_Plex_Mono]">노드 검색...</span>
+ <span className="text-[13px] text-foreground/60 font-[IBM_Plex_Mono]">{t('ontology.searchNode')}</span>
  </div>
  <button
  type="button"
  className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors"
  >
  <Plus className="h-3.5 w-3.5" />
- 노드 추가
+ {t('ontology.addNode')}
  </button>
  </div>
  </div>
 
  {/* Filter Tabs */}
  <div className="flex items-center gap-2.5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">Filter</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">{t('ontology.filter')}</span>
  {LAYER_TABS.map((tab) => (
  <button
  key={tab}
@@ -138,7 +140,7 @@ export function OntologyPage() {
  className={`p-2 rounded transition-colors ${
  showQuality ? 'bg-[#F5F5F5] text-black' : 'text-foreground/60 hover:text-muted-foreground'
  }`}
- title="데이터 품질"
+ title={t('ontology.dataQuality')}
  >
  <ShieldCheck size={16} />
  </button>
@@ -148,7 +150,7 @@ export function OntologyPage() {
  className={`p-2 rounded transition-colors ${
  showHITL ? 'bg-[#F5F5F5] text-black' : 'text-foreground/60 hover:text-muted-foreground'
  }`}
- title="검토 대기열"
+ title={t('ontology.reviewQueue')}
  >
  <ClipboardList size={16} />
  </button>
@@ -156,7 +158,7 @@ export function OntologyPage() {
  <button
  type="button"
  className="p-2 rounded text-foreground/60 hover:text-muted-foreground transition-colors"
- title="내보내기"
+ title={t('ontology.exportMenu')}
  >
  <Download size={16} />
  </button>
@@ -192,7 +194,7 @@ export function OntologyPage() {
  <div className="flex-1 flex overflow-hidden rounded border border-[#E5E5E5]">
  {isLoading ? (
  <div className="flex-1 flex items-center justify-center text-foreground/60 text-sm">
- 온톨로지 데이터 로딩 중...
+ {t('ontology.loadingData')}
  </div>
  ) : viewMode === 'graph' ? (
  <GraphViewer
@@ -203,7 +205,7 @@ export function OntologyPage() {
  <ConceptMapView caseId={caseId} />
  ) : (
  <div className="flex-1 p-8 text-foreground/60 flex items-center justify-center">
- 접근성을 위한 테이블 뷰 (구현 예정)
+ {t('ontology.tableViewPlanned')}
  </div>
  )}
 
@@ -243,12 +245,13 @@ export function OntologyPage() {
 }
 
 function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
+ const { t } = useTranslation();
  const { data: cases, isLoading } = useCases();
 
  return (
  <div className="flex flex-col items-center justify-center h-full text-foreground/60 gap-4">
  <Share2 size={32} className="opacity-20" />
- <p className="text-sm font-medium text-muted-foreground">온톨로지를 탐색할 케이스를 선택하세요</p>
+ <p className="text-sm font-medium text-muted-foreground">{t('ontology.caseSelector.title')}</p>
  {isLoading ? (
  <div className="h-8 w-48 animate-pulse rounded bg-[#F5F5F5]" />
  ) : cases && cases.length > 0 ? (
@@ -266,7 +269,7 @@ function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
  ))}
  </div>
  ) : (
- <p className="text-xs text-foreground/60">등록된 케이스가 없습니다.</p>
+ <p className="text-xs text-foreground/60">{t('ontology.caseSelector.noCases')}</p>
  )}
  </div>
  );

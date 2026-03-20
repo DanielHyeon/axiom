@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import type { OntologyGraphData, OntologyLayer } from '../types/ontology';
 import { getCaseOntology, getPath } from '../api/ontologyApi';
 
@@ -62,7 +63,9 @@ export function useOntologyData(caseId: string | null) {
       if (!sourceId || !targetId || sourceId === targetId) return [];
       try {
         return await getPath(sourceId, targetId);
-      } catch {
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+        toast.error('최단 경로 조회 실패', { description: msg });
         return [];
       }
     },

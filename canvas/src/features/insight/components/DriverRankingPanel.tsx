@@ -2,6 +2,7 @@
 // Sorted list of DRIVER + DIMENSION nodes with search, hover highlight, and click-to-detail
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { TrendingUp, Layers, Columns3, Search } from 'lucide-react';
 import type { GraphData, DriverRankItem } from '../types/insight';
@@ -32,6 +33,7 @@ export function DriverRankingPanel({
  onSelectDriver,
  onHoverDriver,
 }: DriverRankingPanelProps) {
+ const { t } = useTranslation();
  const [search, setSearch] = useState('');
 
  const rankings: DriverRankItem[] = useMemo(() => {
@@ -48,7 +50,7 @@ export function DriverRankingPanel({
  if (!graphData) {
  return (
  <div className="text-xs text-foreground0 text-center py-4">
- 그래프를 로드하면 Driver 순위가 표시됩니다
+ {t('insight.driverRanking.noGraph')}
  </div>
  );
  }
@@ -57,7 +59,7 @@ export function DriverRankingPanel({
  return (
  <div className="text-xs text-foreground0 text-center py-4">
  <Columns3 className="h-5 w-5 mx-auto mb-2 opacity-30" />
- Driver / Dimension 노드가 없습니다
+ {t('insight.driverRanking.noDrivers')}
  </div>
  );
  }
@@ -66,9 +68,9 @@ export function DriverRankingPanel({
  <div className="space-y-2">
  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
  <TrendingUp className="h-3 w-3" />
- Driver / Dimension
+ {t('insight.driverRanking.title')}
  <span className="ml-auto text-muted-foreground normal-case font-normal">
- {rankings.length}개
+ {t('insight.driverRanking.count', { count: rankings.length })}
  </span>
  </div>
 
@@ -79,7 +81,8 @@ export function DriverRankingPanel({
  type="text"
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- placeholder="검색..."
+ placeholder={t('insight.driverRanking.searchPlaceholder')}
+ aria-label="드라이버 검색"
  className="w-full pl-6 pr-2 py-1 text-xs bg-muted/50 border border-border rounded text-foreground/80 placeholder-neutral-600 focus:outline-none focus:border-neutral-500"
  />
  </div>
@@ -118,7 +121,7 @@ export function DriverRankingPanel({
  <div className="text-xs text-foreground truncate">{item.label}</div>
  {item.evidence_count > 0 && (
  <div className="text-[10px] text-muted-foreground">
- 근거 {item.evidence_count}건
+ {t('insight.driverRanking.evidenceCount', { count: item.evidence_count })}
  </div>
  )}
  </div>
@@ -139,7 +142,7 @@ export function DriverRankingPanel({
 
  {filtered.length === 0 && (
  <div className="text-xs text-muted-foreground text-center py-2">
- "{search}" 검색 결과 없음
+ {t('insight.driverRanking.noResults', { query: search })}
  </div>
  )}
  </div>

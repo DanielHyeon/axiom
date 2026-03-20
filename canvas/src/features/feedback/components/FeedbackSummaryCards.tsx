@@ -3,6 +3,7 @@
  *
  * 총 쿼리 수, 만족률(%), 불만족률(%), 평균 응답시간(ms)을 표시한다.
  */
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '@/components/ui/card';
 import { BarChart3, ThumbsUp, ThumbsDown, Clock } from 'lucide-react';
 import type { FeedbackSummary } from '../types/feedback';
@@ -44,6 +45,7 @@ function KpiCard({ icon, label, value, subtext, color }: KpiCardProps) {
 }
 
 export function FeedbackSummaryCards({ data, isLoading }: FeedbackSummaryCardsProps) {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="grid grid-cols-4 gap-4">
@@ -71,30 +73,30 @@ export function FeedbackSummaryCards({ data, isLoading }: FeedbackSummaryCardsPr
     <div className="grid grid-cols-4 gap-4">
       <KpiCard
         icon={<BarChart3 className="h-4 w-4 text-blue-600" />}
-        label="총 쿼리"
+        label={t('feedback.summary.totalQueries')}
         value={totalQueries.toLocaleString()}
-        subtext={`피드백 ${totalFeedbacks}건`}
+        subtext={t('feedback.summary.feedbackCount', { count: totalFeedbacks })}
         color="bg-blue-50"
       />
       <KpiCard
         icon={<ThumbsUp className="h-4 w-4 text-green-600" />}
-        label="만족률"
+        label={t('feedback.summary.satisfactionRate')}
         value={`${(positiveRate * 100).toFixed(1)}%`}
-        subtext="positive 비율"
+        subtext={t('feedback.summary.positiveRatio')}
         color="bg-green-50"
       />
       <KpiCard
         icon={<ThumbsDown className="h-4 w-4 text-red-600" />}
-        label="불만족률"
+        label={t('feedback.summary.dissatisfactionRate')}
         value={`${(negativeRate * 100).toFixed(1)}%`}
-        subtext="negative 비율"
+        subtext={t('feedback.summary.negativeRatio')}
         color="bg-red-50"
       />
       <KpiCard
         icon={<Clock className="h-4 w-4 text-amber-600" />}
-        label="평균 응답시간"
+        label={t('feedback.summary.avgResponseTime')}
         value={`${Math.round(avgTime)}ms`}
-        subtext="SQL 실행 시간"
+        subtext={t('feedback.summary.sqlExecutionTime')}
         color="bg-amber-50"
       />
     </div>

@@ -5,7 +5,27 @@
     "list": "목록",
     "cancel": "취소",
     "confirm": "확인",
-    "error": "오류가 발생했습니다."
+    "error": "오류가 발생했습니다.",
+    "retry": "재시도",
+    "delete": "삭제",
+    "search": "검색...",
+    "noData": "데이터가 없습니다",
+    "refresh": "새로고침",
+    "export": "내보내기",
+    "close": "닫기",
+    "reset": "초기화",
+    "run": "실행",
+    "analyze": "분석",
+    "add": "추가",
+    "filter": "필터",
+    "all": "전체",
+    "rows": "행",
+    "processing": "처리 중...",
+    "showMore": "더 보기",
+    "noSearchResults": "검색 결과 없음",
+    "period": "기간:",
+    "daily": "일별",
+    "weekly": "주별"
   },
   "nav": {
     "dashboard": "대시보드",
@@ -14,6 +34,17 @@
     "data": "데이터",
     "processDesigner": "프로세스 디자이너",
     "watch": "Watch",
+    "settings": "설정"
+  },
+  "sidebar": {
+    "dashboard": "대시보드",
+    "nl2sql": "NL2SQL",
+    "olapPivot": "OLAP Pivot",
+    "insight": "Insight",
+    "ontology": "온톨로지",
+    "data": "데이터",
+    "processDesigner": "프로세스 디자이너",
+    "watch": "모니터링",
     "settings": "설정"
   },
   "dashboard": {
@@ -34,6 +65,174 @@
     "light": "라이트",
     "dark": "다크",
     "system": "시스템"
+  },
+  "locale": {
+    "switchToKo": "한국어로 전환",
+    "switchToEn": "Switch to English"
+  },
+  "nl2sql": {
+    "title": "NL2SQL",
+    "subtitle": "자연어를 SQL로 변환하여 데이터베이스를 쉽게 조회하세요",
+    "placeholder": "예: 최근 3개월간 매출이 가장 높은 상품 10개를 조회하세요",
+    "run": "실행",
+    "reset": "초기화",
+    "generatedSql": "Generated SQL",
+    "queryResult": "조회 결과",
+    "export": "Export",
+    "queryHistory": "Query History",
+    "emptyTitle": "AI SQL 어시스턴트",
+    "emptyDescription": "질문을 입력하면 AI가 SQL을 생성하고 실행합니다.",
+    "queryComplete": "쿼리 실행이 완료되었습니다.",
+    "requestFailed": "요청 처리에 실패했습니다.",
+    "oracleApiFailed": "Oracle API 호출에 실패했습니다.",
+    "streamFailed": "스트림 연결에 실패했습니다.",
+    "reactError": "ReAct 단계에서 오류가 발생했습니다.",
+    "hilResumeFailed": "HIL 재개에 실패했습니다.",
+    "startFailed": "요청을 시작하지 못했습니다.",
+    "hilNeedInfo": "추가 정보가 필요합니다.",
+    "chatUser": "질문",
+    "chatAssistant": "응답",
+    "chatHilQuestion": "에이전트 질문",
+    "topRowsOnly": "상위 5행만 표시 (총 {{count}}행)",
+    "exampleQuestions": {
+      "q1": "2024-06-20 서울전자 매출은?",
+      "q2": "2024년 회사별 매출 성장률이 가장 높은 곳은?",
+      "q3": "최근 3개월 처리 건수 추이",
+      "q4": "지역별 평균 처리 시간 비교"
+    }
+  },
+  "insight": {
+    "title": "Insight",
+    "subtitle": "KPI Impact 분석을 통해 핵심 드라이버를 파악합니다",
+    "searchKpi": "KPI 검색...",
+    "selectedKpi": "선택 KPI",
+    "impactDriverRanking": "Impact Driver Ranking",
+    "driverDetail": "Driver Detail",
+    "impactScore": "Impact Score",
+    "driversFound": "Drivers Found",
+    "active": "active",
+    "metaPrimary": "Primary mode",
+    "metaFallback": "Fallback mode",
+    "metaQueries": "Queries: {{count}}",
+    "metaCached": "Cached ({{ttl}})",
+    "metaCachedHit": "Cached (hit)",
+    "kpiSelector": {
+      "title": "KPI 선택",
+      "placeholder": "KPI fingerprint 입력...",
+      "analyze": "분석",
+      "loading": "로드 중...",
+      "recentKpis": "최근 KPI",
+      "noKpis": "KPI 없음 — 직접 입력"
+    },
+    "driverRanking": {
+      "title": "Driver / Dimension",
+      "count": "{{count}}개",
+      "searchPlaceholder": "검색...",
+      "noGraph": "그래프를 로드하면 Driver 순위가 표시됩니다",
+      "noDrivers": "Driver / Dimension 노드가 없습니다",
+      "noResults": "\"{{query}}\" 검색 결과 없음",
+      "evidenceCount": "근거 {{count}}건"
+    }
+  },
+  "ontology": {
+    "title": "Ontology",
+    "subtitle": "K-MRI 온톨로지 지식 그래프를 탐색하고 관리합니다",
+    "searchNode": "노드 검색...",
+    "addNode": "노드 추가",
+    "filter": "Filter",
+    "dataQuality": "데이터 품질",
+    "reviewQueue": "검토 대기열",
+    "exportMenu": "내보내기",
+    "loadingData": "온톨로지 데이터 로딩 중...",
+    "tableViewPlanned": "접근성을 위한 테이블 뷰 (구현 예정)",
+    "caseSelector": {
+      "title": "온톨로지를 탐색할 케이스를 선택하세요",
+      "noCases": "등록된 케이스가 없습니다."
+    }
+  },
+  "olap": {
+    "title": "OLAP 피벗 분석",
+    "selectCube": "큐브 선택...",
+    "analysisResult": "분석 결과",
+    "queryTime": "쿼리 시간: {{time}}ms",
+    "rowCount": "행: {{count}}",
+    "csvExport": "CSV 내보내기",
+    "aggregating": "데이터를 집계하고 있습니다...",
+    "emptyHint": "조건을 구성하고 \"분석 실행\"을 클릭하세요."
+  },
+  "settings": {
+    "title": "설정",
+    "menuLabel": "설정 메뉴",
+    "tabs": {
+      "system": "시스템",
+      "logs": "로그",
+      "users": "사용자",
+      "config": "구성",
+      "feedback": "피드백"
+    }
+  },
+  "watch": {
+    "title": "통합 관제 및 알람",
+    "subtitle": "네트워크 지연 및 시스템 이상 징후 실시간 모니터링",
+    "viewToggle": "보기 전환",
+    "views": {
+      "feed": "피드",
+      "timeline": "타임라인",
+      "rules": "알림 규칙"
+    },
+    "feedLabel": "알림 피드",
+    "timelineLabel": "이벤트 타임라인",
+    "rulesLabel": "알림 규칙 설정"
+  },
+  "datasource": {
+    "erd": {
+      "errorTitle": "ERD 데이터를 불러올 수 없습니다.",
+      "retryBtn": "다시 시도",
+      "loading": "테이블 메타데이터 로딩 중...",
+      "noTables": "이 데이터소스에서 테이블을 찾을 수 없습니다.",
+      "noTablesHint": "메타데이터 추출을 먼저 실행해주세요."
+    }
+  },
+  "feedback": {
+    "dashboard": {
+      "periodLabel": "기간:",
+      "ratingFilter": "평가 필터",
+      "allRatings": "전체",
+      "positive": "긍정",
+      "negative": "부정",
+      "partial": "수정",
+      "refresh": "새로고침"
+    },
+    "summary": {
+      "totalQueries": "총 쿼리",
+      "feedbackCount": "피드백 {{count}}건",
+      "satisfactionRate": "만족률",
+      "positiveRatio": "positive 비율",
+      "dissatisfactionRate": "불만족률",
+      "negativeRatio": "negative 비율",
+      "avgResponseTime": "평균 응답시간",
+      "sqlExecutionTime": "SQL 실행 시간"
+    },
+    "trend": {
+      "title": "피드백 추이",
+      "loading": "로딩 중...",
+      "noData": "데이터가 없습니다",
+      "positive": "긍정",
+      "negative": "부정",
+      "partial": "수정"
+    },
+    "table": {
+      "title": "피드백 목록",
+      "noData": "피드백 데이터가 없습니다",
+      "date": "날짜",
+      "question": "질문",
+      "rating": "평가",
+      "comment": "코멘트",
+      "positive": "긍정",
+      "negative": "부정",
+      "partial": "수정",
+      "pagination": "{{total}}건 중 {{from}}-{{to}}"
+    }
   },
   "processDesigner": {
     "toolbox": "도구 상자 (Toolbox)",

@@ -3,6 +3,7 @@
 // series_type is always "activity" (query count per day/week) — not KPI value timeseries.
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { fetchKpiActivity } from '../api/insightApi';
 import type { ActivityPoint } from '../api/insightApi';
 import type { TimeRange } from '../types/insight';
@@ -36,7 +37,11 @@ export function useKpiTimeseries({
     setLoading(true);
     fetchKpiActivity({ kpiFingerprint, driverKey, timeRange, granularity })
       .then((res) => setData(res.series))
-      .catch(() => setData([]))
+      .catch((err: unknown) => {
+        const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+        toast.error('KPI 타임시리즈 로딩 실패', { description: msg });
+        setData([]);
+      })
       .finally(() => setLoading(false));
   }, [kpiFingerprint, driverKey, timeRange, granularity]);
 

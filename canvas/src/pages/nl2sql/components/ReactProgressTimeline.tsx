@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { ReactStreamStep } from '@/features/nl2sql/api/oracleNl2sqlApi';
 import type { ReactStepType } from '@/features/nl2sql/types/nl2sql';
 import { cn } from '@/lib/utils';
@@ -43,36 +42,37 @@ const STEP_META: Record<ReactStepType, { label: string; icon: LucideIcon }> = {
  needs_user_input: { label: 'User Input', icon: HelpCircle },
 };
 
+/** 각 스트림 단계에서 요약 텍스트를 추출하는 헬퍼 */
 function extractSummary(step: ReactStreamStep): string {
- const d = step.data;
+ const d = step.data as Record<string, unknown> | undefined;
  if (!d) return '';
  switch (step.step) {
  case 'select': {
- const tables = d.tables as string[] | undefined;
- return tables ? `${tables.length} tables` : '';
+   const tables = Array.isArray(d.tables) ? d.tables : undefined;
+   return tables ? `${tables.length} tables` : '';
  }
  case 'generate':
- return 'SQL generated';
+   return 'SQL generated';
  case 'validate':
- return String(d.status ?? '');
+   return String(d.status ?? '');
  case 'fix':
- return 'SQL fixed';
+   return 'SQL fixed';
  case 'execute': {
- const count = d.row_count;
- return count != null ? `${count} rows` : '';
+   const count = d.row_count;
+   return count != null ? `${count} rows` : '';
  }
  case 'quality': {
- const score = d.score;
- return score != null ? `score: ${Number(score).toFixed(2)}` : '';
+   const score = d.score;
+   return score != null && typeof score === 'number' ? `score: ${score.toFixed(2)}` : '';
  }
  case 'triage':
- return String(d.action ?? '');
+   return String(d.action ?? '');
  case 'error':
- return String(d.message ?? '').slice(0, 60);
+   return String(d.message ?? '').slice(0, 60);
  case 'needs_user_input':
- return '사용자 입력 대기 중';
+   return '사용자 입력 대기 중';
  default:
- return '';
+   return '';
  }
 }
 

@@ -2,7 +2,7 @@
  * ERD 다이어그램 툴바 — 검색, 필터, SVG 다운로드, 통계 표시.
  */
 
-import { useState, useCallback } from 'react';
+import { useRef, useCallback, useEffect } from 'react';
 import { Search, Download, RotateCw, Table, Link, Columns3 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -28,18 +28,26 @@ export function ERDToolbar({
   onRefresh,
   isLoading,
 }: ERDToolbarProps) {
-  const [searchTimeout, setSearchTimeout] = useState<ReturnType<typeof setTimeout> | null>(null);
+  // 디바운스 타이머를 ref로 관리 (불필요한 리렌더 방지 + 클린업 보장)
+  const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // 컴포넌트 언마운트 시 타이머 정리
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+    };
+  }, []);
 
   // 검색 입력 — 300ms 디바운스
   const handleSearchChange = useCallback(
     (value: string) => {
-      if (searchTimeout) clearTimeout(searchTimeout);
-      const timeout = setTimeout(() => {
+      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
+      searchTimeoutRef.current = setTimeout(() => {
         onFilterChange({ ...filter, searchQuery: value });
+        searchTimeoutRef.current = null;
       }, 300);
-      setSearchTimeout(timeout);
     },
-    [filter, onFilterChange, searchTimeout]
+    [filter, onFilterChange]
   );
 
   return (

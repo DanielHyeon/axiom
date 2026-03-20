@@ -2,6 +2,8 @@
 // KPI selector — fetches KPI list from API, falls back to manual input
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, Zap } from 'lucide-react';
@@ -14,6 +16,7 @@ interface KpiSelectorProps {
 }
 
 export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
+ const { t } = useTranslation();
  const [inputValue, setInputValue] = useState('');
  const [kpis, setKpis] = useState<KpiListItem[]>([]);
  const [kpisLoading, setKpisLoading] = useState(true);
@@ -22,7 +25,11 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
  setKpisLoading(true);
  fetchKpis({ limit: 10 })
  .then((res) => setKpis(res.kpis))
- .catch(() => setKpis([]))
+ .catch((err: unknown) => {
+   const msg = err instanceof Error ? err.message : '알 수 없는 오류';
+   toast.error('KPI 목록을 불러오지 못했습니다', { description: msg });
+   setKpis([]);
+ })
  .finally(() => setKpisLoading(false));
  }, []);
 
@@ -49,14 +56,14 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
  <div className="space-y-3">
  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
  <Search className="h-3 w-3" />
- KPI 선택
+ {t('insight.kpiSelector.title')}
  </div>
 
  <form onSubmit={handleSubmit} className="flex gap-2">
  <Input
  value={inputValue}
  onChange={(e) => setInputValue(e.target.value)}
- placeholder="KPI fingerprint 입력..."
+ placeholder={t('insight.kpiSelector.placeholder')}
  className="h-8 text-xs bg-muted/50 border-border"
  disabled={loading}
  />
@@ -67,13 +74,13 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
  disabled={!inputValue.trim() || loading}
  >
  <Zap className="h-3 w-3 mr-1" />
- 분석
+ {t('insight.kpiSelector.analyze')}
  </Button>
  </form>
 
  <div className="space-y-1">
  <div className="text-[10px] font-medium text-foreground0 uppercase tracking-wider">
- {kpisLoading ? '로드 중...' : kpis.length > 0 ? '최근 KPI' : 'KPI 없음 — 직접 입력'}
+ {kpisLoading ? t('insight.kpiSelector.loading') : kpis.length > 0 ? t('insight.kpiSelector.recentKpis') : t('insight.kpiSelector.noKpis')}
  </div>
  {kpis.length > 0 && (
  <div className="flex flex-wrap gap-1">

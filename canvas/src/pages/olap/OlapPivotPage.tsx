@@ -23,10 +23,12 @@ import { DraggableItem } from './components/DraggableItem';
 import { DataTable } from '@/components/shared/DataTable';
 import type { Dimension, Measure } from '@/features/olap/types/olap';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Loader2, Download } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { Loader2, Download, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function OlapPivotPage() {
+ const { t } = useTranslation();
  const {
  cubeId, setCubeId, addFieldToZone,
  clearAll
@@ -36,6 +38,8 @@ export function OlapPivotPage() {
 
  const [activeItem, setActiveItem] = useState<{ item: Dimension | Measure, type: 'dimension' | 'measure' } | null>(null);
  const [chartViewType, setChartViewType] = useState<ChartViewType>('table');
+ // 에러 배너 닫기 상태
+ const [errorDismissed, setErrorDismissed] = useState(false);
 
  // Auto-run query if config changes and valid? We use explicit "run query" button as per spec.
 
@@ -85,7 +89,8 @@ export function OlapPivotPage() {
  };
 
  const handleRunQuery = () => {
- // Collect config and pass to execute
+ // 새 쿼리 실행 시 이전 에러 배너 닫기 상태 초기화
+ setErrorDismissed(false);
  const config = usePivotConfig.getState();
  executeQuery(config);
  };
@@ -112,7 +117,7 @@ export function OlapPivotPage() {
  <div className="h-14 border-b border-border bg-[#121212] px-6 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-4">
  <h1 className="font-semibold flex items-center gap-2">
- <span className="text-xl">📊</span> OLAP 피벗 분석
+ <span className="text-xl">📊</span> {t('olap.title')}
  </h1>
  <div className="h-6 w-px bg-muted" />
  <div className="w-64">
@@ -121,7 +126,7 @@ export function OlapPivotPage() {
  onValueChange={(val) => { clearAll(); setCubeId(val); }}
  >
  <SelectTrigger className="h-8 bg-card border-border text-sm">
- <SelectValue placeholder="큐브 선택..." />
+ <SelectValue placeholder={t('olap.selectCube')} />
  </SelectTrigger>
  <SelectContent>
  {cubes.map(c => (
@@ -152,14 +157,14 @@ export function OlapPivotPage() {
  {/* Bottom half: Results */}
  <div className="flex-[1.5] bg-popover p-6 relative overflow-y-auto">
  <div className="flex justify-between items-end mb-4">
- <h3 className="text-sm font-semibold text-foreground/80">분석 결과</h3>
+ <h3 className="text-sm font-semibold text-foreground/80">{t('olap.analysisResult')}</h3>
  {queryResult && (
  <div className="flex items-center gap-4">
  <span className="text-xs text-foreground0">
- 쿼리 시간: {queryResult.executionTimeMs}ms • 행: {queryResult.data.length}
+ {t('olap.queryTime', { time: queryResult.executionTimeMs })} • {t('olap.rowCount', { count: queryResult.data.length })}
  </span>
  <Button variant="outline" size="sm" className="h-7 text-xs">
- <Download size={12} className="mr-1" /> CSV 내보내기
+ <Download size={12} className="mr-1" /> {t('olap.csvExport')}
  </Button>
  </div>
  )}
@@ -172,13 +177,21 @@ export function OlapPivotPage() {
  {isQuerying ? (
  <div className="absolute inset-0 bg-sidebar/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
  <Loader2 className="animate-spin text-primary mb-2" size={32} />
- <p className="text-sm text-foreground/80">데이터를 집계하고 있습니다...</p>
+ <p className="text-sm text-foreground/80">{t('olap.aggregating')}</p>
  </div>
  ) : null}
 
- {error && (
- <div className="bg-red-950/30 border border-red-900/50 rounded-md p-4 mt-2">
+ {error && !errorDismissed && (
+ <div className="bg-red-950/30 border border-red-900/50 rounded-md p-4 mt-2 flex items-start justify-between gap-2">
  <p className="text-sm text-destructive font-medium">{error}</p>
+ <button
+   type="button"
+   onClick={() => setErrorDismissed(true)}
+   className="shrink-0 p-0.5 rounded text-destructive/60 hover:text-destructive transition-colors"
+   aria-label="에러 배너 닫기"
+ >
+   <X className="h-4 w-4" />
+ </button>
  </div>
  )}
 
@@ -198,7 +211,7 @@ export function OlapPivotPage() {
 
  {!queryResult && !error && !isQuerying && (
  <div className="h-32 flex items-center justify-center text-muted-foreground text-sm italic">
- 조건을 구성하고 "분석 실행"을 클릭하세요.
+ {t('olap.emptyHint')}
  </div>
  )}
  </div>

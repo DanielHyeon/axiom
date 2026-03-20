@@ -166,6 +166,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           onClick={() => setScale((s) => Math.min(s + 0.2, 4))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-black transition-colors"
           title="확대"
+          aria-label="확대"
         >
           +
         </button>
@@ -177,6 +178,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           onClick={() => setScale((s) => Math.max(s - 0.2, 0.2))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-black transition-colors"
           title="축소"
+          aria-label="축소"
         >
           -
         </button>
@@ -185,6 +187,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           onClick={handleResetZoom}
           className="px-2 py-1 text-[10px] text-foreground/60 hover:text-black transition-colors border-l border-[#E5E5E5]"
           title="줌 초기화"
+          aria-label="원래 크기"
         >
           Reset
         </button>

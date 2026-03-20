@@ -47,9 +47,9 @@ export function useERDData(datasourceId: string | null) {
 
   const tableNames = tablesData?.tables?.map((t) => t.name) ?? [];
 
-  // 2단계: 각 테이블의 컬럼 병렬 조회
+  // 2단계: 각 테이블의 컬럼 병렬 조회 (최대 30개로 제한 — 과도한 동시 요청 방지)
   const columnQueries = useQueries({
-    queries: tableNames.map((tableName) => ({
+    queries: tableNames.slice(0, 30).map((tableName) => ({
       queryKey: ['erd', 'columns', datasourceId, tableName],
       queryFn: () => getTableColumns(tableName, datasourceId!),
       enabled: !!datasourceId && tableNames.length > 0,

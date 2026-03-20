@@ -6,9 +6,11 @@ import { EventTimeline } from './components/EventTimeline';
 import { useAlerts } from '@/features/watch/hooks/useAlerts';
 import { useWatchStore } from '@/features/watch/store/useWatchStore';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { BellRing, List, LayoutGrid, Settings2 } from 'lucide-react';
 
 export function WatchDashboardPage() {
+ const { t } = useTranslation();
  const { getFilteredAlerts, markAsRead } = useAlerts();
  const { filters } = useWatchStore();
  const [view, setView] = useState<'feed' | 'timeline' | 'rules'>('feed');
@@ -26,43 +28,43 @@ export function WatchDashboardPage() {
  <BellRing className="text-primary" size={20} aria-hidden />
  </div>
  <div>
- <h1 className="text-2xl font-bold text-foreground">통합 관제 및 알람</h1>
- <p className="text-sm text-secondary-foreground">네트워크 지연 및 시스템 이상 징후 실시간 모니터링</p>
+ <h1 className="text-2xl font-bold text-foreground">{t('watch.title')}</h1>
+ <p className="text-sm text-secondary-foreground">{t('watch.subtitle')}</p>
  </div>
  </div>
 
  <div className="flex items-center gap-2">
  <PriorityFilter />
- <div className="flex rounded-lg border border-border bg-card overflow-hidden" role="tablist" aria-label="보기 전환">
+ <div className="flex rounded-lg border border-border bg-card overflow-hidden" role="tablist" aria-label={t('watch.viewToggle')}>
  <button
  type="button"
  role="tab"
- aria-label="알림 피드"
+ aria-label={t('watch.feedLabel')}
  onClick={() => setView('feed')}
  className={`flex items-center gap-2 px-3 py-2 text-sm ${view === 'feed' ? 'bg-primary/15 text-primary font-medium' : 'text-secondary-foreground hover:bg-secondary'}`}
  >
  <List size={18} aria-hidden />
- <span>피드</span>
+ <span>{t('watch.views.feed')}</span>
  </button>
  <button
  type="button"
  role="tab"
- aria-label="이벤트 타임라인"
+ aria-label={t('watch.timelineLabel')}
  onClick={() => setView('timeline')}
  className={`flex items-center gap-2 px-3 py-2 text-sm ${view === 'timeline' ? 'bg-primary/15 text-primary font-medium' : 'text-secondary-foreground hover:bg-secondary'}`}
  >
  <LayoutGrid size={18} aria-hidden />
- <span>타임라인</span>
+ <span>{t('watch.views.timeline')}</span>
  </button>
  <button
  type="button"
  role="tab"
- aria-label="알림 규칙 설정"
+ aria-label={t('watch.rulesLabel')}
  onClick={() => setView('rules')}
  className={`flex items-center gap-2 px-3 py-2 text-sm ${view === 'rules' ? 'bg-primary/15 text-primary font-medium' : 'text-secondary-foreground hover:bg-secondary'}`}
  >
  <Settings2 size={18} aria-hidden />
- <span>알림 규칙</span>
+ <span>{t('watch.views.rules')}</span>
  </button>
  </div>
  </div>

@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo, useCallback, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useERDData } from '../hooks/useERDData';
 import { generateMermaidERCode, getConnectedTables } from '../utils/mermaidCodeGen';
 import { MermaidERDRenderer } from './MermaidERDRenderer';
@@ -24,6 +25,7 @@ const DEFAULT_FILTER: ERDFilter = {
 };
 
 export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
+  const { t } = useTranslation();
   const { tables, isLoading, error, refetch } = useERDData(datasourceId);
   const [filter, setFilter] = useState<ERDFilter>(DEFAULT_FILTER);
   const svgContainerRef = useRef<HTMLDivElement>(null);
@@ -86,14 +88,14 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-foreground/60 gap-3 p-8">
         <Database className="h-8 w-8 opacity-30" />
-        <p className="text-sm">ERD 데이터를 불러올 수 없습니다.</p>
+        <p className="text-sm">{t('datasource.erd.errorTitle')}</p>
         <p className="text-xs text-destructive">{error instanceof Error ? error.message : String(error)}</p>
         <button
           type="button"
           onClick={() => refetch()}
           className="text-xs text-blue-600 hover:underline"
         >
-          다시 시도
+          {t('datasource.erd.retryBtn')}
         </button>
       </div>
     );
@@ -105,7 +107,7 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
       <div className="flex-1 flex items-center justify-center text-foreground/60 text-sm">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
-          테이블 메타데이터 로딩 중...
+          {t('datasource.erd.loading')}
         </div>
       </div>
     );
@@ -116,8 +118,8 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center text-foreground/60 gap-3 p-8">
         <Database className="h-8 w-8 opacity-30" />
-        <p className="text-sm">이 데이터소스에서 테이블을 찾을 수 없습니다.</p>
-        <p className="text-xs">메타데이터 추출을 먼저 실행해주세요.</p>
+        <p className="text-sm">{t('datasource.erd.noTables')}</p>
+        <p className="text-xs">{t('datasource.erd.noTablesHint')}</p>
       </div>
     );
   }
