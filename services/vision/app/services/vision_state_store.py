@@ -108,6 +108,16 @@ class VisionStateStore:
                     )
                     """
                 )
+                cur.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS causal_analyses (
+                        case_id TEXT NOT NULL,
+                        analysis_id TEXT NOT NULL,
+                        payload_json TEXT NOT NULL,
+                        PRIMARY KEY (case_id, analysis_id)
+                    )
+                    """
+                )
                 cur.close()
             else:
                 conn.execute(
@@ -144,6 +154,16 @@ class VisionStateStore:
                     )
                     """
                 )
+                conn.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS causal_analyses (
+                        case_id TEXT NOT NULL,
+                        analysis_id TEXT NOT NULL,
+                        payload_json TEXT NOT NULL,
+                        PRIMARY KEY (case_id, analysis_id)
+                    )
+                    """
+                )
             conn.commit()
 
     def clear(self) -> None:
@@ -154,12 +174,14 @@ class VisionStateStore:
                 cur.execute("DELETE FROM cubes")
                 cur.execute("DELETE FROM etl_jobs")
                 cur.execute("DELETE FROM root_cause_analyses")
+                cur.execute("DELETE FROM causal_analyses")
                 cur.close()
             else:
                 conn.execute("DELETE FROM what_if_scenarios")
                 conn.execute("DELETE FROM cubes")
                 conn.execute("DELETE FROM etl_jobs")
                 conn.execute("DELETE FROM root_cause_analyses")
+                conn.execute("DELETE FROM causal_analyses")
             conn.commit()
 
     def load_state(self) -> dict[str, Any]:
@@ -178,6 +200,8 @@ class VisionStateStore:
             etl_rows = cur.fetchall()
             cur.execute("SELECT case_id, payload_json FROM root_cause_analyses")
             root_cause_rows = cur.fetchall()
+            cur.execute("SELECT case_id, analysis_id, payload_json FROM causal_analyses")
+            causal_rows = cur.fetchall()
             cur.close()
 
         what_if_by_case: dict[str, dict[str, dict[str, Any]]] = {}
@@ -201,11 +225,20 @@ class VisionStateStore:
             str(row["case_id"]): json.loads(row["payload_json"])
             for row in root_cause_rows
         }
+
+        # 인과 분석 결과 복원: case_id -> {analysis_id -> payload}
+        causal_results_by_case: dict[str, dict[str, dict[str, Any]]] = {}
+        for row in causal_rows:
+            case_id = str(row["case_id"])
+            analysis_id = str(row["analysis_id"])
+            causal_results_by_case.setdefault(case_id, {})[analysis_id] = json.loads(row["payload_json"])
+
         return {
             "what_if_by_case": what_if_by_case,
             "cubes": cubes,
             "etl_jobs": etl_jobs,
             "root_cause_by_case": root_cause_by_case,
+            "causal_results_by_case": causal_results_by_case,
         }
 
     def upsert_scenario(self, case_id: str, scenario_id: str, payload: dict[str, Any]) -> None:
@@ -325,5 +358,32 @@ class VisionStateStore:
                     DO UPDATE SET payload_json = excluded.payload_json
                     """,
                     (case_id, json.dumps(payload, ensure_ascii=True)),
+                )
+            conn.commit()
+
+    def upsert_causal_analysis(self, case_id: str, analysis_id: str, payload: dict[str, Any]) -> None:
+        """인과 분석 결과를 DB에 저장/갱신한다 (서비스 재시작 시 복원용)."""
+        with self._connect() as conn:
+            if self._is_postgres:
+                cur = conn.cursor()
+                cur.execute(
+                    """
+                    INSERT INTO causal_analyses(case_id, analysis_id, payload_json)
+                    VALUES (%s, %s, %s)
+                    ON CONFLICT(case_id, analysis_id)
+                    DO UPDATE SET payload_json = EXCLUDED.payload_json
+                    """,
+                    (case_id, analysis_id, json.dumps(payload, ensure_ascii=True)),
+                )
+                cur.close()
+            else:
+                conn.execute(
+                    """
+                    INSERT INTO causal_analyses(case_id, analysis_id, payload_json)
+                    VALUES (?, ?, ?)
+                    ON CONFLICT(case_id, analysis_id)
+                    DO UPDATE SET payload_json = excluded.payload_json
+                    """,
+                    (case_id, analysis_id, json.dumps(payload, ensure_ascii=True)),
                 )
             conn.commit()

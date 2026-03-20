@@ -7,9 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from app.api.analytics import router as analytics_router
 from app.api.analytics_v3 import router as analytics_v3_router
+from app.api.causal import router as causal_router
 from app.api.olap import router as olap_router
 from app.api.root_cause import router as root_cause_router
 from app.api.what_if import router as what_if_router
+from app.api.whatif_dag import router as whatif_dag_router
 from app.services.vision_runtime import vision_runtime
 
 logger = logging.getLogger("axiom.vision")
@@ -74,7 +76,9 @@ app.add_middleware(
 # /api/v3/analytics* 풀스펙 엔드포인트를 모두 제공한다.
 app.include_router(analytics_router)
 app.include_router(analytics_v3_router)
+app.include_router(causal_router)
 app.include_router(what_if_router)
+app.include_router(whatif_dag_router)
 app.include_router(olap_router)
 app.include_router(root_cause_router)
 

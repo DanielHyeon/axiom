@@ -264,6 +264,21 @@ def _seed_demo_tables() -> None:
 async def lifespan(app: FastAPI):
     # Startup
     _seed_demo_tables()
+
+    # Enum cache bootstrap (#8 P1-1) — best-effort, 실패해도 서비스 가동에 영향 없음
+    from app.pipelines.enum_cache_bootstrap import enum_cache_bootstrap
+    try:
+        result = await enum_cache_bootstrap.run()
+        if result:
+            logger.info(
+                "enum_cache_startup_complete",
+                cached=result.cached,
+                scanned=result.scanned,
+                elapsed_ms=round(result.elapsed_ms, 1),
+            )
+    except Exception as exc:
+        logger.warning("enum_cache_startup_failed", error=str(exc))
+
     yield
     # Shutdown (nothing to clean up)
 

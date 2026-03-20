@@ -475,6 +475,61 @@ class OracleSynapseACL:
         except Exception as exc:
             logger.warning("synapse_acl_reflect_cache_failed", error=str(exc))
 
+    # -- Value Mapping Operations (#13 P1-2) ------------------------------------
+
+    async def save_value_mapping(
+        self,
+        natural_value: str,
+        code_value: str,
+        column_fqn: str,
+        verified: bool = False,
+        verified_confidence: float | None = None,
+    ) -> None:
+        """Neo4j :ValueMapping 노드를 MERGE한다 (Synapse 경유).
+
+        자연어 값과 실제 DB 값의 매핑을 저장하여,
+        향후 동일한 자연어 표현이 등장했을 때 재사용한다.
+        """
+        payload: dict[str, Any] = {
+            "natural_value": natural_value or "",
+            "code_value": code_value or "",
+            "column_fqn": column_fqn or "",
+            "verified": verified,
+        }
+        if verified_confidence is not None:
+            payload["verified_confidence"] = float(verified_confidence)
+
+        try:
+            await self._request_with_retry(
+                "POST",
+                "/api/v3/synapse/graph/value-mapping",
+                json=payload,
+            )
+        except Exception as exc:
+            logger.warning("synapse_acl_save_value_mapping_failed", error=str(exc))
+
+    async def find_value_mappings(
+        self,
+        term: str,
+        tenant_id: str = "",
+    ) -> list[dict[str, Any]]:
+        """Neo4j :ValueMapping 노드에서 CONTAINS 검색한다.
+
+        반환: [{natural_value, code_value, column_fqn, verified, usage_count}, ...]
+        """
+        try:
+            response = await self._request_with_retry(
+                "POST",
+                "/api/v3/synapse/graph/value-mapping/search",
+                tenant_id=tenant_id,
+                json={"term": term},
+            )
+            data = response.get("data") or {}
+            return data.get("mappings") or []
+        except Exception as exc:
+            logger.warning("synapse_acl_find_value_mappings_failed", error=str(exc))
+            return []
+
     # -- Datasource Registry -----------------------------------------------
 
     def list_datasources(self) -> list[DatasourceInfo]:

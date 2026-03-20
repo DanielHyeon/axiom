@@ -20,6 +20,16 @@ class Settings(BaseSettings):
     WEAVER_INSIGHT_URL: str = "http://weaver:8001/api/insight/logs"
     WEAVER_INSIGHT_TOKEN: str = ""   # must match WEAVER_INSIGHT_SERVICE_TOKEN in Weaver
 
+    # ── Feature Flags (#12, #13 P1-2) ──
+    ENABLE_QUALITY_GATE: bool = True          # True면 LLM 기반 품질 게이트 활성화, False면 항상 APPROVE
+    ENABLE_VALUE_MAPPING: bool = True         # True면 Value Mapping 파이프라인 활성화
+
+    # ── Enum Cache Bootstrap (#8 P1-1) ──
+    ENUM_CACHE_ENABLED: bool = True           # True면 서비스 시작 시 enum 캐시 초기화
+    ENUM_CACHE_MAX_VALUES: int = 100          # 100개 이하 고유값만 캐시 (초과 시 enum 아님)
+    ENUM_CACHE_MAX_COLUMNS: int = 2000        # information_schema 스캔 대상 최대 컬럼 수
+    ENUM_CACHE_TARGET_SCHEMA: str = "public"  # 스캔 대상 PostgreSQL 스키마
+
     model_config = ConfigDict(env_file=".env")
 
 settings = Settings()

@@ -1,3 +1,13 @@
+"""ReAct 에이전트: 6단계 루프로 NL2SQL을 반복적으로 개선한다.
+
+Select -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage
+
+변경 이력:
+- v1: MockLLM 기반 (score=0.85 고정)
+- v2: QualityJudge LLM 기반 심사 (#12 P1-2)
+  - CRITICAL 수정: (preview or {}).get("row_count") 안전 접근 (C7)
+"""
+
 import json
 from typing import AsyncGenerator, Dict, Any, List
 
@@ -5,7 +15,9 @@ import structlog
 from pydantic import BaseModel
 
 from app.core.auth import CurrentUser
+from app.core.config import settings
 from app.core.llm_factory import llm_factory
+from app.core.quality_judge import QualityJudge
 from app.core.sql_guard import GuardConfig, sql_guard
 from app.core.sql_exec import sql_executor
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
@@ -49,6 +61,10 @@ def _error_step(iteration: int, code: str, message: str) -> str:
 class ReactAgent:
     """6-step loop: Select (graph) -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage; COMPLETE -> step result."""
 
+    def __init__(self) -> None:
+        # LLM 기반 품질 심사기 (기존 MockLLM 대체)
+        self._quality_judge = QualityJudge()
+
     async def _select_tables(
         self, question: str, tenant_id: str, case_id: str | None = None,
     ) -> tuple[list[str], str]:
@@ -88,14 +104,45 @@ class ReactAgent:
             return ValidateResult(passed=False, next_step="fix", violations=res.violations)
         return ValidateResult(passed=True, sql=res.sql, fixes=res.fixes)
 
-    async def run_step_quality(self, question: str, sql: str) -> Dict[str, Any]:
-        prompt = f"Assess quality of: {question} \nSQL: {sql}"
-        system = "당신은 SQL 결과 품질 심사관입니다."
-        res = await llm_factory.generate(prompt, system_prompt=system)
-        try:
-            return json.loads(res)
-        except Exception:
-            return {"score": 0.5, "is_complete": False, "reason": "Failed to parse json."}
+    async def run_step_quality(
+        self, question: str, sql: str, preview: dict | None = None,
+    ) -> Dict[str, Any]:
+        """LLM 기반 품질 심사를 수행한다.
+
+        기존 MockLLM(항상 0.85 반환)을 QualityJudge로 교체하여
+        실제 질문-SQL 의미 부합성을 평가한다.
+
+        CRITICAL 수정 (C7): preview가 None일 때 안전하게 접근한다.
+        - 잘못된 코드: preview.get("row_count")  # NoneType has no attribute 'get'
+        - 올바른 코드: (preview or {}).get("row_count")
+        """
+        # feature flag: 비활성화 시 기존 MockLLM과 동일한 동작
+        if not settings.ENABLE_QUALITY_GATE:
+            return {
+                "score": 0.85,
+                "is_complete": True,
+                "feedback": "품질 게이트 비활성화",
+                "reasons": [],
+                "risk_flags": [],
+            }
+
+        result = await self._quality_judge.judge_round(
+            question=question,
+            sql=sql,
+            # CRITICAL (C7): preview가 None일 때 안전 접근
+            row_count=(preview or {}).get("row_count"),
+            execution_time_ms=None,
+            preview=preview,
+            metadata=None,
+            round_idx=0,
+        )
+        return {
+            "score": result.confidence,
+            "is_complete": result.accept,
+            "feedback": result.summary,
+            "reasons": result.reasons,
+            "risk_flags": result.risk_flags,
+        }
 
     async def run_step_triage(
         self, quality_result: Dict[str, Any], iteration: int, max_iterations: int
@@ -121,7 +168,7 @@ class ReactAgent:
             for iteration in range(1, session.max_iterations + 1):
                 session.current_iteration = iteration
 
-                # Step 1: Select (O3: ontology → graph → schema → fallback)
+                # Step 1: Select (O3: ontology -> graph -> schema -> fallback)
                 table_names, reasoning = await self._select_tables(session.question, tenant_id, session.case_id)
                 yield _step_line("select", iteration, {"tables": table_names, "reasoning": reasoning})
 
@@ -171,8 +218,13 @@ class ReactAgent:
                     {"row_count": exec_res.row_count, "preview": preview},
                 )
 
-                # Step 5: Quality
-                qual = await self.run_step_quality(session.question, val_res.sql)
+                # Step 5: Quality (preview 데이터를 함께 전달하여 정확한 심사)
+                quality_preview = {
+                    "columns": exec_res.columns if hasattr(exec_res, 'columns') else [],
+                    "rows": preview,
+                    "row_count": exec_res.row_count,
+                }
+                qual = await self.run_step_quality(session.question, val_res.sql, quality_preview)
                 yield _step_line(
                     "quality",
                     iteration,

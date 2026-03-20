@@ -105,7 +105,95 @@ def _description(spec: FeatureSpec, actual: float) -> str:
     return f"{spec.label} 저하가 실패 확률 증가에 영향을 주었습니다."
 
 
-def run_root_cause_engine(case_id: str, payload: dict[str, Any]) -> dict[str, Any]:
+def _root_cause_from_causal_edges(
+    case_id: str,
+    payload: dict[str, Any],
+    causal_edges: list[dict[str, Any]],
+) -> dict[str, Any]:
+    """
+    인과 분석 엣지 기반 근본원인 랭킹.
+
+    각 엣지의 strength, p_value, method를 조합하여
+    impact_score를 계산하고 순위를 매긴다.
+    """
+    max_root_causes = min(max(int(payload.get("max_root_causes", 5)), 1), 10)
+
+    # method별 가중치: granger > decomposition > correlation
+    method_weight = {"granger": 1.2, "decomposition": 1.0, "correlation": 0.8}
+
+    # 엣지별 impact 계산
+    scored: list[dict[str, Any]] = []
+    for edge in causal_edges:
+        strength = float(edge.get("strength", 0.0))
+        p_value = float(edge.get("p_value", 1.0))
+        confidence = 1.0 - p_value
+        weight = method_weight.get(edge.get("method", ""), 0.8)
+        impact = strength * confidence * weight
+
+        scored.append({
+            "variable": edge["source"],
+            "variable_label": edge["source"],
+            "shap_value": round(impact, 4),
+            "contribution_pct": 0.0,  # 아래에서 계산
+            "actual_value": strength,
+            "critical_threshold": None,
+            "description": f"{edge['source']} -> {edge['target']} ({edge.get('method', 'unknown')})",
+            "causal_chain": [edge["source"], edge.get("method", ""), edge["target"]],
+            "confidence": round(confidence, 3),
+            "direction": edge.get("direction", "positive"),
+            "lag": edge.get("lag", 0),
+            "method": edge.get("method", "unknown"),
+            "high_is_risk": True,
+        })
+
+    scored.sort(key=lambda x: x["shap_value"], reverse=True)
+    selected = scored[:max_root_causes]
+
+    # contribution_pct 계산
+    total_shap = sum(item["shap_value"] for item in selected) or 1.0
+    root_causes: list[dict[str, Any]] = []
+    for rank, item in enumerate(selected, 1):
+        item["rank"] = rank
+        item["contribution_pct"] = round((item["shap_value"] / total_shap) * 100.0, 2)
+        root_causes.append(item)
+
+    # 전체 예측 확률 (인과 분석 기반)
+    overall_confidence = round(
+        sum(item["confidence"] for item in root_causes) / max(len(root_causes), 1), 3
+    )
+    predicted_failure_probability = round(
+        _clamp(0.3 + total_shap * 0.4, 0.3, 0.95), 3
+    )
+
+    return {
+        "root_causes": root_causes,
+        "overall_confidence": overall_confidence,
+        "predicted_failure_probability": predicted_failure_probability,
+        "confidence_basis": {
+            "model": "causal-analysis-engine-v1",
+            "edge_count": len(causal_edges),
+            "top_k": len(root_causes),
+        },
+        "explanation": "VAR/Granger + 분해형 하이브리드 인과 분석 기반 근본원인 산출",
+    }
+
+
+def run_root_cause_engine(
+    case_id: str,
+    payload: dict[str, Any],
+    causal_edges: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """
+    근본원인 분석 엔진.
+
+    causal_edges가 주어지면 실제 인과 분석 결과 기반으로 근본원인 산출.
+    없으면 기존 FeatureSpec 기반 결정론적 엔진 사용 (하위 호환).
+    """
+    # 인과 분석 결과가 있으면 새 엔진 사용
+    if causal_edges:
+        return _root_cause_from_causal_edges(case_id, payload, causal_edges)
+
+    # 기존 레거시 로직
     seed = _seed_from(case_id, payload)
     max_root_causes = min(max(int(payload.get("max_root_causes", 5)), 1), 10)
     scored: list[dict[str, Any]] = []

@@ -1,3 +1,15 @@
+"""NL2SQL 파이프라인: 자연어 질문을 SQL로 변환하고 실행한다.
+
+주요 단계:
+1. 질문 벡터화 (임베딩)
+2. 그래프 검색 + 스키마 카탈로그 + 온톨로지 컨텍스트
+2.5. Value Mapping (#13 P1-2): 자연어 값 -> DB 값 매핑
+3. LLM SQL 생성
+4. SQL Guard 검증
+5. SQL 실행
+6. 품질 게이트 심사 + 캐시 저장 + Value Mapping 학습
+"""
+
 from __future__ import annotations
 
 import asyncio
@@ -15,6 +27,7 @@ from app.core.config import settings
 from app.core.llm_factory import llm_factory
 from app.core.sql_exec import sql_executor
 from app.core.sql_guard import GuardConfig, sql_guard
+from app.core.value_mapping import value_mapping_service
 from app.core.visualize import recommend_visualization
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, TableInfo, OntologyContext
 from app.pipelines.cache_postprocess import cache_postprocessor
@@ -86,7 +99,7 @@ Rules:
 
 
 def _table_info_to_schema(t: TableInfo) -> TableSchema:
-    """ACL TableInfo → pipeline TableSchema 변환."""
+    """ACL TableInfo -> pipeline TableSchema 변환."""
     cols = [c.name for c in t.columns] if t.columns else ["id", "name"]
     return TableSchema(name=t.name, columns=cols)
 
@@ -284,6 +297,27 @@ class NL2SQLPipeline:
                 "error": {"code": "NO_SCHEMA", "message": "No schema available for this datasource."},
             }
 
+        # 2.5 Value Mapping 활성화 (#13 P1-2): 자연어 값을 실제 DB 값으로 매핑
+        resolved_values = []
+        if settings.ENABLE_VALUE_MAPPING:
+            try:
+                resolved_values = await value_mapping_service.resolve_values(
+                    question=question,
+                    datasource_id=datasource_id,
+                    tenant_id=tenant_id,
+                    schema_catalog=schema_catalog,
+                )
+                # 해석된 값을 value_mappings에 병합
+                for rv in resolved_values:
+                    value_mappings.append({
+                        "natural_language": rv.user_term,
+                        "db_value": rv.actual_value,
+                        "column": rv.column_fqn.split(".")[-1] if rv.column_fqn else "",
+                        "table": rv.column_fqn.split(".")[-2] if "." in (rv.column_fqn or "") else "",
+                    })
+            except Exception as exc:
+                logger.warning("value_mapping_resolve_failed", error=str(exc))
+
         # 3. Schema formatting done in _format_schema_ddl
         # 4. LLM SQL generation (O1-3 + O3 ontology injection)
         generated_sql = await self._generate_sql_llm(
@@ -291,8 +325,20 @@ class NL2SQLPipeline:
             ontology_ctx=ontology_ctx,
         )
 
+        # 4.5 SQL 리터럴 검증 (#13 P1-2): WHERE 절의 값이 실제 DB 값과 일치하는지 확인
+        if settings.ENABLE_VALUE_MAPPING:
+            try:
+                value_hints = self._build_value_hints(schema_catalog)
+                mismatches = value_mapping_service.validate_sql_literals(generated_sql, value_hints)
+                if mismatches:
+                    logger.warning("sql_literal_mismatch_detected", mismatches=mismatches)
+            except Exception:
+                pass
+
         # 5. Guard
-        guard_cfg = GuardConfig(row_limit=row_limit, dialect=dialect)
+        # 테이블 화이트리스트 적용 — 스키마 카탈로그에 있는 테이블만 허용
+        table_names = [s.name for s in schema_catalog] if schema_catalog else None
+        guard_cfg = GuardConfig(row_limit=row_limit, dialect=dialect, allowed_tables=table_names)
         guard_res = sql_guard.guard_sql(generated_sql, guard_cfg)
         if guard_res.status == "REJECT":
             return {
@@ -324,16 +370,19 @@ class NL2SQLPipeline:
 
         tables_used = [s.name for s in schema_catalog]
 
-        # 9. Cache/quality gate (O4, fire-and-forget)
+        # 9. Cache/quality gate (O4, fire-and-forget) + Value Mapping 학습 (#13)
         try:
             preview_rows = exec_res.rows[:10] if exec_res.rows else []
             asyncio.create_task(
-                cache_postprocessor.process(
+                self._postprocess_and_learn(
                     question=question,
                     sql=guard_res.sql,
                     result_preview=preview_rows,
                     datasource_id=datasource_id,
                     tenant_id=tenant_id,
+                    resolved_values=resolved_values,
+                    preview_columns=exec_res.columns,
+                    execution_time_ms=exec_res.execution_time_ms,
                 )
             )
         except RuntimeError:
@@ -376,6 +425,61 @@ class NL2SQLPipeline:
                 },
             },
         }
+
+    @staticmethod
+    def _build_value_hints(schema_catalog: list[TableSchema]) -> dict[str, set[str]]:
+        """스키마 카탈로그에서 enum 힌트를 value_hints 형태로 변환한다.
+
+        반환: {column_name_lower: {allowed_value_lower, ...}}
+        향후 enum_cache_bootstrap과 통합하여 실제 enum 값을 활용할 수 있다.
+        """
+        hints: dict[str, set[str]] = {}
+        # 현재는 간단한 빈 힌트 반환 (enum_cache_bootstrap 연동은 향후 구현)
+        return hints
+
+    async def _postprocess_and_learn(
+        self,
+        question: str,
+        sql: str,
+        result_preview: list,
+        datasource_id: str,
+        tenant_id: str,
+        resolved_values: list,
+        preview_columns: list[str] | None = None,
+        execution_time_ms: int | None = None,
+    ) -> None:
+        """품질 게이트 심사 후, APPROVE되면 Value Mapping을 학습한다.
+
+        fire-and-forget으로 실행된다.
+        """
+        try:
+            # 품질 게이트 심사 + 캐시 저장
+            decision = await cache_postprocessor.process(
+                question=question,
+                sql=sql,
+                result_preview=result_preview,
+                datasource_id=datasource_id,
+                tenant_id=tenant_id,
+                execution_time_ms=float(execution_time_ms) if execution_time_ms else None,
+                preview_columns=preview_columns,
+            )
+
+            # APPROVE 시 Value Mapping 학습 (#13)
+            if decision.status == "APPROVE" and resolved_values and settings.ENABLE_VALUE_MAPPING:
+                for rv in resolved_values:
+                    try:
+                        await value_mapping_service.save_learned_mapping(
+                            natural_value=rv.user_term,
+                            db_value=rv.actual_value,
+                            column_fqn=rv.column_fqn,
+                            verified=True,
+                            confidence=decision.confidence,
+                        )
+                    except Exception as exc:
+                        logger.debug("value_mapping_learn_failed", error=str(exc))
+
+        except Exception as exc:
+            logger.warning("postprocess_and_learn_failed", error=str(exc))
 
 
 nl2sql_pipeline = NL2SQLPipeline()

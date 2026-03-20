@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from typing import Any
+
+from pydantic import BaseModel, Field
 
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
@@ -18,8 +22,72 @@ hitl_service = HITLService(ontology_service=ontology_service)
 snapshot_service = SnapshotService(neo4j_client, ontology_service)
 
 
+# ── Pydantic 요청/응답 모델 ────────────────────────────────────
+
+
+class RelationUpdateRequest(BaseModel):
+    """관계 속성 업데이트 요청 모델"""
+    weight: float | None = Field(None, ge=0.0, le=1.0, description="영향도 가중치 (0.0~1.0)")
+    lag: int | None = Field(None, ge=0, description="시간 지연 (일 단위)")
+    confidence: float | None = Field(None, ge=0.0, le=1.0, description="관계 신뢰도 (0.0~1.0)")
+    source_layer: str | None = Field(None, description="소스 노드 레이어")
+    target_layer: str | None = Field(None, description="타겟 노드 레이어")
+    from_field: str | None = Field(None, description="소스 필드명")
+    to_field: str | None = Field(None, description="타겟 필드명")
+    method: str | None = Field(None, description="분석 방법 (granger/correlation/manual)")
+    direction: str | None = Field(None, description="영향 방향 (positive/negative)")
+    type: str | None = Field(None, description="관계 타입 변경 (선택)")
+    properties: dict[str, Any] | None = Field(None, description="추가 속성")
+
+
+class BulkRelationUpdateItem(BaseModel):
+    """일괄 업데이트 개별 항목"""
+    source_id: str
+    target_id: str
+    type: str = "CAUSES"
+    weight: float | None = Field(None, ge=0.0, le=1.0)
+    lag: int | None = Field(None, ge=0)
+    confidence: float | None = Field(None, ge=0.0, le=1.0)
+    source_layer: str | None = None
+    target_layer: str | None = None
+    from_field: str | None = None
+    to_field: str | None = None
+    method: str | None = None
+    direction: str | None = None
+
+
+class BulkRelationUpdateRequest(BaseModel):
+    """관계 일괄 업데이트 요청 모델"""
+    updates: list[BulkRelationUpdateItem]
+
+
+class BehaviorModelCreateRequest(BaseModel):
+    """BehaviorModel 생성 요청"""
+    name: str = Field(..., description="모델 이름")
+    model_type: str = Field("unknown", description="모델 타입 (RandomForest, LinearRegression 등)")
+    status: str = Field("pending", description="상태: pending|training|trained|failed|disabled")
+    metrics_json: str | None = Field("{}", description="성능 메트릭 JSON")
+    feature_view_sql: str | None = Field("", description="학습 데이터 SQL")
+    train_data_rows: int | None = Field(0, description="학습 데이터 행 수")
+    reads: list[dict[str, Any]] | None = Field(
+        default_factory=list,
+        description="READS_FIELD 목록: [{source_node_id, field, lag, feature_name}]",
+    )
+    predicts: list[dict[str, Any]] | None = Field(
+        default_factory=list,
+        description="PREDICTS_FIELD 목록: [{target_node_id, field, confidence}]",
+    )
+
+
 def _tenant(request: Request) -> str:
-    return getattr(request.state, "tenant_id", "unknown")
+    """테넌트 ID 추출 — 없으면 401 반환 (fail-closed)"""
+    tid = getattr(request.state, "tenant_id", None)
+    if not tid:
+        raise HTTPException(status_code=401, detail="tenant_id not resolved")
+    return tid
+
+
+# ── 기존 온톨로지 CRUD (하위 호환 유지) ────────────────────────
 
 
 @router.get("/")
@@ -45,6 +113,8 @@ async def get_case_ontology(
     layer: str = "all",
     include_relations: bool = True,
     verified_only: bool = False,
+    min_weight: float | None = None,
+    min_confidence: float | None = None,
     limit: int = 500,
     offset: int = 0,
 ):
@@ -53,6 +123,8 @@ async def get_case_ontology(
         layer=layer,
         include_relations=include_relations,
         verified_only=verified_only,
+        min_weight=min_weight,
+        min_confidence=min_confidence,
         limit=limit,
         offset=offset,
     )
@@ -97,11 +169,14 @@ async def update_node(node_id: str, request: Request, payload: dict[str, Any]):
 
 
 @router.delete("/nodes/{node_id}")
-async def delete_node(node_id: str):
+async def delete_node(node_id: str, request: Request):
+    """노드 삭제 — tenant_id 검증 포함"""
     try:
-        data = await ontology_service.delete_node(node_id=node_id)
+        data = await ontology_service.delete_node(node_id=node_id, tenant_id=_tenant(request))
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
     return {"success": True, "data": data}
 
 
@@ -115,11 +190,82 @@ async def create_relation(request: Request, payload: dict[str, Any]):
 
 
 @router.delete("/relations/{relation_id}")
-async def delete_relation(relation_id: str):
+async def delete_relation(relation_id: str, request: Request):
+    """관계 삭제 — tenant_id 검증 포함"""
     try:
-        data = await ontology_service.delete_relation(relation_id=relation_id)
+        data = await ontology_service.delete_relation(relation_id=relation_id, tenant_id=_tenant(request))
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
+# ── 관계 가중치 업데이트 (신규) ────────────────────────────────
+
+
+@router.patch("/relations/{relation_id}")
+async def update_relation(relation_id: str, request: Request, body: RelationUpdateRequest):
+    """
+    기존 관계의 weight/lag/confidence 등 속성을 업데이트.
+    PATCH 메서드로 부분 업데이트를 지원한다.
+    """
+    # Pydantic 모델에서 None이 아닌 필드만 추출
+    payload = body.model_dump(exclude_none=True)
+    try:
+        data = await ontology_service.update_relation(
+            tenant_id=_tenant(request), relation_id=relation_id, payload=payload
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
+@router.patch("/relations:bulk")
+async def bulk_update_relations(request: Request, body: BulkRelationUpdateRequest):
+    """
+    상관/인과 분석 결과를 관계에 일괄 반영.
+    기존 관계가 있으면 업데이트, 없으면 새로 생성한다.
+
+    요청 본문의 각 항목에는 case_id가 필요하므로, query parameter로 case_id를 받는다.
+    """
+    # body에서 case_id를 첫 항목의 source_id가 속한 case에서 추론하거나, 직접 전달
+    if not body.updates:
+        raise HTTPException(status_code=400, detail="updates 목록이 비어 있습니다")
+
+    # case_id는 첫 항목의 source 노드에서 추론
+    first_source = body.updates[0].source_id
+    case_id = ontology_service.get_case_id_for_node(first_source)
+    if not case_id:
+        raise HTTPException(status_code=400, detail=f"source 노드 '{first_source}'를 찾을 수 없습니다")
+
+    updates_dicts = [item.model_dump(exclude_none=True) for item in body.updates]
+    try:
+        data = await ontology_service.bulk_update_relations(
+            tenant_id=_tenant(request), case_id=case_id, updates=updates_dicts
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
+@router.patch("/cases/{case_id}/relations:bulk")
+async def bulk_update_relations_with_case(case_id: str, request: Request, body: BulkRelationUpdateRequest):
+    """
+    case_id를 URL path로 명시적으로 받는 일괄 업데이트 엔드포인트.
+    /relations:bulk의 대안으로, case_id를 URL에서 직접 지정할 수 있다.
+    """
+    if not body.updates:
+        raise HTTPException(status_code=400, detail="updates 목록이 비어 있습니다")
+    updates_dicts = [item.model_dump(exclude_none=True) for item in body.updates]
+    try:
+        data = await ontology_service.bulk_update_relations(
+            tenant_id=_tenant(request), case_id=case_id, updates=updates_dicts
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     return {"success": True, "data": data}
 
 
@@ -138,6 +284,45 @@ async def get_path(node_id: str, target_id: str, max_depth: int = 6):
         data = await ontology_service.path_to(source_id=node_id, target_id=target_id, max_depth=max_depth)
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
+# ── BehaviorModel CRUD (신규) ────────────────────────────────
+
+
+@router.post("/cases/{case_id}/behavior-models")
+async def create_behavior_model(case_id: str, request: Request, body: BehaviorModelCreateRequest):
+    """
+    OntologyBehavior:Model 노드를 생성하고 READS_FIELD/PREDICTS_FIELD 링크를 설정.
+    Neo4j에 :OntologyBehavior:Model 멀티레이블 노드로 저장된다.
+    """
+    model_data = body.model_dump()
+    try:
+        data = await ontology_service.create_behavior_model(
+            tenant_id=_tenant(request), case_id=case_id, model_data=model_data
+        )
+    except (ValueError, KeyError) as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
+@router.get("/cases/{case_id}/behavior-models")
+async def list_behavior_models(case_id: str):
+    """해당 case의 모든 BehaviorModel 목록 조회"""
+    data = await ontology_service.list_behavior_models(case_id=case_id)
+    return {"success": True, "data": data, "total": len(data)}
+
+
+@router.get("/cases/{case_id}/model-graph")
+async def get_model_graph(case_id: str):
+    """
+    시뮬레이션용 모델 DAG 구조 반환.
+    Vision 서비스의 What-if 시뮬레이션에서 이 API를 호출하여 모델 그래프를 로드한다.
+
+    Returns:
+        {models: [...], reads: [...], predicts: [...]}
+    """
+    data = await ontology_service.get_model_graph(case_id=case_id)
     return {"success": True, "data": data}
 
 
@@ -244,7 +429,7 @@ async def diff_snapshots(snapshot_a: str, snapshot_b: str):
     return {"success": True, "data": data}
 
 
-# -- O5-5: GlossaryTerm ↔ Ontology Bridge ------------------------------------
+# -- O5-5: GlossaryTerm <-> Ontology Bridge ------------------------------------
 
 
 @router.get("/cases/{case_id}/glossary-suggest")
