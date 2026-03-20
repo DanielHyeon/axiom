@@ -2,7 +2,11 @@ import { oracleApi } from '@/lib/api/clients';
 import { createNdjsonStream } from '@/lib/api/streamManager';
 import { toast } from 'sonner';
 import { AppError } from '@/lib/api/errors';
-import type { DatasourceInfo, TableMeta, ColumnMeta } from '@/features/nl2sql/types/nl2sql';
+import type { DatasourceInfo, TableMeta, ColumnMeta } from '@/shared/types/schema';
+
+// ── 공통 Meta API re-export (하위 호환성) ──
+// 다른 feature에서 이 파일을 통해 Meta API를 가져가던 코드를 깨뜨리지 않기 위해 re-export
+export { getDatasources, getTables, getTableColumns } from '@/shared/api/oracleMetaApi';
 
 /** NL2SQL 에러 코드별 사용자 메시지 */
 const NL2SQL_ERROR_MESSAGES: Record<string, string> = {
@@ -182,49 +186,6 @@ export function postReactStream(
 }
 
 // ---------------------------------------------------------------------------
-// Meta API
+// Meta API — shared/api/oracleMetaApi.ts로 이동함.
+// 상단에서 re-export하고 있으므로 기존 import 경로는 그대로 동작한다.
 // ---------------------------------------------------------------------------
-
-/** GET /text2sql/meta/datasources */
-export async function getDatasources(): Promise<DatasourceInfo[]> {
-  const res = await oracleApi.get('/text2sql/meta/datasources');
-  const body = res as unknown as { success: boolean; data?: { datasources?: DatasourceInfo[] } };
-  return body.data?.datasources ?? [];
-}
-
-/** GET /text2sql/meta/tables */
-export async function getTables(params: {
-  datasource_id: string;
-  search?: string;
-  page?: number;
-  page_size?: number;
-  valid_only?: boolean;
-}): Promise<{
-  tables: TableMeta[];
-  pagination: { page: number; page_size: number; total_count: number; total_pages: number };
-}> {
-  const res = await oracleApi.get('/text2sql/meta/tables', { params });
-  const body = res as unknown as {
-    success: boolean;
-    data?: {
-      tables?: TableMeta[];
-      pagination?: { page: number; page_size: number; total_count: number; total_pages: number };
-    };
-  };
-  return {
-    tables: body.data?.tables ?? [],
-    pagination: body.data?.pagination ?? { page: 1, page_size: 50, total_count: 0, total_pages: 0 },
-  };
-}
-
-/** GET /text2sql/meta/tables/{name}/columns */
-export async function getTableColumns(
-  tableName: string,
-  datasourceId: string
-): Promise<ColumnMeta[]> {
-  const res = await oracleApi.get(`/text2sql/meta/tables/${encodeURIComponent(tableName)}/columns`, {
-    params: { datasource_id: datasourceId },
-  });
-  const body = res as unknown as { success: boolean; data?: { columns?: ColumnMeta[] } };
-  return body.data?.columns ?? [];
-}

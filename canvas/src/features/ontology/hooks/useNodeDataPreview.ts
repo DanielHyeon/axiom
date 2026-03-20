@@ -5,8 +5,9 @@
 
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
-import { fetchSchemaCoverage } from '@/features/insight/api/insightApi';
-import type { SchemaCoverageResponse } from '@/features/insight/api/insightApi';
+// 스키마 커버리지 API와 타입은 shared 레이어에서 가져온다 (feature 간 의존 제거)
+import { fetchSchemaCoverage } from '@/shared/api/insightSchemaApi';
+import type { SchemaCoverageResponse } from '@/shared/types/insight';
 
 /** Parse a graph node ID into { table, column } for schema-coverage lookup. */
 function parseNodeId(nodeId: string): { table: string; column?: string } | null {

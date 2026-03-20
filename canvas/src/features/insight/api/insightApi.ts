@@ -194,23 +194,7 @@ export function fetchKpiActivity(params: {
 // GET /api/insight/schema-coverage — Ontology node coverage (P2-B)
 // ---------------------------------------------------------------------------
 
-export interface SchemaCoverageResponse {
-  table: string;
-  column: string | null;
-  query_count: number;
-  last_seen: string | null;
-  driver_score: { score: number; role: string; kpi_fingerprint: string } | null;
-}
-
-export function fetchSchemaCoverage(params: {
-  table: string;
-  column?: string;
-  timeRange?: TimeRange;
-}): Promise<SchemaCoverageResponse> {
-  const qs = new URLSearchParams({ table: params.table });
-  if (params.column) qs.set('column', params.column);
-  if (params.timeRange) qs.set('time_range', params.timeRange);
-  return (weaverApi.get as unknown as Get<SchemaCoverageResponse>)(
-    `/api/insight/schema-coverage?${qs}`,
-  );
-}
+// ── SchemaCoverageResponse 타입과 fetchSchemaCoverage 함수는 shared로 이동 ──
+// 하위 호환성을 위해 re-export
+export type { SchemaCoverageResponse } from '@/shared/types/insight';
+export { fetchSchemaCoverage } from '@/shared/api/insightSchemaApi';

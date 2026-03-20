@@ -5,7 +5,8 @@
  * 도메인 feature의 ObjectType을 재사용하되, 인스턴스 탐색용 타입을 추가 정의.
  */
 
-import type { ObjectType } from '@/features/domain/types/domain';
+// ObjectType은 shared 레이어에서 가져온다 (feature 간 의존 제거)
+import type { ObjectType } from '@/shared/types/domain';
 
 // ──────────────────────────────────────
 // 오브젝트 인스턴스

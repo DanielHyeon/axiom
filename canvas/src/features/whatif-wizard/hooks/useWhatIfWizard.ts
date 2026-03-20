@@ -11,7 +11,8 @@ import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 import { useEventFork } from './useEventFork';
-import * as wizardApi from '@/features/whatif/api/visionWizardApi';
+// Vision 위자드 API는 shared를 통해 접근한다 (feature 간 의존 제거)
+import * as wizardApi from '@/shared/api/visionWizardApi';
 import type {
   CausalRelation,
   InterventionSpec,

@@ -24,10 +24,10 @@ import {
 } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { MermaidERDRenderer } from '@/features/datasource/components/MermaidERDRenderer';
-import { generateMermaidERCode } from '@/features/datasource/utils/mermaidCodeGen';
-import type { ERDTableInfo } from '@/features/datasource/types/erd';
-import type { ColumnMeta } from '../types/nl2sql';
+// ERD 렌더러, 코드 생성, 타입 모두 shared 레이어에서 가져온다 (feature 간 의존 제거)
+import { MermaidERDRenderer } from '@/shared/components/MermaidERDRenderer';
+import { generateMermaidERCode } from '@/shared/utils/mermaidCodeGen';
+import type { ERDTableInfo, ColumnMeta } from '@/shared/types/schema';
 
 // ─── Props ────────────────────────────────────────────────
 

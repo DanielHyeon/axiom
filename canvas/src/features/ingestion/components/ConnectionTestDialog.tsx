@@ -12,7 +12,8 @@ import {
   X,
   Clock,
 } from 'lucide-react';
-import { testConnection } from '@/features/datasource/api/weaverDatasourceApi';
+// 연결 테스트 API는 shared를 통해 접근한다 (feature 간 의존 제거)
+import { testConnection } from '@/shared/api/datasourceApi';
 
 interface ConnectionTestDialogProps {
   /** 다이얼로그 표시 여부 */

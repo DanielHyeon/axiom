@@ -1,3 +1,14 @@
+/**
+ * NL2SQL feature 타입 정의
+ *
+ * 스키마 관련 공통 타입(DatasourceInfo, TableMeta, ColumnMeta)은
+ * shared/types/schema.ts에서 관리하며, 여기서는 re-export한다.
+ * NL2SQL 전용 타입(ChartType, ReactStepType, HilRequest 등)만 이 파일에 정의한다.
+ */
+
+// ── 공통 스키마 타입 re-export (하위 호환성 유지) ──
+export type { DatasourceInfo, TableMeta, ColumnMeta } from '@/shared/types/schema';
+
 /** Chart Type — matches Oracle API visualization.chart_type */
 export type ChartType = 'bar' | 'line' | 'pie' | 'scatter' | 'kpi_card' | 'table';
 
@@ -55,39 +66,6 @@ export interface Nl2SqlState {
     rowCount: number;
     queryTime: number;
     chartRecommendation: ChartConfig | null;
-}
-
-/** Oracle Meta API — datasource info */
-export interface DatasourceInfo {
-    id: string;
-    name: string;
-    type: string;
-    host: string;
-    database: string;
-    schema: string;
-    status: string;
-}
-
-/** Oracle Meta API — table metadata */
-export interface TableMeta {
-    name: string;
-    schema: string;
-    db: string;
-    description: string | null;
-    column_count: number;
-    is_valid: boolean;
-    has_vector: boolean;
-}
-
-/** Oracle Meta API — column metadata */
-export interface ColumnMeta {
-    name: string;
-    fqn: string;
-    data_type: string;
-    nullable: boolean;
-    is_primary_key: boolean;
-    description: string | null;
-    has_vector: boolean;
 }
 
 /** Execution metadata from API response */

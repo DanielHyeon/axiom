@@ -51,10 +51,8 @@ export async function deleteDatasource(name: string): Promise<void> {
   await weaverApi.delete(`/api/datasources/${encodeURIComponent(name)}`);
 }
 
-export async function testConnection(name: string): Promise<{ success: boolean; name: string; response_time_ms?: number; message?: string }> {
-  const res = await weaverApi.post(`/api/datasources/${encodeURIComponent(name)}/test`);
-  return res as unknown as { success: boolean; name: string; response_time_ms?: number; message?: string };
-}
+// testConnection은 shared/api/datasourceApi.ts로 이동. 하위 호환을 위해 re-export.
+export { testConnection } from '@/shared/api/datasourceApi';
 
 export async function getDatasourceSchemas(name: string): Promise<{ datasource: string; schemas: string[] }> {
   const res = await weaverApi.get(`/api/datasources/${encodeURIComponent(name)}/schemas`);

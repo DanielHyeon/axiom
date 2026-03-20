@@ -16,8 +16,8 @@ import { Search, PanelLeftClose, PanelLeftOpen, Network } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-// 도메인 feature 재사용
-import { useObjectTypeList } from '@/features/domain/hooks/useObjectTypes';
+// ObjectType 목록 조회 훅은 shared를 통해 접근 (feature 간 의존 제거)
+import { useObjectTypeList } from '@/shared/hooks/useObjectTypes';
 
 // 오브젝트 탐색기 로컬 훅/스토어
 import { useObjectExplorerStore } from '../store/useObjectExplorerStore';

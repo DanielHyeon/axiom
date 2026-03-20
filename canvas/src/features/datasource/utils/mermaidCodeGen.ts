@@ -3,7 +3,8 @@
  * KAIR MermaidERView.vue의 generateMermaidER() 로직을 TypeScript로 포팅.
  */
 
-import type { ERDTableInfo, ERDColumnInfo, ERDRelation, ERDStats } from '../types/erd';
+// ERD 타입은 shared 레이어에서 관리한다 (여러 feature에서 공통 사용)
+import type { ERDTableInfo, ERDColumnInfo, ERDRelation, ERDStats } from '@/shared/types/schema';
 
 /** 테이블명에서 Mermaid 호환 식별자로 정규화 (특수문자 → 언더스코어) */
 function sanitizeTableName(name: string): string {

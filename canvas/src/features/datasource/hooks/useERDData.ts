@@ -5,9 +5,10 @@
  */
 
 import { useQuery, useQueries } from '@tanstack/react-query';
-import { getTables, getTableColumns } from '@/features/nl2sql/api/oracleNl2sqlApi';
-import type { ERDTableInfo, ERDColumnInfo } from '../types/erd';
-import type { ColumnMeta } from '@/features/nl2sql/types/nl2sql';
+// 공통 Meta API와 타입은 shared 레이어에서 가져온다 (feature 간 의존 제거)
+import { getTables, getTableColumns } from '@/shared/api/oracleMetaApi';
+import type { ERDTableInfo, ERDColumnInfo } from '@/shared/types/schema';
+import type { ColumnMeta } from '@/shared/types/schema';
 
 /** ColumnMeta → ERDColumnInfo 변환 */
 function toERDColumn(col: ColumnMeta): ERDColumnInfo {
