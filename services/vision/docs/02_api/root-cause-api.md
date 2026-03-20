@@ -433,7 +433,7 @@
 
 ### GET `/api/v3/cases/{case_id}/root-cause/process-bottleneck`
 
-Synapse 프로세스 마이닝 병목 데이터를 기반으로 프로세스 병목의 근본원인을 인과 분석한다. Synapse에서 병목 탐지 결과와 프로세스 변형 데이터를 수신하여 DoWhy 인과 그래프로 분석한다.
+Synapse 프로세스 마이닝 병목 데이터를 기반으로 프로세스 병목의 근본원인을 인과 분석한다. Synapse에서 병목 탐지 결과와 프로세스 변형 데이터를 수신하여 statsmodels VAR/Granger 기반 인과 그래프로 분석한다.
 
 #### Query Parameters
 

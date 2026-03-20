@@ -3,12 +3,16 @@
 <!-- affects: backend -->
 <!-- requires-update: 01_architecture/architecture-overview.md -->
 
+> **갱신일**: 2026-03-21. 실제 코드 기준으로 갱신함.
+
 ## 이 문서가 답하는 질문
 
 - Weaver 백엔드의 디렉토리 구조는 어떻게 되는가?
 - 각 모듈의 책임은 무엇인가?
 - 의존성 주입과 설정 관리는 어떻게 하는가?
 - 코드 리뷰 기준은 무엇인가?
+
+> **참고**: 아래 디렉토리 구조는 설계 시점 기준이다. 실제 구현에서는 `api/` 아래에 `datasource.py`, `query.py`, `metadata_catalog.py`, `insight.py`, `insight_ontology.py`, `document_ingestion.py` 라우터가 존재하며, `core/`와 `services/`가 분리되어 있고, `infrastructure/acl/` 대신 `services/synapse_metadata_client.py`, `services/synapse_ontology_client.py`, `services/postgres_metadata_store.py` 등이 외부 연동을 담당한다. `events/outbox.py`에서 Outbox Relay 워커가, `worker/impact_task.py`에서 비동기 잡이 실행된다.
 
 ---
 

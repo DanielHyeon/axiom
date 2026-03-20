@@ -2,7 +2,9 @@
 
 ## 상태
 
-Accepted
+Superseded (5계층으로 확장됨 - Driver 계층 추가)
+
+> **2026-03 업데이트**: 원래 결정은 4계층이었으나, Vision 서비스의 인과 분석(Granger/VAR) 결과를 온톨로지에 반영하기 위해 **Driver 계층**이 추가되어 현재 5계층(Resource → Process → Measure → Driver → KPI)으로 운영 중이다. Driver 계층은 환율변동, 수요변동, 유가변동 등 KPI에 영향을 미치는 인과 요인을 표현하며, `CAUSES`/`INFLUENCES` 관계로 Measure/KPI 계층과 연결된다. 코드 기준: `ontology_service.py`의 `VALID_LAYERS = {"kpi", "measure", "process", "resource", "driver"}`
 
 ## 배경
 

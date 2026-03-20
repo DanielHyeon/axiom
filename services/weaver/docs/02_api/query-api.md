@@ -1,7 +1,8 @@
 # 쿼리 실행 API
 
 > 구현 상태 태그: `Implemented`
-> 기준일: 2026-02-21
+> 기준일: 2026-03-21
+> 근거 파일: `app/api/query.py`
 
 <!-- affects: frontend, backend, llm -->
 <!-- requires-update: 03_backend/mindsdb-client.md -->

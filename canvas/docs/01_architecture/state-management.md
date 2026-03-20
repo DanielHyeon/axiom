@@ -102,7 +102,8 @@ interface AuthStore {
   updateUser: (updates: Partial<User>) => void;
 }
 
-// stores/uiStore.ts
+// stores/uiStore.ts — 미구현 (설계만 존재, 현재 UI 상태는 각 컴포넌트 로컬 state로 관리)
+// TODO: 사이드바/커맨드팔레트 등 전역 UI 상태가 필요할 경우 구현
 interface UiStore {
   // 상태
   sidebarOpen: boolean;
@@ -478,3 +479,4 @@ useEffect(() => {
 |------|------|--------|------|
 | 2026-02-20 | 1.1 | Axiom Team | 비즈니스 프로세스 디자이너 Zustand 스토어 추가, Yjs CRDT 상태 동기화 패턴 추가, 프로세스 보드/마이닝 캐싱 전략 추가 |
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-03-21 | 2.0 | Axiom Team | 현행화: 전역 스토어 3개 (authStore, themeStore, processDesignerStore) + Feature 전용 스토어 18개 반영. 신규 Feature 스토어: useDQStore, useDomainStore, useDomainModelerStore, useGlossaryStore, useIngestionStore, useInsightStore, useLineageStore, useObjectExplorerStore, useOntologyStore, useOntologyWizardStore, useSecurityStore, useWatchStore, useWhatIfStore, useWhatIfWizardStore, useWorkflowEditorStore. 일부 Feature는 store/ (단수) 디렉토리 사용 (설계의 stores/ 복수형과 혼재) |

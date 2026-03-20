@@ -78,11 +78,11 @@
 │  │  │  │  Stores      │  │  Cache                           │  │  │    │
 │  │  │  │              │  │                                   │  │  │    │
 │  │  │  │ - authStore  │  │  - useCases()                    │  │  │    │
-│  │  │  │ - uiStore    │  │  - useDocuments()                │  │  │    │
-│  │  │  │ - themeStore │  │  - useScenarios()                │  │  │    │
-│  │  │  │ - sidebarSt. │  │  - useOlapQuery()                │  │  │    │
-│  │  │  │ - processDe. │  │  - useOntologyNodes()             │  │  │    │
-│  │  │  │   signerSt.  │  │  - useNl2sql()                    │  │  │    │
+│  │  │  │ - themeStore │  │  - useDocuments()                │  │  │    │
+│  │  │  │ - processDe. │  │  - useScenarios()                │  │  │    │
+│  │  │  │   signerSt.  │  │  - useOlapQuery()                │  │  │    │
+│  │  │  │              │  │  - useOntologyNodes()             │  │  │    │
+│  │  │  │              │  │  - useNl2sql()                    │  │  │    │
 │  │  │  │              │  │  - useDatasources()               │  │  │    │
 │  │  │  │              │  │  - useProcessBoard()              │  │  │    │
 │  │  │  │              │  │  - useEarlyWarnings()             │  │  │    │
@@ -343,8 +343,10 @@ API 호출 실패
 
 ## 사실 (Facts)
 
-- React 18.x + TypeScript 5.x (Strict mode)
-- Vite 5.x 빌드 시스템
+- React 19.2 + TypeScript 5.9 (Strict mode)
+- Vite 7.3 빌드 시스템
+- Tailwind CSS 4.2 + Shadcn/ui (Radix UI)
+- Zustand 5.0 + TanStack Query 5.90 + TanStack Table 8.21
 - 타깃 브라우저: Chrome 90+, Edge 90+, Safari 15+
 
 ---
@@ -356,3 +358,4 @@ API 호출 실패
 | 2026-02-20 | 1.2 | Axiom Team | v2 Delta 보완 (Early Warning, Simulation Catalog UI 연계) |
 | 2026-02-20 | 1.1 | Axiom Team | 비즈니스 프로세스 디자이너 데이터 흐름 추가, Yjs WebSocket Provider 추가, CRDT 동기화 패턴 추가 |
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-03-21 | 2.0 | Axiom Team | 기술 스택 버전 현행화 (React 19.2, TS 5.9, Vite 7.3, Tailwind 4.2, Zustand 5.0, TanStack Query 5.90, TanStack Table 8.21) |

@@ -1,7 +1,7 @@
 # 피드백 + 이력 API
 
-> 구현 상태 태그: `Partially Implemented`
-> 기준일: 2026-02-21
+> 구현 상태 태그: `Implemented`
+> 기준일: 2026-03-21
 
 ## 이 문서가 답하는 질문
 
@@ -18,9 +18,15 @@
 
 | Method | Path | 설명 | 인증 | 상태 | 근거 |
 |--------|------|------|------|------|------|
-| POST | `/feedback` | SQL 피드백 제출 | Required | Implemented | `services/oracle/app/api/feedback.py` |
-| GET | `/text2sql/history` | 쿼리 이력 조회 | Required | Planned | `services/oracle/docs/06_data/query-history.md` |
-| GET | `/text2sql/history/{id}` | 특정 이력 상세 | Required | Planned | `services/oracle/docs/06_data/query-history.md` |
+| POST | `/feedback` | SQL 피드백 제출 | Required | Implemented | `app/api/feedback.py` |
+| GET | `/feedback/list` | 피드백 목록 (페이지네이션) | Required + admin/manager | Implemented | `app/api/feedback.py` |
+| GET | `/text2sql/history` | 쿼리 이력 조회 | Required | Implemented | `app/api/text2sql.py` |
+| GET | `/text2sql/history/{query_id}` | 특정 이력 상세 | Required | Implemented | `app/api/text2sql.py` |
+| GET | `/feedback/stats/summary` | 피드백 요약 통계 | Required + admin/manager | Implemented | `app/api/feedback_stats.py` |
+| GET | `/feedback/stats/trend` | 일별/주별 피드백 추이 | Required + admin/manager | Implemented | `app/api/feedback_stats.py` |
+| GET | `/feedback/stats/failures` | 실패 패턴 분석 | Required + admin/manager | Implemented | `app/api/feedback_stats.py` |
+| GET | `/feedback/stats/by-datasource` | 데이터소스별 피드백 분포 | Required + admin/manager | Implemented | `app/api/feedback_stats.py` |
+| GET | `/feedback/stats/top-failed` | 가장 많이 실패한 질문 TOP-N | Required + admin/manager | Implemented | `app/api/feedback_stats.py` |
 
 ---
 
@@ -73,11 +79,11 @@
 
 ---
 
-## 3. GET /text2sql/history (Planned)
+## 3. GET /text2sql/history (Implemented)
 
 ### 3.1 설명
 
-사용자의 쿼리 이력을 조회한다. 페이지네이션과 필터링을 지원한다.
+사용자의 쿼리 이력을 조회한다. 페이지네이션과 필터링을 지원한다. 역할: admin, manager, attorney, analyst, engineer.
 
 ### 3.2 요청 파라미터
 
@@ -136,11 +142,11 @@
 
 ---
 
-## 4. GET /text2sql/history/{id} (Planned)
+## 4. GET /text2sql/history/{query_id} (Implemented)
 
 ### 4.1 설명
 
-특정 쿼리 이력의 상세 정보를 조회한다. 실행 결과 데이터를 포함한다.
+특정 쿼리 이력의 상세 정보를 조회한다. 실행 결과 데이터를 포함한다. 역할: admin, manager, attorney, analyst, engineer.
 
 ### 4.2 응답 (200 OK)
 

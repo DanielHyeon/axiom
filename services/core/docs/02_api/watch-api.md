@@ -18,17 +18,23 @@
 
 | Method | Path | 설명 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|---------|------|------------------|
-| POST | `/api/v1/watches/subscriptions` | 이벤트 구독 생성 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| GET | `/api/v1/watches/subscriptions` | 내 구독 목록 조회 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| PUT | `/api/v1/watches/subscriptions/{id}` | 구독 수정 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| DELETE | `/api/v1/watches/subscriptions/{id}` | 구독 삭제 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| GET | `/api/v1/watches/alerts` | 알림 목록 조회 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| PUT | `/api/v1/watches/alerts/{id}/acknowledge` | 알림 확인 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| PUT | `/api/v1/watches/alerts/{id}/dismiss` | 알림 해제 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| PUT | `/api/v1/watches/alerts/read-all` | 전체 알림 읽음 처리 | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| GET | `/api/v1/watches/stream` | 실시간 알림 스트림 (SSE) | - | Implemented | `services/core/app/api/watch/routes.py` |
-| POST | `/api/v1/watches/rules` | CEP 룰 생성 (관리자) | 10s | Implemented | `services/core/app/api/watch/routes.py` |
-| GET | `/api/v1/watches/rules` | CEP 룰 목록 (관리자) | 10s | Implemented | `services/core/app/api/watch/routes.py` |
+| POST | `/api/v1/watches/subscriptions` | 이벤트 구독 생성 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/subscriptions` | 내 구독 목록 조회 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| PUT | `/api/v1/watches/subscriptions/{id}` | 구독 수정 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| DELETE | `/api/v1/watches/subscriptions/{id}` | 구독 삭제 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/alerts` | 알림 목록 조회 (필터: status, severity, case_id, from, to) | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| PUT | `/api/v1/watches/alerts/{id}/acknowledge` | 알림 확인 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| PUT | `/api/v1/watches/alerts/{id}/dismiss` | 알림 해제 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| PUT | `/api/v1/watches/alerts/read-all` | 전체 알림 읽음 처리 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/stream` | 실시간 알림 스트림 (SSE) | - | Implemented | `app/modules/watch/api/routes.py` |
+| POST | `/api/v1/watches/rules` | CEP 룰 생성 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/rules` | CEP 룰 목록 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/rules/{rule_id}` | CEP 룰 단건 조회 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| PUT | `/api/v1/watches/rules/{rule_id}` | CEP 룰 수정 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| DELETE | `/api/v1/watches/rules/{rule_id}` | CEP 룰 삭제 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| POST | `/api/v1/watches/scheduler/start` | CEP 스케줄러 시작 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| POST | `/api/v1/watches/scheduler/stop` | CEP 스케줄러 중지 | 10s | Implemented | `app/modules/watch/api/routes.py` |
+| GET | `/api/v1/watches/scheduler/status` | CEP 스케줄러 상태 조회 | 10s | Implemented | `app/modules/watch/api/routes.py` |
 
 ---
 

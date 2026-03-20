@@ -337,17 +337,26 @@ async def cache_with_quality_gate(
 
 ## 4. 파이프라인 설정 요약
 
-| 설정 | 기본값 | 설명 |
-|------|--------|------|
-| `vector_top_k` | 10 | 벡터 검색 상위 결과 수 |
-| `max_fk_hops` | 3 | FK 그래프 탐색 최대 홉 |
-| `sql_timeout` | 30s | SQL 실행 타임아웃 |
-| `max_rows` | 10,000 | SQL 최대 반환 행 수 |
-| `row_limit` | 1,000 | API 응답 행 수 제한 |
-| `max_join_depth` | 5 | SQL JOIN 최대 깊이 |
-| `max_subquery_depth` | 3 | 서브쿼리 최대 깊이 |
-| `judge_rounds` | 2 | 품질 게이트 LLM 심사 횟수 |
-| `conf_threshold` | 0.90 | 캐시 최소 신뢰도 |
+> 아래 값은 `app/core/config.py`의 `Settings` 클래스와 각 모듈의 상수에서 확인할 수 있다.
+
+| 설정 | 기본값 | 환경변수 / 코드 위치 | 설명 |
+|------|--------|---------------------|------|
+| `sql_timeout` | 15s | `ORACLE_SQL_EXECUTION_TIMEOUT_SEC` | SQL 실행 타임아웃 |
+| `execution_mode` | hybrid | `ORACLE_SQL_EXECUTION_MODE` | SQL 실행 모드 (mock/hybrid/weaver/direct) |
+| `max_rows` | 10,000 | `SQLExecutor.max_rows` | SQL 최대 반환 행 수 |
+| `row_limit` | 1,000 | `AskOptions.row_limit` (최대 10000) | API 응답 행 수 제한 |
+| `max_join_depth` | 5 | `GuardConfig.max_join_depth` | SQL JOIN 최대 개수 |
+| `max_subquery_depth` | 3 | `GuardConfig.max_subquery_depth` | 서브쿼리 최대 깊이 |
+| `judge_rounds` | 2 | `QualityJudge.multi_round_judge(max_rounds=2)` | 품질 게이트 LLM 심사 횟수 |
+| `THRESHOLD_APPROVE` | 0.80 | `QualityJudge.THRESHOLD_APPROVE` | APPROVE 최소 신뢰도 |
+| `THRESHOLD_PENDING` | 0.60 | `QualityJudge.THRESHOLD_PENDING` | PENDING 최소 신뢰도 |
+| `ENABLE_QUALITY_GATE` | True | `ENABLE_QUALITY_GATE` | 품질 게이트 활성화 여부 |
+| `ENABLE_VALUE_MAPPING` | True | `ENABLE_VALUE_MAPPING` | Value Mapping 파이프라인 활성화 |
+| `ENUM_CACHE_ENABLED` | True | `ENUM_CACHE_ENABLED` | Enum 캐시 부트스트랩 활성화 |
+| `ENUM_CACHE_MAX_VALUES` | 100 | `ENUM_CACHE_MAX_VALUES` | Enum 캐시 최대 고유값 수 |
+| `VALUE_MAPPING_CACHE` | 5000 | `ValueMappingService._MAX_CACHE_SIZE` | Value Mapping LRU 캐시 최대 크기 |
+| `PROBE_BUDGET` | 2 | `ValueMappingService._PROBE_BUDGET` | DB Probe 최대 호출 수 |
+| `react_max_iterations` | 5 | `ReactOptions.max_iterations` (최대 10) | ReAct 최대 반복 횟수 |
 
 ---
 

@@ -14,12 +14,13 @@
 
 ## 1. 전체 라우트 맵
 
-현재 구현: **Data Router** — `createBrowserRouter` in `src/lib/routes/routeConfig.tsx`, `App.tsx`에서 `RouterProvider`로 주입. 최상위 `RootLayout` → 인증 구간 `ProtectedRoute` → 대시보드 `MainLayout` (사이드바·헤더). (Phase G 완료)
+현재 구현: **Data Router** — `createBrowserRouter` in `src/lib/routes/routeConfig.tsx`, `App.tsx`에서 `RouterProvider`로 주입. 최상위 `RootLayout` → 인증 구간 `ProtectedRoute` → 대시보드 `MainLayout` (사이드바·헤더).
 
 ```
 /                                    → 리다이렉트 → /dashboard
 │
-├── /login                           (RootLayout, 사이드바 없음) → LoginPage
+├── /login                           (RootLayout, 사이드바 없음) → LoginPage 로 리다이렉트
+├── /auth/login                      → LoginPage
 ├── /auth/callback                   → CallbackPage (OAuth 콜백)
 │
 ├── /dashboard                       (MainLayout - 사이드바 있음)
@@ -37,26 +38,37 @@
 │
 ├── /analysis                        (MainLayout)
 │   ├── /olap                        → OlapPivotPage              [Vision API]
-│   ├── /nl2sql                      → Nl2SqlPage                 [Oracle API]
-│   └── /insight                     → InsightPage                [Weaver API]
+│   ├── /nl2sql                      → Nl2SqlPage (RoleGuard)     [Oracle API]
+│   ├── /insight                     → InsightPage (RoleGuard)    [Weaver API]
+│   └── /whatif/wizard               → WhatIfWizardPage (RoleGuard) [Vision API]
 │
 ├── /data                            (MainLayout)
-│   ├── /ontology                    → OntologyBrowser            [Synapse API]
-│   └── /datasources                 → DatasourcePage             [Weaver API]
+│   ├── /ontology                    → OntologyPage               [Synapse API]
+│   ├── /datasources                 → DatasourcePage             [Weaver API]
+│   ├── /ingestion                   → DataIngestionPage (RoleGuard) [Weaver API]
+│   ├── /domain                      → DomainModelerPage (RoleGuard) [Synapse API]
+│   ├── /domain/kinetic              → KineticModelerPage (RoleGuard) [Synapse API]
+│   ├── /quality                     → DataQualityPage (RoleGuard) [Weaver API]
+│   ├── /lineage                     → LineagePage (RoleGuard)    [Synapse API]
+│   ├── /explorer                    → ObjectExplorerPage (RoleGuard) [Synapse API]
+│   ├── /glossary                    → GlossaryPage (RoleGuard)   [Weaver API]
+│   └── /workflow                    → WorkflowEditorPage (RoleGuard) [Core API]
 │
 ├── /process-designer                (MainLayout)
-│   ├── index                        → ProcessDesignerListPage     [Synapse API]
-│   └── /:boardId                    → ProcessDesignerPage         [Synapse API + Yjs WS]
+│   ├── index                        → ProcessDesignerListPage (RoleGuard) [Synapse API]
+│   └── /:boardId                    → ProcessDesignerPage (RoleGuard) [Synapse API + Yjs WS]
 │
 ├── /watch                           (MainLayout)
 │   └── index                        → WatchDashboardPage         [Core SSE]
 │
-├── /settings                        (MainLayout)
+├── /settings                        (MainLayout, RoleGuard: admin)
 │   ├── index                        → 리다이렉트 → /settings/system
 │   ├── /system                      → SettingsSystemPage
 │   ├── /logs                        → SettingsLogsPage
 │   ├── /users                       → SettingsUsersPage
-│   └── /config                      → SettingsConfigPage
+│   ├── /config                      → SettingsConfigPage
+│   ├── /feedback                    → SettingsFeedbackPage
+│   └── /security                    → SettingsSecurityPage
 │
 └── /*                               → NotFoundPage (404)
 ```
@@ -81,6 +93,7 @@
 export const router = createBrowserRouter([
   { path: '/', element: <RootLayout />,
     children: [
+      { path: 'login', element: <Navigate to={ROUTES.AUTH.LOGIN} replace /> },
       { path: 'auth/login', element: <SuspensePage><LoginPage /></SuspensePage> },
       { path: 'auth/callback', element: <SuspensePage><CallbackPage /></SuspensePage> },
       { element: <ProtectedRoute />,
@@ -88,16 +101,34 @@ export const router = createBrowserRouter([
           { element: <MainLayout />,
             children: [
               { index: true, element: <Navigate to={ROUTES.DASHBOARD} replace /> },
-              { path: 'dashboard', element: <SuspensePage><CaseDashboardPage /></SuspensePage> },
-              { path: 'cases', children: [...] },
-              { path: 'analysis/olap', ... }, { path: 'analysis/nl2sql', ... }, { path: 'analysis/insight', ... },
-              { path: 'data/ontology', ... }, { path: 'data/datasources', ... },
-              { path: 'process-designer', children: [...] },
+              { path: 'dashboard', ... },
+              { path: 'cases', children: [index, ':caseId', ':caseId/documents', ':caseId/scenarios'] },
+              // 분석
+              { path: 'analysis/olap', ... },
+              { path: 'analysis/nl2sql', element: <RoleGuard>...</RoleGuard> },
+              { path: 'analysis/insight', element: <RoleGuard>...</RoleGuard> },
+              { path: 'analysis/whatif/wizard', element: <RoleGuard>...</RoleGuard> },
+              // 데이터
+              { path: 'data/ontology', ... },
+              { path: 'data/datasources', ... },
+              { path: 'data/ingestion', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/domain', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/domain/kinetic', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/quality', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/lineage', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/explorer', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/glossary', element: <RoleGuard>...</RoleGuard> },
+              { path: 'data/workflow', element: <RoleGuard>...</RoleGuard> },
+              // 프로세스
+              { path: 'process-designer', children: [index, ':boardId'] },
               { path: 'watch', ... },
-              { path: 'settings', element: <SuspensePage><SettingsPage /></SuspensePage>,
+              // 설정 (admin only)
+              { path: 'settings', element: <RoleGuard roles={['admin']}>...,
                 children: [
-                  { index: true, element: <Navigate to={ROUTES.SETTINGS_SYSTEM} replace /> },
-                  { path: 'system', ... }, { path: 'logs', ... }, { path: 'users', ... }, { path: 'config', ... }
+                  { index: true, element: <Navigate to={ROUTES.SETTINGS_SYSTEM} /> },
+                  { path: 'system', ... }, { path: 'logs', ... },
+                  { path: 'users', ... }, { path: 'config', ... },
+                  { path: 'feedback', ... }, { path: 'security', ... },
                 ]
               },
               { path: '*', element: <NotFoundPage /> },
@@ -159,37 +190,31 @@ router.beforeEach((to, from, next) => {
 
 ## 4. 사이드바 네비게이션 구조
 
+```text
+사이드바 (w-16 아이콘만 표시, hover 시 tooltip)
+구현: layouts/Sidebar.tsx — ROUTES 상수 + lucide-react 아이콘
+
+  대시보드           → /dashboard              (LayoutDashboard)
+  자연어 쿼리        → /analysis/nl2sql        (MessageSquareText)
+  OLAP 피벗          → /analysis/olap          (BarChart3)
+  Insight            → /analysis/insight       (Lightbulb)
+  What-if 위자드     → /analysis/whatif/wizard (FlaskConical)
+  온톨로지           → /data/ontology          (Network)
+  데이터소스         → /data/datasources       (Database)
+  리니지             → /data/lineage           (GitBranch)
+  데이터 수집        → /data/ingestion         (Upload)
+  도메인 모델러      → /data/domain            (Boxes)
+  글로서리           → /data/glossary          (BookOpen)
+  데이터 품질        → /data/quality           (ShieldCheck)
+  오브젝트 탐색기    → /data/explorer          (SearchCode)
+  워크플로 에디터    → /data/workflow           (Route)
+  프로세스 디자이너  → /process-designer       (Workflow)
+  Watch              → /watch                  (Eye)
+  ────
+  설정 (admin only)  → /settings               (Settings)
 ```
-┌───────────────────────────┐
-│  Axiom Canvas              │
-│                            │
-│  ┌──────────────────────┐ │
-│  │ 📊 대시보드           │ │  → /dashboard
-│  ├──────────────────────┤ │
-│  │ 📁 케이스             │ │  → /cases
-│  ├──────────────────────┤ │
-│  │ 📈 분석               │ │
-│  │   ├ OLAP 피벗         │ │  → /analysis/olap
-│  │   ├ 자연어 쿼리       │ │  → /analysis/nl2sql
-│  │   └ Insight          │ │  → /analysis/insight
-│  ├──────────────────────┤ │
-│  │ 🔗 데이터             │ │
-│  │   ├ 온톨로지          │ │  → /data/ontology
-│  │   └ 데이터소스        │ │  → /data/datasources
-│  ├──────────────────────┤ │
-│  │ 🔄 프로세스            │ │  → /process-designer
-│  ├──────────────────────┤ │
-│  │ 🔔 Watch              │ │  → /watch
-│  ├──────────────────────┤ │
-│  │ ⚙ 설정               │ │  → /settings
-│  └──────────────────────┘ │
-│                            │
-│  ┌──────────────────────┐ │
-│  │ 사용자 메뉴           │ │
-│  │ 프로필 | 로그아웃     │ │
-│  └──────────────────────┘ │
-└───────────────────────────┘
-```
+
+> **참고**: 사이드바에는 RoleGuard가 없으며 모든 항목이 표시된다. 라우트 레벨에서 `RoleGuard`로 권한을 체크하고, 권한이 없으면 ForbiddenPage를 표시한다. 설정만 `useRole(['admin'])` 조건부 렌더링.
 
 ---
 
@@ -262,10 +287,20 @@ export const ROUTES = {
     OLAP: '/analysis/olap',
     NL2SQL: '/analysis/nl2sql',
     INSIGHT: '/analysis/insight',
+    WHATIF_WIZARD: '/analysis/whatif/wizard',
   },
   DATA: {
     ONTOLOGY: '/data/ontology',
+    ONTOLOGY_CASE: (caseId: string) => `/data/ontology?caseId=${encodeURIComponent(caseId)}`,
     DATASOURCES: '/data/datasources',
+    INGESTION: '/data/ingestion',
+    DOMAIN_MODELER: '/data/domain',
+    KINETIC_MODELER: '/data/domain/kinetic',
+    QUALITY: '/data/quality',
+    LINEAGE: '/data/lineage',
+    EXPLORER: '/data/explorer',
+    GLOSSARY: '/data/glossary',
+    WORKFLOW_EDITOR: '/data/workflow',
   },
   PROCESS_DESIGNER: {
     LIST: '/process-designer',
@@ -277,6 +312,8 @@ export const ROUTES = {
   SETTINGS_LOGS: '/settings/logs',
   SETTINGS_USERS: '/settings/users',
   SETTINGS_CONFIG: '/settings/config',
+  SETTINGS_FEEDBACK: '/settings/feedback',
+  SETTINGS_SECURITY: '/settings/security',
 } as const;
 ```
 
@@ -324,3 +361,4 @@ export const ROUTES = {
 | 2026-02-20 | 1.2 | Axiom Team | 라우트 파라미터 타입 안전성(§5), 라우트 상수 관리(§6) 추가 |
 | 2026-02-22 | 1.3 | Axiom Team | 현재 구현 반영: RootLayout/MainLayout/ProtectedRoute, BrowserRouter, 설정 하위 /system·/logs·/users·/config, 페이지명(CaseDocumentsListPage 등) |
 | 2026-02-26 | 1.4 | Axiom Team | /analysis/insight 라우트 추가 (InsightPage, ROUTES.ANALYSIS.INSIGHT) |
+| 2026-03-21 | 2.0 | Axiom Team | 전면 현행화: 13개 신규 라우트 반영 (whatif wizard, ingestion, domain, kinetic, quality, lineage, explorer, glossary, workflow, feedback, security), RoleGuard 적용 현황, 사이드바 전체 항목, ROUTES 상수 완전 업데이트 |

@@ -18,17 +18,18 @@
 
 | Method | Path | 설명 | 인증 | 타임아웃 | 상태 | 근거(구현/티켓) |
 |--------|------|------|------|---------|------|------------------|
-| POST | `/api/v1/process/initiate` | 프로세스 인스턴스 시작 | 필수 | 60s | Implemented | `services/core/app/api/process/routes.py` |
-| POST | `/api/v1/process/submit` | 워크아이템 제출 (완료) | 필수 | 60s | Implemented | `services/core/app/api/process/routes.py` |
-| POST | `/api/v1/process/role-binding` | 역할-사용자 바인딩 | 필수 | 30s | Implemented | `services/core/app/api/process/routes.py` |
-| GET | `/api/v1/process/{proc_inst_id}/status` | 프로세스 상태 조회 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
-| GET | `/api/v1/process/{proc_inst_id}/workitems` | 워크아이템 목록 조회 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
-| GET | `/api/v1/process/feedback/{workitem_id}` | 피드백 조회 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
-| POST | `/api/v1/process/rework` | 재작업 요청 | 필수 | 30s | Implemented | `services/core/app/api/process/routes.py` |
-| POST | `/api/v1/process/approve-hitl` | HITL 승인/거부 | 필수 | 30s | Implemented | `services/core/app/api/process/routes.py` |
-| GET | `/api/v1/process/definitions` | 프로세스 정의 목록 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
-| GET | `/api/v1/process/definitions/{proc_def_id}` | 프로세스 정의 단건 조회 | 필수 | 10s | Implemented | `services/core/app/api/process/routes.py` |
-| POST | `/api/v1/process/definitions` | 프로세스 정의 생성 | 필수 | 120s | Implemented | `services/core/app/api/process/routes.py` |
+| POST | `/api/v1/process/initiate` | 프로세스 인스턴스 시작 | 필수 | 60s | Implemented | `app/modules/process/api/routes.py` |
+| POST | `/api/v1/process/submit` | 워크아이템 제출 (완료) | 필수 | 60s | Implemented | `app/modules/process/api/routes.py` |
+| POST | `/api/v1/process/role-binding` | 역할-사용자 바인딩 | 필수 | 30s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/{proc_inst_id}/status` | 프로세스 상태 조회 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/{proc_inst_id}/workitems` | 프로세스별 워크아이템 목록 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/workitems` | 테넌트 전체 워크아이템 목록 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/feedback/{workitem_id}` | 피드백 조회 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| POST | `/api/v1/process/rework` | 재작업 요청 | 필수 | 30s | Implemented | `app/modules/process/api/routes.py` |
+| POST | `/api/v1/process/approve-hitl` | HITL 승인/거부 | 필수 | 30s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/definitions` | 프로세스 정의 목록 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| GET | `/api/v1/process/definitions/{proc_def_id}` | 프로세스 정의 단건 조회 | 필수 | 10s | Implemented | `app/modules/process/api/routes.py` |
+| POST | `/api/v1/process/definitions` | 프로세스 정의 생성 | 필수 | 120s | Implemented | `app/modules/process/api/routes.py` |
 
 ---
 

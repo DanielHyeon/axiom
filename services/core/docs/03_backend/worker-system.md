@@ -17,10 +17,11 @@
 |--------|------|------|------|----------|------|
 | **sync** | `workers/sync.py` | event_outbox (DB 폴링) | Redis Streams | 5초 폴링 | Implemented |
 | **watch_cep** | `workers/watch_cep.py` | axiom:watches (Redis) | 알림 생성/발송 | Consumer Group | Implemented |
-| **ocr** | `workers/ocr.py` | axiom:workers (Redis) | 텍스트 추출 결과 (DB) | Consumer Group | 예정 |
-| **extract** | `workers/extract.py` | axiom:workers (Redis) | 구조화 데이터 (DB) | Consumer Group | 예정 |
-| **generate** | `workers/generate.py` | axiom:workers (Redis) | 생성된 문서 (MinIO) | Consumer Group | 예정 |
-| **event_log** | `workers/event_log.py` | axiom:workers (Redis) | 파싱된 이벤트 로그 (Synapse 전달) | Consumer Group | Implemented |
+| **policy_executor** | `workers/policy_executor.py` | axiom:core/synapse/vision:events (Redis) | POLICY_COMMAND 이벤트 (Outbox) | Consumer Group | Implemented |
+| **ocr** | `workers/ocr.py` | axiom:workers (Redis) | 텍스트 추출 결과 (DB) | Consumer Group | 미구현 (스텁) |
+| **extract** | `workers/extract.py` | axiom:workers (Redis) | 구조화 데이터 (DB) | Consumer Group | 미구현 (스텁) |
+| **generate** | `workers/generate.py` | axiom:workers (Redis) | 생성된 문서 (MinIO) | Consumer Group | 미구현 (스텁) |
+| **event_log** | `workers/event_log.py` | axiom:workers (Redis) | 파싱된 이벤트 로그 (Synapse 전달) | Consumer Group | 미구현 (스텁) |
 
 ---
 
@@ -103,7 +104,34 @@ class BaseWorker:
   - 알림 발송 실패 시 3회 재시도 후 FAILED 기록
 ```
 
-### 3.3 OCR Worker
+### 3.3 Policy Executor Worker (Kinetic Layer)
+
+```text
+역할: Redis Stream 이벤트를 소비하여 Neo4j Policy 노드를 매칭하고 POLICY_COMMAND 이벤트를 발행
+입력: Redis Streams axiom:core:events, axiom:synapse:events, axiom:vision:events (Consumer Group)
+출력: POLICY_COMMAND 이벤트 (Core EventOutbox → Redis Streams)
+실행: 독립 프로세스, Consumer Group "policy-executor"로 수평 확장 가능
+구현: Implemented (app/workers/policy_executor.py)
+
+처리 파이프라인:
+  1. 3개 Redis Stream에서 동시 이벤트 읽기 (XREADGROUP, 배치 50건)
+  2. case_id / tenant_id 없는 이벤트는 ACK하고 건너뜀
+  3. Neo4j에서 매칭 Policy 조회 (case_id + tenant_id + trigger_event)
+  4. 트리거 조건 평가 (field/op/value 비교: ==, !=, >, <, >=, <=)
+  5. 쿨다운 확인 (Redis SETEX 기반, 워커 재시작/수평 확장 안전)
+  6. 일일 실행 횟수 제한 확인 (Redis INCR 기반, max_executions_per_day)
+  7. 커맨드 페이로드 구성 ($trigger.payload.xxx 변수 치환)
+  8. POLICY_COMMAND 이벤트를 Core EventOutbox에 발행
+  9. 쿨다운 설정 후 ACK
+
+특수사항:
+  - Neo4j 드라이버를 자체 관리 (Core 서비스에는 neo4j_client가 없으므로 환경 변수에서 직접 연결)
+  - 쿨다운은 Redis SETEX로 관리 (키: axiom:policy:cooldown:{policy_id})
+  - 일일 실행 한도는 Redis INCR로 관리 (키: axiom:policy:daily:{policy_id}:{YYYY-MM-DD})
+  - Redis/Neo4j 오류 시 안전하게 실행 허용 (가용성 우선, fail-open)
+```
+
+### 3.4 OCR Worker (미구현)
 
 ```
 역할: 업로드된 문서(PDF, 이미지)에서 텍스트를 추출
@@ -120,7 +148,7 @@ class BaseWorker:
   5. 완료 이벤트 발행 (WORKER_OCR_COMPLETED)
 ```
 
-### 3.4 Extract Worker
+### 3.5 Extract Worker (미구현)
 
 ```
 역할: OCR된 텍스트를 구조화된 데이터로 변환
@@ -139,7 +167,7 @@ class BaseWorker:
   5. 완료 이벤트 발행 (WORKER_EXTRACT_COMPLETED)
 ```
 
-### 3.5 Generate Worker
+### 3.6 Generate Worker (미구현)
 
 ```
 역할: 보고서/문서를 자동 생성
@@ -155,7 +183,7 @@ class BaseWorker:
   5. 완료 이벤트 발행 (WORKER_GENERATE_COMPLETED)
 ```
 
-### 3.6 EventLog Worker
+### 3.7 EventLog Worker (미구현)
 
 ```
 역할: 업로드된 이벤트 로그(XES/CSV)를 파싱, 검증, 청킹하여 Synapse로 스트리밍 전달

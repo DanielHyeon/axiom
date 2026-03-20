@@ -214,14 +214,19 @@ function RoleGuard({ roles, children }: { roles: UserRole[]; children: ReactNode
   return <>{children}</>;
 }
 
-// router.tsx 사용 예시
+// routeConfig.tsx 사용 예시 (실제 구현)
+// RoleGuard 적용 라우트: nl2sql, insight, whatif/wizard, ingestion,
+// domain, domain/kinetic, quality, lineage, explorer, glossary, workflow
+// 대부분 roles={['admin', 'manager', 'analyst', 'engineer']} 로 설정
 {
   path: 'data/datasources',
-  element: (
-    <RoleGuard roles={['admin', 'engineer']}>
-      <DatasourcePage />
-    </RoleGuard>
-  ),
+  element: <SuspensePage><DatasourcePage /></SuspensePage>,  // RoleGuard 없음
+}
+{
+  path: 'analysis/nl2sql',
+  element: <RoleGuard roles={['admin','manager','attorney','analyst','engineer']}>
+    <SuspensePage><Nl2SqlPage /></SuspensePage>
+  </RoleGuard>,
 }
 ```
 
@@ -230,21 +235,30 @@ function RoleGuard({ roles, children }: { roles: UserRole[]; children: ReactNode
 ```typescript
 // layouts/Sidebar/SidebarNav.tsx
 
-const menuItems = [
-  { path: '/dashboard', label: '대시보드', roles: ['admin', 'manager', 'attorney', 'analyst', 'engineer', 'staff', 'viewer'] },
-  { path: '/cases', label: '케이스', roles: ['admin', 'manager', 'attorney', 'analyst', 'staff', 'viewer'] },
-  { path: '/analysis/olap', label: 'OLAP 피벗', roles: ['admin', 'analyst', 'engineer'] },
-  { path: '/analysis/nl2sql', label: '자연어 쿼리', roles: ['admin', 'analyst', 'engineer'] },
-  { path: '/data/ontology', label: '온톨로지', roles: ['admin', 'engineer'] },
-  { path: '/data/datasources', label: '데이터소스', roles: ['admin', 'engineer'] },
-  { path: '/watch', label: 'Watch', roles: ['admin', 'manager'] },
-  { path: '/settings', label: '설정', roles: ['admin'] },
-];
+// 실제 구현 (layouts/Sidebar.tsx):
+// 사이드바는 역할 필터링 없이 모든 navItems를 표시한다.
+// 라우트 레벨에서 RoleGuard가 권한을 체크하고 ForbiddenPage를 표시한다.
+// 설정(Settings)만 useRole(['admin']) 조건부 렌더링.
 
-// 현재 역할에 맞는 메뉴만 표시
-const visibleItems = menuItems.filter(item =>
-  item.roles.includes(currentUser.role)
-);
+const navItems = [
+  { to: ROUTES.DASHBOARD, icon: LayoutDashboard, labelKey: 'sidebar.dashboard' },
+  { to: ROUTES.ANALYSIS.NL2SQL, icon: MessageSquareText, labelKey: 'sidebar.nl2sql' },
+  { to: ROUTES.ANALYSIS.OLAP, icon: BarChart3, labelKey: 'sidebar.olapPivot' },
+  { to: ROUTES.ANALYSIS.INSIGHT, icon: Lightbulb, labelKey: 'sidebar.insight' },
+  { to: ROUTES.ANALYSIS.WHATIF_WIZARD, icon: FlaskConical, labelKey: 'sidebar.whatif' },
+  { to: ROUTES.DATA.ONTOLOGY, icon: Network, labelKey: 'sidebar.ontology' },
+  { to: ROUTES.DATA.DATASOURCES, icon: Database, labelKey: 'sidebar.data' },
+  { to: ROUTES.DATA.LINEAGE, icon: GitBranch, labelKey: 'sidebar.lineage' },
+  { to: ROUTES.DATA.INGESTION, icon: Upload, labelKey: 'sidebar.ingestion' },
+  { to: ROUTES.DATA.DOMAIN_MODELER, icon: Boxes, labelKey: 'sidebar.domainModeler' },
+  { to: ROUTES.DATA.GLOSSARY, icon: BookOpen, labelKey: 'sidebar.glossary' },
+  { to: ROUTES.DATA.QUALITY, icon: ShieldCheck, labelKey: 'sidebar.dataQuality' },
+  { to: ROUTES.DATA.EXPLORER, icon: SearchCode, labelKey: 'sidebar.objectExplorer' },
+  { to: ROUTES.DATA.WORKFLOW_EDITOR, icon: Route, labelKey: 'sidebar.workflowEditor' },
+  { to: ROUTES.PROCESS_DESIGNER.LIST, icon: Workflow, labelKey: 'sidebar.processDesigner' },
+  { to: ROUTES.WATCH, icon: Eye, labelKey: 'sidebar.watch' },
+];
+// Settings: admin only, 사이드바 하단 별도 렌더링
 ```
 
 ---
@@ -298,3 +312,4 @@ const visibleItems = menuItems.filter(item =>
 | 날짜 | 버전 | 작성자 | 내용 |
 |------|------|--------|------|
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-03-21 | 1.1 | Axiom Team | 사이드바 메뉴 권한 필터 섹션 현행화: 실제 Sidebar.tsx 구현 반영 (역할 필터 없이 전체 표시, RoleGuard는 라우트 레벨). RoleGuard 라우트 예시 업데이트. 17개 navItems + Settings |

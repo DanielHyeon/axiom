@@ -1,6 +1,6 @@
 # 서비스 내부 구조
 
-> 상태: 목표 구조(설계) 문서. 현재 구현 스냅샷은 `app/api/text2sql.py`, `app/api/feedback.py`, `app/api/health.py` 기준으로 확인한다.
+> 상태: 구현 완료 기준 문서 (2026-03-21 갱신). 실제 코드와 정합성 검증 완료.
 
 ## 이 문서가 답하는 질문
 
@@ -13,70 +13,54 @@
 
 ---
 
-## 1. 디렉터리 구조
+## 1. 디렉터리 구조 (현재 구현 기준)
+
+> 아래는 실제 코드 파일 기준이다 (2026-03-21 검증). api/pipelines/core/infrastructure 구조를 사용한다.
 
 ```
 services/oracle/
 ├── docs/                          # 이 문서들
 ├── app/
-│   ├── main.py                    # FastAPI 앱 엔트리포인트
-│   ├── config.py                  # 환경 설정 (Pydantic Settings)
+│   ├── main.py                    # FastAPI 앱 엔트리포인트 (Lifespan + 데모 시드 데이터)
 │   │
-│   ├── routers/                   # API 계층 (HTTP 요청/응답)
-│   │   ├── __init__.py
-│   │   ├── ask.py                 # POST /text2sql/ask
-│   │   ├── react.py               # POST /text2sql/react (NDJSON)
-│   │   ├── direct_sql.py          # POST /text2sql/direct-sql
-│   │   ├── meta.py                # GET /text2sql/meta/*
-│   │   ├── feedback.py            # POST /feedback (현재 구현), /text2sql/feedback (목표 경로)
-│   │   ├── history.py             # GET /text2sql/history
-│   │   └── events.py              # /text2sql/events/* (Core Watch 프록시)
+│   ├── api/                       # API 계층 (HTTP 요청/응답)
+│   │   ├── text2sql.py            # POST /text2sql/ask, /react, /direct-sql, /history
+│   │   ├── feedback.py            # POST /feedback, GET /feedback/list
+│   │   ├── feedback_stats.py      # GET /feedback/stats/* (summary/trend/failures/by-datasource/top-failed)
+│   │   ├── meta.py                # 메타데이터 탐색 (tables/columns/datasources/description 수정)
+│   │   ├── events.py              # /text2sql/events/* (Core Watch 프록시) + /text2sql/watch-agent/chat
+│   │   └── health.py              # /health, /health/ready 프로브
 │   │
 │   ├── pipelines/                 # 파이프라인 계층 (워크플로우 오케스트레이션)
-│   │   ├── __init__.py
-│   │   ├── nl2sql_pipeline.py     # Ask 파이프라인 (8단계)
-│   │   └── react_pipeline.py      # ReAct 파이프라인 (6단계)
+│   │   ├── nl2sql_pipeline.py     # Ask 파이프라인 (10단계)
+│   │   ├── react_agent.py         # ReAct 파이프라인 (6단계, HIL 지원)
+│   │   ├── cache_postprocess.py   # 품질 게이트 + 캐시 저장 + Value Mapping 학습
+│   │   └── enum_cache_bootstrap.py # Enum 캐시 부트스트랩 (서비스 시작 시)
 │   │
 │   ├── core/                      # 코어 모듈 (비즈니스 로직 단위)
-│   │   ├── __init__.py
-│   │   ├── graph_search.py        # Synapse Graph API 5축 검색 어댑터 (352줄)
-│   │   ├── prompt.py              # LangChain SQL 프롬프트 (112줄)
-│   │   ├── sql_exec.py            # SQL 실행 엔진 (380줄)
-│   │   ├── sql_guard.py           # SQL 안전성 검증 (153줄)
-│   │   ├── llm_factory.py         # LLM 팩토리 (213줄)
-│   │   ├── embedding.py           # 텍스트 벡터화 (55줄)
-│   │   ├── viz.py                 # 시각화 추천 (297줄)
-│   │   ├── cache_postprocess.py   # 캐시 후처리 (1977줄)
-│   │   └── enum_cache_bootstrap.py # Enum 캐싱 (513줄)
+│   │   ├── config.py              # 환경 설정 (Pydantic Settings)
+│   │   ├── auth.py                # JWT 검증 (Core 동일 비밀키)
+│   │   ├── graph_search.py        # RRF 기반 검색 + PRF (현재 모의 데이터)
+│   │   ├── schema_context.py      # 서브스키마 컨텍스트 (DDL 축소)
+│   │   ├── sql_exec.py            # SQL 실행 (4모드: direct_pg/weaver/hybrid/mock)
+│   │   ├── sql_guard.py           # SQLGlot AST 기반 SQL 안전성 검증
+│   │   ├── llm_factory.py         # LLM 팩토리 (MockLLM 스마트 모드)
+│   │   ├── quality_judge.py       # LLM 기반 N-라운드 품질 심사기
+│   │   ├── value_mapping.py       # 자연어 -> DB 값 매핑 3단계 파이프라인
+│   │   ├── visualize.py           # 시각화 추천 (컬럼 역할 추론 기반)
+│   │   ├── query_history.py       # PostgreSQL 쿼리 이력 저장소 (인메모리 폴백)
+│   │   ├── feedback_analytics.py  # asyncpg 기반 피드백 통계 집계
+│   │   ├── synapse_client.py      # Synapse API 클라이언트
+│   │   ├── rate_limit.py          # 인메모리 Rate Limiter
+│   │   └── security.py            # 역할별 행 제한 + PII 마스킹
 │   │
-│   ├── models/                    # 데이터 모델 (Pydantic / SQLAlchemy)
-│   │   ├── __init__.py
-│   │   ├── request.py             # API 요청 모델
-│   │   ├── response.py            # API 응답 모델
-│   │   ├── history.py             # 쿼리 이력 모델
-│   │   ├── schema.py              # 스키마 검색 결과 모델
-│   │   └── event.py               # 이벤트 룰 모델
+│   ├── infrastructure/            # 외부 시스템 연동 (Anti-Corruption Layer)
+│   │   └── acl/
+│   │       ├── synapse_acl.py     # Anti-Corruption Layer: Synapse BC
+│   │       └── weaver_acl.py      # Anti-Corruption Layer: Weaver BC
 │   │
-│   ├── repositories/              # 데이터 접근 계층
-│   │   ├── __init__.py
-│   │   ├── synapse_repo.py        # Synapse Graph/Meta API 접근
-│   │   ├── history_repo.py        # 쿼리 이력 접근
-│   │   └── event_repo.py          # 이벤트 룰 접근
-│   │
-│   └── utils/                     # 유틸리티
-│       ├── __init__.py
-│       ├── logger.py              # 구조화 로깅
-│       └── metrics.py             # 메트릭 수집
-│
-├── tests/                         # 테스트
-│   ├── unit/
-│   │   ├── test_sql_guard.py
-│   │   ├── test_graph_search.py
-│   │   └── test_embedding.py
-│   ├── integration/
-│   │   ├── test_nl2sql_pipeline.py
-│   │   └── test_synapse_connection.py
-│   └── conftest.py
+│   └── prompts/                   # LLM 프롬프트 템플릿
+│       └── quality_gate_prompt.md # 품질 게이트 시스템 프롬프트
 │
 ├── pyproject.toml                 # 프로젝트 설정
 ├── Dockerfile                     # 컨테이너 빌드
@@ -89,7 +73,7 @@ services/oracle/
 
 ```
 ┌─────────────────┐
-│   routers/      │  → HTTP만 처리. 비즈니스 로직 없음
+│   api/          │  → HTTP만 처리. 비즈니스 로직 없음
 │   (API 계층)    │
 └────────┬────────┘
          │ 호출
@@ -106,54 +90,53 @@ services/oracle/
 └────────┬────────┘
          │ 호출
          ▼
-┌─────────────────┐
-│  repositories/  │  → 데이터 접근만. 비즈니스 로직 없음
-│  models/        │
-│  (데이터 계층)  │
-└─────────────────┘
+┌──────────────────┐
+│  infrastructure/ │  → 외부 시스템 연동 (ACL). 비즈니스 로직 없음
+│  (데이터 계층)   │
+└──────────────────┘
 ```
 
 ### 2.1 허용되는 의존 방향
 
 | 호출자 | 피호출 가능 대상 |
 |--------|-----------------|
-| `routers/` | `pipelines/`, `models/` |
-| `pipelines/` | `core/`, `models/` |
-| `core/` | `repositories/`, `models/`, `utils/` |
-| `repositories/` | `models/`, `utils/` |
+| `api/` | `pipelines/`, `core/` (인증/설정만) |
+| `pipelines/` | `core/`, `infrastructure/` |
+| `core/` | `infrastructure/`, `core/config.py` |
+| `infrastructure/` | (외부 시스템만) |
 
 ### 2.2 금지되는 의존
 
 | 금지 | 이유 |
 |------|------|
-| `routers/` -> `core/` | 파이프라인을 거쳐야 함 |
-| `routers/` -> `repositories/` | 데이터 접근은 코어를 통해야 함 |
+| `api/` -> `infrastructure/` 직접 | ACL은 파이프라인/코어를 거쳐야 함 |
 | `core/` -> `core/` (순환) | 순환 의존은 테스트 불가 |
 | `core/` -> `pipelines/` | 역방향 의존 |
-| `repositories/` -> `core/` | 역방향 의존 |
+| `infrastructure/` -> `core/` | 역방향 의존 |
 
 ---
 
 ## 3. 모듈별 책임
 
-### 3.1 routers/ (API 계층)
+### 3.1 api/ (API 계층)
 
 | 파일 | 책임 | 코드 리뷰 체크 |
 |------|------|---------------|
-| `ask.py` | NL2SQL 요청 수신, 응답 포맷팅 | 비즈니스 로직 없는지 확인 |
-| `react.py` | ReAct 스트리밍 응답 관리 | NDJSON 형식 준수 여부 |
-| `direct_sql.py` | 직접 SQL 수신, 권한 검증 | Admin 권한 체크 존재 여부 |
-| `meta.py` | 메타데이터 조회, 페이지네이션 | 페이지네이션 로직 정확성 |
-| `feedback.py` | 피드백 수신, 유효성 검증 | 입력 검증 로직 |
-| `history.py` | 이력 조회, 필터링 | 사용자별 접근 제어 |
-| `events.py` | 이벤트 CRUD, 스케줄러 제어 | Core Watch 이관 호환성 |
+| `text2sql.py` | /ask, /react, /direct-sql, /history 엔드포인트 | 비즈니스 로직 없는지, NDJSON 형식 준수 여부 |
+| `feedback.py` | 피드백 제출 + 목록 조회 | 입력 검증 로직 |
+| `feedback_stats.py` | 피드백 통계 대시보드 (summary/trend/failures/by-datasource/top-failed) | admin/manager 역할 체크 |
+| `meta.py` | 메타데이터 탐색 (tables/columns/datasources/description 수정) | 페이지네이션 로직 정확성 |
+| `events.py` | /text2sql/events/* (Core Watch 프록시) + /text2sql/watch-agent/chat | Core Watch 프록시 정합성 |
+| `health.py` | /health, /health/ready 프로브 | 의존 서비스 체크 |
 
 ### 3.2 pipelines/ (파이프라인 계층)
 
 | 파일 | 책임 | 코드 리뷰 체크 |
 |------|------|---------------|
-| `nl2sql_pipeline.py` | 8단계 파이프라인 오케스트레이션 | 각 단계 에러 처리, 타임아웃 |
-| `react_pipeline.py` | ReAct 6단계 루프 관리 | 최대 반복 횟수 제어, 스트리밍 |
+| `nl2sql_pipeline.py` | 10단계 Ask 파이프라인 오케스트레이션 | 각 단계 에러 처리, 타임아웃 |
+| `react_agent.py` | ReAct 6단계 루프 관리 (HIL 지원) | 최대 반복 횟수 제어, 스트리밍 |
+| `cache_postprocess.py` | 품질 게이트 + 캐시 저장 + Value Mapping 학습 | 백그라운드 에러 처리, 메모리 누수 |
+| `enum_cache_bootstrap.py` | Enum 캐시 부트스트랩 (서비스 시작 시) | 시작 시 성능 영향, 캐시 무효화 |
 
 ### 3.3 core/ (코어 모듈)
 
@@ -179,52 +162,50 @@ services/oracle/
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 
-class OracleSettings(BaseSettings):
+class Settings(BaseSettings):
     """Oracle 서비스 설정. 환경 변수로 오버라이드 가능."""
 
-    # Synapse (Graph/Meta API)
-    synapse_base_url: str = "http://localhost:8003/api/v1"
-    synapse_service_token: str  # required, no default
+    ENVIRONMENT: str = "development"
+    JWT_SECRET_KEY: str = "axiom-dev-secret-key-do-not-use-in-production"
+    JWT_ALGORITHM: str = "HS256"
+    SYNAPSE_API_URL: str = "http://localhost:8003"
+    CORE_API_URL: str = "http://localhost:8001"
+    SERVICE_TOKEN_ORACLE: str = "local-oracle-token"
+    WEAVER_QUERY_API_URL: str = "http://localhost:8001/api/query"
+    WEAVER_BEARER_TOKEN: str = ""
+    ORACLE_SQL_EXECUTION_MODE: str = "hybrid"  # mock | hybrid | weaver | direct
+    ORACLE_SQL_EXECUTION_TIMEOUT_SEC: int = 15
+    ORACLE_DATASOURCES_JSON: str = "[]"
+    QUERY_HISTORY_DATABASE_URL: str = "postgresql://arkos:arkos@localhost:5432/insolvency_os"
+    WEAVER_INSIGHT_URL: str = "http://weaver:8001/api/insight/logs"
+    WEAVER_INSIGHT_TOKEN: str = ""
 
-    # Target DB
-    target_db_type: str = "postgresql"  # postgresql | mysql
-    target_db_url: str  # required, no default
+    # Feature Flags
+    ENABLE_QUALITY_GATE: bool = True
+    ENABLE_VALUE_MAPPING: bool = True
 
-    # LLM
-    llm_provider: str = "openai"  # openai | google | compatible
-    llm_model: str = "gpt-4o"
-    llm_api_key: str  # required, no default
-    embedding_provider: str = "openai"
-    embedding_model: str = "text-embedding-3-small"
+    # Enum Cache Bootstrap
+    ENUM_CACHE_ENABLED: bool = True
+    ENUM_CACHE_MAX_VALUES: int = 100
+    ENUM_CACHE_MAX_COLUMNS: int = 2000
+    ENUM_CACHE_TARGET_SCHEMA: str = "public"
 
-    # Pipeline
-    sql_timeout: int = 30
-    max_rows: int = 10000
-    row_limit: int = 1000
-    max_join_depth: int = 5
-    max_subquery_depth: int = 3
-    vector_top_k: int = 10
-    max_fk_hops: int = 3
+    model_config = ConfigDict(env_file=".env")
 
-    # Quality Gate
-    judge_rounds: int = 2
-    conf_threshold: float = 0.90
-
-    model_config = ConfigDict(
-        env_prefix="ORACLE_",
-        env_file=".env",
-    )
+settings = Settings()
 ```
 
-### 4.2 환경 변수 매핑
+> **참고**: `env_prefix`를 사용하지 않는다. 환경변수명을 설정 키와 동일하게 직접 지정한다.
 
-| 환경 변수 | 설정 키 | 필수 |
-|-----------|---------|------|
-| `ORACLE_SYNAPSE_BASE_URL` | `synapse_base_url` | No (기본값 있음) |
-| `ORACLE_SYNAPSE_SERVICE_TOKEN` | `synapse_service_token` | Yes |
-| `ORACLE_TARGET_DB_URL` | `target_db_url` | Yes |
-| `ORACLE_LLM_API_KEY` | `llm_api_key` | Yes |
-| `ORACLE_SQL_TIMEOUT` | `sql_timeout` | No (기본: 30) |
+### 4.2 주요 환경 변수
+
+| 환경 변수 | 기본값 | 설명 |
+|-----------|--------|------|
+| `ORACLE_SQL_EXECUTION_MODE` | `hybrid` | SQL 실행 모드 (mock/hybrid/weaver/direct) |
+| `ORACLE_SQL_EXECUTION_TIMEOUT_SEC` | `15` | SQL 실행 타임아웃 (초) |
+| `QUERY_HISTORY_DATABASE_URL` | (로컬 PG) | 쿼리 이력 PostgreSQL URL |
+| `ENABLE_QUALITY_GATE` | `True` | 품질 게이트 활성화 여부 |
+| `ENABLE_VALUE_MAPPING` | `True` | Value Mapping 활성화 여부 |
 
 ---
 

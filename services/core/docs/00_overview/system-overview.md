@@ -161,7 +161,7 @@ LLM 통합 시 핵심 원칙:
 |------|------|------|----------|
 | **Runtime** | Python | 3.12+ | AI/ML 생태계, FastAPI 호환 |
 | **Web Framework** | FastAPI | 0.115+ | 비동기 지원, 타입 안전, OpenAPI 자동 생성 |
-| **인증** | python-jose (JWT) | 3.3+ | Spring JJWT 대체, RS256/HS256 지원 |
+| **인증** | PyJWT + passlib[bcrypt] | 2.10+ | Spring JJWT 대체, HS256 (실제 구현) |
 | **ORM** | SQLAlchemy | 2.0+ | 비동기 지원, Alembic 마이그레이션 |
 | **DB 드라이버** | asyncpg | 0.30+ | PostgreSQL 비동기 고성능 드라이버 |
 | **LLM Framework** | LangChain + LangGraph | 0.3.x + 0.2.x | ReAct 패턴, 멀티에이전트, HITL |
@@ -175,7 +175,7 @@ LLM 통합 시 핵심 원칙:
 
 | 영역 | K-AIR (원본) | Axiom Core (전환 후) | 전환 전략 |
 |------|-------------|---------------------|----------|
-| API Gateway | Spring Boot + JJWT | FastAPI + python-jose | JWT 필터 로직 이식, 라우팅 규칙 YAML화 |
+| API Gateway | Spring Boot + JJWT | FastAPI + PyJWT | JWT 필터 로직 이식, 라우팅 규칙 YAML화 |
 | DB 접근 | Supabase Client SDK | SQLAlchemy + asyncpg | RLS 정책 동일, 마이그레이션은 Alembic |
 | 에이전트 | CrewAI + A2A SDK | LangGraph + LangChain | CrewAI Flow -> LangGraph 노드 전환 |
 | 인증 | Keycloak + Supabase Auth | 자체 JWT + RBAC | Keycloak 토큰 구조 참조 |

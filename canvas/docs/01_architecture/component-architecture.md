@@ -16,7 +16,7 @@
 
 ### 1.1 계층 정의
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
 │  Pages (페이지 컴포넌트)                                     │
 │  - 라우트와 1:1 대응                                        │
@@ -45,7 +45,7 @@
 
 ### 1.2 의존성 방향
 
-```
+```text
 Pages ──────→ Features ──────→ Shared
   │               │               │
   │               │               └──→ Shadcn/ui primitives
@@ -58,11 +58,13 @@ Pages ──────→ Features ──────→ Shared
 ```
 
 #### 금지됨
+
 - `Feature A` -> `Feature B` 직접 import
 - `Shared` -> `Feature` import (역방향)
 - `Page` -> API Service 직접 호출 (hook을 통해야 함)
 
 #### 허용됨
+
 - Feature 간 통신은 **Zustand store** 또는 **URL 파라미터**를 통해서만 가능
 - 같은 Feature 내 하위 컴포넌트 간 props 전달
 
@@ -72,7 +74,7 @@ Pages ──────→ Features ──────→ Shared
 
 ### 2.1 Feature 내부 파일 구성 (컨벤션)
 
-```
+```text
 src/features/case-dashboard/
 ├── components/           # Feature 전용 UI 컴포넌트
 │   ├── CaseTable.tsx
@@ -96,93 +98,72 @@ src/features/case-dashboard/
 └── index.ts              # Public API (배럴 파일)
 ```
 
-### 2.2 8대 Feature 모듈 맵
+### 2.2 22개 Feature 모듈 맵
 
-```
+> **역사적 참고**: 초기 설계 문서에서는 `nl2sql-chat`, `olap-pivot`, `ontology-browser`, `what-if-builder`, `watch-alerts` 등의 이름을 사용했으나, 실제 구현에서는 `nl2sql`, `olap`, `ontology`, `whatif`, `watch`로 간결하게 명명되었다. 아래는 **실제 디렉토리 이름** 기준이다.
+
+#### A. 핵심 분석 (Core Analysis) -- 5개
+
+```text
 src/features/
-├── case-dashboard/       # 1. 케이스 대시보드
-│   └── (위 구조 참조)
+├── nl2sql/               # NL2SQL 대화형 쿼리 (Oracle API)
+│   ├── api/, components/, hooks/, types/
 │
-├── document-management/  # 2. 문서 관리 + HITL 리뷰
-│   ├── components/
-│   │   ├── DocumentList.tsx
-│   │   ├── DocumentEditor.tsx      # Monaco Editor 기반
-│   │   ├── DocumentDiffViewer.tsx   # AI 원본 vs 수정본
-│   │   ├── ReviewPanel.tsx          # HITL 리뷰 패널
-│   │   ├── InlineComment.tsx
-│   │   └── ApprovalWorkflow.tsx
-│   ├── hooks/
-│   │   ├── useDocuments.ts
-│   │   ├── useReviews.ts
-│   │   └── useDocumentEditor.ts
-│   └── ...
+├── olap/                 # OLAP 피벗 테이블 (Vision API)
+│   ├── api/, components/, hooks/, store/, types/
 │
-├── what-if-builder/      # 3. What-if 시나리오 빌더
-│   ├── components/
-│   │   ├── ScenarioPanel.tsx
-│   │   ├── ParameterSlider.tsx
-│   │   ├── TornadoChart.tsx
-│   │   ├── ScenarioComparison.tsx
-│   │   └── SensitivityMatrix.tsx
-│   ├── hooks/
-│   │   ├── useScenarios.ts
-│   │   └── useSensitivity.ts
-│   └── ...
+├── insight/              # KPI 임팩트 분석 — 3패널 (Vision API)
+│   ├── api/, components/, hooks/, store/, types/, utils/
 │
-├── olap-pivot/           # 4. OLAP 피벗 테이블
-│   ├── components/
-│   │   ├── PivotBuilder.tsx        # DnD 영역
-│   │   ├── PivotTable.tsx          # 결과 테이블
-│   │   ├── DimensionPalette.tsx    # 차원/측정값 팔레트
-│   │   ├── DrilldownBreadcrumb.tsx
-│   │   ├── ChartSwitcher.tsx       # 테이블 <-> 차트 전환
-│   │   └── PivotFilters.tsx
-│   ├── hooks/
-│   │   ├── useOlapQuery.ts
-│   │   ├── useCubes.ts
-│   │   └── usePivotConfig.ts
-│   └── ...
+├── whatif/               # What-if DAG 시뮬레이션 (Vision API)
+│   ├── api/, components/, hooks/, store/, types/
 │
-├── ontology-browser/     # 5. 온톨로지 브라우저
-│   ├── components/
-│   │   ├── GraphViewer.tsx          # React Force Graph
-│   │   ├── NodeDetail.tsx
-│   │   ├── LayerFilter.tsx          # 4계층 필터
-│   │   ├── PathHighlighter.tsx
-│   │   └── SearchPanel.tsx
-│   ├── hooks/
-│   │   ├── useOntologyGraph.ts
-│   │   └── useNodeSearch.ts
-│   └── ...
+└── whatif-wizard/        # What-if 5단계 위자드 (Vision API)
+    ├── api/, components/, hooks/, store/, types/
+```
+
+#### B. 온톨로지 및 시맨틱 (Ontology & Semantic) -- 5개
+
+```text
+src/features/
+├── ontology/             # 온톨로지 5계층 그래프 브라우저 (Synapse API)
+│   ├── api/, components/, hooks/, store/, types/
 │
-├── nl2sql-chat/          # 6. NL2SQL 대화형 쿼리
-│   ├── components/
-│   │   ├── ChatInterface.tsx
-│   │   ├── MessageBubble.tsx
-│   │   ├── SqlPreview.tsx           # SQL 구문 강조
-│   │   ├── ResultTable.tsx
-│   │   ├── QueryHistory.tsx
-│   │   └── ChartRecommender.tsx
-│   ├── hooks/
-│   │   ├── useNl2sql.ts
-│   │   ├── useQueryStream.ts       # SSE 스트리밍
-│   │   └── useQueryHistory.ts
-│   └── ...
+├── domain/               # 도메인 레이어 — GWT 엔진 (Synapse API)
+│   ├── api/, components/, hooks/, store/, types/
 │
-├── watch-alerts/         # 7. Watch 알림 대시보드
-│   ├── components/
-│   │   ├── AlertFeed.tsx
-│   │   ├── AlertCard.tsx
-│   │   ├── AlertRuleEditor.tsx
-│   │   ├── EventTimeline.tsx
-│   │   └── PriorityFilter.tsx
-│   ├── hooks/
-│   │   ├── useAlerts.ts
-│   │   ├── useWebSocket.ts         # WS 연결 관리
-│   │   └── useAlertRules.ts
-│   └── ...
+├── domain-modeler/       # 도메인 모델러 UI (Synapse API)
+│   ├── api/, components/, hooks/, store/, types/
 │
-├── process-designer/     # 8. 비즈니스 프로세스 디자이너
+├── glossary/             # 비즈니스 글로서리 (Weaver API)
+│   ├── api/, components/, hooks/, store/, types/
+│
+└── object-explorer/      # 오브젝트 탐색기 (Synapse API)
+    ├── api/, components/, hooks/, store/, types/
+```
+
+#### C. 데이터 관리 (Data Management) -- 4개
+
+```text
+src/features/
+├── datasource/           # 데이터소스 관리 (Weaver API)
+│   ├── api/, components/, hooks/, schemas/, types/, utils/
+│
+├── ingestion/            # 데이터 수집/파이프라인 (Weaver API)
+│   ├── api/, components/, hooks/, store/, types/
+│
+├── data-quality/         # 데이터 품질 (Weaver API)
+│   ├── api/, components/, hooks/, store/, types/
+│
+└── lineage/              # 데이터 리니지 시각화 (Synapse API)
+    ├── api/, components/, hooks/, store/, types/
+```
+
+#### D. 프로세스 및 워크플로 (Process & Workflow) -- 2개
+
+```text
+src/features/
+├── process-designer/     # 비즈니스 프로세스 디자이너 (Synapse API)
 │   ├── components/
 │   │   ├── ProcessDesigner.tsx        # 최상위 페이지 컴포넌트
 │   │   ├── ProcessCanvas/             # react-konva 캔버스 (vue-konva 대체)
@@ -215,26 +196,46 @@ src/features/
 │   ├── api/
 │   │   ├── processApi.ts              # Synapse 프로세스 마이닝 API
 │   │   └── processApi.types.ts
-│   ├── stores/
-│   │   └── processDesignerStore.ts    # Zustand: toolMode, selectedItems, collaborators
+│   ├── store/
+│   │   ├── useProcessDesignerStore.ts # Zustand: toolMode, selectedItems, collaborators
+│   │   └── canvasDataStore.ts         # Zustand: 캔버스 데이터 상태
 │   ├── types/
 │   │   ├── canvasItem.types.ts        # 11종 노드 타입 정의
 │   │   ├── connection.types.ts        # 연결선 타입 정의
 │   │   └── board.types.ts             # 보드 상태 타입
+│   ├── utils/                         # Feature 전용 유틸리티
 │   └── index.ts
 │
-└── datasource-manager/   # + 데이터소스 관리
-    ├── components/
-    │   ├── DatasourceList.tsx
-    │   ├── ConnectionForm.tsx
-    │   ├── SchemaExplorer.tsx
-    │   ├── SyncProgress.tsx         # SSE 진행률
-    │   └── MetadataTree.tsx
-    ├── hooks/
-    │   ├── useDatasources.ts
-    │   ├── useMetadataSync.ts
-    │   └── useSchemaExplore.ts
-    └── ...
+└── workflow-editor/      # 워크플로 에디터 (Core API)
+    ├── components/, store/, types/
+```
+
+#### E. 케이스 및 문서 (Case & Document) -- 2개
+
+```text
+src/features/
+├── case-dashboard/       # 케이스 대시보드 (Core API)
+│   ├── api/, components/, hooks/, stores/, types/
+│
+└── document-management/  # 문서 관리 + HITL 리뷰 (Core API)
+    ├── api/, components/, hooks/, stores/, types/
+```
+
+#### F. 관리 및 모니터링 (Admin & Monitoring) -- 4개
+
+```text
+src/features/
+├── auth/                 # 인증/인가 (Core API)
+│   ├── api/, components/, stores/, types/
+│
+├── security/             # 보안 관리 UI (Core API)
+│   ├── api/, components/, hooks/, store/, types/
+│
+├── watch/                # 알림 규칙 및 이벤트 모니터링 (Core API)
+│   ├── components/, hooks/, store/, types/
+│
+└── feedback/             # 피드백 대시보드 (Oracle API)
+    ├── api/, components/, hooks/, types/
 ```
 
 ---
@@ -244,9 +245,9 @@ src/features/
 ### 3.1 process-gpt-vue3 (SpikeAdmin) 전환
 
 | Vue 컴포넌트 (디렉토리) | Canvas Feature | React 컴포넌트 | 전환 노트 |
-|--------------------------|---------------|----------------|-----------|
+| ------------------------ | ------------- | -------------- | --------- |
 | `admin/` | 시스템 관리 (Phase 2) | - | 우선순위 낮음 |
-| `apps/chats/` | nl2sql-chat | ChatInterface, MessageBubble | Socket.io -> TanStack Query + SSE |
+| `apps/chats/` | nl2sql | ChatInterface, MessageBubble | Socket.io -> TanStack Query + SSE |
 | `designer/` (BPMN) | 대상 외 | - | Canvas 범위 밖 |
 | `dmn/` | 대상 외 | - | Canvas 범위 밖 |
 | `analytics/` | case-dashboard | StatsCard, CaseTimeline | ApexCharts -> Recharts |
@@ -255,27 +256,27 @@ src/features/
 ### 3.2 robo-data-fabric/frontend 전환
 
 | Vue 뷰 | Canvas Feature | React 컴포넌트 | 전환 노트 |
-|---------|---------------|----------------|-----------|
-| `Dashboard.vue` | datasource-manager | DatasourceList | Headless UI -> Shadcn/ui |
-| `DataSources.vue` | datasource-manager | ConnectionForm | Pinia -> Zustand |
-| `QueryEditor.vue` | nl2sql-chat | SqlPreview | 에디터 유지 |
-| `MaterializedTables.vue` | datasource-manager | MetadataTree | 트리 구조 유지 |
+| ------- | ------------- | -------------- | --------- |
+| `Dashboard.vue` | datasource | DatasourceList | Headless UI -> Shadcn/ui |
+| `DataSources.vue` | datasource | ConnectionForm | Pinia -> Zustand |
+| `QueryEditor.vue` | nl2sql | SqlPreview | 에디터 유지 |
+| `MaterializedTables.vue` | datasource | MetadataTree | 트리 구조 유지 |
 
 ### 3.3 data-platform-olap/frontend 전환
 
 | Vue 컴포넌트 | Canvas Feature | React 컴포넌트 | 전환 노트 |
-|--------------|---------------|----------------|-----------|
-| `PivotEditor.vue` | olap-pivot | PivotBuilder | DnD: vue-draggable -> @dnd-kit |
-| `PivotTable.vue` | olap-pivot | PivotTable | TanStack Table 활용 |
-| `NaturalQuery.vue` | nl2sql-chat | ChatInterface | i18n 유지 (ko/en) |
-| `CubeModeler.vue` | olap-pivot | DimensionPalette | cubeStore -> Zustand |
-| `DataLineage.vue` | ontology-browser | GraphViewer | Mermaid -> React Force Graph |
-| `ETLManager.vue` | 데이터소스 관리 | SyncProgress | Airflow 연동 |
+| ------------ | ------------- | -------------- | --------- |
+| `PivotEditor.vue` | olap | PivotBuilder | DnD: vue-draggable -> @dnd-kit |
+| `PivotTable.vue` | olap | PivotTable | TanStack Table 활용 |
+| `NaturalQuery.vue` | nl2sql | ChatInterface | i18n 유지 (ko/en) |
+| `CubeModeler.vue` | olap | DimensionPalette | cubeStore -> Zustand |
+| `DataLineage.vue` | ontology | GraphViewer | Mermaid -> React Force Graph |
+| `ETLManager.vue` | datasource | SyncProgress | Airflow 연동 |
 
 ### 3.4 eventstorming-tool (핵심 이식) 전환
 
 | Vue 컴포넌트 | Canvas Feature | React 컴포넌트 | 전환 노트 |
-|--------------|---------------|----------------|-----------|
+| ------------ | ------------- | -------------- | --------- |
 | `CanvasBoard.vue` | process-designer | ProcessCanvas | vue-konva -> react-konva (동일 Konva.js 엔진) |
 | `StickyNote.vue` | process-designer | CanvasItem | EventStorming 노드 -> Business Process 노드 개념 확장 |
 | `ContextBox.vue` | process-designer | ContextBox | Business Domain 영역으로 의미 확장 |
@@ -290,7 +291,7 @@ src/features/
 
 ### 4.1 패턴 분류
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  1. Props 전달 (부모 -> 자식)                            │
 │     Page -> Feature -> Sub-component                     │
@@ -317,7 +318,7 @@ src/features/
 ### 4.2 통신 패턴 선택 기준
 
 | 조건 | 패턴 | 예시 |
-|------|------|------|
+| ---- | ---- | ---- |
 | 같은 Feature 내, 부모-자식 | Props/Callback | PivotBuilder -> DimensionPalette |
 | 같은 Feature 내, 형제 | 공통 부모의 state 또는 Feature store | PivotTable <-> ChartSwitcher |
 | Feature 간 상태 공유 | Zustand store | authStore의 currentUser |
@@ -331,48 +332,43 @@ src/features/
 
 ### 5.1 Shadcn/ui 기반 (직접 사용)
 
-```
-shared/ui/          # Shadcn/ui 컴포넌트 (npx shadcn-ui add 로 추가)
+```text
+components/ui/      # Shadcn/ui 컴포넌트 (npx shadcn-ui add 로 추가)
+├── badge.tsx
 ├── button.tsx
 ├── card.tsx
-├── dialog.tsx
-├── dropdown-menu.tsx
+├── checkbox.tsx
 ├── input.tsx
 ├── label.tsx
+├── popover.tsx
 ├── select.tsx
-├── separator.tsx
-├── sheet.tsx       # 모바일 사이드 패널
-├── skeleton.tsx    # 로딩 플레이스홀더
+├── slider.tsx
 ├── table.tsx
-├── tabs.tsx
-├── textarea.tsx
-├── toast.tsx       # Sonner 기반
-└── tooltip.tsx
+└── textarea.tsx
 ```
 
-### 5.2 커스텀 확장 컴포넌트
+> **참고**: 설계 시 `shared/ui/`에 배치 예정이었으나, 실제 구현에서는 `components/ui/`에 위치한다 (Shadcn/ui CLI 기본 경로).
 
-```
+### 5.2 커스텀 공유 컴포넌트 (현재 구현)
+
+```text
 shared/components/
-├── DataTable/              # TanStack Table 래퍼
-│   ├── DataTable.tsx       # 정렬, 필터, 페이지네이션
-│   ├── ColumnHeader.tsx
-│   └── Pagination.tsx
-├── Chart/                  # Recharts 래퍼
-│   ├── BarChart.tsx
-│   ├── LineChart.tsx
-│   ├── PieChart.tsx
-│   └── TornadoChart.tsx    # 커스텀
-├── StatusBadge.tsx         # 상태 배지 (active, pending, closed)
+├── AuthGuard.tsx           # 인증 가드
 ├── EmptyState.tsx          # 데이터 없음 화면
-├── LoadingSkeleton.tsx     # 스켈레톤 UI 조합
-├── ErrorFallback.tsx       # 에러 바운더리 fallback
-├── ConfirmDialog.tsx       # 확인 다이얼로그
-├── SearchInput.tsx         # 디바운스 검색
-├── DateRangePicker.tsx     # 날짜 범위 선택
-├── FileUpload.tsx          # 파일 업로드
-└── Breadcrumb.tsx          # 경로 표시
+├── ErrorState.tsx          # 에러 상태 표시
+├── ListSkeleton.tsx        # 목록 스켈레톤
+├── LoadingSpinner.tsx      # 로딩 스피너
+├── MermaidERDRenderer.tsx  # ERD 시각화 (Mermaid.js)
+└── RoleGuard.tsx           # 역할 기반 접근 제어
+
+shared/hooks/
+├── useApiError.ts          # API 에러 핸들링
+├── useObjectTypes.ts       # 오브젝트 타입
+├── usePermission.ts        # 권한 체크
+└── useRole.ts              # 역할 체크
 ```
+
+> **미구현 설계 항목**: DataTable 래퍼, Chart 래퍼, StatusBadge, ConfirmDialog, SearchInput, DateRangePicker, FileUpload, Breadcrumb — 향후 공통 패턴 추출 시 추가 예정.
 
 ---
 
@@ -389,8 +385,10 @@ shared/components/
 ## 사실 (Facts)
 
 - K-AIR 기존 컴포넌트: Vue 40+ 디렉토리 (eventstorming-tool 포함)
-- Canvas 목표 Feature 모듈: 9개 (8 기능 + 데이터소스)
-- Shared 컴포넌트: Shadcn/ui 15+ primitives + 커스텀 10+ 컴포넌트
+- Canvas 현재 Feature 모듈: 22개 (auth, case-dashboard, data-quality, datasource, document-management, domain, domain-modeler, feedback, glossary, ingestion, insight, lineage, nl2sql, object-explorer, olap, ontology, process-designer, security, watch, whatif, whatif-wizard, workflow-editor)
+- Shared 컴포넌트: Shadcn/ui 11 primitives (badge, button, card, checkbox, input, label, popover, select, slider, table, textarea) + 커스텀 11 컴포넌트 (AuthGuard, EmptyState, ErrorState, ListSkeleton, LoadingSpinner, MermaidERDRenderer, RoleGuard 등)
+- 전역 Zustand 스토어: 3개 (authStore, themeStore, processDesignerStore)
+- Feature 전용 Zustand 스토어: 19개 (useDQStore, useDomainStore, useDomainModelerStore, useGlossaryStore, useIngestionStore, useInsightStore, useLineageStore, useObjectExplorerStore, useOntologyStore, useOntologyWizardStore, usePivotConfig, canvasDataStore, useProcessDesignerStore, useSecurityStore, useWatchStore, useWhatIfStore, useWhatIfWizardStore[whatif], useWhatIfWizardStore[whatif-wizard], useWorkflowEditorStore)
 - 비즈니스 프로세스 디자이너: react-konva 기반, Yjs CRDT 실시간 협업
 
 ---
@@ -398,6 +396,8 @@ shared/components/
 ## 변경 이력
 
 | 날짜 | 버전 | 작성자 | 내용 |
-|------|------|--------|------|
+| ---- | ---- | ------ | ---- |
 | 2026-02-20 | 1.1 | Axiom Team | 비즈니스 프로세스 디자이너(process-designer) Feature 모듈 추가, eventstorming-tool 전환 매핑 추가 |
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-03-21 | 2.0 | Axiom Team | Feature 모듈 22개로 전면 현행화 (KAIR 갭 해소: glossary, lineage, object-explorer, domain-modeler, data-quality, ingestion, security, whatif-wizard, workflow-editor, feedback, domain 추가). Zustand 스토어 18개 + 전역 3개. Shared 컴포넌트 실제 파일 목록 반영 |
+| 2026-03-21 | 2.1 | Axiom Team | 서브폴더 정확도 보정 (insight에 utils/ 추가, case-dashboard에서 utils/ 제거, document-management에 stores/ 추가, process-designer에 utils/ 추가 및 store/ 파일 목록 현행화). Zustand 스토어 수 18→19개로 정정 (usePivotConfig, canvasDataStore 누락분 추가) |

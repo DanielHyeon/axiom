@@ -37,7 +37,7 @@
 │  │  - Mondrian XML 파서                                        │ │
 │  │  - 피벗 SQL 생성기                                          │ │
 │  │  - ETL 서비스                                               │ │
-│  │  - 인과 추론 엔진 (DoWhy)                                   │ │
+│  │  - 인과 추론 엔진 (statsmodels VAR/Granger)                  │ │
 │  │  - NL→피벗 워크플로우 (LangGraph)                           │ │
 │  │                                                              │ │
 │  │  금지: HTTP 관심사, FastAPI 의존성                           │ │

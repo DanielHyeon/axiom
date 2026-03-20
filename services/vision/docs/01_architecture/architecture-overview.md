@@ -24,15 +24,25 @@
 ┌─────────────────────────────────────────────────────────────────┐
 │  API 레이어 (app/api/)                                           │
 │  ├─ what_if.py     : What-if 시나리오 CRUD + 계산 트리거        │
+│  ├─ whatif_dag.py  : 온톨로지 DAG 기반 What-if 시뮬레이션      │
+│  ├─ whatif_fork.py : 이벤트소싱 기반 브랜칭 시뮬레이션          │
+│  ├─ causal.py      : 인과 분석 (VAR/Granger 하이브리드)        │
 │  ├─ olap.py        : OLAP 큐브 관리 + 피벗 쿼리                │
-│  ├─ analytics.py   : 통계 대시보드 집계                         │
-│  └─ root_cause.py  : 근본원인 분석 요청 [Phase 4]              │
+│  ├─ analytics.py   : 통계 대시보드 집계 (레거시)               │
+│  ├─ analytics_v3.py: 통계 대시보드 풀스펙 (실 DB 연동)         │
+│  └─ root_cause.py  : 근본원인 분석 요청 (Implemented)          │
 ├─────────────────────────────────────────────────────────────────┤
 │  엔진 레이어 (app/engines/)                                      │
-│  ├─ scenario_solver.py  : scipy 기반 제약 최적화                │
-│  ├─ mondrian_parser.py  : Mondrian XML → 큐브 메타데이터 추출   │
-│  ├─ pivot_engine.py     : 큐브 메타 → SQL 생성 + 실행          │
-│  └─ causal_engine.py    : DoWhy 인과 추론 [Phase 4]            │
+│  ├─ scenario_solver.py        : scipy 기반 제약 최적화                │
+│  ├─ mondrian_parser.py        : Mondrian XML → 큐브 메타데이터 추출   │
+│  ├─ pivot_engine.py           : 큐브 메타 → SQL 생성 + 실행          │
+│  ├─ nl_to_pivot.py            : LLM 기반 자연어 → 피벗 쿼리 변환     │
+│  ├─ causal_analysis_engine.py : VAR/Granger 하이브리드 인과 분석      │
+│  ├─ whatif_dag_engine.py      : 온톨로지 DAG 증분 전파 시뮬레이션     │
+│  ├─ event_fork_engine.py      : 이벤트소싱 기반 GWT 룰 시뮬레이션    │
+│  ├─ whatif_fallback.py        : DAG 시뮬레이션 폴백 예측기            │
+│  ├─ whatif_models.py          : What-if 공통 데이터 모델              │
+│  └─ etl_pipeline.py          : ETL 동기화 파이프라인                  │
 ├─────────────────────────────────────────────────────────────────┤
 │  코어 레이어 (app/core/)                                         │
 │  ├─ config.py     : 환경 설정 (Pydantic Settings)               │
@@ -52,7 +62,7 @@
 | 경계 | 이유 |
 |------|------|
 | API ↔ 엔진 분리 | API는 HTTP 프로토콜 관심사만 처리. 엔진은 순수 계산 로직으로 단위 테스트 가능 |
-| 엔진 간 독립 | What-if/OLAP/See-Why는 각각 독립적으로 배포/스케일 가능해야 함. scipy와 DoWhy는 무거운 계산이므로 향후 별도 워커로 분리 가능 |
+| 엔진 간 독립 | What-if/OLAP/See-Why는 각각 독립적으로 배포/스케일 가능해야 함. scipy와 statsmodels는 무거운 계산이므로 향후 별도 워커로 분리 가능 |
 | 코어 공유 | 설정, DB 세션, 인증은 모든 엔진이 공유하되, 엔진 간 직접 의존은 금지 |
 
 ---
@@ -64,7 +74,7 @@
 ```
 ┌─ Docker Container: axiom-vision ──────────────────────────────┐
 │                                                                │
-│  FastAPI Application (uvicorn, port 8400)                      │
+│  FastAPI Application (uvicorn, port 8000)                      │
 │  ├─ /api/v3/cases/{id}/what-if/*     → What-if API            │
 │  ├─ /api/v3/pivot/*                  → OLAP API               │
 │  ├─ /api/v3/analytics/*             → Analytics API           │
@@ -91,7 +101,7 @@
 axiom-vision:
   build: ./services/vision
   ports:
-    - "8400:8400"
+    - "9100:8000"
   environment:
     - DATABASE_URL=postgresql+asyncpg://axiom:password@postgres:5432/axiom
     - REDIS_URL=redis://redis:6379/2
@@ -212,7 +222,7 @@ async def compute_scenario(case_id: UUID, scenario_id: UUID):
 | LLM API 장애 | NL→피벗만 영향 | 수동 피벗 쿼리는 정상 동작 |
 | PostgreSQL 과부하 | 전체 Vision | Connection pool 제한 (max 20), 쿼리 타임아웃 30초 |
 | Redis 장애 | OLAP 캐시만 영향 | 캐시 미스 시 DB 직접 쿼리 (graceful degradation) |
-| DoWhy ML 추론 오류 | See-Why만 영향 | 분석 실패 시 "분석 불가" 반환, 다른 엔진 정상 |
+| statsmodels 인과 분석 오류 | See-Why만 영향 | 분석 실패 시 "분석 불가" 반환, 다른 엔진 정상 |
 | Materialized View 갱신 실패 | OLAP 데이터 최신성 | 이전 MV 유지, 갱신 재시도 (3회) |
 
 ### 5.2 Circuit Breaker 적용 대상
@@ -245,25 +255,46 @@ services/vision/
 │   │   ├── what_if.py             # What-if 시나리오 API
 │   │   ├── olap.py                # OLAP 피벗 API
 │   │   ├── analytics.py           # 통계 대시보드 API
-│   │   └── root_cause.py          # 근본원인 분석 API [Phase 4]
+│   │   ├── root_cause.py          # 근본원인 분석 API (Implemented)
+│   │   ├── causal.py              # 인과 분석 API (VAR/Granger)
+│   │   ├── whatif_dag.py          # What-if DAG 시뮬레이션 API
+│   │   ├── whatif_fork.py         # What-if Fork(이벤트소싱) API
+│   │   ├── analytics_v3.py        # Analytics 풀스펙 API (실 DB 연동)
+│   │   └── _auth.py               # 공통 인증 헬퍼
 │   ├── engines/
 │   │   ├── __init__.py
 │   │   ├── scenario_solver.py     # scipy 기반 시나리오 솔버
 │   │   ├── mondrian_parser.py     # Mondrian XML 파서
 │   │   ├── pivot_engine.py        # 피벗 쿼리 엔진
-│   │   ├── etl_service.py         # ETL 동기화 서비스
-│   │   ├── nl_pivot_workflow.py   # LangGraph NL→피벗 워크플로우
-│   │   └── causal_engine.py       # DoWhy 인과 추론 [Phase 4]
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── scenario.py            # What-if SQLAlchemy 모델
-│   │   ├── cube.py                # 큐브 메타데이터 모델
-│   │   └── causal.py              # 인과 분석 모델 [Phase 4]
-│   ├── schemas/
-│   │   ├── __init__.py
-│   │   ├── what_if.py             # What-if Pydantic 스키마
-│   │   ├── olap.py                # OLAP Pydantic 스키마
-│   │   └── root_cause.py          # See-Why Pydantic 스키마
+│   │   ├── etl_pipeline.py        # ETL 동기화 파이프라인
+│   │   ├── nl_to_pivot.py         # LLM NL→피벗 변환
+│   │   ├── causal_analysis_engine.py # VAR/Granger 하이브리드 인과 분석
+│   │   ├── whatif_dag_engine.py   # 온톨로지 DAG 증분 전파
+│   │   ├── event_fork_engine.py   # 이벤트소싱 GWT 룰 시뮬레이션
+│   │   ├── whatif_fallback.py     # DAG 폴백 예측기
+│   │   └── whatif_models.py       # What-if 공통 데이터 모델
+│   ├── services/
+│   │   ├── vision_runtime.py      # 통합 런타임 (시나리오/큐브/RCA 상태 관리)
+│   │   ├── analytics_service.py   # Analytics 실 DB 연동 서비스
+│   │   ├── root_cause_engine.py   # 결정적 Root-Cause 실계산 엔진
+│   │   ├── root_cause_service.py  # RCA 서비스 레이어
+│   │   ├── causal_analysis_service.py # 인과 분석 서비스
+│   │   ├── causal_data_fetcher.py # Synapse 인과 데이터 조회
+│   │   ├── model_graph_fetcher.py # Synapse 모델 그래프 조회
+│   │   ├── cube_manager.py        # 큐브 메타 관리
+│   │   ├── etl_manager.py         # ETL 잡 관리
+│   │   ├── scenario_manager.py    # 시나리오 상태 관리
+│   │   ├── vision_state_store.py  # 인메모리 상태 저장소
+│   │   └── operational_metrics.py # 운영 지표 수집
+│   ├── clients/
+│   │   └── core_client.py         # Core 서비스 HTTP 클라이언트
+│   ├── db/
+│   │   ├── pg_utils.py            # PostgreSQL 유틸리티
+│   │   └── simulation_schema.py   # Event Fork 시뮬레이션 테이블 DDL
+│   ├── workers/
+│   │   └── case_event_consumer.py # CQRS 읽기 모델 갱신 워커
+│   ├── events/
+│   │   └── outbox.py              # Transactional Outbox + Relay Worker
 │   └── core/
 │       ├── __init__.py
 │       ├── config.py              # Pydantic Settings

@@ -9,8 +9,8 @@
 | [00_project/](00_project/README.md) | 프로젝트 개요, 서비스 토폴로지 |
 | [01_architecture/](01_architecture/README.md) | 크로스서비스 아키텍처 (Semantic Layer, Ingestion, Verification) |
 | [02_api/](02_api/README.md) | API 레지스트리 & 서비스 엔드포인트 SSOT |
-| [03_implementation/](03_implementation/README.md) | 구현 계획 (프로그램 + 6개 서비스별) |
-| [04_status/](04_status/README.md) | Gap 분석 & 구현 상태 추적 |
+| [03_implementation/](03_implementation/README.md) | 구현 계획 (프로그램 + 6개 서비스별), KAIR 갭 구현 계획, DDD 리팩토링, Kinetic Layer 설계 |
+| [04_status/](04_status/README.md) | Gap 분석 & 구현 상태 추적 (Canvas 프론트엔드 심층 감사 포함) |
 | [05_backlog/](05_backlog/README.md) | 로드맵 & 백로그 |
 | [06_governance/](06_governance/README.md) | 거버넌스, 정책, 도메인 계약 |
 | [07_research/](07_research/README.md) | 리서치 자료 (K-AIR 분석, AI 아키텍처) |

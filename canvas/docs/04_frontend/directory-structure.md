@@ -157,21 +157,57 @@ canvas/
 │   │   │   └── api/
 │   │   │       └── weaverDatasourceApi.ts
 │   │   │
-│   │   └── insight/                 # 9. KPI Impact Graph + Query Subgraph (Weaver API)
-│   │       ├── api/
-│   │       │   └── insightApi.ts    # requestImpact, getJobStatus, postQuerySubgraph
-│   │       ├── components/
-│   │       │   ├── ImpactGraphViewer.tsx   # Cytoscape.js Impact Graph (cose-bilkent)
-│   │       │   ├── KpiSelector.tsx         # KPI fingerprint 입력
-│   │       │   └── QuerySubgraphViewer.tsx # SQL → 서브그래프 (dagre LR)
-│   │       ├── hooks/
-│   │       │   └── useImpactGraph.ts       # 202 async 폴링 훅
-│   │       ├── store/
-│   │       │   └── useInsightStore.ts      # Zustand (kpi, graph, job, drivers)
-│   │       ├── types/
-│   │       │   └── insight.ts              # GraphData, GraphNode, GraphEdge 등
-│   │       └── utils/
-│   │           └── graphTransformer.ts     # API → Cytoscape elements 변환
+│   │   ├── insight/                 # 9. KPI Impact Graph + Query Subgraph (Weaver API)
+│   │   │   ├── api/
+│   │   │   │   └── insightApi.ts    # requestImpact, getJobStatus, postQuerySubgraph
+│   │   │   ├── components/
+│   │   │   │   ├── ImpactGraphViewer.tsx   # Cytoscape.js Impact Graph (cose-bilkent)
+│   │   │   │   ├── KpiSelector.tsx         # KPI fingerprint 입력
+│   │   │   │   └── QuerySubgraphViewer.tsx # SQL → 서브그래프 (dagre LR)
+│   │   │   ├── hooks/
+│   │   │   │   └── useImpactGraph.ts       # 202 async 폴링 훅
+│   │   │   ├── store/
+│   │   │   │   └── useInsightStore.ts      # Zustand (kpi, graph, job, drivers)
+│   │   │   ├── types/
+│   │   │   │   └── insight.ts              # GraphData, GraphNode, GraphEdge 등
+│   │   │   └── utils/
+│   │   │       └── graphTransformer.ts     # API → Cytoscape elements 변환
+│   │   │
+│   │   ├── auth/                    # 10. 인증 (Core API)
+│   │   │   ├── api/, components/, stores/, types/
+│   │   │
+│   │   ├── data-quality/            # 11. 데이터 품질 (Weaver API)
+│   │   │   ├── api/, components/, hooks/, store/ (useDQStore.ts), types/
+│   │   │
+│   │   ├── domain/                  # 12. 도메인 레이어 — GWT 엔진 (Synapse API)
+│   │   │   ├── api/, components/, hooks/, store/ (useDomainStore.ts), types/
+│   │   │
+│   │   ├── domain-modeler/          # 13. 도메인 모델러 UI (Synapse API)
+│   │   │   ├── api/, components/, hooks/, store/ (useDomainModelerStore.ts), types/
+│   │   │
+│   │   ├── glossary/                # 14. 비즈니스 글로서리 (Weaver API)
+│   │   │   ├── api/, components/, hooks/, store/ (useGlossaryStore.ts), types/
+│   │   │
+│   │   ├── ingestion/               # 15. 데이터 수집/파이프라인 (Weaver API)
+│   │   │   ├── api/, components/, hooks/, store/ (useIngestionStore.ts), types/
+│   │   │
+│   │   ├── lineage/                 # 16. 데이터 리니지 시각화 (Synapse API)
+│   │   │   ├── api/, components/, hooks/, store/ (useLineageStore.ts), types/
+│   │   │
+│   │   ├── object-explorer/         # 17. 오브젝트 탐색기 (Synapse API)
+│   │   │   ├── api/, components/, hooks/, store/ (useObjectExplorerStore.ts), types/
+│   │   │
+│   │   ├── security/                # 18. 보안 관리 UI (Core API)
+│   │   │   ├── api/, components/, hooks/, store/ (useSecurityStore.ts), types/
+│   │   │
+│   │   ├── whatif-wizard/           # 19. What-if 5단계 위자드 (Vision API)
+│   │   │   ├── api/, components/, hooks/, store/ (useWhatIfWizardStore.ts), types/
+│   │   │
+│   │   ├── workflow-editor/         # 20. 워크플로 에디터 (Core API)
+│   │   │   ├── components/, store/ (useWorkflowEditorStore.ts), types/
+│   │   │
+│   │   └── feedback/                # 21. 피드백 대시보드 (Oracle API)
+│   │       ├── api/, components/, hooks/, types/
 │   │
 │   ├── pages/                       # 라우트 페이지 (React.lazy)
 │   │   ├── dashboard/
@@ -184,15 +220,30 @@ canvas/
 │   │   ├── documents/
 │   │   │   └── DocumentReviewPage.tsx
 │   │   ├── whatif/
-│   │   │   └── WhatIfPage.tsx
+│   │   │   ├── WhatIfPage.tsx
+│   │   │   └── WhatIfWizardPage.tsx
 │   │   ├── olap/
 │   │   │   └── OlapPivotPage.tsx
 │   │   ├── nl2sql/
 │   │   │   └── Nl2SqlPage.tsx
+│   │   ├── insight/
+│   │   │   └── InsightPage.tsx
 │   │   ├── ontology/
-│   │   │   └── OntologyBrowser.tsx
+│   │   │   └── OntologyPage.tsx
 │   │   ├── data/
-│   │   │   └── DatasourcePage.tsx
+│   │   │   ├── DatasourcePage.tsx
+│   │   │   ├── DataIngestionPage.tsx
+│   │   │   ├── DataQualityPage.tsx
+│   │   │   └── GlossaryPage.tsx
+│   │   ├── domain/
+│   │   │   ├── DomainModelerPage.tsx
+│   │   │   └── KineticModelerPage.tsx
+│   │   ├── lineage/
+│   │   │   └── LineagePage.tsx
+│   │   ├── object-explorer/
+│   │   │   └── ObjectExplorerPage.tsx
+│   │   ├── workflow/
+│   │   │   └── WorkflowEditorPage.tsx
 │   │   ├── process-designer/
 │   │   │   └── ProcessDesignerListPage.tsx
 │   │   ├── process/
@@ -204,7 +255,9 @@ canvas/
 │   │   │   ├── SettingsSystemPage.tsx
 │   │   │   ├── SettingsLogsPage.tsx
 │   │   │   ├── SettingsUsersPage.tsx
-│   │   │   └── SettingsConfigPage.tsx
+│   │   │   ├── SettingsConfigPage.tsx
+│   │   │   ├── SettingsFeedbackPage.tsx
+│   │   │   └── SettingsSecurityPage.tsx
 │   │   ├── auth/
 │   │   │   ├── LoginPage.tsx
 │   │   │   └── CallbackPage.tsx
@@ -217,25 +270,35 @@ canvas/
 │   │   ├── PageErrorBoundary.tsx
 │   │   ├── ProtectedRoute.tsx
 │   │   ├── ServiceStatusBanner.tsx
-│   │   └── ui/                      # Shadcn/ui (button, card, input, select 등)
+│   │   └── ui/                      # Shadcn/ui (badge, button, card, checkbox, input, label, popover, select, slider, table, textarea)
 │   │
-│   ├── shared/                      # 공유 컴포넌트/유틸
+│   ├── shared/                      # 공유 컴포넌트/유틸/훅
 │   │   ├── components/
+│   │   │   ├── AuthGuard.tsx
 │   │   │   ├── EmptyState.tsx
-│   │   │   └── RoleGuard.tsx        # 역할 기반 접근 (admin 등)
-│   │   └── hooks/
-│   │       └── useRole.ts
+│   │   │   ├── ErrorState.tsx
+│   │   │   ├── ListSkeleton.tsx
+│   │   │   ├── LoadingSpinner.tsx
+│   │   │   ├── MermaidERDRenderer.tsx  # ERD 시각화
+│   │   │   └── RoleGuard.tsx           # 역할 기반 접근 (admin 등)
+│   │   ├── hooks/
+│   │   │   ├── useApiError.ts          # API 에러 핸들링
+│   │   │   ├── useObjectTypes.ts
+│   │   │   ├── usePermission.ts        # 권한 체크
+│   │   │   └── useRole.ts              # 역할 체크
 │   │
 │   ├── layouts/                     # 레이아웃
 │   │   ├── RootLayout.tsx           # 최상위 (Outlet만)
+│   │   ├── AuthLayout.tsx           # 인증 레이아웃
 │   │   ├── MainLayout.tsx           # 사이드바 + 헤더 + Outlet (대시보드용)
-│   │   ├── Sidebar.tsx
 │   │   ├── DashboardLayout.tsx      # (선택 사용)
+│   │   ├── Sidebar.tsx              # 사이드바 (w-16, 아이콘 + tooltip)
 │   │   └── components/
 │   │       ├── Header.tsx
 │   │       ├── UserMenu.tsx
 │   │       ├── NotificationBell.tsx
 │   │       ├── LocaleToggle.tsx
+│   │       ├── PageTabHeader.tsx
 │   │       └── ThemeToggle.tsx
 │   │
 │   ├── stores/                      # 전역 Zustand 스토어
@@ -391,3 +454,4 @@ src/                                src/
 | 2026-02-22 | 1.2 | Axiom Team | 현재 구현 반영: src/ 직하위 App·main, layouts(RootLayout·MainLayout·Sidebar·components), components/·components/ui/, lib/queryClient·watchStream·streamManager, 설정 하위 페이지, pages 경로 정리 |
 | 2026-02-23 | 1.3 | Axiom Team | 현행화: lib/routes/routeConfig.tsx, lib/api 파일 목록(clients·casesApi·watch·watchStream 등), case-dashboard(lib/api/casesApi 사용), watch·datasource·process-designer 구조, shared/RoleGuard·useRole, stores/themeStore·processDesignerStore, providers·styles |
 | 2026-02-26 | 1.4 | Axiom Team | features/insight/ 모듈 추가 (api·components·hooks·store·types·utils), pages/insight/ 추가 |
+| 2026-03-21 | 2.0 | Axiom Team | 전면 현행화: 22개 feature 모듈 반영 (auth, data-quality, domain, domain-modeler, feedback, glossary, ingestion, lineage, object-explorer, security, whatif-wizard, workflow-editor 추가). 20개 페이지 디렉토리 반영 (domain, lineage, object-explorer, workflow, insight 등). shared/components 실제 파일 목록 업데이트. layouts/AuthLayout·PageTabHeader 추가. shadcn/ui 실제 컴포넌트 목록 반영 |

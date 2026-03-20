@@ -79,7 +79,7 @@ Oracle은 **4개의 논리 계층**으로 구성된다.
 │  │  │  FastAPI (uvicorn)                   │ │           │
 │  │  │  - /text2sql/* 라우트               │ │           │
 │  │  │  - 비동기 I/O (asyncio)             │ │           │
-│  │  │  - 커넥션 풀 (asyncpg/aiomysql)     │ │           │
+│  │  │  - psycopg2 (asyncio.to_thread)     │ │           │
 │  │  └─────────────┬───────────────────────┘ │           │
 │  │                │                          │           │
 │  │  ┌─────────────▼───────────────────────┐ │           │
@@ -231,7 +231,7 @@ Client                     Oracle                     OpenAI
 | 외부 시스템 | 통합 방식 | 프로토콜 | 데이터 방향 |
 |------------|----------|---------|------------|
 | **Synapse** | Graph/Meta API | HTTP REST | Oracle -> Synapse (조회) |
-| **Target DB** | asyncpg/aiomysql | TCP | 읽기 전용 (SELECT) |
+| **Target DB** | psycopg2 (asyncio.to_thread) / Weaver ACL (httpx) | TCP | 읽기 전용 (SELECT) |
 | **OpenAI** | HTTP REST | HTTPS | Oracle -> OpenAI (프롬프트/응답) |
 | **Core 인증** | JWT 검증 | HTTP Header | Core -> Oracle (토큰 전달) |
 | **Core Watch** | 이벤트 버스 | HTTP REST | Oracle <-> Core (이벤트 룰/알림) |
@@ -258,7 +258,7 @@ Client                     Oracle                     OpenAI
 |------|-----------|------|
 | API 요청 처리 | 비동기 (async/await) | FastAPI 기반, 높은 동시성 요구 |
 | Synapse API 호출 | 비동기 | httpx async client 사용 |
-| Target DB 쿼리 | 비동기 | asyncpg/aiomysql 사용 |
+| Target DB 쿼리 | 비동기 (래핑) | psycopg2 + asyncio.to_thread 또는 Weaver ACL (httpx) |
 | LLM 호출 | 비동기 | OpenAI async client 사용 |
 | 캐시 후처리 | 비동기 백그라운드 | BackgroundTasks / asyncio.create_task |
 | Enum 캐싱 | 비동기 백그라운드 | 서버 시작 시 bootstrap |
@@ -277,10 +277,11 @@ Client                     Oracle                     OpenAI
 
 ## 금지 사항
 
-- Router에서 외부 API/DB에 직접 접근 금지
+- Router에서 외부 API/DB에 직접 접근 금지 (파이프라인/ACL 경유 필수)
 - 코어 모듈 간 순환 의존 금지
-- 동기 I/O (requests, psycopg2 등) 사용 금지
-- LLM 호출 결과를 검증 없이 SQL 실행에 전달 금지
+- **동기 I/O를 이벤트 루프에서 직접 실행 금지** (현재 psycopg2는 `asyncio.to_thread`로 래핑하여 사용 중)
+- LLM 호출 결과를 SQL Guard 검증 없이 SQL 실행에 전달 금지
+- Synapse/Weaver API를 ACL(Anti-Corruption Layer) 없이 직접 호출 금지
 
 ## 관련 문서
 

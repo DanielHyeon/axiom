@@ -25,8 +25,9 @@
 | 이름 | Axiom Oracle |
 | 은유 | "데이터의 영매" - 사람의 말을 데이터의 언어(SQL)로 통역 |
 | 도메인 | 비즈니스 프로세스 인텔리전스 |
-| 핵심 기능 | 자연어 -> SQL 변환, ReAct 추론, SQL 안전성 검증, 이벤트 감지 |
-| 출자 | K-AIR `robo-data-text2sql-main` (구현 완성도 95%) |
+| 핵심 기능 | 자연어 -> SQL 변환, ReAct 추론 (HIL), SQL 안전성 검증, 이벤트 감시 (Core Watch 프록시), 피드백 분석 |
+| 버전 | 2.0.0 (FastAPI title: "Axiom Oracle") |
+| 출자 | K-AIR `robo-data-text2sql-main` 기반 — 전면 재구현 완료 |
 
 ### 1.2 Axiom 플랫폼 내 위치
 
@@ -75,7 +76,7 @@
 
 ## 2. NL2SQL 파이프라인 요약
 
-Oracle의 핵심은 **8단계 NL2SQL 파이프라인**이다.
+Oracle의 핵심은 **10단계 NL2SQL 파이프라인**이다.
 
 ```
 사용자 질문 (자연어)
@@ -83,71 +84,99 @@ Oracle의 핵심은 **8단계 NL2SQL 파이프라인**이다.
     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ 1. 임베딩 생성                                               │
-│    자연어 질문 → 벡터 (OpenAI text-embedding-3-small 등)     │
+│    자연어 질문 → 벡터 (MockLLM 1536차원 / OpenAI 등)        │
 ├─────────────────────────────────────────────────────────────┤
-│ 2. 그래프 검색 (5축 벡터 유사도 + FK 3홉)                    │
-│    question_vector / hyde_vector / regex / intent / PRF      │
-│    → 관련 테이블, 컬럼, 기존 쿼리 후보군 추출                │
+│ 2. 그래프 검색 + 스키마 카탈로그 + 온톨로지 컨텍스트 (O3)    │
+│    Synapse ACL 경유 → 관련 테이블, 컬럼, 값 매핑, 캐시 쿼리 │
+├─────────────────────────────────────────────────────────────┤
+│ 2.5. Value Mapping (#13 P1-2)                               │
+│    자연어 값 → DB 값 매핑 (3단계: 캐시 → DB Probe → 검증)   │
 ├─────────────────────────────────────────────────────────────┤
 │ 3. 스키마 포맷팅                                             │
 │    추출된 테이블/컬럼 → CREATE TABLE DDL 형태로 정규화       │
 ├─────────────────────────────────────────────────────────────┤
-│ 4. SQL 생성 (LangChain + GPT-4o)                            │
-│    프롬프트: 스키마 + 질문 + 값 매핑 + 규칙 → SQL 출력      │
+│ 4. SQL 생성 (LLM Factory — MockLLM 스마트 모드)             │
+│    프롬프트: 스키마 + 질문 + 값 매핑 + 온톨로지 → SQL 출력  │
 ├─────────────────────────────────────────────────────────────┤
-│ 5. SQL 검증 (SQLGlot + SQL Guard)                           │
-│    구문 파싱, DML 차단, JOIN 깊이/서브쿼리 깊이 제한        │
+│ 4.5. SQL 리터럴 검증 (#13 P1-2)                             │
+│    WHERE 절의 값이 실제 DB 값과 일치하는지 확인              │
 ├─────────────────────────────────────────────────────────────┤
-│ 6. SQL 실행 (asyncpg / aiomysql)                            │
-│    타임아웃 30초, 최대 10,000행, 응답 1,000행 제한           │
+│ 5. SQL 검증 (SQLGlot AST 기반 SQL Guard)                    │
+│    AST 파싱, 멀티스테이트먼트 차단, 금지 노드 검출,          │
+│    JOIN/서브쿼리 깊이 제한, 화이트리스트 테이블 검증         │
+├─────────────────────────────────────────────────────────────┤
+│ 6. SQL 실행 (4모드: direct_pg / weaver / hybrid / mock)     │
+│    타임아웃 15초, 최대 10,000행, psycopg2 readonly          │
 ├─────────────────────────────────────────────────────────────┤
 │ 7. 시각화 추천                                               │
-│    결과 컬럼 타입 분석 → 차트 유형(bar/line/pie) 자동 추천   │
+│    결과 컬럼 역할 추론 → 차트 유형 자동 추천                 │
+│    (line/bar/pie/scatter/kpi_card/table)                     │
 ├─────────────────────────────────────────────────────────────┤
-│ 8. 결과 캐싱 (품질 게이트)                                   │
-│    LLM 심사 N회 → 신뢰도 >= 0.90 → Neo4j Query 노드 영속화  │
+│ 8. 결과 요약 (LLM 요약)                                     │
+│    쿼리 결과를 한 문장으로 요약                              │
+├─────────────────────────────────────────────────────────────┤
+│ 9. 품질 게이트 + 캐시 저장 + Value Mapping 학습 (비동기)    │
+│    N-라운드 LLM 심사 → APPROVE(>=0.80)/PENDING/REJECT       │
+│    APPROVE 시 Neo4j 캐시 저장 + Value Mapping 학습          │
+├─────────────────────────────────────────────────────────────┤
+│ 10. Insight 로그 포워딩 (비동기, fire-and-forget)            │
+│    Oracle → Weaver /api/insight/logs (P1-B)                 │
 └─────────────────────────────────────────────────────────────┘
     │
     ▼
-응답 (SQL + 데이터 + 시각화 추천 + 요약)
+응답 (SQL + 데이터 + 시각화 추천 + 요약 + 메타데이터)
 ```
 
 ---
 
 ## 3. 기술 스택
 
-### 3.1 핵심 기술
+### 3.1 핵심 기술 (현재 구현 기준)
 
 | 계층 | 기술 | 용도 |
 |------|------|------|
-| LLM | GPT-4o (OpenAI) | SQL 생성, 품질 심사, 시각화 추천 |
-| 프레임워크 | LangChain | 프롬프트 체인, ReAct 에이전트 |
-| 그래프 DB | Neo4j 5 | 스키마 그래프, 벡터 인덱스, 쿼리 캐시 |
-| SQL 파서 | SQLGlot | SQL 구문 분석, 방언 변환, 구조 검증 |
-| 임베딩 | OpenAI text-embedding-3-small | 질문/스키마/쿼리 벡터화 |
-| 웹 프레임워크 | FastAPI | 비동기 API 서버 |
-| DB 드라이버 | asyncpg / aiomysql | PostgreSQL/MySQL 비동기 실행 |
-| 캐시 | Redis | 세션, 임시 결과 |
+| LLM | MockLLM (스마트 모드) | SQL 생성, 품질 심사 — 프로덕션 시 GPT-4o로 교체 가능 |
+| LLM 추상화 | LLMFactory + LLMClientWithRetry | 프로바이더 팩토리 + 3회 재시도 래퍼 |
+| SQL 파서 | SQLGlot (AST 기반) | SQL 구문 분석, 금지 노드 검출, LIMIT 자동 삽입 |
+| 품질 심사 | QualityJudge (N-라운드) | Pydantic strict 모델, fail-closed, semantic mismatch 검증 |
+| 웹 프레임워크 | FastAPI 2.0.0 | 비동기 API 서버, Lifespan 패턴 |
+| DB 드라이버 | psycopg2 (동기, asyncio.to_thread 래핑) | PostgreSQL 직접 실행 (readonly) |
+| SQL 실행 | 4모드 (direct/hybrid/weaver/mock) | ORACLE_SQL_EXECUTION_MODE 환경변수로 설정 |
+| 외부 연동 | httpx (비동기) | Synapse ACL, Weaver ACL, Core Watch 프록시 |
+| 인증 | python-jose (JWT HS256) | Core 발급 JWT 검증, 역할 기반 권한 |
+| 로깅 | structlog | 구조화 로깅 |
+| Value Mapping | 인메모리 LRU 캐시 + DB Probe | 자연어 → DB 값 매핑 (최대 5000건) |
+| Enum 캐시 | information_schema 스캔 | 서비스 시작 시 저카디널리티 컬럼 캐싱 |
 
-### 3.2 K-AIR 원본 소스 구성
+### 3.2 현재 소스 구성 (구현 완료)
 
-K-AIR `robo-data-text2sql-main`에서 이식하는 핵심 소스:
-
-| 파일 | 줄 수 | 역할 |
-|------|-------|------|
-| `app/routers/ask.py` | - | NL2SQL 메인 엔드포인트 |
-| `app/core/graph_search.py` | 352 | Neo4j 5축 벡터 검색 |
-| `app/core/prompt.py` | 112 | LangChain SQL 생성 프롬프트 |
-| `app/core/sql_exec.py` | 380 | SQL 실행 (asyncpg/aiomysql) |
-| `app/core/sql_guard.py` | 153 | SQL 안전성 검증 |
-| `app/core/llm_factory.py` | 213 | LLM 팩토리 (멀티 프로바이더) |
-| `app/core/embedding.py` | 55 | 텍스트 벡터화 |
-| `app/core/viz.py` | 297 | 시각화 추천 |
-| `app/core/cache_postprocess.py` | 1,977 | 백그라운드 쿼리/값매핑 영속화 |
-| `app/core/enum_cache_bootstrap.py` | 513 | Enum 값 캐싱 |
-| `app/routers/feedback.py` | - | 피드백 수집 |
-| `app/routers/meta.py` | - | 메타데이터 탐색 |
-| `app/models/history.py` | - | 쿼리 이력 (K-AIR 레거시: SQLite) |
+| 파일 | 역할 |
+|------|------|
+| `app/api/text2sql.py` | /ask, /react, /direct-sql, /history 엔드포인트 |
+| `app/api/feedback.py` | 피드백 제출 + 목록 조회 |
+| `app/api/feedback_stats.py` | 피드백 통계 대시보드 (summary/trend/failures/by-datasource/top-failed) |
+| `app/api/meta.py` | 메타데이터 탐색 (tables/columns/datasources/description 수정) |
+| `app/api/events.py` | 이벤트 룰 CRUD + 스케줄러 + SSE 알림 (Core Watch 프록시) |
+| `app/api/health.py` | /health, /health/ready 프로브 |
+| `app/pipelines/nl2sql_pipeline.py` | 10단계 Ask 파이프라인 |
+| `app/pipelines/react_agent.py` | 6단계 ReAct 에이전트 (HIL 지원) |
+| `app/pipelines/cache_postprocess.py` | 품질 게이트 + 캐시 저장 |
+| `app/pipelines/enum_cache_bootstrap.py` | Enum 캐시 부트스트랩 (서비스 시작 시) |
+| `app/core/llm_factory.py` | LLM 팩토리 (MockLLM 스마트 모드 + 재시도) |
+| `app/core/sql_guard.py` | SQLGlot AST 기반 SQL 안전성 검증 |
+| `app/core/sql_exec.py` | SQL 실행 (4모드: direct_pg/weaver/hybrid/mock) |
+| `app/core/quality_judge.py` | LLM 기반 N-라운드 품질 심사기 |
+| `app/core/value_mapping.py` | 자연어 → DB 값 매핑 3단계 파이프라인 |
+| `app/core/visualize.py` | 시각화 추천 (컬럼 역할 추론 기반) |
+| `app/core/schema_context.py` | 서브스키마 컨텍스트 (DDL 축소) |
+| `app/core/graph_search.py` | RRF 기반 검색 + PRF (현재 모의 데이터) |
+| `app/core/query_history.py` | PostgreSQL 쿼리 이력 저장소 (인메모리 폴백) |
+| `app/core/feedback_analytics.py` | asyncpg 기반 피드백 통계 집계 |
+| `app/core/auth.py` | JWT 검증 (Core 동일 비밀키) |
+| `app/core/rate_limit.py` | 인메모리 Rate Limiter |
+| `app/core/security.py` | 역할별 행 제한 + PII 마스킹 |
+| `app/infrastructure/acl/synapse_acl.py` | Anti-Corruption Layer: Synapse BC |
+| `app/infrastructure/acl/weaver_acl.py` | Anti-Corruption Layer: Weaver BC |
 
 ---
 

@@ -3,7 +3,7 @@
 > **최종 수정일**: 2026-02-20
 > **상태**: Draft
 > **Phase**: 4 (출시 후)
-> **근거**: ADR-004 (DoWhy 선택), K-AIR "See-why 원인분석" 설계
+> **근거**: ADR-004 (인과 추론 라이브러리 선택 → statsmodels VAR/Granger로 전환), K-AIR "See-why 원인분석" 설계
 
 ---
 
@@ -63,17 +63,17 @@
 │  └─ 각 원인의 기여도 (%) 산출                                  │
 │          │                                                      │
 │          ▼                                                      │
-│  3. DoWhy 인과 효과 추정                                       │
+│  3. statsmodels 인과 효과 추정                                 │
 │  ├─ 처치(Treatment): 근본원인 변수 (예: 부채비율)              │
 │  ├─ 결과(Outcome): 사업 실패 여부                              │
-│  ├─ 추정 방법: 백도어 기준 (backdoor criterion)                │
-│  ├─ 효과 크기: ATE (Average Treatment Effect)                  │
-│  └─ 검증: Refutation tests (placebo, random common cause)      │
+│  ├─ 추정 방법: VAR 임펄스 응답 함수 (IRF)                      │
+│  ├─ 효과 크기: Granger 인과성 F-통계량 + VAR 계수              │
+│  └─ 검증: Granger 인과성 검정 (p-value < 0.05)                 │
 │          │                                                      │
 │          ▼                                                      │
 │  4. 반사실 시나리오 생성 (Counterfactual)                       │
 │  ├─ "비용 구조를 20% 개선하면 수익성이 어떻게 변할까?"         │
-│  ├─ DoWhy counterfactual estimation                            │
+│  ├─ VAR 모델 기반 반사실 시뮬레이션                            │
 │  ├─ 민감도: 어떤 원인 변경이 가장 큰 영향?                     │
 │  └─ 정량화: "비용 구조 20% 개선 시 실패 확률 35% 하락"        │
 │          │                                                      │
@@ -127,6 +127,8 @@ CAUSAL_VARIABLES = {
 
 ### 3.2 PC Algorithm + LiNGAM
 
+> **구현 상태**: 미구현 (Phase 4 설계 참고). 현재 인과 분석은 `causal_analysis_engine.py`의 VAR/Granger 하이브리드 엔진이 수행.
+
 ```python
 from causallearn.search.ConstraintBased.PC import pc
 from lingam import DirectLiNGAM
@@ -176,58 +178,52 @@ async def build_causal_graph(
     return graph
 ```
 
-### 3.3 DoWhy 인과 효과 추정
+### 3.3 statsmodels 인과 효과 추정
 
 ```python
-import dowhy
-from dowhy import CausalModel
+from statsmodels.tsa.stattools import grangercausalitytests
+from statsmodels.tsa.vector_ar.var_model import VAR
+import pandas as pd
 
 async def estimate_causal_effect(
     data: pd.DataFrame,
     treatment: str,        # "debt_ratio"
     outcome: str,          # "business_failure"
-    graph_dot: str,        # DOT format causal graph
+    max_lag: int = 4,
     min_confidence: float = 0.70
 ) -> CausalEffectResult:
     """
-    Estimate causal effect of treatment on outcome using DoWhy.
+    statsmodels VAR/Granger 기반 인과 효과 추정.
+    Granger 인과성 검정으로 인과 방향을 확인하고,
+    VAR 모델의 임펄스 응답 함수(IRF)로 효과 크기를 추정한다.
     """
-    model = CausalModel(
-        data=data,
-        treatment=treatment,
-        outcome=outcome,
-        graph=graph_dot
+    # Granger 인과성 검정
+    test_data = data[[outcome, treatment]].dropna()
+    granger_result = grangercausalitytests(
+        test_data, maxlag=max_lag, verbose=False
     )
 
-    # Identify causal effect
-    identified = model.identify_effect(proceed_when_unidentifiable=True)
+    # 최적 시차의 p-value 추출
+    best_lag = min(granger_result.keys(),
+                   key=lambda k: granger_result[k][0]["ssr_ftest"][1])
+    p_value = granger_result[best_lag][0]["ssr_ftest"][1]
+    f_stat = granger_result[best_lag][0]["ssr_ftest"][0]
 
-    # Estimate using backdoor criterion
-    estimate = model.estimate_effect(
-        identified,
-        method_name="backdoor.propensity_score_matching"
-    )
-
-    # Refutation tests
-    refutation_placebo = model.refute_estimate(
-        identified, estimate,
-        method_name="placebo_treatment_refuter"
-    )
-    refutation_random = model.refute_estimate(
-        identified, estimate,
-        method_name="random_common_cause"
-    )
+    # VAR 모델 적합 및 임펄스 응답 함수
+    var_data = data[[treatment, outcome]].dropna()
+    var_model = VAR(var_data)
+    var_fitted = var_model.fit(maxlags=best_lag)
+    irf = var_fitted.irf(periods=10)
 
     return CausalEffectResult(
         treatment=treatment,
         outcome=outcome,
-        ate=float(estimate.value),
-        confidence_interval=estimate.get_confidence_intervals(),
-        refutation_passed=(
-            refutation_placebo.new_effect < 0.05 and
-            refutation_random.new_effect < estimate.value * 1.1
-        ),
-        confidence=compute_confidence(estimate, refutation_placebo, refutation_random)
+        granger_f_stat=float(f_stat),
+        granger_p_value=float(p_value),
+        var_coefficients=var_fitted.params.to_dict(),
+        irf_cumulative=float(irf.cum_effects[-1][0][1]),
+        causal_confirmed=(p_value < 0.05),
+        confidence=1.0 - float(p_value)
     )
 ```
 
@@ -378,7 +374,7 @@ PROCESS_CAUSAL_VARIABLES = {
 }
 ```
 
-### 7.4 파이프라인: Synapse 병목 데이터 → DoWhy 인과 그래프
+### 7.4 파이프라인: Synapse 병목 데이터 → statsmodels 인과 분석
 
 ```
 ┌─ 프로세스 병목 인과 분석 파이프라인 ────────────────────────────┐
@@ -399,12 +395,12 @@ PROCESS_CAUSAL_VARIABLES = {
 │  └─ 관측 데이터 테이블 구성                                     │
 │          │                                                      │
 │          ▼                                                      │
-│  3. DoWhy 인과 추론 (기존 파이프라인 재사용)                    │
-│  ├─ PC Algorithm + LiNGAM → 인과 그래프 구축                  │
+│  3. statsmodels 인과 추론 (기존 파이프라인 재사용)              │
+│  ├─ Granger 인과성 검정 → 인과 방향 확인                      │
 │  ├─ 처치(Treatment): 의심되는 원인 활동/변수                   │
 │  ├─ 결과(Outcome): 병목 발생 또는 SLA 위반                    │
-│  ├─ DoWhy 인과 효과 추정                                       │
-│  └─ Refutation tests 검증                                      │
+│  ├─ VAR 모델 임펄스 응답 함수로 효과 크기 추정                │
+│  └─ Granger p-value < 0.05 검증                                │
 │          │                                                      │
 │          ▼                                                      │
 │  4. 인과 체인 도출                                              │
@@ -512,12 +508,12 @@ class CausalChainStep(BaseModel):
 
 ## 결정 사항 (Decisions)
 
-- DoWhy 라이브러리로 인과 추론 (ADR-004)
+- statsmodels VAR/Granger 기반 인과 추론 (ADR-004 → 전환 결정)
 - PC Algorithm + LiNGAM 조합으로 인과 그래프 구축
 - 인과 연결 보고 최소 신뢰도 0.70
 - SHAP으로 요인 기여도 설명
-- 프로세스 병목 인과 분석은 Synapse 병목 데이터를 입력으로 받아 DoWhy 파이프라인을 재사용 (별도 엔진 아님)
-- 프로세스 변형(variant) 데이터를 인과 피처로 변환하여 DoWhy에 공급
+- 프로세스 병목 인과 분석은 Synapse 병목 데이터를 입력으로 받아 statsmodels 인과 분석 파이프라인을 재사용 (별도 엔진 아님)
+- 프로세스 변형(variant) 데이터를 인과 피처로 변환하여 VAR/Granger 엔진에 공급
 
 ## 금지 사항 (Forbidden)
 
@@ -528,7 +524,7 @@ class CausalChainStep(BaseModel):
 
 ## 필수 사항 (Required)
 
-- 인과 효과 추정 시 Refutation test 통과 필수
+- 인과 효과 추정 시 Granger 인과성 검정 통과 필수 (p-value < 0.05)
 - 신뢰도 0.70 미만 인과 연결은 "참고용"으로 표시
 - 도메인 전문가 HITL 검토 후 최종 인과 그래프 확정
 - 모든 분석에 분석 일시, 사용 데이터 범위, 신뢰도 명시

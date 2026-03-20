@@ -36,7 +36,7 @@
 │  │                                                            │  │  │
 │  │  "문서를 그리고 다듬는 창의적 작업 공간"                   │  │  │
 │  │                                                            │  │  │
-│  │  React 18 + TypeScript + Shadcn/ui + Zustand              │  │  │
+│  │  React 19.2 + TypeScript 5.9 + Shadcn/ui + Zustand 5.0    │  │  │
 │  │  + react-konva + Yjs (실시간 협업 프로세스 디자이너)      │  │  │
 │  │                                                            │  │  │
 │  └────────────────────────────────────────────────────────────┘  │  │
@@ -282,24 +282,27 @@ Watch 알림             ───→  Core 서비스              WebSocket
 
 | 분류 | 기술 | 버전 | 결정 근거 (ADR 참조) |
 |------|------|------|---------------------|
-| UI 프레임워크 | React | 18.x | ADR-001: 생태계, 인력풀, 타입 안전성 |
-| 언어 | TypeScript | 5.x | 타입 안전성, 리팩토링 용이 |
-| 상태 관리 | Zustand | 4.x | ADR-003: 간결한 API, React 외부 접근 |
-| 서버 상태 | TanStack Query | 5.x | ADR-004: 캐싱, 재시도, 무한 스크롤 |
+| UI 프레임워크 | React | 19.2 | ADR-001: 생태계, 인력풀, 타입 안전성 |
+| 언어 | TypeScript | 5.9 | 타입 안전성, 리팩토링 용이 |
+| 상태 관리 | Zustand | 5.0 | ADR-003: 간결한 API, React 외부 접근 |
+| 서버 상태 | TanStack Query | 5.90 | ADR-004: 캐싱, 재시도, 무한 스크롤 |
 | 라우팅 | React Router | 6.x | ADR-005: 중첩 라우트, 코드 분할 |
-| UI 컴포넌트 | Shadcn/ui | latest | ADR-002: 소유 가능한 컴포넌트, Tailwind 기반 |
-| 스타일링 | Tailwind CSS | 3.x | 유틸리티 우선, Shadcn/ui 호환 |
-| 빌드 | Vite | 5.x | 빠른 HMR, ESM 기반 |
+| UI 컴포넌트 | Shadcn/ui (Radix UI) | latest | ADR-002: 소유 가능한 컴포넌트, Tailwind 기반 |
+| 스타일링 | Tailwind CSS | 4.2 | 유틸리티 우선, Shadcn/ui 호환 |
+| 빌드 | Vite | 7.3 | 빠른 HMR, ESM 기반 |
 | 차트 | Recharts | 2.x | React 네이티브, 선언적 API |
-| 그래프 | React Force Graph | 1.x | 온톨로지 시각화 |
+| 그래프 | Cytoscape.js | latest | 온톨로지·Insight 그래프 시각화 |
 | 캔버스 | react-konva | 18.x | 비즈니스 프로세스 디자이너 (ADR-006) |
 | 실시간 협업 | Yjs + y-websocket | 13.x | CRDT 기반 다중 사용자 동시 편집 |
-| 테이블 | TanStack Table | 8.x | 헤드리스, 가상 스크롤 |
+| 테이블 | TanStack Table | 8.21 | 헤드리스, 가상 스크롤 |
 | 폼 | React Hook Form + Zod | - | 성능, 타입 안전 검증 |
+| 국제화 | i18next | latest | 한국어/영어 다국어 지원 |
+| ERD 시각화 | Mermaid.js | latest | 데이터소스 ERD 렌더링 |
+| 코드 에디터 | Monaco Editor | latest | SQL 미리보기, 코드 편집 |
 
-### 5.2 Vue 3 -> React 18 전환 매핑
+### 5.2 Vue 3 -> React 19 전환 매핑
 
-| Vue 3 개념 | React 18 대응 | 비고 |
+| Vue 3 개념 | React 19 대응 | 비고 |
 |-------------|---------------|------|
 | `<template>` | JSX/TSX | XML-like -> JS 표현식 |
 | `ref()` / `reactive()` | `useState` / Zustand store | 반응성 시스템 차이 |
@@ -370,3 +373,4 @@ Watch 알림             ───→  Core 서비스              WebSocket
 |------|------|--------|------|
 | 2026-02-20 | 1.1 | Axiom Team | 8번째 기능 영역 비즈니스 프로세스 디자이너 추가, EventStorming 이식 대상 격상, react-konva/Yjs 기술 스택 추가 |
 | 2026-02-19 | 1.0 | Axiom Team | 초기 작성 |
+| 2026-03-21 | 2.0 | Axiom Team | 기술 스택 버전 현행화 (React 19.2, TS 5.9, Vite 7.3, Tailwind 4.2, Zustand 5.0, TanStack Query 5.90), 그래프 라이브러리 Cytoscape.js로 정정, i18next/Mermaid.js/Monaco 추가. 22개 Feature 모듈 반영 필요 (기존 8+1에서 대폭 확장: glossary, lineage, object-explorer, domain-modeler, data-quality, ingestion, security, whatif-wizard, workflow-editor 등) |

@@ -1,6 +1,6 @@
 # Axiom Service Endpoints SSOT
 
-> 기준일: 2026-02-22
+> 기준일: 2026-03-21
 > 상태: Synced (현재 배포 파일 기준)
 > 기준 파일: `docker-compose.yml`, `k8s/deployments.yaml`, `k8s/services.yaml`, `k8s/configmaps.yaml`
 
@@ -16,6 +16,7 @@
 |---|---:|---:|---|
 | Postgres DB | 5432 | 5432 | `postgresql://localhost:5432/insolvency_os` |
 | Core | 8002 | 8002 | `http://localhost:8002` |
+| Synapse | 8003 | 8003 | `http://localhost:8003` |
 | Vision | 8000 | 8000 | `http://localhost:8000` |
 | Weaver | 8001 | 8001 | `http://localhost:8001` |
 | Oracle | 8004 | 8004 | `http://localhost:8004` |

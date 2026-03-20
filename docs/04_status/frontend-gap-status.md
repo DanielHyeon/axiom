@@ -1,7 +1,7 @@
 # 프론트엔드 UI/UX 미구현·갭 현황
 
-> **기준**: `canvas/docs/04_frontend/` 설계 vs `canvas/src/` 실제 구현  
-> **갱신일**: 2026-02-22 (코드베이스 검증 반영)
+> **기준**: `canvas/docs/04_frontend/` 설계 vs `canvas/src/` 실제 구현
+> **갱신일**: 2026-03-21 (KAIR 갭 Phase 1-3 구현 후 전면 검증)
 
 ---
 
@@ -50,14 +50,14 @@
 | Data router | `createBrowserRouter` (data loader 등) | `BrowserRouter` + `Routes` | **선언적 라우터만 사용** |
 | ErrorPage 사용 | 라우트 `errorElement` 또는 ErrorBoundary fallback | ✅ **해소** — GlobalErrorBoundary가 에러 시 ErrorPage 렌더 | |
 
-### 2.3 레이아웃·공통 UI (Medium)
+### 2.3 레이아웃·공통 UI (대부분 해소)
 
 | 항목 | 설계 | 현재 | 갭 |
 |------|------|------|-----|
-| RootLayout | 계층적 Root → Dashboard/Auth | MainLayout이 사실상 루트 레이아웃 | **RootLayout 개념 없음** |
-| Sidebar 모듈화 | Sidebar.tsx, SidebarNav, SidebarItem | ✅ **해소** — `layouts/Sidebar.tsx` 분리, MainLayout에서 사용 | |
-| Header / UserMenu | 상단 헤더, 유저 메뉴 | ✅ **해소** — `Header`(NotificationBell + UserMenu), 로그아웃·설정 링크 | |
-| Design Tokens·다크 모드 | 전역 토큰, 테마 전환 | 미적용 (gray/white 등 하드코딩), Monaco만 vs-dark | **디자인 토큰·다크 모드 전역 미구현** |
+| RootLayout | 계층적 Root → Dashboard/Auth | ✅ **해소** — `layouts/RootLayout.tsx` 존재, AuthLayout도 별도 | |
+| Sidebar 모듈화 | Sidebar.tsx, SidebarNav, SidebarItem | ✅ **해소** — `layouts/Sidebar.tsx` 분리, 17개 navItems + Settings | |
+| Header / UserMenu | 상단 헤더, 유저 메뉴 | ✅ **해소** — `Header`(NotificationBell + UserMenu + LocaleToggle + ThemeToggle + PageTabHeader) | |
+| Design Tokens·다크 모드 | 전역 토큰, 테마 전환 | ✅ **해소** — `styles/tokens.css`, `themeStore`, `ThemeProvider`, `.dark` 클래스 | 일부 인라인 hex 혼용 잔존 (P2) |
 
 ### 2.4 설정 하위 라우트 (Low)
 
@@ -74,15 +74,15 @@
 | 케이스 대시보드 | CaseFilters를 대시보드에서도 사용 | CaseFilters는 CaseListPage에만 사용 | **대시보드에 필터** 넣을지 선택 사항 |
 | 프로세스 디자이너 | ProcessMinimap, PropertyPanel, Yjs 협업, ConformanceOverlay, VariantList | ProcessDesignerPage에 툴박스·드래그 등 있음 | **Minimap·PropertyPanel·Yjs·마이닝 오버레이·변형 패널** 설계 대비 완성도 갭 가능 |
 
-### 2.6 인프라·공통 (Medium)
+### 2.6 인프라·공통 (일부 해소)
 
 | 항목 | 설계 | 현재 | 갭 |
 |------|------|------|-----|
-| i18n | react-i18next, ko/en | 없음 | **i18n 미도입** — 문자열 하드코딩 |
-| 페이지 단위 ErrorBoundary | 라우트/페이지별 | GlobalErrorBoundary 만 | **페이지 단위 ErrorBoundary** 미적용 |
-| 폼 표준 | React Hook Form + Zod | 사용처 제한적 | **폼 표준** 적용 범위 확인 필요 |
-| TanStack Query 전역 옵션 | retry, staleTime, mutation onError | 설정 미확인 | **queryClient 옵션** 설계 대비 확인 |
-| wsManager / sseManager 표준화 | 공통 매니저 | watch 등에서 API·EventSource 사용 | **표준화 여부** 확인 |
+| i18n | react-i18next, ko/en | ✅ **인프라 해소** — `lib/i18n/`, `LocaleToggle.tsx`, `useTranslation()` 사용 | 번역 리소스 비어있음 (하드코딩 텍스트 100+곳 잔존) |
+| 페이지 단위 ErrorBoundary | 라우트/페이지별 | ✅ **해소** — `PageErrorBoundary` 존재, MainLayout에서 적용 | |
+| 폼 표준 | React Hook Form + Zod | 부분 적용 | 사용처 제한적 |
+| TanStack Query 전역 옵션 | retry, staleTime, mutation onError | ✅ **해소** — `lib/queryClient.ts` 설정 | |
+| wsManager / sseManager 표준화 | 공통 매니저 | ✅ **해소** — `lib/api/wsManager.ts`, `lib/api/watchStream.ts`, `lib/api/streamManager.ts` | |
 
 ### 2.7 테스트·문서 (Low)
 
@@ -93,24 +93,34 @@
 
 ---
 
-## 3. 우선순위별 정리
+## 3. 우선순위별 정리 (2026-03-21 기준)
 
-### 높음 (UX 일관성·필수 화면)
-- **Header/UserMenu**: MainLayout 상단에 헤더·유저 메뉴 추가 시 네비게이션·로그아웃 등 접근성 향상.
-- **ErrorPage 연동**: GlobalErrorBoundary fallback을 ErrorPage 컴포넌트로 렌더하면 에러 UI 일관.
+### 해소됨 (이전 우선순위 항목 중 구현 완료)
+- ~~Header/UserMenu~~ -- 해소 (Header, UserMenu, NotificationBell, LocaleToggle, ThemeToggle)
+- ~~ErrorPage 연동~~ -- 해소 (GlobalErrorBoundary + PageErrorBoundary)
+- ~~Sidebar 모듈화~~ -- 해소 (layouts/Sidebar.tsx, 17개 navItems)
+- ~~PathHighlighter, ScenarioComparison~~ -- 해소 (둘 다 구현됨)
+- ~~설정 /logs, /config~~ -- 해소 (/system, /logs, /users, /config, /feedback, /security 6개 탭)
+- ~~i18n 인프라~~ -- 해소 (react-i18next, LocaleToggle)
+- ~~디자인 토큰·다크 모드~~ -- 해소 (tokens.css, themeStore, ThemeProvider)
+- ~~KAIR 갭 Phase 1-3~~ -- 해소 (보안관리, 도메인모델러, What-if위자드, 데이터수집, DQ, 온톨로지위자드, 글로서리, 리니지, 오브젝트탐색기)
 
-### 중간 (설계 정합성·재사용)
-- **Sidebar 모듈화**: MainLayout의 nav를 Sidebar.tsx 등으로 분리.
-- **PathHighlighter, ScenarioComparison**: 온톨로지·What-if 설계 대비 보완.
-- **설정 /logs, /config**: 설계에 포함된 경우 해당 탭·라우트 추가.
-- **i18n**: 다국어 필요 시 react-i18next 도입.
-- **디자인 토큰·다크 모드**: 전역 테마 적용 시.
+### 남은 높음 (P0/P1)
+- **i18n 번역 리소스**: ko.json / en.json 작성 필요 (하드코딩 한국어 100+곳)
+- **@ts-nocheck 제거**: InsightPage, Nl2SqlPage, GraphViewer, ReactProgressTimeline 4파일
+- **Silent fail 에러 처리**: 8건 (toast 미표시)
+- **Insight 백엔드 API 갭**: `GET /api/insight/kpis`, `GET /api/insight/drivers`, `GET /api/insight/nodes/{id}` 미구현
 
-### 낮음 (구조·품질)
+### 남은 중간 (P2)
+- **접근성 (a11y)**: aria-label 누락 다수
+- **반응형 디자인**: 모바일 미대응 3건
+- **테마 일관성**: 인라인 hex와 Tailwind 색상 혼용
+- **단위 테스트**: Vitest 설정 + 핵심 함수 테스트 0건
+
+### 남은 낮음 (P3)
 - **app/ 디렉터리 구조**: 진입·라우터를 app/ 아래로 이동 (선택).
 - **shared/ui vs components/ui**: 경로 통일 (선택).
-- **createBrowserRouter**: data loader 등 필요 시 전환.
-- **단위/통합 테스트**: Vitest·RTL 확대.
+- **store/ vs stores/ 명명 불일치**: 일부 Feature는 단수, 일부는 복수형 사용
 
 ---
 

@@ -2,7 +2,15 @@
 
 ## 상태
 
-Accepted
+Superseded (실제 구현은 statsmodels VAR/Granger 하이브리드로 전환)
+
+> **2026-03 업데이트**: 원래 결정은 DoWhy + causal-learn 조합이었으나, 실제 구현에서는 `statsmodels` 기반 VAR/Granger + 분해형 하이브리드 엔진(`causal_analysis_engine.py`)으로 전환되었다. 주요 이유:
+> 1. DoWhy는 사전 정의된 인과 그래프가 필요하나, Axiom은 온톨로지 관계에서 인과 구조를 자동으로 도출해야 함
+> 2. 시계열 인과 분석(Granger Causality, VAR)이 프로세스 KPI 분석에 더 적합
+> 3. 분해형(정의형) 관계(FORMULA, DERIVED_FROM)는 통계 검정 없이 온톨로지 구조로 직접 판정 가능
+> 4. DoWhy 의존성 대비 statsmodels가 이미 프로젝트에 포함되어 있어 의존성 경량화
+>
+> 코드 기준: `services/vision/app/engines/causal_analysis_engine.py` (VAR/Granger + decomposition hybrid)
 
 ## 배경
 

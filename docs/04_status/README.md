@@ -12,3 +12,4 @@
 | [frontend-gap-status.md](frontend-gap-status.md) | Canvas | UI/UX 구현 체크리스트 (해결/미해결) |
 | [core-frontend-integration-status.md](core-frontend-integration-status.md) | Core ↔ Canvas | Canvas API 클라이언트 연동 상태 |
 | [settings-users-api-status.md](settings-users-api-status.md) | Core | Users API 책임 할당 & 구현 상태 |
+| [canvas-frontend-audit.md](canvas-frontend-audit.md) | Canvas | 프론트엔드 심층 감사 (263개 파일, KAIR 갭 분석 포함) |

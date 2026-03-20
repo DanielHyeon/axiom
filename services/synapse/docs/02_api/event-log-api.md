@@ -41,6 +41,7 @@
 | GET | `/{log_id}/preview` | 이벤트 로그 미리보기 (상위 100건) | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
 | PUT | `/{log_id}/column-mapping` | 컬럼 매핑 수정 | 동기 | Implemented | `services/synapse/app/api/event_logs.py` |
 | POST | `/{log_id}/refresh` | 이벤트 로그 재인제스트 (DB 소스) | 비동기 | Implemented | `services/synapse/app/api/event_logs.py` |
+| POST | `/export-bpm` | BPM 이벤트 로그 내보내기 | 비동기 | Implemented | `services/synapse/app/api/event_logs.py` |
 
 ---
 

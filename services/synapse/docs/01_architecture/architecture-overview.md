@@ -88,9 +88,15 @@
 
 | 파일 | 책임 | 출처 |
 |------|------|------|
-| `api/ontology.py` | 온톨로지 CRUD, 계층 탐색, 관계 관리 | 신규 개발 |
-| `api/schema_edit.py` | 테이블/컬럼 설명 편집, FK 관계 관리 | K-AIR text2sql 이식 |
+| `api/ontology.py` | 온톨로지 CRUD, 관계 가중치, BehaviorModel, 스냅샷, HITL, Export, Quality | 신규 개발 |
+| `api/graph.py` | 벡터/FK/온톨로지 검색, 쿼리 캐시, 영향도 분석 | K-AIR 이식 + 확장 |
+| `api/schema_edit.py` | 테이블/컬럼 설명 편집, FK 관계 관리, 임베딩 재생성 | K-AIR text2sql 이식 |
 | `api/extraction.py` | 비정형 문서 → 온톨로지 추출 (비동기) | 신규 개발 |
+| `api/event_logs.py` | 이벤트 로그 인제스트/CRUD/통계/미리보기/BPM 내보내기 | 신규 개발 |
+| `api/mining.py` | 프로세스 마이닝 (발견/적합성/병목/성능/변종/BPMN) | 신규 개발 |
+| `api/kinetic.py` | Kinetic Layer — ActionType(GWT 룰) + Policy CRUD + 드라이런 | 신규 개발 |
+| `api/metadata_graph.py` | Metadata Graph — Weaver 연동 (스냅샷/글로서리/태그/데이터소스) | 신규 개발 |
+| `api/concept_mapping.py` | OntologyNode ↔ Table 매핑 CRUD | 신규 개발 |
 
 **원칙**:
 - API Layer는 HTTP 요청/응답 변환만 담당한다
@@ -103,7 +109,7 @@
 |------|------|------|
 | `graph/neo4j_bootstrap.py` | Neo4j 스키마 초기화, 노드/관계 생성, 인덱스/제약조건 | K-AIR text2sql 이식 |
 | `graph/graph_search.py` | 벡터 유사도 검색 + FK 그래프 경로 탐색 | K-AIR text2sql 이식 |
-| `graph/ontology_schema.py` | 4계층 온톨로지 스키마 정의/마이그레이션 | 신규 개발 |
+| `graph/ontology_schema.py` | 5계층 온톨로지 스키마 정의/마이그레이션 | 신규 개발 |
 | `graph/ontology_ingest.py` | 케이스 데이터 → 온톨로지 노드 자동 생성 | 신규 개발 |
 
 **원칙**:
@@ -117,7 +123,7 @@
 |------|------|------|
 | `extraction/ner_extractor.py` | GPT-4o 기반 개체명 인식 (NER) | 신규 개발 |
 | `extraction/relation_extractor.py` | 개체 간 관계 추출 | 신규 개발 |
-| `extraction/ontology_mapper.py` | 추출된 개체/관계 → 4계층 온톨로지 매핑 | 신규 개발 |
+| `extraction/ontology_mapper.py` | 추출된 개체/관계 → 5계층 온톨로지 매핑 | 신규 개발 |
 
 **원칙**:
 - LLM 호출은 Extraction Layer에서만 발생한다
@@ -171,7 +177,7 @@ Canvas → Core → Synapse API (POST /extract-ontology 또는 /ingest/audio)
                      ├─ 1c. [레거시 코드] AST 기반 제어/데이터 흐름(DFG) 파싱
                      ├─ 2. NER 및 규칙 추론 (GPT-4o Structured Output / Rules Engine)
                      ├─ 3. 관계(Relation) 및 정책(Policy) 추출
-                     ├─ 4. 4계층 온톨로지 매핑
+                     ├─ 4. 5계층 온톨로지 매핑
                      └─ 5. 신뢰도 < 0.80 → HITL 대기열
                               │
                               ▼ Graph Layer
@@ -268,7 +274,7 @@ Oracle → Synapse API (POST /graph/search)
 ### 4.1 노드 레이블링 전략
 
 ```
-기존 K-AIR 이식 노드:     4계층 온톨로지 확장 노드:     Process Mining 확장 노드:
+기존 K-AIR 이식 노드:     5계층 온톨로지 확장 노드:     Process Mining 확장 노드:
   (:Table)                   (:Resource)                    (:BusinessEvent)
   (:Column)                  (:Process)                     (:BusinessAction)
   (:Query)                   (:Measure)                     (:BusinessRule)

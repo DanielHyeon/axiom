@@ -68,43 +68,46 @@
 ### 1.2 요청 인증
 
 ```python
-# app/core/security.py
-# K-AIR gs-main/gateway의 JwtAuthFilter에서 이식
+# app/core/security.py — 실제 구현 (2026-03-21 검증)
+# PyJWT 라이브러리 사용 (python-jose가 아님)
 
-from jose import jwt, JWTError
-from fastapi import Depends, HTTPException
-from fastapi.security import HTTPBearer
+import jwt  # PyJWT
+from fastapi import Depends, HTTPException, status
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-security = HTTPBearer()
+security_scheme = HTTPBearer(auto_error=False)
 
 async def get_current_user(
-    credentials = Depends(security),
+    credentials: HTTPAuthorizationCredentials | None = Depends(security_scheme),
 ) -> dict:
     """JWT 토큰 검증 및 사용자 정보 추출"""
-    token = credentials.credentials
-
-    try:
-        payload = jwt.decode(
-            token,
-            settings.JWT_SECRET_KEY,
-            algorithms=[settings.JWT_ALGORITHM],  # RS256 또는 HS256
-        )
-    except JWTError as e:
-        raise HTTPException(status_code=401, detail="Invalid token")
-
-    # 만료 확인
-    if payload.get("exp", 0) < time.time():
-        raise HTTPException(status_code=401, detail="Token expired")
-
+    if not credentials:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authorization header missing")
+    payload = decode_token(credentials.credentials)
+    if payload.get("type") == "refresh":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Use access token")
+    # 테넌트 불일치 검사: JWT tenant_id와 X-Tenant-Id 헤더 비교
+    tenant_id = payload["tenant_id"]
+    header_tenant = get_current_tenant_id()
+    if header_tenant and header_tenant != "default" and header_tenant != tenant_id:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant mismatch")
     return {
         "user_id": payload["sub"],
         "email": payload.get("email"),
-        "tenant_id": payload["tenant_id"],
-        "role": payload["role"],
+        "tenant_id": tenant_id,
+        "role": payload.get("role", "viewer"),
         "permissions": payload.get("permissions", []),
         "case_roles": payload.get("case_roles", {}),
     }
+
+def decode_token(token: str) -> dict:
+    try:
+        return jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or expired token")
 ```
+
+> **주의**: 이전 문서에서 `python-jose` (`from jose import jwt`)로 기술했으나, 실제 구현은 `PyJWT` (`import jwt`)를 사용한다. 만료 검사는 PyJWT가 `decode()` 시 자동 수행한다 (별도 `exp` 비교 불필요).
 
 ---
 
@@ -143,7 +146,7 @@ async def get_current_user(
 | process:initiate | O | O | O | X | X | X | X |
 | process:submit | O | O | O | O | X | O | X |
 | process:approve | O | O | X | X | X | X | X |
-| agent:chat | O | O | O | O | O | O | X |
+| agent:chat | O | O | O | O | O | O | O |
 | agent:feedback | O | O | O | O | X | X | X |
 | watch:manage | O | O | O | X | X | O | X |
 | mcp:configure | O | O | X | X | X | X | X |
@@ -159,34 +162,37 @@ async def get_current_user(
 | schema:edit | O | X | X | X | O | X | X |
 | schema:read | O | O | O | O | O | O | O |
 
+> **코드 동기화 주의 (2026-03-21)**: `app/core/security.py`의 `ROLE_PERMISSIONS` dict에는 위 매트릭스의 일부 권한만 구현되어 있다. `case:delete`, `tenant:manage`, `olap:query`, `olap:manage`, `nl2sql:query`, `datasource:read` (engineer만 구현), `ontology:read` (engineer만 구현), `schema:read` (engineer만 구현) 등은 아직 코드에 반영되지 않았거나, 해당 모듈(Vision, Oracle, Weaver)의 프록시 권한 체계에서 별도 검사될 예정이다. 위 매트릭스는 **설계 목표**이며, 현재 구현과의 차이를 인지해야 한다.
+
 ### 2.4 권한 검사 구현
 
 ```python
-# app/core/security.py
-
-from functools import wraps
+# app/core/security.py — 실제 구현 (2026-03-21 검증)
+# require_permission은 Depends() 팩토리 함수로 구현됨 (데코레이터가 아님)
 
 def require_permission(permission: str):
-    """권한 검사 데코레이터"""
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, current_user=Depends(get_current_user), **kwargs):
-            if permission not in current_user.get("permissions", []):
-                if current_user["role"] != "admin":  # admin은 모든 권한
-                    raise HTTPException(
-                        status_code=403,
-                        detail=f"Permission '{permission}' required"
-                    )
-            return await func(*args, current_user=current_user, **kwargs)
-        return wrapper
-    return decorator
+    """경로별 권한 검사용 Depends 팩토리."""
+    async def _check(user: dict = Depends(get_current_user)) -> dict:
+        if user["role"] == "admin":
+            return user  # admin은 모든 권한 통과
+        if permission not in user.get("permissions", []):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Permission '{permission}' required",
+            )
+        return user
+    return _check
 
-# 사용 예시
+# 사용 예시 (Depends()로 주입)
 @router.post("/cases")
-@require_permission("case:create")
-async def create_case(data: CaseCreate, current_user: dict = Depends(get_current_user)):
+async def create_case(
+    data: CaseCreate,
+    current_user: dict = Depends(require_permission("case:create")),
+):
     ...
 ```
+
+> **주의**: 이전 문서에서 `@require_permission` 데코레이터 패턴으로 기술했으나, 실제 구현은 `Depends(require_permission("..."))` 패턴이다. 현재 대부분의 보호 라우터는 `main.py`에서 `dependencies=[Depends(get_current_user)]`로 일괄 적용하며, 세밀한 권한 검사가 필요한 경우에만 `require_permission`을 사용한다.
 
 ---
 

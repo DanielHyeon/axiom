@@ -14,157 +14,132 @@
 
 ## 1. 모듈 개요
 
-`sql_exec.py`는 K-AIR에서 380줄로 구현된 모듈로, SQL Guard를 통과한 SELECT 쿼리를 대상 데이터베이스에서 비동기로 실행하고 결과를 반환한다.
+`sql_exec.py`는 SQL Guard를 통과한 SELECT 쿼리를 대상 데이터베이스에서 실행하고 결과를 반환한다.
+
+> **현재 구현**: `app/core/sql_exec.py` -- 4가지 실행 모드를 지원하며, `ORACLE_SQL_EXECUTION_MODE` 환경변수로 모드를 설정한다.
 
 ---
 
-## 2. 지원 데이터베이스
+## 2. 실행 모드
 
-| DB | 드라이버 | 프로토콜 | 비고 |
-|----|---------|---------|------|
-| PostgreSQL | `asyncpg` | TCP :5432 | 주력 지원 (비즈니스 DB) |
-| MySQL | `aiomysql` | TCP :3306 | K-AIR 호환성 유지 |
+| 모드 | 드라이버 | 설명 |
+|------|---------|------|
+| `direct` | psycopg2 (동기, `asyncio.to_thread` 래핑) | PostgreSQL 직접 실행 (readonly). 실패 시 mock 폴백 |
+| `hybrid` (기본값) | psycopg2 → Weaver ACL → mock | Weaver 우선, 실패 시 mock 폴백 |
+| `weaver` | httpx (Weaver ACL) | Weaver API 경유. 실패 시 에러 발생 (폴백 없음) |
+| `mock` | 없음 | SQL 파싱 기반 모의 데이터 생성 |
 
 ### 2.1 드라이버 선택 근거
 
-| 기준 | asyncpg | psycopg2 |
-|------|---------|----------|
-| 비동기 | 네이티브 async | 래퍼 필요 |
-| 성능 | 3-5배 빠름 | 기준 |
-| 바이너리 프로토콜 | 지원 | 지원 |
-| 선택 | **채택** | 미사용 |
+| 기준 | psycopg2 (현재) | asyncpg (미구현) |
+|------|-----------------|------------------|
+| 비동기 | `asyncio.to_thread` 래핑 | 네이티브 async |
+| 읽기 전용 | `conn.set_session(readonly=True)` | 지원 |
+| 선택 근거 | 범용성, 간단한 구현 | 향후 성능 최적화 시 전환 가능 |
 
 ---
 
-## 3. 커넥션 풀 관리
+## 3. 커넥션 관리
+
+> **현재 구현**: 커넥션 풀을 사용하지 않는다. psycopg2로 매 요청마다 연결/해제한다.
 
 ```python
-# sql_exec.py 기반
+# sql_exec.py 기반 (실제 구현)
 class SQLExecutor:
     """비동기 SQL 실행기."""
 
-    def __init__(self, config: OracleSettings):
-        self._pools: dict[str, asyncpg.Pool] = {}
-        self._config = config
+    def __init__(self, sql_timeout: int = 30, max_rows: int = 10000):
+        self.sql_timeout = sql_timeout
+        self.max_rows = max_rows
+        self.execution_mode = settings.ORACLE_SQL_EXECUTION_MODE.lower()
 
-    async def _get_pool(self, datasource: DataSource) -> asyncpg.Pool:
-        """
-        데이터소스별 커넥션 풀 생성/재사용.
-        Lazy initialization: 첫 요청 시 풀 생성.
-        """
-        pool_key = datasource.id
-        if pool_key not in self._pools:
-            if datasource.type == "postgresql":
-                self._pools[pool_key] = await asyncpg.create_pool(
-                    dsn=datasource.connection_string,
-                    min_size=2,         # 최소 커넥션
-                    max_size=10,        # 최대 커넥션
-                    max_inactive_connection_lifetime=300,  # 5분 유휴 해제
-                    command_timeout=self._config.sql_timeout,
-                )
-            elif datasource.type == "mysql":
-                self._pools[pool_key] = await aiomysql.create_pool(
-                    host=datasource.host,
-                    port=datasource.port,
-                    user=datasource.user,
-                    password=datasource.password,
-                    db=datasource.database,
-                    minsize=2,
-                    maxsize=10,
-                )
-        return self._pools[pool_key]
+    def _execute_direct_pg_sync(self, sql: str) -> ExecutionResult:
+        """PostgreSQL에 직접 SQL을 동기로 실행한다 (스레드 풀에서 호출)."""
+        import psycopg2
 
-    async def close_all(self):
-        """모든 커넥션 풀 종료. 서버 shutdown 시 호출."""
-        for pool in self._pools.values():
-            await pool.close()
-        self._pools.clear()
+        db_url = settings.QUERY_HISTORY_DATABASE_URL
+        conn = psycopg2.connect(db_url)
+        try:
+            conn.set_session(readonly=True, autocommit=True)
+            with conn.cursor() as cur:
+                cur.execute(sql)
+                columns = [desc[0] for desc in cur.description] if cur.description else []
+                rows_raw = cur.fetchmany(self.max_rows + 1)
+                truncated = len(rows_raw) > self.max_rows
+                rows = [[self._serialize_value(v) for v in r] for r in rows_raw[:self.max_rows]]
+        finally:
+            conn.close()
+        return ExecutionResult(columns=columns, rows=rows, ...)
+
+    async def _execute_direct_pg(self, sql: str, user: CurrentUser) -> ExecutionResult:
+        """PostgreSQL 직접 실행 (비동기 래퍼). asyncio.to_thread로 위임."""
+        return await asyncio.to_thread(self._execute_direct_pg_sync, sql)
 ```
 
-### 3.1 커넥션 풀 설정
+### 3.1 커넥션 전략
 
-| 설정 | 값 | 근거 |
-|------|-----|------|
-| `min_size` | 2 | 유휴 시에도 기본 커넥션 유지 |
-| `max_size` | 10 | 동시 쿼리 수 제한 (DB 부하 방지) |
-| `max_inactive_lifetime` | 300초 | 5분 유휴 커넥션 자동 해제 |
-| `command_timeout` | 30초 | SQL 실행 타임아웃 |
+| 항목 | 현재 구현 | 향후 개선안 |
+|------|----------|-----------|
+| 드라이버 | psycopg2 (동기) | asyncpg (네이티브 async) |
+| 풀링 | 없음 (매 요청 connect/close) | asyncpg.Pool (min=2, max=10) |
+| 비동기 | `asyncio.to_thread` 래핑 | 네이티브 async |
+| 읽기 전용 | `conn.set_session(readonly=True)` | 지원 |
 
 ---
 
 ## 4. SQL 실행 흐름
 
+> **현재 구현**: `execute_sql()` 메서드는 `execution_mode` 설정에 따라 4가지 경로 중 하나를 선택한다.
+
 ```python
-async def execute_sql(
-    self,
-    sql: str,
-    datasource: DataSource,
-    timeout: int | None = None,
-    max_rows: int | None = None
-) -> ExecutionResult:
+async def execute_sql(self, sql: str, datasource_id: str, user: CurrentUser,
+                      timeout: int | None = None) -> ExecutionResult:
     """
-    SQL 실행 전체 흐름.
+    SQL 실행 전체 흐름 (4모드 분기).
 
-    1. 커넥션 풀에서 커넥션 획득
-    2. statement_timeout 설정 (PostgreSQL)
-    3. SQL 실행
-    4. 결과 행 제한 (max_rows)
-    5. 컬럼 메타데이터 추출
-    6. 커넥션 반환
+    - direct: psycopg2로 직접 실행 (asyncio.to_thread). 실패 시 mock 폴백
+    - hybrid: Weaver ACL 우선, 실패 시 mock 폴백
+    - weaver: Weaver ACL 경유. 실패 시 에러 (폴백 없음)
+    - mock: SQL 파싱 기반 모의 데이터 생성
     """
-    timeout = timeout or self._config.sql_timeout
-    max_rows = max_rows or self._config.max_rows
+    effective_timeout = timeout or settings.ORACLE_SQL_EXECUTION_TIMEOUT_SEC
 
-    pool = await self._get_pool(datasource)
-
-    async with pool.acquire() as conn:
+    if self.execution_mode == "mock":
+        return await self._execute_mock(sql, user)
+    elif self.execution_mode == "direct":
         try:
-            # PostgreSQL: statement_timeout 설정
-            if datasource.type == "postgresql":
-                await conn.execute(
-                    f"SET statement_timeout = '{timeout * 1000}'"
-                )
+            return await self._execute_direct_pg(sql, user)
+        except Exception:
+            return await self._execute_mock(sql, user)
+    elif self.execution_mode == "weaver":
+        return await self._execute_via_weaver(sql, datasource_id, user, effective_timeout)
+    else:  # hybrid
+        try:
+            return await self._execute_via_weaver(sql, datasource_id, user, effective_timeout)
+        except Exception:
+            return await self._execute_mock(sql, user)
+```
 
-            # SQL 실행
-            rows = await conn.fetch(sql)
+### 4.1 direct_pg 모드 상세
 
-            # 행 수 제한
-            total_count = len(rows)
-            truncated = total_count > max_rows
-            if truncated:
-                rows = rows[:max_rows]
+```python
+def _execute_direct_pg_sync(self, sql: str) -> ExecutionResult:
+    """동기 psycopg2 호출 (asyncio.to_thread에서 실행)."""
+    import psycopg2
 
-            # 컬럼 메타데이터 추출
-            columns = []
-            if rows:
-                columns = [
-                    ColumnMeta(
-                        name=key,
-                        type=_pg_type_to_str(rows[0][key])
-                    )
-                    for key in rows[0].keys()
-                ]
-
-            return ExecutionResult(
-                columns=columns,
-                rows=[list(row.values()) for row in rows],
-                row_count=total_count,
-                truncated=truncated,
-                execution_time_ms=_elapsed_ms()
-            )
-
-        except asyncpg.QueryCanceledError:
-            raise SQLTimeoutError(
-                f"SQL 실행이 {timeout}초를 초과했습니다"
-            )
-        except asyncpg.PostgresError as e:
-            raise SQLExecutionError(
-                f"SQL 실행 에러: {e.message}"
-            )
-        finally:
-            # statement_timeout 리셋
-            if datasource.type == "postgresql":
-                await conn.execute("RESET statement_timeout")
+    conn = psycopg2.connect(settings.QUERY_HISTORY_DATABASE_URL)
+    try:
+        conn.set_session(readonly=True, autocommit=True)
+        with conn.cursor() as cur:
+            cur.execute(sql)
+            columns = [desc[0] for desc in cur.description] if cur.description else []
+            rows_raw = cur.fetchmany(self.max_rows + 1)
+            truncated = len(rows_raw) > self.max_rows
+            rows = [[self._serialize_value(v) for v in r] for r in rows_raw[:self.max_rows]]
+    finally:
+        conn.close()
+    return ExecutionResult(columns=columns, rows=rows, row_count=len(rows),
+                           truncated=truncated, backend="direct_pg", ...)
 ```
 
 ---
@@ -189,19 +164,12 @@ async def execute_sql(
 | 계층 | 타임아웃 | 동작 |
 |------|---------|------|
 | API | 60초 | uvicorn/nginx 레벨에서 요청 종료 |
-| SQL 실행 | 30초 | asyncpg command_timeout |
+| SQL 실행 | 15초 | `ORACLE_SQL_EXECUTION_TIMEOUT_SEC` (psycopg2 래핑) |
 | DB statement | 30초 | PostgreSQL이 쿼리 취소 |
 
 ### 5.2 MySQL 타임아웃
 
-```python
-# MySQL은 statement_timeout이 없으므로 다른 전략 사용
-if datasource.type == "mysql":
-    # aiomysql에서 읽기 타임아웃 설정
-    await conn.execute(
-        f"SET SESSION MAX_EXECUTION_TIME={timeout * 1000}"
-    )
-```
+> **참고**: 현재 Oracle 서비스의 SQL 실행은 PostgreSQL만 지원한다 (psycopg2 direct_pg 모드 또는 Weaver ACL 경유). MySQL 직접 실행은 미구현이다.
 
 ---
 
@@ -229,27 +197,22 @@ SQL 실행 결과
 
 ### 7.1 에러 분류
 
-| asyncpg 예외 | Oracle 예외 | 사용자 메시지 |
-|-------------|------------|-------------|
-| `QueryCanceledError` | `SQLTimeoutError` | "쿼리 실행 시간 초과" |
-| `UndefinedTableError` | `SQLExecutionError` | "테이블을 찾을 수 없습니다" |
-| `UndefinedColumnError` | `SQLExecutionError` | "컬럼을 찾을 수 없습니다" |
-| `SyntaxOrAccessRuleViolation` | `SQLExecutionError` | "SQL 문법 오류" |
-| `InsufficientPrivilegeError` | `SQLExecutionError` | "데이터 접근 권한 없음" |
-| `ConnectionDoesNotExistError` | `SQLExecutionError` | "DB 연결 실패" |
+> **현재 구현**: direct_pg 모드에서는 psycopg2 예외가 발생한다. 실패 시 mock 폴백으로 전환된다.
 
-### 7.2 재시도 전략
+| 에러 상황 | 동작 | 사용자 메시지 |
+|----------|------|-------------|
+| psycopg2 연결 실패 | mock 폴백 (hybrid/direct) 또는 에러 (weaver) | "쿼리 실행 중 오류가 발생했습니다" |
+| SQL 문법 오류 | mock 폴백 (hybrid/direct) 또는 에러 (weaver) | "SQL 실행 에러" |
+| Weaver ACL 타임아웃 | mock 폴백 (hybrid) 또는 에러 (weaver) | "쿼리 실행 시간 초과" |
+| mock 모드 | 항상 성공 (모의 데이터 생성) | - |
 
-```python
-# 커넥션 에러만 재시도 (쿼리 에러는 재시도 무의미)
-RETRYABLE_ERRORS = (
-    asyncpg.ConnectionDoesNotExistError,
-    asyncpg.InterfaceError,
-    ConnectionRefusedError,
-)
+### 7.2 폴백 전략
 
-MAX_RETRIES = 2
-RETRY_DELAY = 1.0  # 초
+```
+direct 모드:  direct_pg 실패 → mock 폴백
+hybrid 모드:  weaver ACL 실패 → mock 폴백
+weaver 모드:  weaver ACL 실패 → 에러 발생 (폴백 없음)
+mock 모드:    항상 모의 데이터 반환
 ```
 
 ---

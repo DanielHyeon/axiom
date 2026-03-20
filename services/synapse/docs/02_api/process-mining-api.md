@@ -43,8 +43,12 @@
 | POST | `/performance` | 성능 분석 (시간축 병목 탐지) | 비동기 |
 | POST | `/import-model` | 외부 BPMN/Petri Net 모델 임포트 (적합성 검사용) | 동기 |
 | GET | `/results/{task_id}` | 비동기 작업 결과 조회 (별칭: `/tasks/{task_id}/result`) | 동기 |
+| POST | `/bottlenecks` | 병목 분석 실행 | 비동기 |
+| POST | `/performance` | 성능 분석 (시간축 병목 탐지) | 비동기 |
 | POST | `/bpmn/export` | BPMN XML 내보내기 | 동기 |
+| POST | `/import-model` | 외부 BPMN/Petri Net 모델 임포트 | 동기 |
 | GET | `/statistics/{log_id}` | 이벤트 로그 통계 | 동기 |
+| GET | `/results/{result_id}` | 결과 조회 (task_id 또는 result_id) | 동기 |
 
 > 참고: `/conformance` 경로의 내부 checker는 현재 stub 구현이 포함되어 있어 full-spec 기준 `Partial`로 관리한다.
 

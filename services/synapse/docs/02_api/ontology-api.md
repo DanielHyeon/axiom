@@ -5,7 +5,7 @@
 
 ## 이 문서가 답하는 질문
 
-- 4계층 온톨로지 노드를 생성/조회/수정/삭제하는 API는?
+- 5계층 온톨로지 노드를 생성/조회/수정/삭제하는 API는?
 - 계층 간 관계를 어떻게 관리하는가?
 - 특정 케이스의 전체 온톨로지를 어떻게 조회하는가?
 - 각 API의 권한 요구사항은?
@@ -41,6 +41,23 @@
 | DELETE | `/relations/{relation_id}` | 관계 삭제 |
 | GET | `/nodes/{node_id}/neighbors` | 인접 노드 조회 |
 | GET | `/nodes/{node_id}/path-to/{target_id}` | 두 노드 간 경로 |
+| PATCH | `/relations/{relation_id}` | 관계 속성 부분 업데이트 (weight/lag/confidence 등) |
+| PATCH | `/relations:bulk` | 관계 일괄 업데이트 (인과 분석 결과 반영) |
+| PATCH | `/cases/{case_id}/relations:bulk` | 관계 일괄 업데이트 (case_id 명시) |
+| POST | `/cases/{case_id}/behavior-models` | BehaviorModel 생성 |
+| GET | `/cases/{case_id}/behavior-models` | BehaviorModel 목록 조회 |
+| GET | `/cases/{case_id}/model-graph` | 시뮬레이션용 모델 DAG 구조 반환 |
+| GET | `/cases/{case_id}/export` | OWL/RDF Export (Turtle/JSON-LD) |
+| GET | `/cases/{case_id}/quality` | 온톨로지 품질 보고서 |
+| GET | `/cases/{case_id}/hitl` | HITL 검토 대기열 |
+| POST | `/hitl/submit` | HITL 검토 제출 |
+| POST | `/hitl/{item_id}/approve` | HITL 승인 |
+| POST | `/hitl/{item_id}/reject` | HITL 거부 |
+| POST | `/cases/{case_id}/snapshots` | 온톨로지 스냅샷 생성 |
+| GET | `/cases/{case_id}/snapshots` | 스냅샷 목록 조회 |
+| GET | `/snapshots/diff` | 스냅샷 비교 (diff) |
+| GET | `/cases/{case_id}/glossary-suggest` | 글로서리 용어 → 온톨로지 노드 매칭 제안 |
+| POST | `/cases/{case_id}/glossary-link` | 글로서리 용어 ↔ 온톨로지 노드 연결 |
 | GET | `/` | 호환 경로 (query `case_id`) |
 | POST | `/extract-ontology` | 엔티티/관계 일괄 인제스트 |
 
@@ -63,7 +80,7 @@ Query Parameters:
 
 | 파라미터 | 타입 | 필수 | 기본값 | 설명 |
 |---------|------|------|-------|------|
-| `layer` | string | N | all | 필터: resource, process, measure, kpi, all |
+| `layer` | string | N | all | 필터: resource, process, measure, driver, kpi, all |
 | `include_relations` | bool | N | true | 관계 포함 여부 |
 | `verified_only` | bool | N | false | 검증된 노드만 |
 | `limit` | int | N | 500 | 최대 노드 수 |
@@ -83,6 +100,7 @@ Query Parameters:
         "resource": 18,
         "process": 12,
         "measure": 10,
+        "driver": 5,
         "kpi": 7
       }
     },
@@ -174,6 +192,12 @@ Query Parameters:
           "CycleTime": 3
         }
       },
+      "driver": {
+        "total": 5,
+        "by_type": {
+          "Driver": 5
+        }
+      },
       "kpi": {
         "total": 7,
         "by_type": {
@@ -189,11 +213,12 @@ Query Parameters:
     "relation_counts": {
       "PARTICIPATES_IN": 15,
       "PRODUCES": 10,
-      "CONTRIBUTES_TO": 12,
-      "DEPENDS_ON": 7,
+      "DERIVED_FROM": 12,
+      "SUPPORTS": 7,
+      "CAUSES": 4,
       "INFLUENCES": 5,
-      "OWNS": 5,
-      "HAS_CONTRACT_WITH": 3,
+      "CONTAINS": 5,
+      "RELATED_TO": 3,
       "other": 5
     },
     "verification_status": {
@@ -239,7 +264,7 @@ Content-Type: application/json
 | 필드 | 타입 | 필수 | nullable | 설명 |
 |------|------|------|----------|------|
 | `case_id` | uuid | Y | N | 프로젝트 ID |
-| `layer` | string | Y | N | resource, process, measure, kpi |
+| `layer` | string | Y | N | resource, process, measure, driver, kpi |
 | `type` | string | Y | N | 노드 유형 (Company, Asset 등) |
 | `properties` | object | Y | N | 노드 속성 (유형별 스키마 다름) |
 | `source` | string | N | N | manual, extracted, ingested (기본: manual) |
@@ -342,15 +367,20 @@ Content-Type: application/json
 
 #### 관계 유형별 유효성 검증
 
-| 관계 유형 | 허용 방향 |
-|----------|----------|
-| PARTICIPATES_IN | Resource → Process |
-| PRODUCES | Process → Measure |
-| CONTRIBUTES_TO | Resource → Measure, Measure → KPI |
-| DEPENDS_ON | KPI → Measure |
-| INFLUENCES | Process → KPI |
-| OWNS | Company → Asset |
-| HAS_CONTRACT_WITH | Company → Contract |
+| 관계 유형 | 허용 방향 | 비고 |
+|----------|----------|------|
+| DERIVED_FROM | KPI → Measure, Measure → Process | ALLOWED_REL_TYPES 등록됨 |
+| OBSERVED_IN | Measure → Process | ALLOWED_REL_TYPES 등록됨 |
+| PRECEDES | Process → Process | ALLOWED_REL_TYPES 등록됨 |
+| SUPPORTS | Resource → Process | ALLOWED_REL_TYPES 등록됨 |
+| USES | Process → Resource | ALLOWED_REL_TYPES 등록됨 |
+| CAUSES | Driver → KPI, Measure → Driver | ALLOWED_REL_TYPES 등록됨 |
+| INFLUENCES | Process → KPI, Driver → Measure | ALLOWED_REL_TYPES 등록됨 |
+| RELATED_TO | 임의 노드 간 | ALLOWED_REL_TYPES 등록됨 (범용 관계) |
+| PARTICIPATES_IN | Resource → Process | ALLOWED_REL_TYPES 등록됨 |
+| PRODUCES | Process → Measure | ALLOWED_REL_TYPES 등록됨 |
+| CONTAINS | 상위 → 하위 | ALLOWED_REL_TYPES 등록됨 |
+| TRIGGERS | Event → Action | ALLOWED_REL_TYPES 등록됨 |
 
 잘못된 방향으로 관계 생성을 시도하면 400 에러를 반환한다.
 
@@ -405,7 +435,7 @@ Content-Type: application/json
           "name": "강남 사옥"
         },
         "relation": {
-          "type": "OWNS",
+          "type": "CONTAINS",
           "direction": "outgoing"
         },
         "depth": 1
@@ -451,7 +481,7 @@ Content-Type: application/json
       },
       {
         "node": {"id": "node-uuid-030", "labels": ["Revenue", "Measure"], "name": "매출"},
-        "relation_to_next": {"type": "CONTRIBUTES_TO", "properties": {"weight": 1.0}}
+        "relation_to_next": {"type": "DERIVED_FROM", "properties": {"weight": 1.0}}
       },
       {
         "node": {"id": "node-uuid-040", "labels": ["ProcessEfficiency", "KPI"], "name": "프로세스 효율성"},
@@ -493,6 +523,6 @@ Content-Type: application/json
 
 ## 근거 문서
 
-- `01_architecture/ontology-4layer.md` (4계층 온톨로지 구조)
+- `01_architecture/ontology-4layer.md` (5계층 온톨로지 구조)
 - `07_security/data-access.md` (접근 제어)
 - `06_data/ontology-model.md` (데이터 모델)

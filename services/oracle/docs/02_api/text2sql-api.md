@@ -66,6 +66,7 @@ NL2SQL 파이프라인은 Synapse Graph Layer (Neo4j)에 의존한다.
 |------|------|------|----------|------|
 | `question` | string | Yes | No | 자연어 질문 (최소 2자, 최대 2000자) |
 | `datasource_id` | string | Yes | No | 대상 데이터소스 ID |
+| `case_id` | string | No | Yes | 온톨로지 컨텍스트용 케이스 ID (O3) |
 | `options` | object | No | Yes | 실행 옵션 |
 | `options.use_cache` | boolean | No | - | 캐시된 쿼리 사용 여부 (기본: true) |
 | `options.include_viz` | boolean | No | - | 시각화 추천 포함 여부 (기본: true) |
@@ -125,9 +126,11 @@ NL2SQL 파이프라인은 Synapse Graph Layer (Neo4j)에 의존한다.
 | `data.visualization.chart_type` | string | No | 차트 유형 (bar/line/pie/scatter/kpi_card/table) |
 | `data.visualization.config` | object | No | 차트 설정 |
 | `data.summary` | string | Yes | 결과 요약 (LLM 생성) |
+| `data.metadata.query_id` | string | Yes | 쿼리 이력 ID (피드백 제출에 사용) |
 | `data.metadata.execution_time_ms` | integer | No | 전체 실행 시간 (밀리초) |
+| `data.metadata.execution_backend` | string | No | SQL 실행 백엔드 (direct_pg/weaver/mock) |
 | `data.metadata.tables_used` | array | No | 사용된 테이블 목록 |
-| `data.metadata.cache_hit` | boolean | No | 캐시 히트 여부 |
+| `data.metadata.schema_source` | string | No | 스키마 출처 (synapse_graph/synapse/fallback) |
 | `data.metadata.guard_status` | string | No | SQL Guard 결과 (PASS/FIX) |
 | `data.metadata.guard_fixes` | array | Yes | 적용된 자동 수정 목록 |
 
@@ -187,8 +190,12 @@ ReAct(Reasoning + Acting) 패턴으로 다단계 추론을 수행한다. NDJSON(
 |------|------|------|----------|------|
 | `question` | string | Yes | No | 자연어 질문 |
 | `datasource_id` | string | Yes | No | 대상 데이터소스 ID |
+| `case_id` | string | No | Yes | 온톨로지 컨텍스트용 케이스 ID (O3) |
 | `options.max_iterations` | integer | No | - | ReAct 최대 반복 횟수 (기본: 5, 최대: 10) |
 | `options.stream` | boolean | No | - | 스트리밍 여부 (기본: true) |
+| `options.row_limit` | integer | No | - | 응답 행 수 제한 (기본: 1000, 최대: 10000) |
+| `session_state` | string | No | Yes | HIL 세션 재개용 상태 토큰 (ask_user 이후) |
+| `user_response` | string | No | Yes | HIL ask_user에 대한 사용자 응답 |
 
 ### 3.3 응답 (200 OK, NDJSON Stream)
 
@@ -219,6 +226,7 @@ Content-Type: `application/x-ndjson`
 | `execute` | SQL 실행 | row_count, preview |
 | `quality` | 품질 점검 | score, feedback |
 | `triage` | 결과 분류/라우팅 | action (continue/complete/fail), reason |
+| `needs_user_input` | HIL: 사용자 추가 입력 요청 | type, question_to_user, session_state, partial_sql, context |
 | `result` | 최종 결과 | sql, result, summary, visualization |
 | `error` | 에러 발생 | code, message |
 

@@ -19,7 +19,7 @@
 
 ```
 +-------------------------------------------------------------------------+
-|                         Axiom Canvas (React 18)                          |
+|                         Axiom Canvas (React 19)                          |
 |  +----------+ +----------+ +----------+ +----------+ +----------+       |
 |  | Cases    | | Documents| | HITL     | | What-if  | | Watch    |       |
 |  | 관리     | | 관리     | | 리뷰     | | 시뮬     | | 알림     |       |
@@ -104,36 +104,63 @@
 ### 2.2 주요 컴포넌트별 계층 매핑
 
 ```python
-# Presentation Layer - app/api/
-app/api/auth/          # JWT 인증 엔드포인트 (login, refresh) — Implemented
-app/api/users/         # 사용자 API (GET /me) — Implemented
-app/api/cases/         # 케이스 목록·활동·문서 리뷰 — Implemented (GET /cases, /cases/activities, POST .../review)
-app/api/process/       # BPM 실행 API — Implemented
-app/api/agents/        # 에이전트 관리 API — Implemented
-app/api/watches/       # Watch 구독/알림 API — Implemented
+# Presentation Layer — app/api/ (직접 구현) + app/modules/*/api/ (모듈별)
+app/api/auth/routes.py             # JWT 인증 (login, refresh) — Implemented
+app/api/users/routes.py            # 사용자 API (GET /me, POST, GET 목록) — Implemented
+app/api/health.py                  # 헬스체크 (startup, live, ready, metrics) — Implemented
+app/api/events/routes.py           # Outbox 관리 (sync run-once, backlog, retry, DLQ) — Implemented
+app/api/admin/event_routes.py      # DLQ 관리 (dead-letter CRUD, 파이프라인 메트릭) — Implemented
+app/api/gateway/routes.py          # Synapse 프록시 게이트웨이 (~50개 엔드포인트) — Implemented
+app/modules/case/api/routes.py     # 케이스 목록·활동·통계·추이·문서리뷰 — Implemented
+app/modules/process/api/routes.py  # BPM 실행 API — Implemented
+app/modules/agent/api/routes.py    # 에이전트/MCP/Completion API — Implemented (Partial)
+app/modules/watch/api/routes.py    # Watch 구독/알림/룰/스케줄러/SSE — Implemented
 
-# Application Layer - app/services/
-app/services/process_service.py    # BPM 실행 조율
-app/services/agent_service.py      # 에이전트 실행 조율
-app/services/watch_service.py      # CEP 룰 관리/알림 조율
-app/services/document_service.py   # 문서 처리 조율 — 미구현
+# Application Layer — app/modules/*/application/
+app/modules/process/application/process_service_facade.py  # BPM 파사드 (4개 하위 서비스 위임)
+app/modules/process/application/definition_service.py      # 프로세스 정의 CRUD
+app/modules/process/application/workitem_lifecycle_service.py  # 워크아이템 라이프사이클
+app/modules/process/application/process_instance_service.py    # 프로세스 인스턴스 관리
+app/modules/process/application/role_binding_service.py        # 역할 바인딩
+app/modules/agent/application/agent_service.py   # 에이전트 서비스 (피드백, MCP, 채팅, 지식)
+app/modules/watch/application/watch_service.py   # CEP 룰 관리/알림 조율
 
-# Domain Layer - app/bpm/, app/orchestrator/
-app/bpm/models.py                 # BPM Pydantic 모델 — Implemented
-app/bpm/engine.py                 # BPM 엔진 코어 (process_service 위임) — Implemented
-app/bpm/saga.py                   # Saga 보상 트랜잭션 (스텁) — Implemented
-app/bpm/extractor.py              # BPMN 추출기 (PDF→BPMN/DMN) — 예정
-app/orchestrator/langgraph_flow.py # 10노드 LangGraph 오케스트레이터 — Implemented (Oracle/Synapse 연동, SSOT §2.1)
-app/orchestrator/agent_loop.py     # 에이전트 지식 학습 루프 — Implemented (graph.ainvoke, HITL)
+# Domain Layer — app/modules/process/domain/, app/orchestrator/
+app/modules/process/domain/aggregates/work_item.py  # WorkItem Aggregate Root (상태 머신)
+app/modules/process/domain/events.py                # 도메인 이벤트 정의
+app/modules/process/domain/errors.py                # 도메인 에러
+app/modules/process/infrastructure/bpm/models.py    # BPM Pydantic 모델
+app/modules/process/infrastructure/bpm/engine.py    # BPM 엔진 코어
+app/modules/process/infrastructure/bpm/saga.py      # Saga 보상 트랜잭션
+app/orchestrator/langgraph_flow.py   # _CompiledOrchestrator (4노드 의도 분류)
+app/orchestrator/agent_loop.py       # run_agent_loop (1회 실행, HITL)
+app/orchestrator/tool_loader.py      # SafeToolLoader (BLOCKED_TOOLS 차단)
+app/orchestrator/mcp_client.py       # MCP 도구 실행 클라이언트
 
-# Infrastructure Layer - app/core/, app/workers/
-app/core/config.py                 # 환경 설정
-app/core/security.py               # JWT + RBAC — Implemented
-app/core/middleware.py             # 멀티테넌트 ContextVar
-app/core/database.py               # SQLAlchemy 세션
-app/core/redis_client.py           # Redis 연결
-app/workers/                       # 비동기 워커 (sync 구현, watch_cep 등 예정)
+# Infrastructure Layer — app/core/, app/workers/, app/infrastructure/
+app/core/config.py                 # Settings (pydantic-settings)
+app/core/security.py               # JWT (PyJWT) + RBAC — Implemented
+app/core/middleware.py             # TenantMiddleware + RequestIdMiddleware (ASGI)
+app/core/database.py               # SQLAlchemy async (스키마: "core")
+app/core/redis_client.py           # Redis 싱글턴
+app/core/events.py                 # EventPublisher (Outbox INSERT)
+app/core/event_contract_registry.py  # 이벤트 계약 등록·검증 (9개 이벤트)
+app/core/rate_limiter.py           # RateLimitMiddleware (Redis 고정 윈도우)
+app/core/resilience.py             # CircuitBreaker (3상태)
+app/core/observability.py          # MetricsRegistry (Prometheus 렌더링)
+app/core/self_verification.py      # SelfVerificationHarness (20% 샘플링)
+app/infrastructure/external/synapse_acl.py  # SynapseACL (Anti-Corruption Layer)
+app/models/base_models.py          # 전체 ORM 모델 (14개 테이블)
+app/workers/sync.py                # SyncWorker — Outbox→Redis Streams (Implemented)
+app/workers/policy_executor.py     # PolicyExecutorWorker — Neo4j Policy 매칭 (Implemented)
+app/workers/watch_cep.py           # WatchCepWorker shim (Implemented)
+app/workers/event_log.py           # EventLogWorker (미구현 스텁)
+app/workers/ocr.py                 # OCR Worker (미구현 스텁)
+app/workers/extract.py             # Extract Worker (미구현 스텁)
+app/workers/generate.py            # Generate Worker (미구현 스텁)
 ```
+
+> **참고**: `app/bpm/`, `app/domain/`, `app/services/` 경로에 레거시 하위호환 코드가 존재한다. 신규 코드는 `app/modules/<domain>/` 패턴을 따라야 한다.
 
 ---
 

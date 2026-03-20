@@ -233,7 +233,7 @@ from fastapi import Request, HTTPException
 from app.core.redis_client import get_redis
 
 class RateLimiter:
-    """Redis 기반 슬라이딩 윈도우 속도 제한"""
+    """Redis 기반 고정 윈도우 속도 제한"""
 
     RULES = {
         "/api/v1/auth/login": (10, 60),       # 10 req/min
@@ -318,6 +318,8 @@ app.add_middleware(
         "https://app.axiom.ai",             # 프로덕션
         "https://*.axiom.ai",               # 서브도메인 (테넌트별)
         "http://localhost:3000",             # 개발 환경
+        "http://localhost:5173",             # Docker canvas-ui
+        "http://localhost:5174",             # Docker canvas-ui (포트 충돌 회피)
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],

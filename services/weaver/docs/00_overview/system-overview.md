@@ -18,16 +18,20 @@
 
 엔터프라이즈 환경에서는 이해관계자, 대상 조직, 운영 데이터, 재무 데이터 등이 **서로 다른 데이터베이스와 시스템**에 분산되어 있다. Weaver는 이 분산된 데이터를 **단일 인터페이스**로 추상화하여, 사용자와 AI 에이전트가 마치 하나의 데이터베이스를 다루듯 접근할 수 있게 한다.
 
-### 핵심 역할
+### 핵심 역할 (현재 구현 기준)
 
-| 역할 | 설명 |
-|------|------|
-| **데이터 패브릭** | MindsDB를 게이트웨이로 사용하여 다중 DB를 단일 SQL 인터페이스로 추상화 |
-| **메타데이터 추출** | 연결된 DB에서 스키마, 테이블, 컬럼, FK 관계를 자동 추출 |
-| **메타데이터 그래프** | 추출된 메타데이터를 Neo4j 그래프로 저장하여 관계 탐색 가능 |
-| **다중 DB 추상화** | PostgreSQL, MySQL, MongoDB, Redis, Elasticsearch 등 8개 엔진 지원 |
-| **ETL 파이프라인** | Apache Airflow와 연동하여 데이터 수집/변환/적재 자동화 |
-| **메타데이터 서비스** | 테넌트별 메타데이터 SSOT, 패브릭 스냅샷, 비즈니스 용어 사전, 변경 전파 |
+| 역할 | 설명 | 구현 상태 |
+|------|------|----------|
+| **데이터소스 관리** | 데이터소스 CRUD, 연결 테스트, 헬스 체크 | Implemented |
+| **메타데이터 추출** | 스키마 인트로스펙션 SSE 스트리밍 (postgresql, mysql, oracle) | Implemented |
+| **메타데이터 그래프** | 추출된 메타데이터를 Synapse(Neo4j) 그래프로 저장 | Implemented (metadata_external_mode) |
+| **메타데이터 카탈로그** | 패브릭 스냅샷, 비즈니스 용어 사전(Glossary), 태그, diff | Implemented |
+| **쿼리 실행** | MindsDB 경유 / 모의 데이터 실행, 물리화 테이블 | Implemented |
+| **Insight 잡 스토어** | Redis 기반 비동기 분석 잡 (impact, subgraph), RLS 세션 | Implemented |
+| **문서 수집** | 문서 업로드 + DDD 개념 추출 + Synapse 온톨로지 적용 파이프라인 | Implemented |
+| **Outbox Relay** | 이벤트 소싱 — Transactional Outbox 패턴 + Redis Streams 전파 | Implemented |
+| **다중 DB 추상화** | MindsDB 경유 (external_mode 활성화 시) | Implemented (조건부) |
+| **ETL 파이프라인** | Apache Airflow 연동 | 미구현 |
 
 ---
 
@@ -130,17 +134,21 @@ Weaver는 Axiom의 **데이터 인프라 계층**이다. Oracle(NL2SQL), Vision(
 
 ## 5. 기술 스택
 
-| 계층 | 기술 | 버전 | 용도 |
-|------|------|------|------|
-| **웹 프레임워크** | FastAPI | 0.109+ | REST API 서버 |
-| **비동기 서버** | Uvicorn | 최신 | ASGI 서버 |
-| **HTTP 클라이언트** | httpx | 최신 | MindsDB API 호출 |
-| **데이터 패브릭** | MindsDB | 최신 | 다중 DB 게이트웨이 |
-| **메타데이터 저장** | Neo4j | 5.0+ | 그래프 데이터베이스 |
-| **PG 드라이버** | asyncpg | 0.29+ | PostgreSQL 비동기 연결 |
-| **MySQL 드라이버** | aiomysql / pymysql | 최신 | MySQL 비동기/동기 연결 |
-| **데이터 검증** | Pydantic | 2.5+ | 요청/응답 모델 |
-| **ETL** | Apache Airflow | 2.x | 데이터 파이프라인 |
+| 계층 | 기술 | 용도 |
+|------|------|------|
+| **웹 프레임워크** | FastAPI 1.0.0 | REST API 서버 |
+| **비동기 서버** | Uvicorn | ASGI 서버 |
+| **HTTP 클라이언트** | httpx | MindsDB/Synapse API 호출 |
+| **데이터 패브릭** | MindsDB (external_mode) | 다중 DB 게이트웨이 (조건부 활성화) |
+| **메타데이터 저장** | PostgreSQL (metadata_pg_mode) + Synapse/Neo4j (metadata_external_mode) | 3-tier 저장소 전략 |
+| **Insight 캐시** | Redis (aioredis) | 잡 스토어, 캐시키, dedup |
+| **PG 드라이버** | asyncpg | PostgreSQL 비동기 연결 (Insight, 메타데이터) |
+| **스키마 인트로스펙션** | asyncpg / aiomysql / oracledb | 대상 DB 스키마 추출 |
+| **인증** | python-jose (JWT HS256) | Core 발급 JWT 검증 + 서비스 토큰 |
+| **데이터 검증** | Pydantic v2 | 요청/응답 모델 |
+| **이벤트 소싱** | Transactional Outbox + Redis Streams | WeaverRelayWorker |
+| **로깅** | Python logging + 비밀 리다크션 | 구조화 로깅 |
+| **ETL** | Apache Airflow | 미구현 (향후 계획) |
 
 ---
 
@@ -165,15 +173,18 @@ Weaver는 Axiom의 **데이터 인프라 계층**이다. Oracle(NL2SQL), Vision(
 
 Weaver는 K-AIR 프로젝트의 `robo-data-fabric-main` 저장소를 기반으로 이식된다.
 
-| 항목 | K-AIR 원본 | Weaver 이식 | 상태 |
+| 항목 | K-AIR 원본 | Weaver 구현 | 상태 |
 |------|-----------|-------------|------|
-| 데이터소스 CRUD | `routers/datasources.py` | `api/datasources.py` | 계획 |
-| 쿼리 실행 | `routers/query.py` | `api/query.py` | 계획 |
-| MindsDB 클라이언트 | `services/mindsdb_service.py` | `mindsdb/client.py` | 계획 |
-| Neo4j 메타데이터 | `services/neo4j_service.py` | `core/neo4j_client.py` | 계획 |
-| PG 어댑터 | `services/schema_introspection.py` | `adapters/postgresql.py` | 계획 |
-| MySQL 어댑터 | `services/schema_introspection.py` | `adapters/mysql.py` | 계획 |
-| Oracle 어댑터 | (미구현) | `adapters/oracle.py` | 신규 |
+| 데이터소스 CRUD | `routers/datasources.py` | `api/datasource.py` | 완료 |
+| 쿼리 실행 | `routers/query.py` | `api/query.py` | 완료 |
+| MindsDB 클라이언트 | `services/mindsdb_service.py` | `services/mindsdb_client.py` | 완료 |
+| Neo4j 메타데이터 | `services/neo4j_service.py` | `services/neo4j_metadata_store.py` | 완료 |
+| PG 메타데이터 저장소 | (신규) | `services/postgres_metadata_store.py` | 완료 |
+| 스키마 인트로스펙션 | `services/schema_introspection.py` | `core/schema_introspection.py` + `services/introspection_service.py` | 완료 |
+| 메타데이터 카탈로그 | (신규) | `api/metadata_catalog.py` | 완료 |
+| Insight 잡 스토어 | (신규) | `api/insight.py` + `services/insight_job_store.py` | 완료 |
+| 문서 수집 | (신규) | `api/document_ingestion.py` | 완료 |
+| Outbox Relay | (신규) | `events/outbox.py` | 완료 |
 | Vue3 프론트엔드 | `frontend/` | 제외 (Canvas에서 재작성) | - |
 
 ### 이식 원칙

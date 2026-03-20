@@ -35,6 +35,9 @@
 | POST | `/ontology-path` | 온톨로지 계층 경로 탐색 |
 | GET | `/tables/{table_name}/related` | 테이블의 관련 테이블 목록 |
 | GET | `/stats` | 그래프 통계 |
+| POST | `/query-cache` | Oracle 품질 게이트 통과 쿼리 반영 |
+| POST | `/ontology/context` | Neo4j fulltext 기반 온톨로지 컨텍스트 (FEATURE_SEARCH_V2) |
+| POST | `/impact-analysis` | Cross-domain 영향도 분석 (multi-hop BFS) |
 
 ---
 
@@ -285,7 +288,7 @@ Content-Type: application/json
 
 ### 3.4 POST /ontology-path
 
-온톨로지 4계층 내 경로를 탐색한다. KPI 역추적 분석에 사용된다.
+온톨로지 5계층 내 경로를 탐색한다. KPI 역추적 분석에 사용된다.
 
 #### Request
 

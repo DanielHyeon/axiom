@@ -5,8 +5,10 @@
 - Axiom Synapse는 무엇이며 어떤 문제를 해결하는가?
 - 비즈니스 프로세스 인텔리전스에서 온톨로지가 왜 필요한가?
 - Synapse가 다른 Axiom 모듈과 어떻게 연동되는가?
-- 4계층 온톨로지 구조란 무엇인가?
+- 5계층 온톨로지 구조란 무엇인가?
 - Process Mining Engine은 무엇이며, EventStorming과 어떻게 통합되는가?
+- Kinetic Layer(GWT 룰 엔진)는 무엇이며 어떤 역할을 하는가?
+- Metadata Graph API를 통해 Weaver와 어떻게 연동하는가?
 
 <!-- affects: all -->
 <!-- requires-update: 01_architecture/architecture-overview.md, 01_architecture/process-mining-engine.md -->
@@ -17,7 +19,7 @@
 
 > **"데이터 간 연결고리를 잇는 지능 신경망"**
 
-Axiom Synapse는 비즈니스 프로세스 데이터를 **4계층 온톨로지(Resource - Process - Measure - KPI)** 로 구조화하고, 비정형 문서에서 자동으로 개체와 관계를 추출하여 **지식그래프**를 구축하며, **Process Mining Engine**으로 설계된 프로세스와 실제 실행 간의 차이를 분석하는 모듈이다.
+Axiom Synapse는 비즈니스 프로세스 데이터를 **5계층 온톨로지(Resource - Process - Measure - Driver - KPI)** 로 구조화하고, 비정형 문서에서 자동으로 개체와 관계를 추출하여 **지식그래프**를 구축하며, **Process Mining Engine**으로 설계된 프로세스와 실제 실행 간의 차이를 분석하고, **Kinetic Layer(GWT 룰 엔진)**로 이벤트 반응형 비즈니스 룰을 실행하는 모듈이다.
 
 ---
 
@@ -30,7 +32,7 @@ Axiom Synapse는 비즈니스 프로세스 데이터를 **4계층 온톨로지(R
 | **데이터 사일로** | 이해관계자 목록, 자산 평가서, 의사결정 문서가 각기 다른 형태로 존재 | 온톨로지 통합 그래프로 연결 |
 | **관계 추적 불가** | "이 리소스가 어떤 프로세스에 할당되어 있는가?" 질의 불가 | Neo4j 그래프 경로 탐색 |
 | **비정형 문서 사장** | 비즈니스 문서, 계약서, 보고서 등의 핵심 정보가 텍스트에 묻힘 | GPT-4o 기반 자동 추출 |
-| **KPI 근거 부재** | 프로세스 효율성, 비용 절감률 등의 산출 근거를 역추적할 수 없음 | 4계층 온톨로지 역방향 탐색 |
+| **KPI 근거 부재** | 프로세스 효율성, 비용 절감률 등의 산출 근거를 역추적할 수 없음 | 5계층 온톨로지 역방향 탐색 |
 | **프로세스 병목 미식별** | 어떤 프로세스 단계가 병목인지, SLA를 위반하는지 파악 불가 | Process Mining Engine 시간축 분석 |
 | **설계-실행 괴리** | EventStorming으로 설계한 프로세스와 실제 실행의 차이를 추적할 수 없음 | Conformance Checking (적합성 검사) |
 | **프로세스 변종 관리 부재** | 동일 프로세스가 실제로 몇 가지 경로로 실행되는지 알 수 없음 | Variant Analysis (변종 분석) |
@@ -49,26 +51,31 @@ Axiom Synapse는 비즈니스 프로세스 데이터를 **4계층 온톨로지(R
 
 ---
 
-## 3. 4계층 온톨로지 개요
+## 3. 5계층 온톨로지 개요
 
-비즈니스 프로세스 인텔리전스의 모든 데이터를 4개 계층으로 분류한다.
+> **변경 이력**: 초기 설계는 4계층(Resource-Process-Measure-KPI)이었으나, 인과 분석 결과로 자동 생성되는 Driver 계층이 추가되어 현재 **5계층**으로 운영 중이다 (ADR-002 재검토 조건 충족).
+
+비즈니스 프로세스 인텔리전스의 모든 데이터를 5개 계층으로 분류한다.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │  KPI 계층        전략적 성과 지표                             │
-│  예: 프로세스 효율성 85%, 비용 절감률 20%                    │
+│  예: OEE 85%, Throughput Rate, Defect Rate, Downtime         │
+├─────────────────────────────────────────────────────────────┤
+│  Driver 계층     인과 분석에서 도출된 영향 요인               │
+│  예: 환율변동, 수요변동, 유가변동 (Vision 인과 분석 자동 생성)│
 ├─────────────────────────────────────────────────────────────┤
 │  Measure 계층    프로세스 실행에서 파생된 정량 지표            │
-│  예: 매출 500억, 비용 200억, 영업이익 50억                   │
+│  예: Availability, Performance, Quality, Cycle Time, MTBF    │
 ├─────────────────────────────────────────────────────────────┤
 │  Process 계층    비즈니스 프로세스 절차                       │
-│  예: 데이터 수집 → 프로세스 분석 → 최적화 → 실행             │
+│  예: Assembly, Inspection, Packaging, Maintenance            │
 ├─────────────────────────────────────────────────────────────┤
 │  Resource 계층   물리적 자원, 관계자, 자산                    │
-│  예: 기업 A (매출 500억, 직원 1,000명)                       │
+│  예: CNC Machine A, Robot Arm B, Operators, Materials        │
 └─────────────────────────────────────────────────────────────┘
 
-흐름: Resource ─참여→ Process ─산출→ Measure ─기여→ KPI
+흐름: Resource ─USES→ Process ─OBSERVED_IN→ Measure ─CAUSES→ Driver ─DERIVED_FROM→ KPI
 ```
 
 ### 3.1 계층별 노드 유형
@@ -98,7 +105,7 @@ Axiom Synapse는 비즈니스 프로세스 데이터를 **4계층 온톨로지(R
 
 - Neo4j 5 기반 그래프 데이터베이스
 - 기존 K-AIR text2sql의 Table/Column/Query/ValueMapping 노드 이식
-- 4계층 온톨로지 확장 노드 추가
+- 5계층 온톨로지 확장 노드 추가
 - FK 관계 기반 그래프 경로 탐색 (최대 3홉)
 
 ### 4.2 벡터 유사도 검색
@@ -120,7 +127,41 @@ Axiom Synapse는 비즈니스 프로세스 데이터를 **4계층 온톨로지(R
 - FK 관계 수동 관리
 - Oracle Text2SQL의 정확도 향상을 위한 메타데이터 보강
 
-### 4.5 Process Mining Engine
+### 4.5 Kinetic Layer (GWT 룰 엔진)
+
+이벤트 반응형 비즈니스 룰을 Given-When-Then 패턴으로 정의하고 실행하는 엔진이다.
+
+- **ActionType(GWT 룰) CRUD**: 비즈니스 룰 생성/조회/수정/삭제
+- **Policy CRUD**: 이벤트 반응형 자동 오케스트레이션 정책 관리
+- **온톨로지 연결**: ActionType ↔ 온톨로지 노드 링크 (TRIGGERS, MODIFIES, CHAINS_TO, USES_MODEL)
+- **드라이런 테스트**: Neo4j 쓰기/이벤트 발행 없이 룰 매칭 결과 시뮬레이션
+- **GWT Consumer Worker**: Redis Streams 이벤트를 구독하여 GWT 룰 자동 실행
+
+### 4.6 Metadata Graph (Weaver 연동)
+
+Weaver 서비스가 Neo4j에 직접 접속하지 않고 Synapse를 경유하여 메타데이터 그래프에 접근하도록 중개하는 API이다.
+
+- **스키마 스냅샷**: 데이터소스별 스키마 스냅샷 저장/조회/삭제
+- **글로서리**: 비즈니스 용어 관리 (CRUD + 검색)
+- **엔티티 태그**: 테이블/컬럼 등 엔티티에 태그 부여
+- **데이터소스 카탈로그**: 데이터소스 UPSERT + 카탈로그 추출 결과 저장
+- **Concept Mapping**: OntologyNode ↔ Table/Column 매핑 관리
+
+### 4.7 BehaviorModel 관리
+
+온톨로지 그래프 위에 ML/통계 모델의 입출력 관계를 표현하는 BehaviorModel 노드를 관리한다.
+
+- `:OntologyBehavior:Model` 멀티레이블 노드로 Neo4j에 저장
+- `READS_FIELD` / `PREDICTS_FIELD` 링크로 모델의 입력/출력 필드 연결
+- Vision 서비스의 What-if DAG 시뮬레이션에서 모델 그래프 로드에 활용
+
+### 4.8 OWL/RDF Export + Quality Dashboard + Snapshot 관리
+
+- **OWL/RDF Export**: 케이스 온톨로지를 Turtle 또는 JSON-LD 형식으로 내보내기
+- **Quality Dashboard**: 온톨로지 품질 보고서 자동 생성 (고아 노드, 미연결 관계 등 검출)
+- **Snapshot 관리**: 온톨로지 버전 스냅샷 생성/목록/비교 (diff)
+
+### 4.9 Process Mining Engine
 
 EventStorming 기반 프로세스 설계와 실제 이벤트 로그를 연결하여, 프로세스 발견/적합성 검사/병목 탐지를 수행하는 엔진이다.
 
@@ -133,7 +174,7 @@ EventStorming 기반 프로세스 설계와 실제 이벤트 로그를 연결하
 #### 4.5.2 측정값 바인딩 (Measure Binding)
 
 - Event 체인에서 Measure 노드를 자동 산출
-- 4계층 온톨로지의 Measure/KPI 계층과 직접 연결
+- 5계층 온톨로지의 Measure/KPI 계층과 직접 연결
 - 예시: `{출하됨}` ──produces──> `[배송완료율: 95.2%]`
 
 #### 4.5.3 이벤트 로그 연결 (Event Log Binding)
@@ -233,7 +274,7 @@ EventStorming 기반 프로세스 설계와 실제 이벤트 로그를 연결하
 | 용어 | 정의 |
 |------|------|
 | **온톨로지 (Ontology)** | 도메인 내 개체와 그 관계를 형식적으로 정의한 지식 체계 |
-| **4계층 온톨로지** | Resource → Process → Measure → KPI 의 계층적 지식 구조 |
+| **5계층 온톨로지** | Resource → Process → Measure → Driver → KPI 의 계층적 지식 구조 |
 | **지식그래프 (Knowledge Graph)** | 개체(노드)와 관계(엣지)로 구성된 그래프 형태의 지식 표현 |
 | **NER (Named Entity Recognition)** | 텍스트에서 고유명사, 금액, 일자 등 개체명을 자동 인식하는 기술 |
 | **HITL (Human-in-the-Loop)** | AI 추출 결과를 인간이 검토/승인하는 품질 보증 프로세스 |

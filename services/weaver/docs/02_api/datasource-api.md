@@ -31,7 +31,10 @@
 | `GET` | `/api/datasources/{name}/schemas` | 스키마 목록 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
 | `GET` | `/api/datasources/{name}/tables` | 테이블 목록 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
 | `GET` | `/api/datasources/{name}/tables/{table}/schema` | 테이블 스키마 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
-| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Implemented | `docs/implementation-plans/weaver/81_sprint2-ticket-board.md` |
+| `GET` | `/api/datasources/{name}/tables/{table}/sample` | 샘플 데이터 조회 | Implemented | `app/api/datasource.py` |
+| `POST` | `/api/datasources/{name}/extract-metadata` | 메타데이터 추출 (SSE 스트리밍) | Implemented | `app/api/datasource.py` |
+
+> **추가 구현된 기능**: Idempotency-Key 헤더 지원, Rate Limiting (사용자별 60/분), 감사 로그, PostgreSQL/Synapse 이중 저장소 연동.
 
 ---
 

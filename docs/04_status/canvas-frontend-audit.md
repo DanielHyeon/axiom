@@ -210,14 +210,14 @@ className="bg-gray-100 text-gray-800"      // Tailwind
 | 지표 | 값 | 평가 |
 |------|---|------|
 | 총 소스 파일 | 263개 | — |
-| Feature slices | 12개 | ✅ 체계적 |
+| Feature slices | 22개 | ✅ 체계적 (KAIR Phase 1-3 구현 후 대폭 확장) |
 | @ts-nocheck | 4개 파일 | 🔴 제거 필요 |
 | `any` 사용 | ~15개 위치 | 🟡 타입 가드로 교체 |
 | aria 속성 | 69개 | 🔴 부족 |
 | 하드코딩 한국어 | 100+ 위치 | 🔴 i18n 필요 |
 | 단위 테스트 | 0개 (E2E: 8개 spec) | 🔴 추가 필요 |
 | TanStack Query | 12개 훅 | ✅ 캐싱 전략 양호 |
-| Zustand 스토어 | 8개 | ✅ 적절한 분리 |
+| Zustand 스토어 | 21개 (전역 3 + Feature 18) | ✅ 적절한 분리 |
 
 ---
 
@@ -255,9 +255,9 @@ className="bg-gray-100 text-gray-800"      // Tailwind
 
 | 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
 |----------|-----------------|----------|-----------|
-| **도메인 레이어 (ObjectType)** | 15개 | `ObjectTypeModeler.vue`, `BehaviorDialog.vue` | ❌ 없음 |
-| **보안/감사 관리** | 6개 | `SecurityGuardTab.vue`, `AuditLogs.vue` | ❌ Core에만 API |
-| **What-if 고도화** | 12개 | `WhatIfSimulator.vue` (5단계 위자드) | 🟡 단순 버전만 |
+| **도메인 레이어 (ObjectType)** | 15개 | `ObjectTypeModeler.vue`, `BehaviorDialog.vue` | ✅ 구현됨 (`features/domain/`, `features/domain-modeler/`, `/data/domain`, `/data/domain/kinetic`) |
+| **보안/감사 관리** | 6개 | `SecurityGuardTab.vue`, `AuditLogs.vue` | ✅ 구현됨 (`features/security/`, `/settings/security`) |
+| **What-if 고도화** | 12개 | `WhatIfSimulator.vue` (5단계 위자드) | ✅ 구현됨 (`features/whatif-wizard/`, `/analysis/whatif/wizard`) |
 
 **도메인 레이어**: KAIR의 ObjectType 시스템은 DB 스키마를 비즈니스 친화적 "도메인 객체"로 추상화하는 핵심 기능. Materialized View + Behavior(REST/JS/Python/DMN) 지원. Axiom의 온톨로지는 그래프 구조만 있고 도메인 모델링 도구가 없음.
 
@@ -269,10 +269,10 @@ className="bg-gray-100 text-gray-800"      // Tailwind
 
 | 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
 |----------|-----------------|----------|-----------|
-| **데이터 수집/파이프라인** | 8개 | `UploadTab.vue`, `PipelineControlPanel.vue` | ❌ 없음 |
-| **데이터 품질/관측성** | 10개 | `WatchAgent.vue` (Vue Flow), `DataQuality.vue` | 🟡 기본 Watch만 |
-| **온톨로지 고도화** | 10개 | `OntologyWizard.vue`, `SchemaBasedGenerator.vue` | 🟡 브라우저만 |
-| **NL2SQL 고도화** | 17개 | `SchemaCanvas.vue`, `DatabaseTree.vue` | 🟡 채팅만 |
+| **데이터 수집/파이프라인** | 8개 | `UploadTab.vue`, `PipelineControlPanel.vue` | ✅ 구현됨 (`features/ingestion/`, `/data/ingestion`) |
+| **데이터 품질/관측성** | 10개 | `WatchAgent.vue` (Vue Flow), `DataQuality.vue` | ✅ 구현됨 (`features/data-quality/`, `/data/quality`) + 워크플로 에디터 (`features/workflow-editor/`, `/data/workflow`) |
+| **온톨로지 고도화** | 10개 | `OntologyWizard.vue`, `SchemaBasedGenerator.vue` | ✅ 구현됨 (`useOntologyWizardStore` 추가, `/data/ontology`) |
+| **NL2SQL 고도화** | 17개 | `SchemaCanvas.vue`, `DatabaseTree.vue` | 🟡 채팅 + ERD(MermaidERDRenderer) + Graph탭(QuerySubgraphViewer). SchemaCanvas 수준 미달 |
 
 **데이터 수집**: KAIR는 파일 드래그&드롭 업로드 + ETL 파이프라인 제어 + 실시간 진행률 UI. Axiom은 데이터소스 연결만 있고 업로드/ETL 관리 없음.
 
@@ -284,45 +284,56 @@ className="bg-gray-100 text-gray-800"      // Tailwind
 
 | 카테고리 | KAIR 컴포넌트 수 | 핵심 파일 | Axiom 상태 |
 |----------|-----------------|----------|-----------|
-| **데이터 리니지** | 10개 | `LineageTab.vue`, `LineageGraph.vue` | ❌ 없음 |
-| **비즈니스 글로서리** | 6개 | `GlossaryTab.vue`, `TermModal.vue` | ❌ 없음 |
-| **오브젝트 탐색기** | 6개 | `ObjectExplorerTab.vue`, `ObjectExplorerGraph.vue` | ❌ 없음 |
+| **데이터 리니지** | 10개 | `LineageTab.vue`, `LineageGraph.vue` | ✅ 구현됨 (`features/lineage/`, `/data/lineage`) |
+| **비즈니스 글로서리** | 6개 | `GlossaryTab.vue`, `TermModal.vue` | ✅ 구현됨 (`features/glossary/`, `/data/glossary`) |
+| **오브젝트 탐색기** | 6개 | `ObjectExplorerTab.vue`, `ObjectExplorerGraph.vue` | ✅ 구현됨 (`features/object-explorer/`, `/data/explorer`) |
 
 ### 8.2 KAIR 아키텍처 패턴 비교
 
 | 패턴 | KAIR | Axiom | 갭 |
 |------|------|-------|---|
-| 도메인 레이어 | ObjectType + Behavior | 온톨로지 그래프 | 비즈니스 로직 바인딩 없음 |
-| 워크플로 에디터 | Vue Flow 기반 | 없음 (Watch는 목록) | 시각적 자동화 불가 |
-| 멀티스텝 위자드 | What-if 5단계, Ontology 위자드 | 단일 뷰 | 가이드 UX 부족 |
-| 스트리밍 진행률 | AnalysisProgressModal | 기본 로딩 | 세부 진행률 없음 |
-| 보안 관리 | RBAC + RLS + Audit UI | API만 | 관리자 UI 없음 |
-| 데이터 리니지 | 그래프 시각화 | Neo4j에 데이터만 | 시각화 없음 |
+| 도메인 레이어 | ObjectType + Behavior | ✅ `features/domain/` + `domain-modeler/` | GWT 엔진 + Kinetic 모델러 구현 |
+| 워크플로 에디터 | Vue Flow 기반 | ✅ `features/workflow-editor/` | `/data/workflow` 라우트 |
+| 멀티스텝 위자드 | What-if 5단계, Ontology 위자드 | ✅ `features/whatif-wizard/` + `useOntologyWizardStore` | 둘 다 구현 |
+| 스트리밍 진행률 | AnalysisProgressModal | 🟡 `ReactProgressTimeline` (NL2SQL) | 범용 진행률 컴포넌트 아직 없음 |
+| 보안 관리 | RBAC + RLS + Audit UI | ✅ `features/security/` + `/settings/security` | 관리자 UI 구현 |
+| 데이터 리니지 | 그래프 시각화 | ✅ `features/lineage/` + `/data/lineage` | 시각화 구현 |
 
-### 8.3 구현 우선순위 로드맵
+### 8.3 구현 우선순위 로드맵 — 2026-03-21 현황
 
-#### Phase 1: 엔터프라이즈 기반 (4-6주)
-| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
-|------|---------|-------------|--------|
-| 보안/감사 관리 UI | ~1,200 | 6개 | Core RBAC API |
-| 도메인 레이어 모델러 | ~3,000 | 15개 | Synapse 확장 |
-| What-if 5단계 위자드 | ~2,500 | 12개 | Vision DAG 엔진 |
+> Phase 1~3 모두 구현 완료. 각 항목의 Feature 모듈, 라우트, 페이지, Zustand 스토어가 존재한다.
 
-#### Phase 2: 데이터 관리 (3-4주)
-| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
-|------|---------|-------------|--------|
-| 파일 업로드 + ETL 파이프라인 | ~1,200 | 8개 | Weaver 확장 |
-| 데이터 품질 대시보드 | ~1,800 | 10개 | Watch 확장 |
-| 온톨로지 위자드 + 자동 생성 | ~1,800 | 10개 | Synapse |
+#### Phase 1: 엔터프라이즈 기반 -- 완료
 
-#### Phase 3: 시맨틱 레이어 (3-4주)
-| 항목 | 예상 LOC | 신규 컴포넌트 | 의존성 |
-|------|---------|-------------|--------|
-| 데이터 리니지 시각화 | ~1,500 | 10개 | Neo4j 리니지 |
-| 비즈니스 글로서리 | ~1,500 | 6개 | Weaver 카탈로그 |
-| 오브젝트 탐색기 | ~900 | 6개 | 도메인 레이어 |
+| 항목 | 상태 | Feature 모듈 | 라우트 |
+|------|------|-------------|--------|
+| 보안/감사 관리 UI | ✅ 구현됨 | `features/security/` (useSecurityStore) | `/settings/security` |
+| 도메인 레이어 모델러 | ✅ 구현됨 | `features/domain/` + `features/domain-modeler/` | `/data/domain`, `/data/domain/kinetic` |
+| What-if 5단계 위자드 | ✅ 구현됨 | `features/whatif-wizard/` (useWhatIfWizardStore) | `/analysis/whatif/wizard` |
 
-**총 예상**: ~90개 컴포넌트, ~16,300 LOC, 10-14주
+#### Phase 2: 데이터 관리 -- 완료
+
+| 항목 | 상태 | Feature 모듈 | 라우트 |
+|------|------|-------------|--------|
+| 파일 업로드 + ETL 파이프라인 | ✅ 구현됨 | `features/ingestion/` (useIngestionStore) | `/data/ingestion` |
+| 데이터 품질 대시보드 | ✅ 구현됨 | `features/data-quality/` (useDQStore) | `/data/quality` |
+| 온톨로지 위자드 + 자동 생성 | ✅ 구현됨 | `features/ontology/` (useOntologyWizardStore) | `/data/ontology` |
+
+#### Phase 3: 시맨틱 레이어 -- 완료
+
+| 항목 | 상태 | Feature 모듈 | 라우트 |
+|------|------|-------------|--------|
+| 데이터 리니지 시각화 | ✅ 구현됨 | `features/lineage/` (useLineageStore) | `/data/lineage` |
+| 비즈니스 글로서리 | ✅ 구현됨 | `features/glossary/` (useGlossaryStore) | `/data/glossary` |
+| 오브젝트 탐색기 | ✅ 구현됨 | `features/object-explorer/` (useObjectExplorerStore) | `/data/explorer` |
+
+#### 추가 구현 (Phase 외)
+
+| 항목 | Feature 모듈 | 라우트 |
+|------|-------------|--------|
+| 워크플로 에디터 | `features/workflow-editor/` (useWorkflowEditorStore) | `/data/workflow` |
+| 피드백 대시보드 | `features/feedback/` | `/settings/feedback` |
+| Kinetic 모델러 | `features/domain/` | `/data/domain/kinetic` |
 
 ### 8.4 참조해야 할 KAIR 핵심 파일
 

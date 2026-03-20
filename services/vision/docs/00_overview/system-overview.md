@@ -21,9 +21,9 @@
 |------|-----|
 | **모듈명** | Axiom Vision |
 | **컨셉** | 데이터를 분석해 미래를 내다보는 통찰력 |
-| **역할** | What-if 시뮬레이션, 프로세스 시뮬레이션, OLAP 피벗 분석, 통계 대시보드, 근본원인 분석 |
-| **기술 스택** | FastAPI + scipy.optimize + Mondrian XML + DoWhy + Recharts |
-| **서비스 포트** | 8400 (기본값) |
+| **역할** | What-if 시뮬레이션(재무+DAG+Fork), 인과 분석(VAR/Granger), OLAP 피벗 분석, 통계 대시보드, 근본원인 분석 |
+| **기술 스택** | FastAPI + scipy.optimize + Mondrian XML + statsmodels(VAR/Granger) + Recharts |
+| **서비스 포트** | 8000 (내부) / 9100 (Docker 매핑) |
 | **의존 모듈** | Axiom Core (인증/라우팅), Axiom Canvas (프론트엔드), Axiom Synapse (프로세스 마이닝 데이터), PostgreSQL |
 
 ### 1.1 왜 Vision인가?
@@ -49,7 +49,7 @@
 │  │  민감도 분석     │  │  큐브 관리       │  │  인과 추론   │  │
 │  │  전환점 탐색     │  │  NL→피벗         │  │  반사실 분석 │  │
 │  │  (scipy)         │  │  ETL 동기화      │  │  SHAP 시각화 │  │
-│  │                  │  │  (Mondrian)       │  │  (DoWhy)     │  │
+│  │                  │  │  (Mondrian)       │  │(statsmodels) │  │
 │  └──────────────────┘  └──────────────────┘  └──────────────┘  │
 │                                                                  │
 │  ┌──────────────────────────────────────────────────────────┐   │
@@ -99,19 +99,67 @@
 | 항목 | 내용 |
 |------|------|
 | **해결 문제** | "이 조직의 비즈니스 실패 근본 원인은 무엇인가?" |
-| **핵심 기술** | DoWhy + PC Algorithm + LiNGAM + SHAP |
-| **구현 상태** | 20% (K-AIR에 데모 수준) |
-| **Phase** | Phase 4 (출시 후) |
-| **예상 공수** | ~25일 (엔진 12일, 데이터 8일, UI 5일) |
+| **핵심 기술** | 결정적 위험 엔진 (deterministic-risk-engine-v1) + 변수 감도 테이블 |
+| **구현 상태** | Implemented (S13-VIS-RCA-002~004) |
+| **Phase** | 구현 완료 |
 
 **주요 기능**:
-- 인과 그래프 구축: 관측 데이터에서 PC Algorithm / LiNGAM으로 인과 구조 탐색
-- 케이스별 근본원인 추출: 비즈니스 실패로부터 역추적, 상위 3~5개 원인 도출
-- 반사실 시나리오: "비용 구조를 20% 개선하면 수익성이 어떻게 변할까?"
-- SHAP 값 시각화: 각 요인의 최종 결과 기여도
-- LLM 설명 생성: 인과 체인을 서술문으로 변환 (분석 보고서 연동)
+- 근본원인 분석 (비동기 202 패턴): 역추적 + 기여도 계산 + 설명문 생성
+- 반사실 시나리오: 변수 감도 기반 실패 확률 변화 계산
+- 인과 타임라인: 시간순 인과 관계 이벤트 추적
+- 요인 영향도 (SHAP-like): 변수별 기여도 시각화
+- 인과 그래프: React Flow 시각화용 노드/엣지 데이터
+- 프로세스 병목 근본원인: Synapse 프로세스 마이닝 데이터 기반 병목 인과 분석
+- 운영 지표: `/health/ready`에 failure_rate/avg_latency 노출, `/metrics` Prometheus 호환
 
-**의존성**: 과거 종결 사건 100건 이상의 라벨링된 데이터 필요
+### 2.4 인과 분석 엔진 (Causal Analysis)
+
+| 항목 | 내용 |
+|------|------|
+| **해결 문제** | "이 KPI에 영향을 미치는 인과 관계는 무엇인가?" |
+| **핵심 기술** | statsmodels VAR/Granger + 분해형 하이브리드 |
+| **구현 상태** | Implemented |
+
+> **참고**: ADR-004에서 DoWhy를 선택했으나, 실제 구현은 statsmodels 기반 VAR/Granger + 분해형 하이브리드 엔진으로 전환되었다. DoWhy는 미사용.
+
+**주요 기능**:
+- VAR/Granger 검정 기반 시차 인과 관계 발견
+- 분해형(정의형) 관계 분석: FORMULA, DERIVED_FROM 등 온톨로지 관계 활용
+- 하이브리드 라우팅: 관계 타입별 최적 판정기 자동 선택
+- 비동기 실행 (202) + 폴링 패턴
+- 결과를 Synapse 온톨로지 Driver 계층에 자동 반영 가능
+
+### 2.5 What-if DAG 엔진
+
+| 항목 | 내용 |
+|------|------|
+| **해결 문제** | "온톨로지 변수를 변경하면 KPI가 어떻게 변하는가?" |
+| **핵심 기술** | BehaviorModel DAG 증분 전파 + Fallback Predictor |
+| **구현 상태** | Implemented |
+
+**주요 기능**:
+- Synapse BehaviorModel 그래프 로드 (READS_FIELD/PREDICTS_FIELD)
+- DAG 위상 정렬 기반 증분 전파 시뮬레이션
+- 다중 시나리오 비교 (compare)
+- 베이스라인 스냅샷 조회
+- 모델 목록 + 입출력 수 조회
+
+### 2.6 What-if Fork 엔진 (이벤트소싱 기반)
+
+| 항목 | 내용 |
+|------|------|
+| **해결 문제** | "GWT 룰을 적용했을 때 이벤트 체인이 어떻게 전개되는가?" |
+| **핵심 기술** | EventForkEngine (Neo4j + PostgreSQL) + GWT 룰 평가기 |
+| **구현 상태** | Implemented |
+
+**주요 기능**:
+- 특정 시점 온톨로지 상태 스냅샷 (base_timestamp)
+- 사용자 개입(intervention)을 초기 이벤트로 변환
+- 경량 GWT 룰 평가기 인프로세스 실행 (dry_run)
+- 결과 이벤트 체인을 PostgreSQL simulation_events에 기록
+- base vs simulation KPI 델타 계산
+- 브랜치 CRUD + 시나리오 비교
+- Outbox 패턴으로 WHATIF_FORK_COMPLETED 이벤트 발행
 
 ---
 
@@ -169,12 +217,12 @@
          │
          ▼ HTTP (내부)
 ┌─ Axiom Vision ──────────────────────────────────────────────────┐
-│  FastAPI (포트 8400)                                             │
+│  FastAPI (포트 8000)                                             │
 │  ├─ What-if 엔진 (scipy.optimize)                               │
 │  │   └─ 프로세스 시간축 시뮬레이션 (Synapse 연동)               │
 │  ├─ OLAP 엔진 (Mondrian XML + SQL)                              │
 │  │   └─ 프로세스 KPI 큐브 (Synapse 프로세스 데이터)             │
-│  ├─ See-Why 엔진 (DoWhy) [Phase 4]                              │
+│  ├─ See-Why 엔진 (statsmodels) [Phase 4]                         │
 │  │   └─ 프로세스 병목 인과 분석 (Synapse 병목 데이터)           │
 │  └─ Analytics 집계                                               │
 └──────────────────────────────────────────────────────────────────┘
@@ -244,7 +292,7 @@ Phase 4 (출시 후)
 | `data-platform-olap-main/sql_generator.py` | `vision/app/engines/pivot_engine.py` | SQL 생성기 이식 |
 | `data-platform-olap-main/` LangGraph 워크플로우 | `vision/app/engines/` NL→피벗 | 5노드 워크플로우 이식 |
 | (신규) | `vision/app/engines/scenario_solver.py` | scipy 기반 시나리오 솔버 |
-| (신규) | `vision/app/engines/causal_engine.py` | DoWhy 인과 추론 엔진 |
+| (신규) | `vision/app/engines/causal_analysis_engine.py` | statsmodels VAR/Granger 하이브리드 인과 분석 엔진 |
 
 ---
 
@@ -252,7 +300,7 @@ Phase 4 (출시 후)
 
 | 설정 키 | 기본값 | 설명 |
 |---------|--------|------|
-| `VISION_PORT` | 8400 | Vision 서비스 포트 |
+| `VISION_PORT` | 8000 | Vision 서비스 포트 |
 | `DATABASE_URL` | (필수) | PostgreSQL 연결 문자열 |
 | `OPENAI_MODEL` | gpt-4o | NL→피벗 변환용 LLM 모델 |
 | `QUERY_TIMEOUT` | 30 | 쿼리 타임아웃 (초) |

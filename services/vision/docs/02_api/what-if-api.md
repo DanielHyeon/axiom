@@ -61,6 +61,46 @@
 | POST | `/what-if/{scenario_id}/breakeven` | 전환점 분석 | Partial | `docs/implementation-plans/vision/84_sprint5-ticket-board.md` |
 | POST | `/what-if/process-simulation` | 프로세스 시간축 시뮬레이션 | Partial | `docs/implementation-plans/vision/84_sprint5-ticket-board.md` |
 
+### 관련 라우터 (별도 문서 참조)
+
+다음 What-if 관련 API는 별도 라우터로 구현되어 있으며, 각각의 엔드포인트 문서를 참조한다:
+
+| 라우터 | Base URL | 설명 | 구현 상태 |
+|--------|----------|------|-----------|
+| **What-if DAG** | `/api/v3/cases/{case_id}/whatif-dag` | 온톨로지 BehaviorModel DAG 기반 증분 전파 시뮬레이션 | Implemented |
+| **What-if Fork** | `/api/v3/cases/{case_id}/whatif-fork` | 이벤트소싱 기반 GWT 룰 브랜칭 시뮬레이션 | Implemented |
+
+#### What-if DAG 엔드포인트 (whatif_dag.py)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `/whatif-dag/simulate` | DAG 증분 전파 시뮬레이션 실행 |
+| POST | `/whatif-dag/compare` | 다중 시나리오 비교 |
+| GET | `/whatif-dag/snapshot` | 베이스라인 스냅샷 조회 |
+| GET | `/whatif-dag/models` | 시뮬레이션 가능 모델 목록 |
+
+#### What-if Fork 엔드포인트 (whatif_fork.py)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `/whatif-fork/branches` | 시뮬레이션 브랜치 생성 |
+| POST | `/whatif-fork/branches/{id}/simulate` | 브랜치 시뮬레이션 실행 |
+| GET | `/whatif-fork/branches/{id}` | 브랜치 상세 조회 |
+| GET | `/whatif-fork/branches/{id}/events` | 이벤트 로그 조회 |
+| POST | `/whatif-fork/compare` | 브랜치 간 비교 |
+| DELETE | `/whatif-fork/branches/{id}` | 브랜치 삭제 |
+
+#### 인과 분석 엔드포인트 (causal.py)
+
+| Method | Path | 설명 |
+|--------|------|------|
+| POST | `/causal` | 인과 분석 실행 (비동기 202) |
+| GET | `/causal/{analysis_id}/status` | 분석 상태 조회 |
+| GET | `/causal/{analysis_id}/edges` | 인과 엣지 목록 |
+| GET | `/causal/{analysis_id}/graph` | 인과 그래프 시각화 데이터 |
+| GET | `/causal/latest` | 최신 완료 분석 결과 |
+| GET | `/causal` | 분석 이력 목록 |
+
 ---
 
 ## 1. 시나리오 생성
