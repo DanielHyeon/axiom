@@ -3,6 +3,9 @@
 Thumbs.db
 .idea/
 .vscode/
+
+# AI context (세션 요약 등 로컬 전용)
+.ai-context/
 *.swp
 *.swo
 
