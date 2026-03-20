@@ -17,4 +17,4 @@
 - [Synapse API](../../services/synapse/docs/02_api/) — Event Log, Extraction, Graph, Ontology, Process Mining API
 - [Vision API](../../services/vision/docs/02_api/) — Analytics, OLAP, Root Cause, What-if API
 - [Weaver API](../../services/weaver/docs/02_api/) — Datasource, Metadata, Catalog, Query API
-- [Canvas API](../../apps/canvas/docs/02_api/) — API Client, Contracts
+- [Canvas API](../../canvas/docs/02_api/) — API Client, Contracts

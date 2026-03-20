@@ -141,7 +141,7 @@
 ### 2.2 프론트엔드 폴더 구조
 
 ```
-apps/canvas/src/
+canvas/src/
 ├── features/insight/
 │   ├── api/
 │   │   └── insightApi.ts              # Weaver insight endpoints 호출

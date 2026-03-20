@@ -425,7 +425,7 @@ const ask = (question: string) => {
 ```
 
 > **SSOT**: 권한 매트릭스는 `services/core/docs/07_security/auth-model.md` §2.3을 따른다.
-> **프론트엔드 구현**: `apps/canvas/docs/07_security/auth-flow.md`의 `RoleGuard`, `usePermission` 훅 참조.
+> **프론트엔드 구현**: `canvas/docs/07_security/auth-flow.md`의 `RoleGuard`, `usePermission` 훅 참조.
 
 ---
 

@@ -649,7 +649,7 @@ PROMPT_VERSIONS = {
 | Vision NL→피벗 | `services/vision/docs/05_llm/nl-to-pivot.md` | LangGraph 5노드 워크플로우 |
 | Synapse GPT-4o ADR | `services/synapse/docs/99_decisions/ADR-003-gpt4o-extraction.md` | GPT-4o Structured Output 선택 |
 | Weaver 메타데이터 보강 | `services/weaver/docs/05_llm/metadata-enrichment.md` | LLM 기반 설명 생성 |
-| Canvas AI 기능 | `apps/canvas/docs/05_llm/ai-features.md` | UI AI 패턴, HITL, 실패 처리 |
+| Canvas AI 기능 | `canvas/docs/05_llm/ai-features.md` | UI AI 패턴, HITL, 실패 처리 |
 | Core 배포 | `services/core/docs/08_operations/deployment.md` | 환경별 LLM 구성 |
 | Core 설정 | `services/core/docs/08_operations/configuration.md` | 환경 변수 전체 목록 |
 | 성능·모니터링 종합 | `services/core/docs/08_operations/performance-monitoring.md` | SLO/SLA, LLM 메트릭, 알림 규칙, Grafana LLM Operations 대시보드 |

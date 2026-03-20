@@ -1,7 +1,7 @@
 # Axiom 통합 구현 프로그램 계획서
 
 ## 1. 목적
-- 기존 설계 문서(`apps/canvas/docs`, `services/*/docs`)를 구현 가능한 작업 패키지로 전환한다.
+- 기존 설계 문서(`canvas/docs`, `services/*/docs`)를 구현 가능한 작업 패키지로 전환한다.
 - 프로젝트별( Core / Oracle / Synapse / Vision / Weaver / Canvas ) 구현 순서와 의존성을 명시한다.
 - 각 단계별 통과 기준(Gate)을 정의하여, 설계-구현-검증의 추적 가능성을 확보한다.
 

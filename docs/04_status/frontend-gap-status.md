@@ -1,6 +1,6 @@
 # 프론트엔드 UI/UX 미구현·갭 현황
 
-> **기준**: `apps/canvas/docs/04_frontend/` 설계 vs `apps/canvas/src/` 실제 구현  
+> **기준**: `canvas/docs/04_frontend/` 설계 vs `canvas/src/` 실제 구현  
 > **갱신일**: 2026-02-22 (코드베이스 검증 반영)
 
 ---
@@ -117,4 +117,4 @@
 ## 4. 참조
 
 - 상세 갭 원본: `docs/04_status/frontend-gap-analysis.md`
-- 라우트·설계: `apps/canvas/docs/04_frontend/routing.md`, `directory-structure.md`, `feature-priority-matrix.md`
+- 라우트·설계: `canvas/docs/04_frontend/routing.md`, `directory-structure.md`, `feature-priority-matrix.md`

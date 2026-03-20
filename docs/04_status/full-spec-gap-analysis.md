@@ -2,14 +2,14 @@
 
 기준일: 2026-02-22  
 작성자: Codex (coding-standard 기준 적용)  
-범위: `docs/`, `docs/03_implementation/`, `services/*/docs`, `apps/canvas/docs` 대비 `services/*/app`, `apps/canvas/src`
+범위: `docs/`, `docs/03_implementation/`, `services/*/docs`, `canvas/docs` 대비 `services/*/app`, `canvas/src`
 
 ## 1. 검토 범위 및 방법
 
 ### 1.1 검토 범위(문서 수)
 - top-level 문서(`docs/*.md`): 10개
 - 서비스 설계 문서(`services/*/docs/**/*.md`): 160개
-- Canvas 설계 문서(`apps/canvas/docs/**/*.md`): 36개
+- Canvas 설계 문서(`canvas/docs/**/*.md`): 36개
 - 구현계획 문서(`docs/03_implementation/**/*.md`): 145개
 
 ### 1.2 판정 기준
@@ -118,13 +118,13 @@
 
 ### G-009. Canvas가 인증/핵심 화면에서 부분적 mock 흐름 유지 (Partial)
 - 설계 근거
-  - `apps/canvas/docs/04_frontend/feature-priority-matrix.md:1`
+  - `canvas/docs/04_frontend/feature-priority-matrix.md:1`
 - 코드 근거
-  - 보호 라우트 우회 제거: `apps/canvas/src/components/ProtectedRoute.tsx:6`
-  - refresh token 호출 구현: `apps/canvas/src/stores/authStore.ts:40`
-  - API 클라이언트 mock token 제거: `apps/canvas/src/lib/api-client.ts:17`
-  - 단, 개발 편의 fallback(mock)은 env 기반으로 선택 가능: `apps/canvas/src/pages/auth/LoginPage.tsx:16`
-  - 주요 페이지 placeholder/mock: `apps/canvas/src/pages/process/ProcessDesigner.tsx:17`, `apps/canvas/src/pages/ontology/OntologyBrowser.tsx:12`
+  - 보호 라우트 우회 제거: `canvas/src/components/ProtectedRoute.tsx:6`
+  - refresh token 호출 구현: `canvas/src/stores/authStore.ts:40`
+  - API 클라이언트 mock token 제거: `canvas/src/lib/api-client.ts:17`
+  - 단, 개발 편의 fallback(mock)은 env 기반으로 선택 가능: `canvas/src/pages/auth/LoginPage.tsx:16`
+  - 주요 페이지 placeholder/mock: `canvas/src/pages/process/ProcessDesigner.tsx:17`, `canvas/src/pages/ontology/OntologyBrowser.tsx:12`
 - 판정: Partial
 
 ## 2.3 Medium

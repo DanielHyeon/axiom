@@ -1,7 +1,7 @@
 # Insight 프론트엔드 갭 분석 — 검증 보고서
 
 > **검증일**: 2026-02-27
-> **검증 대상**: `apps/canvas/src/features/insight/`, `apps/canvas/src/pages/insight/`, `apps/canvas/src/pages/nl2sql/`
+> **검증 대상**: `canvas/src/features/insight/`, `canvas/src/pages/insight/`, `canvas/src/pages/nl2sql/`
 > **결론**: 제출된 갭 분석 문서의 내용은 **대부분 사실과 다름** — 프론트엔드 Phase 1·2 구현은 이미 완료되어 있음
 
 ---
@@ -28,12 +28,12 @@
 
 | 파일 | LOC | 상태 | 비고 |
 |------|-----|------|------|
-| [features/insight/types/insight.ts](apps/canvas/src/features/insight/types/insight.ts) | 260 | ✅ 완료 | `GraphNode`, `GraphEdge`, `GraphMeta`, `TimeRange` 등 전체 타입 정의 |
-| [features/insight/api/insightApi.ts](apps/canvas/src/features/insight/api/insightApi.ts) | 179 | ✅ 완료 | `requestImpact`, `getJobStatus`, `getQuerySubgraph` 구현 |
-| [features/insight/utils/graphTransformer.ts](apps/canvas/src/features/insight/utils/graphTransformer.ts) | 302 | ✅ 완료 | API 응답 → Cytoscape 변환, dagre/cose 레이아웃 선택 로직 포함 |
-| [features/insight/components/QuerySubgraphViewer.tsx](apps/canvas/src/features/insight/components/QuerySubgraphViewer.tsx) | 174 | ✅ 완료 | SQL 서브그래프 + confidence 배지 |
-| [pages/nl2sql/components/QueryGraphPanel.tsx](apps/canvas/src/pages/nl2sql/components/QueryGraphPanel.tsx) | 16 | ✅ 완료 | `QuerySubgraphViewer` wrapper |
-| [pages/nl2sql/components/ResultPanel.tsx](apps/canvas/src/pages/nl2sql/components/ResultPanel.tsx) | 253 | ✅ 완료 | Graph 탭 (`TabId = 'chart' \| 'table' \| 'sql' \| 'graph'`) 통합 완료 |
+| [features/insight/types/insight.ts](canvas/src/features/insight/types/insight.ts) | 260 | ✅ 완료 | `GraphNode`, `GraphEdge`, `GraphMeta`, `TimeRange` 등 전체 타입 정의 |
+| [features/insight/api/insightApi.ts](canvas/src/features/insight/api/insightApi.ts) | 179 | ✅ 완료 | `requestImpact`, `getJobStatus`, `getQuerySubgraph` 구현 |
+| [features/insight/utils/graphTransformer.ts](canvas/src/features/insight/utils/graphTransformer.ts) | 302 | ✅ 완료 | API 응답 → Cytoscape 변환, dagre/cose 레이아웃 선택 로직 포함 |
+| [features/insight/components/QuerySubgraphViewer.tsx](canvas/src/features/insight/components/QuerySubgraphViewer.tsx) | 174 | ✅ 완료 | SQL 서브그래프 + confidence 배지 |
+| [pages/nl2sql/components/QueryGraphPanel.tsx](canvas/src/pages/nl2sql/components/QueryGraphPanel.tsx) | 16 | ✅ 완료 | `QuerySubgraphViewer` wrapper |
+| [pages/nl2sql/components/ResultPanel.tsx](canvas/src/pages/nl2sql/components/ResultPanel.tsx) | 253 | ✅ 완료 | Graph 탭 (`TabId = 'chart' \| 'table' \| 'sql' \| 'graph'`) 통합 완료 |
 
 ---
 
@@ -43,23 +43,23 @@
 
 | 파일 | LOC | 상태 | 비고 |
 |------|-----|------|------|
-| [lib/routes/routes.ts](apps/canvas/src/lib/routes/routes.ts) | — | ✅ 완료 | `ROUTES.ANALYSIS.INSIGHT = '/analysis/insight'` 정의됨 |
-| [lib/routes/routeConfig.tsx](apps/canvas/src/lib/routes/routeConfig.tsx) | — | ✅ 완료 | RoleGuard 포함 `/analysis/insight` 라우트 등록 |
-| [layouts/.../Sidebar.tsx](apps/canvas/src/layouts/components/Sidebar.tsx) | — | ✅ 완료 | `ROUTES.ANALYSIS.INSIGHT` 링크 및 "Insight" 레이블 존재 |
-| [features/insight/store/useInsightStore.ts](apps/canvas/src/features/insight/store/useInsightStore.ts) | 161 | ✅ 완료 | Zustand store, `selectedKpiFingerprint`, `impactGraph`, `selectedDriverId` 등 |
-| [features/insight/hooks/useImpactGraph.ts](apps/canvas/src/features/insight/hooks/useImpactGraph.ts) | 249 | ✅ 완료 | 202 폴링 로직 (MAX_POLL=30, 5분 타임아웃), 취소/재시도 포함 |
-| [features/insight/hooks/useDriverDetail.ts](apps/canvas/src/features/insight/hooks/useDriverDetail.ts) | 21 | ⚠️ **스텁** | `close()` 핸들러만 구현. `GET /api/insight/nodes/{id}` 미구현으로 인한 의도적 스텁 |
-| [features/insight/components/ImpactGraphViewer.tsx](apps/canvas/src/features/insight/components/ImpactGraphViewer.tsx) | 232 | ✅ 완료 | Cytoscape.js 렌더링, hover/click 이벤트 |
-| [features/insight/components/KpiSelector.tsx](apps/canvas/src/features/insight/components/KpiSelector.tsx) | 89 | ⚠️ **하드코딩** | 샘플 KPI 5개 하드코딩. `GET /api/insight/kpis` 미구현으로 인한 workaround |
-| [features/insight/components/DriverRankingPanel.tsx](apps/canvas/src/features/insight/components/DriverRankingPanel.tsx) | 148 | ⚠️ **클라이언트 파생** | 그래프 데이터에서 클라이언트사이드 파생. `GET /api/insight/drivers` 미구현으로 인한 workaround |
-| [features/insight/components/NodeDetailPanel.tsx](apps/canvas/src/features/insight/components/NodeDetailPanel.tsx) | 226 | ✅ 완료 | 점수 Breakdown + Evidence 표시 |
-| [features/insight/components/PathComparisonPanel.tsx](apps/canvas/src/features/insight/components/PathComparisonPanel.tsx) | 103 | ✅ 완료 | Top 3 경로 비교, 체크박스 토글 |
-| [features/insight/components/TimeRangeSelector.tsx](apps/canvas/src/features/insight/components/TimeRangeSelector.tsx) | 37 | ✅ 완료 | 7d/30d/90d pill 버튼 |
-| [features/insight/utils/scoreCalculator.ts](apps/canvas/src/features/insight/utils/scoreCalculator.ts) | 91 | ✅ 완료 | Breakdown 표시 유틸 |
-| [features/insight/utils/fingerprintUtils.ts](apps/canvas/src/features/insight/utils/fingerprintUtils.ts) | 52 | ✅ 완료 | `?fp=` URL 파라미터 딥링크 |
-| [pages/insight/InsightPage.tsx](apps/canvas/src/pages/insight/InsightPage.tsx) | 232 | ✅ 완료 | 3-패널 레이아웃, URL 동기화, deeplink 지원 |
-| [pages/insight/components/InsightHeader.tsx](apps/canvas/src/pages/insight/components/InsightHeader.tsx) | 32 | ✅ 완료 | 헤더 + TimeRangeSelector |
-| [pages/insight/components/InsightSidebar.tsx](apps/canvas/src/pages/insight/components/InsightSidebar.tsx) | 46 | ✅ 완료 | KpiSelector + DriverRankingPanel 조합 |
+| [lib/routes/routes.ts](canvas/src/lib/routes/routes.ts) | — | ✅ 완료 | `ROUTES.ANALYSIS.INSIGHT = '/analysis/insight'` 정의됨 |
+| [lib/routes/routeConfig.tsx](canvas/src/lib/routes/routeConfig.tsx) | — | ✅ 완료 | RoleGuard 포함 `/analysis/insight` 라우트 등록 |
+| [layouts/.../Sidebar.tsx](canvas/src/layouts/components/Sidebar.tsx) | — | ✅ 완료 | `ROUTES.ANALYSIS.INSIGHT` 링크 및 "Insight" 레이블 존재 |
+| [features/insight/store/useInsightStore.ts](canvas/src/features/insight/store/useInsightStore.ts) | 161 | ✅ 완료 | Zustand store, `selectedKpiFingerprint`, `impactGraph`, `selectedDriverId` 등 |
+| [features/insight/hooks/useImpactGraph.ts](canvas/src/features/insight/hooks/useImpactGraph.ts) | 249 | ✅ 완료 | 202 폴링 로직 (MAX_POLL=30, 5분 타임아웃), 취소/재시도 포함 |
+| [features/insight/hooks/useDriverDetail.ts](canvas/src/features/insight/hooks/useDriverDetail.ts) | 21 | ⚠️ **스텁** | `close()` 핸들러만 구현. `GET /api/insight/nodes/{id}` 미구현으로 인한 의도적 스텁 |
+| [features/insight/components/ImpactGraphViewer.tsx](canvas/src/features/insight/components/ImpactGraphViewer.tsx) | 232 | ✅ 완료 | Cytoscape.js 렌더링, hover/click 이벤트 |
+| [features/insight/components/KpiSelector.tsx](canvas/src/features/insight/components/KpiSelector.tsx) | 89 | ⚠️ **하드코딩** | 샘플 KPI 5개 하드코딩. `GET /api/insight/kpis` 미구현으로 인한 workaround |
+| [features/insight/components/DriverRankingPanel.tsx](canvas/src/features/insight/components/DriverRankingPanel.tsx) | 148 | ⚠️ **클라이언트 파생** | 그래프 데이터에서 클라이언트사이드 파생. `GET /api/insight/drivers` 미구현으로 인한 workaround |
+| [features/insight/components/NodeDetailPanel.tsx](canvas/src/features/insight/components/NodeDetailPanel.tsx) | 226 | ✅ 완료 | 점수 Breakdown + Evidence 표시 |
+| [features/insight/components/PathComparisonPanel.tsx](canvas/src/features/insight/components/PathComparisonPanel.tsx) | 103 | ✅ 완료 | Top 3 경로 비교, 체크박스 토글 |
+| [features/insight/components/TimeRangeSelector.tsx](canvas/src/features/insight/components/TimeRangeSelector.tsx) | 37 | ✅ 완료 | 7d/30d/90d pill 버튼 |
+| [features/insight/utils/scoreCalculator.ts](canvas/src/features/insight/utils/scoreCalculator.ts) | 91 | ✅ 완료 | Breakdown 표시 유틸 |
+| [features/insight/utils/fingerprintUtils.ts](canvas/src/features/insight/utils/fingerprintUtils.ts) | 52 | ✅ 완료 | `?fp=` URL 파라미터 딥링크 |
+| [pages/insight/InsightPage.tsx](canvas/src/pages/insight/InsightPage.tsx) | 232 | ✅ 완료 | 3-패널 레이아웃, URL 동기화, deeplink 지원 |
+| [pages/insight/components/InsightHeader.tsx](canvas/src/pages/insight/components/InsightHeader.tsx) | 32 | ✅ 완료 | 헤더 + TimeRangeSelector |
+| [pages/insight/components/InsightSidebar.tsx](canvas/src/pages/insight/components/InsightSidebar.tsx) | 46 | ✅ 완료 | KpiSelector + DriverRankingPanel 조합 |
 
 ---
 

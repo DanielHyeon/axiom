@@ -15,7 +15,7 @@
 ## 1. 전체 디렉토리 구조
 
 ```
-apps/canvas/
+canvas/
 ├── public/                          # 정적 파일 (favicon, robots.txt)
 ├── src/
 │   ├── App.tsx                      # 루트 컴포넌트 (라우트 정의 포함)

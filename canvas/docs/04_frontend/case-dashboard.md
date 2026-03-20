@@ -520,11 +520,11 @@ interface UserPreferences {
 | 문서 | 관계 |
 |------|------|
 | `services/core/docs/07_security/auth-model.md` | RBAC 7역할 정의, 권한 매트릭스 (SSOT) |
-| `apps/canvas/docs/04_frontend/admin-dashboard.md` | admin 전용 시스템 관리 대시보드 (별도 `/settings` 경로) |
-| `apps/canvas/docs/07_security/auth-flow.md` | `useRole()`, `RoleGuard`, 사이드바 역할 필터링 |
-| `apps/canvas/docs/06_data/state-schema.md` | User.role 타입 정의, authStore 상태 구조 |
+| `canvas/docs/04_frontend/admin-dashboard.md` | admin 전용 시스템 관리 대시보드 (별도 `/settings` 경로) |
+| `canvas/docs/07_security/auth-flow.md` | `useRole()`, `RoleGuard`, 사이드바 역할 필터링 |
+| `canvas/docs/06_data/state-schema.md` | User.role 타입 정의, authStore 상태 구조 |
 | `services/core/docs/06_data/database-schema.md` | `bpm_work_item`, `users` 테이블 (패널 데이터 원천) |
-| `apps/canvas/docs/04_frontend/watch-alerts.md` | Watch 알림 대시보드 UI, Notification Center(§7), 역할별 알림 관련성(§8) |
+| `canvas/docs/04_frontend/watch-alerts.md` | Watch 알림 대시보드 UI, Notification Center(§7), 역할별 알림 관련성(§8) |
 
 ---
 

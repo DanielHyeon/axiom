@@ -268,9 +268,9 @@ Synapse는 API 레벨에서 모듈별 역할 이름을 사용한다. Core 시스
 
 ## 관련 문서
 
-- `apps/canvas/docs/04_frontend/case-dashboard.md` (역할별 대시보드 합성 — §4, 7개 역할 → 패널 매핑)
-- `apps/canvas/docs/04_frontend/admin-dashboard.md` (admin 전용 시스템 관리 대시보드)
-- `apps/canvas/docs/07_security/auth-flow.md` (Canvas 프론트엔드 인증 흐름, RoleGuard 구현)
+- `canvas/docs/04_frontend/case-dashboard.md` (역할별 대시보드 합성 — §4, 7개 역할 → 패널 매핑)
+- `canvas/docs/04_frontend/admin-dashboard.md` (admin 전용 시스템 관리 대시보드)
+- `canvas/docs/07_security/auth-flow.md` (Canvas 프론트엔드 인증 흐름, RoleGuard 구현)
 
 ---
 

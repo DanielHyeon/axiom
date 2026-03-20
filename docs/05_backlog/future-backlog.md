@@ -47,7 +47,7 @@
 
 ---
 
-## 2. Canvas (apps/canvas) — 코드 검증 결과
+## 2. Canvas (canvas) — 코드 검증 결과
 
 ### 2.1 라우팅
 
@@ -119,7 +119,7 @@ Synapse, Vision, Oracle, Weaver는 이번에 **코드 스캔하지 않음**. 문
 | `docs/04_status/core-gap-analysis.md` | Core 문서 대비 갭 상세. |
 | `docs/03_implementation/frontend/00_ui-ux-gap-implementation-plan.md` §6 | 프론트 비적용 범위·갭 잔여. |
 | `docs/03_implementation/core/00_core-gap-implementation-plan.md` | Core Phase D/E, Worker 예정. |
-| `apps/canvas/docs/04_frontend/event-streams.md` | Watch SSE vs POST 스트림, WebSocket 미사용 명시. |
+| `canvas/docs/04_frontend/event-streams.md` | Watch SSE vs POST 스트림, WebSocket 미사용 명시. |
 
 ---
 

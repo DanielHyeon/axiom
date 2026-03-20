@@ -1,7 +1,7 @@
 # 프론트엔드 구성 설계 대비 갭 분석
 
-설계 문서 기준: `apps/canvas/docs/04_frontend/` (directory-structure, routing, feature-priority-matrix, implementation-guide, case-dashboard 등)  
-대상 구현: `apps/canvas/src/`  
+설계 문서 기준: `canvas/docs/04_frontend/` (directory-structure, routing, feature-priority-matrix, implementation-guide, case-dashboard 등)  
+대상 구현: `canvas/src/`  
 작성일: 2026-02-22
 
 ---
@@ -173,4 +173,4 @@
 
 ---
 
-이 문서는 설계 문서와 `apps/canvas/src` 구현을 비교한 갭 목록이며, 우선순위는 P0/P1 Feature 및 라우트 정합성 기준으로 제안한 것이다. 실제 스프린트 반영 시 리소스에 따라 Critical → High 순으로 처리하는 것을 권장한다.
+이 문서는 설계 문서와 `canvas/src` 구현을 비교한 갭 목록이며, 우선순위는 P0/P1 Feature 및 라우트 정합성 기준으로 제안한 것이다. 실제 스프린트 반영 시 리소스에 따라 Critical → High 순으로 처리하는 것을 권장한다.

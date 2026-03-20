@@ -5,8 +5,8 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/06_data/cache-strategy.md
-- apps/canvas/docs/06_data/state-schema.md
+- canvas/docs/06_data/cache-strategy.md
+- canvas/docs/06_data/state-schema.md
 
 ## 3. 에이전트 운영
 - 주관: backend-developer | 협업: code-security-auditor, code-inspector-tester

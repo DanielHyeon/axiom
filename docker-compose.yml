@@ -184,7 +184,7 @@ services:
   # Frontend (Canvas UI)
   canvas-ui:
     build:
-      context: ./apps/canvas
+      context: ./canvas
       dockerfile: Dockerfile
       args:
         VITE_CORE_URL: http://localhost:9002

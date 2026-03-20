@@ -32,7 +32,7 @@
 
 ### 1.2 기본 설정
 
-**구현 위치**: `apps/canvas/src/lib/queryClient.ts`  
+**구현 위치**: `canvas/src/lib/queryClient.ts`  
 전역 옵션 상세는 [04_frontend/query-client.md](../04_frontend/query-client.md) 참고.
 
 - **queries**: staleTime 5분, gcTime 30분, retry 3회(지수 백오프), refetchOnWindowFocus/Reconnect/Mount true.

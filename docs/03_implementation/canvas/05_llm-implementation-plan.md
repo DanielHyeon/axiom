@@ -5,7 +5,7 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/05_llm/ai-features.md
+- canvas/docs/05_llm/ai-features.md
 
 ## 3. 에이전트 운영
 - 주관: backend-developer | 협업: api-developer, code-security-auditor, code-reviewer

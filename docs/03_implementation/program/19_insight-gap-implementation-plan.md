@@ -187,7 +187,7 @@ async def list_kpis(
 
 #### 3.4 프론트엔드 수정
 
-**파일**: [features/insight/api/insightApi.ts](apps/canvas/src/features/insight/api/insightApi.ts)
+**파일**: [features/insight/api/insightApi.ts](canvas/src/features/insight/api/insightApi.ts)
 
 ```typescript
 export async function fetchKpis(params?: {
@@ -198,7 +198,7 @@ export async function fetchKpis(params?: {
 }): Promise<KpiListResponse>
 ```
 
-**파일**: [features/insight/components/KpiSelector.tsx](apps/canvas/src/features/insight/components/KpiSelector.tsx)
+**파일**: [features/insight/components/KpiSelector.tsx](canvas/src/features/insight/components/KpiSelector.tsx)
 
 ```
 변경:
@@ -208,7 +208,7 @@ export async function fetchKpis(params?: {
   - input 직접 입력 fallback 유지 (API 오류 시에도 동작)
 ```
 
-**파일**: [features/insight/types/insight.ts](apps/canvas/src/features/insight/types/insight.ts)
+**파일**: [features/insight/types/insight.ts](canvas/src/features/insight/types/insight.ts)
 
 ```typescript
 export interface KpiListItem {
@@ -436,7 +436,7 @@ LIMIT 5
 
 #### 3.13 프론트엔드 수정
 
-**파일**: [features/insight/api/insightApi.ts](apps/canvas/src/features/insight/api/insightApi.ts)
+**파일**: [features/insight/api/insightApi.ts](canvas/src/features/insight/api/insightApi.ts)
 
 ```typescript
 export async function fetchDriverDetail(
@@ -445,7 +445,7 @@ export async function fetchDriverDetail(
 ): Promise<DriverDetailResponse>
 ```
 
-**파일**: [features/insight/hooks/useDriverDetail.ts](apps/canvas/src/features/insight/hooks/useDriverDetail.ts)
+**파일**: [features/insight/hooks/useDriverDetail.ts](canvas/src/features/insight/hooks/useDriverDetail.ts)
 
 현재 스텁(21 LOC)을 교체:
 
@@ -625,7 +625,7 @@ async def kpi_activity(
 
 #### 3.19 프론트엔드 구현
 
-**신규 파일**: [features/insight/hooks/useKpiTimeseries.ts](apps/canvas/src/features/insight/hooks/useKpiTimeseries.ts)
+**신규 파일**: [features/insight/hooks/useKpiTimeseries.ts](canvas/src/features/insight/hooks/useKpiTimeseries.ts)
 
 ```typescript
 export function useKpiTimeseries(params: {
@@ -649,7 +649,7 @@ export function useKpiTimeseries(params: {
 }
 ```
 
-**신규 파일**: [features/insight/components/KpiMiniChart.tsx](apps/canvas/src/features/insight/components/KpiMiniChart.tsx)
+**신규 파일**: [features/insight/components/KpiMiniChart.tsx](canvas/src/features/insight/components/KpiMiniChart.tsx)
 
 구현 방식: 외부 차트 라이브러리 없이 SVG 직접 구현 (번들 크기 최소화). Recharts가 이미 설치돼 있으면 재사용.
 
@@ -679,7 +679,7 @@ GET /api/insight/schema-coverage?table=customers&column=region
 
 Synapse 안정화 후 별도 PR.
 
-**신규 파일**: [features/ontology/hooks/useNodeDataPreview.ts](apps/canvas/src/features/ontology/hooks/useNodeDataPreview.ts)
+**신규 파일**: [features/ontology/hooks/useNodeDataPreview.ts](canvas/src/features/ontology/hooks/useNodeDataPreview.ts)
 
 ```typescript
 export function useNodeDataPreview(nodeId: string | null) {
@@ -738,9 +738,9 @@ export function useNodeDataPreview(nodeId: string | null) {
 | `services/weaver/app/api/insight.py` | 수정 | `GET /kpis` 엔드포인트 |
 | `services/weaver/app/services/insight_query_store.py` | 수정 | `fetch_kpis()`, `parse_time_range_days()` |
 | `services/weaver/app/services/insight_store.py` | 수정 (옵션 A) | `kpi_fingerprint`, `kpi_name` 컬럼 마이그레이션 추가 |
-| `apps/canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchKpis()` 추가 |
-| `apps/canvas/src/features/insight/types/insight.ts` | 수정 | `KpiListItem`, `KpiListResponse` 타입 |
-| `apps/canvas/src/features/insight/components/KpiSelector.tsx` | 수정 | 하드코딩 제거, API 연동 |
+| `canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchKpis()` 추가 |
+| `canvas/src/features/insight/types/insight.ts` | 수정 | `KpiListItem`, `KpiListResponse` 타입 |
+| `canvas/src/features/insight/components/KpiSelector.tsx` | 수정 | 하드코딩 제거, API 연동 |
 
 ### P0-B 변경 파일
 
@@ -756,8 +756,8 @@ export function useNodeDataPreview(nodeId: string | null) {
 | ------ | --------- | --------- |
 | `services/weaver/app/api/insight.py` | 수정 | `GET /drivers/detail` 엔드포인트 |
 | `services/weaver/app/services/insight_query_store.py` | 수정 | `fetch_driver_score()`, `fetch_driver_evidence()` |
-| `apps/canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchDriverDetail()` 추가 |
-| `apps/canvas/src/features/insight/hooks/useDriverDetail.ts` | 수정 | 스텁 → 실제 API 호출 (21 LOC → ~40 LOC) |
+| `canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchDriverDetail()` 추가 |
+| `canvas/src/features/insight/hooks/useDriverDetail.ts` | 수정 | 스텁 → 실제 API 호출 (21 LOC → ~40 LOC) |
 
 ### P1-B 변경 파일
 
@@ -771,16 +771,16 @@ export function useNodeDataPreview(nodeId: string | null) {
 | 파일 | 변경 유형 | 주요 내용 |
 | ------ | --------- | --------- |
 | `services/weaver/app/api/insight.py` | 수정 | `GET /kpi/activity` 추가 |
-| `apps/canvas/src/features/insight/hooks/useKpiTimeseries.ts` | **신규** | 활동도 트렌드 훅 |
-| `apps/canvas/src/features/insight/components/KpiMiniChart.tsx` | **신규** | SVG 미니 라인차트 |
-| `apps/canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchKpiActivity()` 추가 |
+| `canvas/src/features/insight/hooks/useKpiTimeseries.ts` | **신규** | 활동도 트렌드 훅 |
+| `canvas/src/features/insight/components/KpiMiniChart.tsx` | **신규** | SVG 미니 라인차트 |
+| `canvas/src/features/insight/api/insightApi.ts` | 수정 | `fetchKpiActivity()` 추가 |
 
 ### P2-B 파일
 
 | 파일 | 변경 유형 | 주요 내용 |
 | ------ | --------- | --------- |
 | `services/weaver/app/api/insight.py` | 수정 | `GET /insight/schema-coverage` (Weaver 기반, Synapse 불필요) |
-| `apps/canvas/src/features/ontology/hooks/useNodeDataPreview.ts` | **신규** | querylog 기반 schema coverage 훅 |
+| `canvas/src/features/ontology/hooks/useNodeDataPreview.ts` | **신규** | querylog 기반 schema coverage 훅 |
 
 ---
 

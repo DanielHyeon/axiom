@@ -5,7 +5,7 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/00_overview/system-overview.md
+- canvas/docs/00_overview/system-overview.md
 
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, technical-doc-writer | 협업: code-documenter, code-standards-enforcer

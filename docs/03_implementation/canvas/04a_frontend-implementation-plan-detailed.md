@@ -3,10 +3,10 @@
 ## 1. 문서 목적·범위
 
 - **목적**: `docs/04_status/frontend-gap-analysis.md`에서 도출한 갭을 해소하기 위한 단계별 구현 계획을 수립하고, **Phase·작업 단위별 통과 조건**을 명시한다.
-- **범위**: Canvas(`apps/canvas`) 프론트엔드 전반 — 라우팅·레이아웃·인프라·P0/P1/P2 Feature·품질·테스트.
+- **범위**: Canvas(`canvas`) 프론트엔드 전반 — 라우팅·레이아웃·인프라·P0/P1/P2 Feature·품질·테스트.
 - **참조 문서**:
   - `docs/04_status/frontend-gap-analysis.md` (갭 목록)
-  - `apps/canvas/docs/04_frontend/` (routing, directory-structure, feature-priority-matrix, implementation-guide, case-dashboard, document-management 등)
+  - `canvas/docs/04_frontend/` (routing, directory-structure, feature-priority-matrix, implementation-guide, case-dashboard, document-management 등)
   - `docs/03_implementation/program/01_sprint-backlog-master.md` (프로그램 스프린트 연동)
 
 ---
@@ -75,7 +75,7 @@
 - **0-G3 404·에러**: 알 수 없는 path 접근 시 NotFoundPage가 렌더되고, ErrorBoundary 발생 시 ErrorPage(또는 ErrorFallback)가 렌더된다.
 - **0-G4 레이아웃**: Sidebar·Header·UserMenu·NotificationBell이 보호된 라우트에서 일관되게 노출된다.
 - **0-G5 코드 분할**: 최소 5개 이상 페이지가 lazy 로드되며, 해당 라우트 진입 시 별도 청크가 로드된다 (네트워크 탭 또는 번들 분석으로 확인).
-- **0-G6 문서**: `apps/canvas/docs/04_frontend/routing.md`, `directory-structure.md`가 현재 라우트·디렉토리와 불일치 없이 반영된다.
+- **0-G6 문서**: `canvas/docs/04_frontend/routing.md`, `directory-structure.md`가 현재 라우트·디렉토리와 불일치 없이 반영된다.
 
 ---
 

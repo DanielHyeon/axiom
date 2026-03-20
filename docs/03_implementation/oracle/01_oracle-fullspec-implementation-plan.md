@@ -1,6 +1,6 @@
 # Oracle Full 스펙 구현 계획 (미구현·스텁·Mock 항목)
 
-> **근거**: [docs/03_implementation/oracle/](.) (구현 계획), **코드 검증**: `services/oracle/app/`, `apps/canvas/src/features/nl2sql/` 실제 구현 대조  
+> **근거**: [docs/03_implementation/oracle/](.) (구현 계획), **코드 검증**: `services/oracle/app/`, `canvas/src/features/nl2sql/` 실제 구현 대조  
 > **범위**: 현재 스텁·Mock이거나 설계 문서(services/oracle/docs/) Full 스펙에 미달한 항목만. 설계 문서를 참조하여 단계별 구현 계획을 수립한다.  
 > **작성일**: 2026-02-22
 
@@ -236,7 +236,7 @@
 
 ### 10.1 참조 설계
 
-- **apps/canvas/src/lib/api/clients.ts**: oracleApi = createApiClient(VITE_ORACLE_URL).
+- **canvas/src/lib/api/clients.ts**: oracleApi = createApiClient(VITE_ORACLE_URL).
 - **oracleNl2sqlApi.ts**: oracleApi(createApiClient) 사용. postAsk·getHistory는 oracleApi.post/get, postReactStream은 baseURL 기반 createNdjsonStream. JWT는 createApiClient 인터셉터로 주입.
 - **docs/02_api/service-endpoints-ssot.md**: Oracle 포트·Base URL·Canvas VITE_ORACLE_URL 명시됨.
 

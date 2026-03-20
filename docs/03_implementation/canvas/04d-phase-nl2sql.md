@@ -12,7 +12,7 @@
 ### P1-1: Pie Chart Config 키 불일치 수정 (F3)
 
 **문제**: BE `visualize.py`는 pie chart에 `label_column`/`value_column` 반환하나, FE `ChartRecommender.tsx`는 `x_column`으로 접근
-**수정 파일**: `apps/canvas/src/pages/nl2sql/components/ChartRecommender.tsx`
+**수정 파일**: `canvas/src/pages/nl2sql/components/ChartRecommender.tsx`
 **작업**: pie chart 분기에서 `config.label_column` / `config.value_column` 키 사용
 
 ### P1-2: Scatter Chart 타입 처리 (F5)
@@ -20,28 +20,28 @@
 **문제**: `ChartType`에 'scatter' 포함되나 BE/FE 모두 렌더링 없음
 **수정 파일**:
 - `services/oracle/app/core/visualize.py` — scatter 추천 규칙 추가 (2 numeric columns)
-- `apps/canvas/src/pages/nl2sql/components/ChartRecommender.tsx` — Recharts ScatterChart 렌더링
+- `canvas/src/pages/nl2sql/components/ChartRecommender.tsx` — Recharts ScatterChart 렌더링
 
 ### P1-3: NL2SQL 라우트 RoleGuard 적용 (E2)
 
 **문제**: `routeConfig.tsx:80`에 RoleGuard 없음. 모든 사용자가 NL2SQL 접근 가능
-**수정 파일**: `apps/canvas/src/lib/routes/routeConfig.tsx`
+**수정 파일**: `canvas/src/lib/routes/routeConfig.tsx`
 **작업**: nl2sql 라우트에 `<RoleGuard allowedRoles={['admin','manager','attorney','analyst','engineer']}>` 래핑
 
 ### P1-4: Rate Limit 429 핸들링 (E4)
 
 **문제**: BE rate limiting 동작하나 FE에서 429 응답 처리 없음
-**수정 파일**: `apps/canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts`
+**수정 파일**: `canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts`
 **작업**: 429 응답 시 "요청이 너무 많습니다. 잠시 후 다시 시도해주세요" toast 표시 + 재시도 가이드
 
 ### Phase 1 수정 파일 요약
 
 | 파일 | 변경 |
 | --- | --- |
-| `apps/canvas/src/pages/nl2sql/components/ChartRecommender.tsx` | MODIFY (F3, F5) |
+| `canvas/src/pages/nl2sql/components/ChartRecommender.tsx` | MODIFY (F3, F5) |
 | `services/oracle/app/core/visualize.py` | MODIFY (F5) |
-| `apps/canvas/src/lib/routes/routeConfig.tsx` | MODIFY (E2) |
-| `apps/canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (E4) |
+| `canvas/src/lib/routes/routeConfig.tsx` | MODIFY (E2) |
+| `canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (E4) |
 
 ### Gate 1 판정 기준
 
@@ -65,8 +65,8 @@
 - 선택값을 `postAsk()`/`postReactStream()`에 전달
 
 **수정 파일**:
-- `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY (하드코딩 제거)
-- `apps/canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` — MODIFY (getDatasources 추가)
+- `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY (하드코딩 제거)
+- `canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` — MODIFY (getDatasources 추가)
 
 ### P2-2: Meta API FE 통합 (A8)
 
@@ -80,14 +80,14 @@
 **문제**: MessageBubble, SqlPreview, ThinkingIndicator 존재하나 Nl2SqlPage에서 직접 div 렌더링
 **작업**: 기존 컴포넌트를 Nl2SqlPage의 메시지 렌더링에 연결
 
-**수정 파일**: `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY (컴포넌트 통합)
+**수정 파일**: `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY (컴포넌트 통합)
 
 ### P2-4: SQL Editor (Monaco) 통합 (G7)
 
 **문제**: react-monaco-editor 의존성 있으나 NL2SQL에서 미사용
 **작업**: SqlPreview 컴포넌트에 "수정" 모드 토글 → Monaco Editor 표시 → 수정된 SQL 재실행
 
-**수정 파일**: `apps/canvas/src/pages/nl2sql/components/SqlPreview.tsx` — MODIFY
+**수정 파일**: `canvas/src/pages/nl2sql/components/SqlPreview.tsx` — MODIFY
 
 ### P2-5: Streaming Progress UI (G10)
 
@@ -95,23 +95,23 @@
 **작업**: SyncProgress 패턴 참조하여 ReAct 9-step 타임라인 구현
 - select → generate → validate → fix → execute → quality → triage → result
 
-**수정 파일**: `apps/canvas/src/pages/nl2sql/components/` — CREATE (ReactProgressTimeline.tsx)
+**수정 파일**: `canvas/src/pages/nl2sql/components/` — CREATE (ReactProgressTimeline.tsx)
 
 ### P2-6: Result Table 개선 (G15)
 
 **문제**: 결과를 기본 div로 표시. DataTable 미사용
 **작업**: 기존 `DataTable` 컴포넌트 재사용하여 정렬/페이지네이션 지원
 
-**수정 파일**: `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY
+**수정 파일**: `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` — MODIFY
 
 ### Phase 2 수정 파일 요약
 
 | 파일 | 변경 |
 | --- | --- |
-| `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (G1, B2, G4-G6, G15) |
-| `apps/canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (A8) |
-| `apps/canvas/src/pages/nl2sql/components/SqlPreview.tsx` | MODIFY (G7) |
-| `apps/canvas/src/pages/nl2sql/components/ReactProgressTimeline.tsx` | CREATE (G10) |
+| `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (G1, B2, G4-G6, G15) |
+| `canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (A8) |
+| `canvas/src/pages/nl2sql/components/SqlPreview.tsx` | MODIFY (G7) |
+| `canvas/src/pages/nl2sql/components/ReactProgressTimeline.tsx` | CREATE (G10) |
 
 ### Gate 2 판정 기준
 
@@ -163,9 +163,9 @@
 
 | 파일 | 변경 |
 | --- | --- |
-| `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (G3, G9, G11, C6, G14) |
-| `apps/canvas/src/pages/nl2sql/components/ResultPanel.tsx` | CREATE (G11 탭 분리) |
-| `apps/canvas/src/pages/nl2sql/components/ReactProgressTimeline.tsx` | MODIFY (D4) |
+| `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (G3, G9, G11, C6, G14) |
+| `canvas/src/pages/nl2sql/components/ResultPanel.tsx` | CREATE (G11 탭 분리) |
+| `canvas/src/pages/nl2sql/components/ReactProgressTimeline.tsx` | MODIFY (D4) |
 
 ### Gate 3 판정 기준
 
@@ -203,10 +203,10 @@
 
 | 파일 | 변경 |
 | --- | --- |
-| `apps/canvas/src/pages/nl2sql/components/DirectSqlPanel.tsx` | CREATE (B7) |
-| `apps/canvas/src/pages/nl2sql/components/ChartRecommender.tsx` | MODIFY (kpi_card) |
-| `apps/canvas/src/pages/nl2sql/components/MetadataPanel.tsx` | CREATE (C7-C12) |
-| `apps/canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (B5, 통합) |
+| `canvas/src/pages/nl2sql/components/DirectSqlPanel.tsx` | CREATE (B7) |
+| `canvas/src/pages/nl2sql/components/ChartRecommender.tsx` | MODIFY (kpi_card) |
+| `canvas/src/pages/nl2sql/components/MetadataPanel.tsx` | CREATE (C7-C12) |
+| `canvas/src/pages/nl2sql/Nl2SqlPage.tsx` | MODIFY (B5, 통합) |
 
 ### Gate 4 판정 기준
 
@@ -246,11 +246,11 @@
 
 | 파일 | 변경 |
 | --- | --- |
-| `apps/canvas/src/pages/nl2sql/nl2sqlFormSchema.ts` | MODIFY (B1) |
-| `apps/canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (C1, C13, C15) |
-| `apps/canvas/src/lib/api/clients.ts` | VERIFY (E3) |
+| `canvas/src/pages/nl2sql/nl2sqlFormSchema.ts` | MODIFY (B1) |
+| `canvas/src/features/nl2sql/api/oracleNl2sqlApi.ts` | MODIFY (C1, C13, C15) |
+| `canvas/src/lib/api/clients.ts` | VERIFY (E3) |
 | `services/oracle/docs/02_api/text2sql-api.md` | UPDATE (문서 동기화) |
-| `apps/canvas/docs/04_frontend/nl2sql-chat.md` | UPDATE (문서 동기화) |
+| `canvas/docs/04_frontend/nl2sql-chat.md` | UPDATE (문서 동기화) |
 
 ### Gate 5 판정 기준
 

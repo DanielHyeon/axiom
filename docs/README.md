@@ -37,4 +37,4 @@
 - [services/synapse/docs/](../services/synapse/docs/) — Synapse (process mining, ontology)
 - [services/vision/docs/](../services/vision/docs/) — Vision (OLAP, what-if, root cause)
 - [services/weaver/docs/](../services/weaver/docs/) — Weaver (metadata fabric, adapters)
-- [apps/canvas/docs/](../apps/canvas/docs/) — Canvas (React frontend)
+- [canvas/docs/](../canvas/docs/) — Canvas (React frontend)

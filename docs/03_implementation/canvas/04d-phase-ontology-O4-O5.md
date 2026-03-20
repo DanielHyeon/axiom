@@ -148,7 +148,7 @@ RETURN
 
 ### O4-3: Canvas ImpactAnalysisPanel
 
-**신규 파일**: `apps/canvas/src/pages/ontology/components/ImpactAnalysisPanel.tsx`
+**신규 파일**: `canvas/src/pages/ontology/components/ImpactAnalysisPanel.tsx`
 
 **UI 구성**:
 - **시작 노드**: 현재 선택된 노드 (NodeDetail에서 진입)
@@ -159,7 +159,7 @@ RETURN
 
 ### O4-4: NodeDetail 영향 분석 버튼
 
-**수정 파일**: `apps/canvas/src/pages/ontology/components/NodeDetail.tsx`
+**수정 파일**: `canvas/src/pages/ontology/components/NodeDetail.tsx`
 
 **추가**: "변경 영향 분석" 버튼 (기존 "이 노드로 경로 탐색" 아래)
 
@@ -171,7 +171,7 @@ RETURN
 
 ### O4-5: ontologyApi 확장
 
-**수정 파일**: `apps/canvas/src/features/ontology/api/ontologyApi.ts`
+**수정 파일**: `canvas/src/features/ontology/api/ontologyApi.ts`
 
 ```typescript
 analyzeImpact(nodeId: string, direction: string, depth: number)
@@ -187,10 +187,10 @@ analyzeSchemaChangeImpact(tableName: string, depth: number)
 | --- | --- | --- |
 | `services/synapse/app/services/impact_analysis_service.py` | CREATE | MEDIUM |
 | `services/synapse/app/api/graph.py` | MODIFY (+2 endpoints) | LOW |
-| `apps/canvas/src/features/ontology/api/ontologyApi.ts` | MODIFY (+2 함수) | LOW |
-| `apps/canvas/src/pages/ontology/components/ImpactAnalysisPanel.tsx` | CREATE | MEDIUM |
-| `apps/canvas/src/pages/ontology/components/NodeDetail.tsx` | MODIFY (버튼) | LOW |
-| `apps/canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (패널 통합) | LOW |
+| `canvas/src/features/ontology/api/ontologyApi.ts` | MODIFY (+2 함수) | LOW |
+| `canvas/src/pages/ontology/components/ImpactAnalysisPanel.tsx` | CREATE | MEDIUM |
+| `canvas/src/pages/ontology/components/NodeDetail.tsx` | MODIFY (버튼) | LOW |
+| `canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (패널 통합) | LOW |
 
 ### Gate O4 판정 기준
 
@@ -263,7 +263,7 @@ class OntologyQualityService:
         }
 ```
 
-**FE 컴포넌트**: `apps/canvas/src/pages/ontology/components/QualityDashboard.tsx`
+**FE 컴포넌트**: `canvas/src/pages/ontology/components/QualityDashboard.tsx`
 - 품질 지표 카드 (orphan, low confidence, missing description)
 - 계층별 커버리지 bar chart
 
@@ -290,7 +290,7 @@ CREATE TABLE hitl_review_queue (
 );
 ```
 
-**FE 컴포넌트**: `apps/canvas/src/pages/ontology/components/HITLReviewQueue.tsx`
+**FE 컴포넌트**: `canvas/src/pages/ontology/components/HITLReviewQueue.tsx`
 - 대기 중인 리뷰 항목 리스트
 - Approve / Reject 버튼
 - 리뷰 코멘트 입력
@@ -356,8 +356,8 @@ LIMIT 5
 | `services/synapse/migrations/` | CREATE (hitl_review_queue) | MEDIUM |
 | `services/synapse/app/graph/neo4j_bootstrap.py` | MODIFY (v2.2.0 — DEFINES index) | LOW |
 | `services/synapse/requirements.txt` | MODIFY (+rdflib) | LOW |
-| `apps/canvas/src/pages/ontology/components/QualityDashboard.tsx` | CREATE | LOW |
-| `apps/canvas/src/pages/ontology/components/HITLReviewQueue.tsx` | CREATE | MEDIUM |
+| `canvas/src/pages/ontology/components/QualityDashboard.tsx` | CREATE | LOW |
+| `canvas/src/pages/ontology/components/HITLReviewQueue.tsx` | CREATE | MEDIUM |
 
 ### Gate O5 판정 기준
 

@@ -1,7 +1,7 @@
 # Process Designer 갭 분석 (설계 vs 구현)
 
 > 분석일: 2026-02-27
-> 설계 문서: `apps/canvas/docs/04_frontend/process-designer.md` (v1.2)
+> 설계 문서: `canvas/docs/04_frontend/process-designer.md` (v1.2)
 > 구현 대상: `pages/process/`, `pages/process-designer/`, `stores/processDesignerStore.ts`, `features/process-designer/`
 
 ---

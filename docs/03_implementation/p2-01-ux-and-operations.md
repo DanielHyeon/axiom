@@ -97,10 +97,10 @@
 **Step 16-1: 의존성 설치 + 타입 정의** (복잡도: Low)
 
 - **무엇**: mermaid.js 패키지 설치, ERD 타입 정의
-- **위치**: `apps/canvas/package.json`, `features/datasource/types/erd.ts`
+- **위치**: `canvas/package.json`, `features/datasource/types/erd.ts`
 - **방법**:
   ```bash
-  cd apps/canvas && pnpm add mermaid@^11
+  cd canvas && pnpm add mermaid@^11
   ```
 - **타입 정의**:
   ```typescript
@@ -947,7 +947,7 @@ KAIR build_sql_context 파이프라인 단계:
 ### 3.1 파일 구조 전체
 
 ```
-apps/canvas/src/
+canvas/src/
   features/
     datasource/
       components/

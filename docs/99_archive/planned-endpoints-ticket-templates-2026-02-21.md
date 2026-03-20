@@ -35,7 +35,7 @@
   - 에러 응답 표준화
 - 완료조건(DoD)
   - 위 3개 엔드포인트 200/4xx 동작 확인
-  - `apps/canvas/src/lib/api/watch.ts` 경로 호출 성공
+  - `canvas/src/lib/api/watch.ts` 경로 호출 성공
   - 문서 업데이트: `services/core/docs/02_api/watch-api.md`
 - 테스트케이스
   - 정상 목록 조회

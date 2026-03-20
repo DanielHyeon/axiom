@@ -44,4 +44,4 @@ DDD Phase 0-3 구현 완료 (2026-02). 전체 구현 상세는 `docs/03_implemen
 - [Synapse Architecture](../../services/synapse/docs/01_architecture/)
 - [Vision Architecture](../../services/vision/docs/01_architecture/)
 - [Weaver Architecture](../../services/weaver/docs/01_architecture/)
-- [Canvas Architecture](../../apps/canvas/docs/01_architecture/)
+- [Canvas Architecture](../../canvas/docs/01_architecture/)

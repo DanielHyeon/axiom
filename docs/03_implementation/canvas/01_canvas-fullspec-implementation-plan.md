@@ -1,7 +1,7 @@
 # Canvas Full 스펙 구현 계획 (미구현·스텁·문서 갭)
 
-> **근거**: [docs/05_backlog/future-backlog.md](../../future-implementation-backlog.md), [docs/04_status/frontend-gap-analysis.md](../../frontend-design-gap-analysis.md), **코드 검증**: `apps/canvas/src/` 실제 구현 대조  
-> **범위**: 설계 문서(`apps/canvas/docs/04_frontend/`) 대비 미구현·스텁·Mock·문서 불일치 항목. Core 풀스펙 계획서와 동일한 구조로 단계별 구현 계획을 수립한다.  
+> **근거**: [docs/05_backlog/future-backlog.md](../../future-implementation-backlog.md), [docs/04_status/frontend-gap-analysis.md](../../frontend-design-gap-analysis.md), **코드 검증**: `canvas/src/` 실제 구현 대조  
+> **범위**: 설계 문서(`canvas/docs/04_frontend/`) 대비 미구현·스텁·Mock·문서 불일치 항목. Core 풀스펙 계획서와 동일한 구조로 단계별 구현 계획을 수립한다.  
 > **작성일**: 2026-02-23  
 > **구현 상태 (코드 기준 2026-02 검증)**: **Phase A–G 완료.** 갭: Admin 전용 설정·설정 로그/AI 분석, 데이터소스 extract-metadata SSE, Watch 규칙 CRUD·문서 동기화(routing/directory-structure).
 
@@ -9,7 +9,7 @@
 
 ## 1. 목적
 
-- Canvas의 **미구현**, **스텁/Mock**, **설계 문서와 불일치**인 항목을 `apps/canvas/docs/04_frontend/` 설계 문서에 맞춰 Full 스펙으로 구현하기 위한 계획.
+- Canvas의 **미구현**, **스텁/Mock**, **설계 문서와 불일치**인 항목을 `canvas/docs/04_frontend/` 설계 문서에 맞춰 Full 스펙으로 구현하기 위한 계획.
 - Phase별 설계 문서 참조, 티켓, 선행 조건, 통과 기준을 명시. **갭은 코드 기준으로 검증한 결과를 반영.**
 
 ---
@@ -39,7 +39,7 @@
 
 ## 3. 갭 요약 (코드 기준)
 
-아래는 `apps/canvas/src/` 실제 코드와 `apps/canvas/docs/04_frontend/` 설계 문서를 대조한 결과이다.
+아래는 `canvas/src/` 실제 코드와 `canvas/docs/04_frontend/` 설계 문서를 대조한 결과이다.
 
 | 영역 | 현재 상태 (코드) | Full 스펙 (설계 문서) |
 |------|------------------|------------------------|
@@ -277,5 +277,5 @@
 ## 17. 문서 갱신
 
 - 각 Phase 완료 시 **frontend-design-gap-analysis.md** 해당 갭을 "해소"로 갱신.
-- **apps/canvas/docs/04_frontend/** 내 routing.md, directory-structure.md, admin-dashboard.md, datasource-manager.md, watch-alerts.md를 구현 상태에 맞게 수정.
+- **canvas/docs/04_frontend/** 내 routing.md, directory-structure.md, admin-dashboard.md, datasource-manager.md, watch-alerts.md를 구현 상태에 맞게 수정.
 - API 계약(02_api, service-endpoints-ssot)에 새로 사용하는 엔드포인트가 있으면 반영.

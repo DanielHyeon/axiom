@@ -11,7 +11,7 @@
 
 **문제 (I1)**: `routeConfig.tsx:81` → `OntologyBrowser`(stub, 3개 mock 노드). 완성된 `OntologyPage`(78 lines, ForceGraph2D)는 dead code
 
-**수정 파일**: `apps/canvas/src/lib/routes/routeConfig.tsx`
+**수정 파일**: `canvas/src/lib/routes/routeConfig.tsx`
 
 **작업**:
 - Line 22: lazy import `OntologyBrowser` → `OntologyPage`로 변경
@@ -29,7 +29,7 @@ const OntologyPage = lazy(() => import('@/pages/ontology/OntologyPage'));
 
 **문제 (I2)**: `synapseApi` 인스턴스 존재(`clients.ts:21`)하나 ontology 함수 0개. `useOntologyMock`이 14개 하드코딩 노드 반환
 
-**신규 파일**: `apps/canvas/src/features/ontology/api/ontologyApi.ts`
+**신규 파일**: `canvas/src/features/ontology/api/ontologyApi.ts`
 
 **구현할 함수** (`synapseApi` 래핑):
 
@@ -50,7 +50,7 @@ const OntologyPage = lazy(() => import('@/pages/ontology/OntologyPage'));
 - BE: `{nodes[].layer, relations[].source_id, relations[].target_id}`
 - FE: `OntologyNode.label, OntologyEdge.source (string|OntologyNode)`
 
-**신규 파일**: `apps/canvas/src/features/ontology/hooks/useOntologyData.ts`
+**신규 파일**: `canvas/src/features/ontology/hooks/useOntologyData.ts`
 
 **핵심 로직**:
 
@@ -86,8 +86,8 @@ function transformEdge(beRel: SynapseRelation): OntologyEdge {
 **문제 (I4)**: BE `OntologyService` 모든 메서드가 `case_id` 필수. FE `OntologyPage`에 case_id 개념 없음
 
 **수정 파일**:
-- `apps/canvas/src/features/ontology/store/useOntologyStore.ts` — `caseId: string | null` 상태 추가
-- `apps/canvas/src/pages/ontology/OntologyPage.tsx` — URL query param `?caseId=xxx` 파싱 또는 case selector 추가
+- `canvas/src/features/ontology/store/useOntologyStore.ts` — `caseId: string | null` 상태 추가
+- `canvas/src/pages/ontology/OntologyPage.tsx` — URL query param `?caseId=xxx` 파싱 또는 case selector 추가
 
 **구현 방식**: URL searchParams에서 caseId 추출 → store 저장 → API 호출 시 전달
 
@@ -101,7 +101,7 @@ useEffect(() => { if (caseId) setCaseId(caseId); }, [caseId]);
 
 **문제 (I16 관련)**: `SearchPanel.tsx`는 클라이언트사이드 필터만 수행. Neo4j `ontology_fulltext` + `schema_fulltext` 인덱스 미활용
 
-**수정 파일**: `apps/canvas/src/pages/ontology/components/SearchPanel.tsx`
+**수정 파일**: `canvas/src/pages/ontology/components/SearchPanel.tsx`
 
 **작업**: 기존 300ms debounce 유지하되, `ontologyApi.searchOntology(query)` 서버 호출로 전환
 
@@ -109,13 +109,13 @@ useEffect(() => { if (caseId) setCaseId(caseId); }, [caseId]);
 
 | 파일 | 변경 | 위험도 |
 | --- | --- | --- |
-| `apps/canvas/src/lib/routes/routeConfig.tsx` | MODIFY (라우팅) | LOW |
-| `apps/canvas/src/features/ontology/api/ontologyApi.ts` | CREATE | LOW |
-| `apps/canvas/src/features/ontology/hooks/useOntologyData.ts` | CREATE | MEDIUM |
-| `apps/canvas/src/features/ontology/store/useOntologyStore.ts` | MODIFY (caseId) | LOW |
-| `apps/canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (hook 교체) | MEDIUM |
-| `apps/canvas/src/pages/ontology/components/NodeDetail.tsx` | MODIFY (hook 교체) | LOW |
-| `apps/canvas/src/pages/ontology/components/SearchPanel.tsx` | MODIFY (API 호출) | LOW |
+| `canvas/src/lib/routes/routeConfig.tsx` | MODIFY (라우팅) | LOW |
+| `canvas/src/features/ontology/api/ontologyApi.ts` | CREATE | LOW |
+| `canvas/src/features/ontology/hooks/useOntologyData.ts` | CREATE | MEDIUM |
+| `canvas/src/features/ontology/store/useOntologyStore.ts` | MODIFY (caseId) | LOW |
+| `canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (hook 교체) | MEDIUM |
+| `canvas/src/pages/ontology/components/NodeDetail.tsx` | MODIFY (hook 교체) | LOW |
+| `canvas/src/pages/ontology/components/SearchPanel.tsx` | MODIFY (API 호출) | LOW |
 
 ### Gate O1 판정 기준
 
@@ -198,7 +198,7 @@ CREATE INDEX defines_index IF NOT EXISTS
 
 > 리스크 3 완화: 1차는 CRUD 리스트 UI. 시각 연결선은 Phase B (O4와 병합).
 
-**신규 파일**: `apps/canvas/src/pages/ontology/components/ConceptMapView.tsx`
+**신규 파일**: `canvas/src/pages/ontology/components/ConceptMapView.tsx`
 
 **Phase A UI 구성**:
 - 좌측: GlossaryTerm 검색 + 목록
@@ -211,7 +211,7 @@ CREATE INDEX defines_index IF NOT EXISTS
 
 ### O2-5: OntologyPage 뷰 모드 확장
 
-**수정 파일**: `apps/canvas/src/pages/ontology/OntologyPage.tsx`
+**수정 파일**: `canvas/src/pages/ontology/OntologyPage.tsx`
 
 **변경**: 기존 `isTableMode: boolean` → 3-mode 전환
 
@@ -219,11 +219,11 @@ CREATE INDEX defines_index IF NOT EXISTS
 type ViewMode = 'graph' | 'conceptMap' | 'table';
 ```
 
-**수정 파일**: `apps/canvas/src/features/ontology/store/useOntologyStore.ts` — viewMode 상태 추가
+**수정 파일**: `canvas/src/features/ontology/store/useOntologyStore.ts` — viewMode 상태 추가
 
 ### O2-6: ontologyApi 확장
 
-**수정 파일**: `apps/canvas/src/features/ontology/api/ontologyApi.ts`
+**수정 파일**: `canvas/src/features/ontology/api/ontologyApi.ts`
 
 **추가할 함수**:
 - `getConceptMappings(caseId)`
@@ -240,10 +240,10 @@ type ViewMode = 'graph' | 'conceptMap' | 'table';
 | `services/synapse/app/services/metadata_graph_service.py` | MODIFY (+5 메서드) | MEDIUM |
 | `services/synapse/app/api/concept_mapping.py` | CREATE | LOW |
 | `services/synapse/app/main.py` | MODIFY (router) | LOW |
-| `apps/canvas/src/features/ontology/api/ontologyApi.ts` | MODIFY (+5 함수) | LOW |
-| `apps/canvas/src/pages/ontology/components/ConceptMapView.tsx` | CREATE (Phase A) | MEDIUM |
-| `apps/canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (3-mode) | LOW |
-| `apps/canvas/src/features/ontology/store/useOntologyStore.ts` | MODIFY (viewMode) | LOW |
+| `canvas/src/features/ontology/api/ontologyApi.ts` | MODIFY (+5 함수) | LOW |
+| `canvas/src/pages/ontology/components/ConceptMapView.tsx` | CREATE (Phase A) | MEDIUM |
+| `canvas/src/pages/ontology/OntologyPage.tsx` | MODIFY (3-mode) | LOW |
+| `canvas/src/features/ontology/store/useOntologyStore.ts` | MODIFY (viewMode) | LOW |
 
 ### Gate O2 판정 기준
 

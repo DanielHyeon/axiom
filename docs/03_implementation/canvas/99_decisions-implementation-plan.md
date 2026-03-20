@@ -5,12 +5,12 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/99_decisions/ADR-001-react-over-vue.md
-- apps/canvas/docs/99_decisions/ADR-002-shadcn-ui.md
-- apps/canvas/docs/99_decisions/ADR-003-zustand-state.md
-- apps/canvas/docs/99_decisions/ADR-004-tanstack-query.md
-- apps/canvas/docs/99_decisions/ADR-005-react-router-v6.md
-- apps/canvas/docs/99_decisions/ADR-006-react-konva-process.md
+- canvas/docs/99_decisions/ADR-001-react-over-vue.md
+- canvas/docs/99_decisions/ADR-002-shadcn-ui.md
+- canvas/docs/99_decisions/ADR-003-zustand-state.md
+- canvas/docs/99_decisions/ADR-004-tanstack-query.md
+- canvas/docs/99_decisions/ADR-005-react-router-v6.md
+- canvas/docs/99_decisions/ADR-006-react-konva-process.md
 
 ## 3. 에이전트 운영
 - 주관: technical-doc-writer, code-implementation-planner | 협업: code-reviewer

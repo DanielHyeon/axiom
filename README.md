@@ -31,7 +31,7 @@ Canvas: http://localhost:5173
 - [services/synapse/docs/](services/synapse/docs/) — Synapse 서비스 설계 문서
 - [services/vision/docs/](services/vision/docs/) — Vision 서비스 설계 문서
 - [services/weaver/docs/](services/weaver/docs/) — Weaver 서비스 설계 문서
-- [apps/canvas/docs/](apps/canvas/docs/) — Canvas 프론트엔드 설계 문서
+- [canvas/docs/](canvas/docs/) — Canvas 프론트엔드 설계 문서
 
 ## Tech Stack
 

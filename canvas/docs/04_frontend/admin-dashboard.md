@@ -895,10 +895,10 @@ Core API (LogAnalyzer)
 |------|------|
 | `services/core/docs/08_operations/logging-system.md` | 로깅 체계, AI 분석 API, 보관 정책 |
 | `services/core/docs/08_operations/performance-monitoring.md` | Prometheus 메트릭, Grafana 대시보드, 알림 규칙 |
-| `apps/canvas/docs/07_security/auth-flow.md` | RBAC 역할 정의, admin 권한 |
-| `apps/canvas/docs/04_frontend/routing.md` | 라우트 구조, /settings 경로 |
-| `apps/canvas/docs/04_frontend/design-system.md` | 디자인 토큰, 컴포넌트 라이브러리 |
-| `apps/canvas/docs/04_frontend/watch-alerts.md` | Watch 알림 UI (참조 패턴) |
+| `canvas/docs/07_security/auth-flow.md` | RBAC 역할 정의, admin 권한 |
+| `canvas/docs/04_frontend/routing.md` | 라우트 구조, /settings 경로 |
+| `canvas/docs/04_frontend/design-system.md` | 디자인 토큰, 컴포넌트 라이브러리 |
+| `canvas/docs/04_frontend/watch-alerts.md` | Watch 알림 UI (참조 패턴) |
 | `services/core/docs/06_data/database-operations.md` | DB 모니터링, 슬로우 쿼리, 관리자 API |
 
 ---

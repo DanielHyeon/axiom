@@ -1,6 +1,6 @@
 # TanStack Query 전역 옵션
 
-<!-- 구현: apps/canvas/src/lib/queryClient.ts -->
+<!-- 구현: canvas/src/lib/queryClient.ts -->
 
 ## 개요
 

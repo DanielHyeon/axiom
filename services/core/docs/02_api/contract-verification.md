@@ -13,7 +13,7 @@ This document verifies the API contracts described in `gateway-api.md`, `process
 - [x] `POST /initiate` properly accepts `proc_def_id` and initial payload.
 - [x] `POST /submit` handles `result_data` and advances the workflow.
 - [x] `POST /approve-hitl` and `POST /rework` correctly mandate feedback strings on negative actions.
-- [x] Workitem states (`TODO`, `IN_PROGRESS`, `SUBMITTED`, `DONE`, `REWORK`, `CANCELLED`) properly match the UI filter configurations in `apps/canvas/`.
+- [x] Workitem states (`TODO`, `IN_PROGRESS`, `SUBMITTED`, `DONE`, `REWORK`, `CANCELLED`) properly match the UI filter configurations in `canvas/`.
 
 ## 3. Watch API Checks (`/api/v1/watches/*`)
 - [x] Subscriptions explicitly bind to an `event_type` and ruleset (deadline, threshold, pattern).

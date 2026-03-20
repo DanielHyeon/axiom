@@ -5,8 +5,8 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/02_api/api-client.md
-- apps/canvas/docs/02_api/api-contracts.md
+- canvas/docs/02_api/api-client.md
+- canvas/docs/02_api/api-contracts.md
 
 ## 3. 에이전트 운영
 - 주관: api-developer | 협업: backend-developer, code-security-auditor, code-documenter

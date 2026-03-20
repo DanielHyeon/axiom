@@ -5,7 +5,7 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/08_operations/build-deploy.md
+- canvas/docs/08_operations/build-deploy.md
 
 ## 3. 에이전트 운영
 - 주관: backend-developer, code-standards-enforcer | 협업: code-documenter, code-reviewer

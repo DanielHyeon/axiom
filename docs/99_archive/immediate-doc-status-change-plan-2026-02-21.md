@@ -54,7 +54,7 @@
   - `services/core/app/main.py`  
   - `services/core/app/api/process/routes.py`
 - Canvas 호출 근거:  
-  - `apps/canvas/src/lib/api/watch.ts`
+  - `canvas/src/lib/api/watch.ts`
 - SSOT 불일치 근거:  
   - `docs/02_api/service-endpoints-ssot.md`  
   - `docker-compose.yml`  

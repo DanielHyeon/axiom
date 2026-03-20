@@ -6,7 +6,7 @@
 > 최신 기준 보고서는 `docs/04_status/full-spec-gap-analysis.md`를 사용한다.
 
 기준일: 2026-02-21  
-작성 범위: `docs/`, `services/*/docs`, `apps/canvas/docs` vs 실제 런타임 코드(`services/*/app`, `apps/canvas/src`) 및 테스트(`services/*/tests`, `apps/canvas/tests`)
+작성 범위: `docs/`, `services/*/docs`, `canvas/docs` vs 실제 런타임 코드(`services/*/app`, `canvas/src`) 및 테스트(`services/*/tests`, `canvas/tests`)
 
 ---
 
@@ -59,7 +59,7 @@
 - 실제 코드
   - Core 라우터 등록은 `health`, `process`만 존재: `services/core/app/main.py:25`, `services/core/app/main.py:26`
   - Watch 라우트 파일/등록 부재
-  - Canvas는 Watch API 호출 중: `apps/canvas/src/lib/api/watch.ts:5`, `apps/canvas/src/lib/api/watch.ts:10`, `apps/canvas/src/lib/api/watch.ts:14`
+  - Canvas는 Watch API 호출 중: `canvas/src/lib/api/watch.ts:5`, `canvas/src/lib/api/watch.ts:10`, `canvas/src/lib/api/watch.ts:14`
 - 판정
   - 문서 기준 D3 완료 주장과 런타임 구현이 정면 충돌
 - 영향
@@ -255,7 +255,7 @@
 - SSOT: `docs/02_api/service-endpoints-ssot.md`
 - Core 구현 엔트리: `services/core/app/main.py`
 - Core Watch 문서: `services/core/docs/02_api/watch-api.md`
-- Canvas Watch 호출: `apps/canvas/src/lib/api/watch.ts`
+- Canvas Watch 호출: `canvas/src/lib/api/watch.ts`
 - Oracle 구현 엔트리: `services/oracle/app/main.py`
 - Synapse 구현 엔트리: `services/synapse/app/main.py`
 - Vision 구현 엔트리: `services/vision/app/main.py`

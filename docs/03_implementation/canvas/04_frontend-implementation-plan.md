@@ -5,23 +5,23 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/04_frontend/admin-dashboard.md
-- apps/canvas/docs/04_frontend/case-dashboard.md
-- apps/canvas/docs/04_frontend/datasource-manager.md
-- apps/canvas/docs/04_frontend/design-system.md
-- apps/canvas/docs/04_frontend/directory-structure.md
-- apps/canvas/docs/04_frontend/document-management.md
-- apps/canvas/docs/04_frontend/e2e-core-journey.md
-- apps/canvas/docs/04_frontend/feature-priority-matrix.md
-- apps/canvas/docs/04_frontend/implementation-guide.md
-- apps/canvas/docs/04_frontend/nl2sql-chat.md
-- apps/canvas/docs/04_frontend/olap-pivot.md
-- apps/canvas/docs/04_frontend/ontology-browser.md
-- apps/canvas/docs/04_frontend/process-designer.md
-- apps/canvas/docs/04_frontend/routing.md
-- apps/canvas/docs/04_frontend/ux-interaction-patterns.md
-- apps/canvas/docs/04_frontend/watch-alerts.md
-- apps/canvas/docs/04_frontend/what-if-builder.md
+- canvas/docs/04_frontend/admin-dashboard.md
+- canvas/docs/04_frontend/case-dashboard.md
+- canvas/docs/04_frontend/datasource-manager.md
+- canvas/docs/04_frontend/design-system.md
+- canvas/docs/04_frontend/directory-structure.md
+- canvas/docs/04_frontend/document-management.md
+- canvas/docs/04_frontend/e2e-core-journey.md
+- canvas/docs/04_frontend/feature-priority-matrix.md
+- canvas/docs/04_frontend/implementation-guide.md
+- canvas/docs/04_frontend/nl2sql-chat.md
+- canvas/docs/04_frontend/olap-pivot.md
+- canvas/docs/04_frontend/ontology-browser.md
+- canvas/docs/04_frontend/process-designer.md
+- canvas/docs/04_frontend/routing.md
+- canvas/docs/04_frontend/ux-interaction-patterns.md
+- canvas/docs/04_frontend/watch-alerts.md
+- canvas/docs/04_frontend/what-if-builder.md
 
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, code-documenter | 협업: api-developer, code-inspector-tester

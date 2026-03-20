@@ -989,7 +989,7 @@ async def get_maintenance_status(_=Depends(require_role("admin"))):
 | `services/weaver/docs/06_data/neo4j-schema-v2.md` | Neo4j v2 스키마 |
 | `services/synapse/docs/06_data/neo4j-schema.md` | Synapse Neo4j 스키마 |
 | `services/weaver/docs/07_security/connection-security.md` | DB 연결 보안 |
-| `apps/canvas/docs/04_frontend/admin-dashboard.md` | 관리자 UI DB 모니터링 화면 |
+| `canvas/docs/04_frontend/admin-dashboard.md` | 관리자 UI DB 모니터링 화면 |
 
 ---
 

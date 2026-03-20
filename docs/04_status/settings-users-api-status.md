@@ -23,8 +23,8 @@
 | 문서 | 내용 |
 |------|------|
 | `services/core/docs/02_api/watch-api.md` | "사용자 생성 시(`POST /api/v1/users`) 역할에 따라 기본 구독이 자동 생성된다" — **계약 가정**이며, Core에 해당 엔드포인트 없음. |
-| `apps/canvas/docs/04_frontend/admin-dashboard.md` | `GET /api/v1/admin/users`, `POST /api/v1/admin/users/invite`, `PATCH /api/v1/admin/users/:userId/role|status` — **스펙 기술**만 있음, 구현 없음. |
-| `apps/canvas/docs/02_api/api-contracts.md` | `GET /users/me` (현재 사용자) — **계약 정의**만 있음. |
+| `canvas/docs/04_frontend/admin-dashboard.md` | `GET /api/v1/admin/users`, `POST /api/v1/admin/users/invite`, `PATCH /api/v1/admin/users/:userId/role|status` — **스펙 기술**만 있음, 구현 없음. |
+| `canvas/docs/02_api/api-contracts.md` | `GET /users/me` (현재 사용자) — **계약 정의**만 있음. |
 
 ### 2.3 다른 서비스 (Vision / Oracle / Weaver)
 

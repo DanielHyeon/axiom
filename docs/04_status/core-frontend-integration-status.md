@@ -1,6 +1,6 @@
 # Core ↔ 프론트엔드(Canvas) 구현 연동 현황
 
-> **기준**: `services/core` 제공 API vs `apps/canvas/src` 호출 구현  
+> **기준**: `services/core` 제공 API vs `canvas/src` 호출 구현  
 > **작성일**: 2026-02-22  
 > **갱신**: 2026-02-22 — Process 전부, Users/me, Agent/MCP API 클라이언트 및 설정 페이지 연동 완료.
 
@@ -99,10 +99,10 @@ Auth·Watch·Health·Process(목록/생성/단건/실행 전부)·Users/me·Agen
 
 ## 4. 파일 위치
 
-- `apps/canvas/src/lib/api/processApi.ts` — Process 전부
-- `apps/canvas/src/lib/api/usersApi.ts` — GET /users/me
-- `apps/canvas/src/lib/api/agentApi.ts` — Agent, MCP, Completion, Chat, Knowledge
-- `apps/canvas/src/pages/settings/SettingsUsersPage.tsx` — 마운트 시 getCurrentUser() 호출
+- `canvas/src/lib/api/processApi.ts` — Process 전부
+- `canvas/src/lib/api/usersApi.ts` — GET /users/me
+- `canvas/src/lib/api/agentApi.ts` — Agent, MCP, Completion, Chat, Knowledge
+- `canvas/src/pages/settings/SettingsUsersPage.tsx` — 마운트 시 getCurrentUser() 호출
 
 ---
 

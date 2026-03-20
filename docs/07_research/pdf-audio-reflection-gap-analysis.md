@@ -7,7 +7,7 @@
   - `research/차세대 AI 아키텍처_ 자율형 에이전트 메시와 엔터프라이즈 월드 모델_v2.pdf` (62p)
   - `research/질문으로_설계하는_기업_예측_월드_모델.m4a` (14m46s)
 - 대조 대상
-  - 설계 문서: `docs/`, `services/*/docs`, `apps/canvas/docs`
+  - 설계 문서: `docs/`, `services/*/docs`, `canvas/docs`
   - 구현 계획: `docs/03_implementation/*`
 
 ## 2. 분석 방법
@@ -98,7 +98,7 @@
 - 설계 철학으로는 유사 개념이 있으나, 표준 입력 템플릿/품질 게이트로 고정되지 않음.
 
 2. Self-Verification 20% 규칙의 시스템 테스트 규약
-- Canvas UX에서 80/20 HITL 철학은 존재 (`apps/canvas/docs/04_frontend/ux-interaction-patterns.md:109`).
+- Canvas UX에서 80/20 HITL 철학은 존재 (`canvas/docs/04_frontend/ux-interaction-patterns.md:109`).
 - 그러나 모델 자체 self-check(샘플링 검증) 파이프라인은 독립 모듈/수치 기준으로 분리되어 있지 않음.
 
 3. 음성/회의록 기반 온톨로지 추출 표준

@@ -203,7 +203,7 @@ Authorization: Bearer <jwt_token>
 
 ### 2.5 역할별 기본 구독 시드
 
-사용자 생성 시(`POST /api/v1/users`) 역할에 따라 기본 구독이 자동 생성된다. 상세 매핑은 `apps/canvas/docs/04_frontend/watch-alerts.md` §8.2를 참조한다.
+사용자 생성 시(`POST /api/v1/users`) 역할에 따라 기본 구독이 자동 생성된다. 상세 매핑은 `canvas/docs/04_frontend/watch-alerts.md` §8.2를 참조한다.
 
 ```
 [결정] 사용자 생성 시 역할별 기본 구독을 자동 시드한다.
@@ -230,7 +230,7 @@ Authorization: Bearer <jwt_token>
 
 | 문서 | 관계 |
 |------|------|
-| `apps/canvas/docs/04_frontend/watch-alerts.md` | 프론트엔드 Watch 대시보드 UI, Notification Center, 역할별 알림 관련성 |
+| `canvas/docs/04_frontend/watch-alerts.md` | 프론트엔드 Watch 대시보드 UI, Notification Center, 역할별 알림 관련성 |
 | `01_architecture/event-driven.md` | CEP 엔진 설계, AlertDispatcher, 에스컬레이션 정책 |
 
 ---

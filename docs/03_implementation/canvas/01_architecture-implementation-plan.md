@@ -5,10 +5,10 @@
 - 단계별 책임 에이전트와 통과 기준을 명확히 정의한다.
 
 ## 2. 참조 설계 문서
-- apps/canvas/docs/01_architecture/api-integration.md
-- apps/canvas/docs/01_architecture/architecture-overview.md
-- apps/canvas/docs/01_architecture/component-architecture.md
-- apps/canvas/docs/01_architecture/state-management.md
+- canvas/docs/01_architecture/api-integration.md
+- canvas/docs/01_architecture/architecture-overview.md
+- canvas/docs/01_architecture/component-architecture.md
+- canvas/docs/01_architecture/state-management.md
 
 ## 3. 에이전트 운영
 - 주관: code-implementation-planner, backend-developer | 협업: code-refactor, code-reviewer

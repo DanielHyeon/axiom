@@ -618,7 +618,7 @@ P1 ──→ O1 ──→ O2-A ──→ O3 ──→ P2 ──→ P3 ──→ 
 
 ```bash
 # 다음 grep 결과가 모두 0건이어야 한다
-grep -r "_fallback_tables\|ds_business_main\|DEFAULT_DATASOURCE" services/oracle/ apps/canvas/src/
+grep -r "_fallback_tables\|ds_business_main\|DEFAULT_DATASOURCE" services/oracle/ canvas/src/
 grep -r "self\._tables\|self\._fk_edges" services/synapse/app/services/graph_search_service.py
 ```
 

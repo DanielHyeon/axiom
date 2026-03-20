@@ -47,13 +47,13 @@
     - `services/vision/tests/unit/test_vision_p2_api_full.py`
 - [x] `S9-CAN-001` 1차 완료 (인증 우회 제거 + refresh 구현)
   - 구현:
-    - `apps/canvas/src/components/ProtectedRoute.tsx`
-    - `apps/canvas/src/stores/authStore.ts`
-    - `apps/canvas/src/pages/auth/LoginPage.tsx`
-    - `apps/canvas/src/lib/api-client.ts`
-    - `apps/canvas/src/App.tsx`
+    - `canvas/src/components/ProtectedRoute.tsx`
+    - `canvas/src/stores/authStore.ts`
+    - `canvas/src/pages/auth/LoginPage.tsx`
+    - `canvas/src/lib/api-client.ts`
+    - `canvas/src/App.tsx`
   - 검증:
-    - `cd apps/canvas && npm run build` 통과
+    - `cd canvas && npm run build` 통과
   - 비고:
     - 로그인은 Core `/api/v1/auth/login` 실호출을 우선 시도하며, `VITE_AUTH_FALLBACK_MOCK=false` 설정 시 mock fallback 비활성화 가능
 - [x] `S9-PGM-002` 1차 완료 (SSOT 정합 자동 점검 스크립트 추가)

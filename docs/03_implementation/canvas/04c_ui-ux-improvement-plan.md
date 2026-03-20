@@ -1,7 +1,7 @@
 # Canvas UI/UX 개선 계획 (사용자 시나리오·일관성·접근성)
 
 > **관점**: UI/UX와 CSS는 프론트엔드의 생명이다. 사용자 시나리오상 불편점을 줄이고, 디자인 일관성·피드백·접근성·반응형을 체계적으로 개선한다.  
-> **참조**: [00_ui-ux-gap-implementation-plan.md](00_ui-ux-gap-implementation-plan.md)(기본 갭 완료), [apps/canvas/docs/04_frontend/design-system.md](../../apps/canvas/docs/04_frontend/design-system.md), case-dashboard.md, admin-dashboard.md, watch-alerts.md, datasource-manager.md  
+> **참조**: [00_ui-ux-gap-implementation-plan.md](00_ui-ux-gap-implementation-plan.md)(기본 갭 완료), [canvas/docs/04_frontend/design-system.md](../../canvas/docs/04_frontend/design-system.md), case-dashboard.md, admin-dashboard.md, watch-alerts.md, datasource-manager.md  
 > **작성일**: 2026-02-23
 
 ---
