@@ -49,7 +49,10 @@
     "settings": "Settings",
     "ingestion": "Ingestion",
     "domainModeler": "Domain Model",
-    "dataQuality": "Data Quality"
+    "dataQuality": "Data Quality",
+    "glossary": "Glossary",
+    "lineage": "Lineage",
+    "objectExplorer": "Explorer"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -246,6 +249,117 @@
   "ontologyWizard": {
     "title": "Ontology Wizard",
     "subtitle": "Auto-generate ontology from DB schema"
+  },
+  "glossary": {
+    "title": "Business Glossary",
+    "subtitle": "Define and manage your organization's business terminology",
+    "glossaries": "Glossaries",
+    "search": "Search terms...",
+    "noGlossarySelected": "Select a glossary",
+    "noGlossaryHint": "Select a glossary from the list or create a new one.",
+    "status": {
+      "draft": "Draft",
+      "approved": "Approved",
+      "deprecated": "Deprecated"
+    },
+    "type": {
+      "business": "Business Glossary",
+      "technical": "Technical Glossary",
+      "dataQuality": "Data Quality Glossary"
+    },
+    "glossary": {
+      "create": "New Glossary",
+      "edit": "Edit Glossary",
+      "name": "Glossary Name",
+      "namePlaceholder": "e.g. Business_Glossary",
+      "nameRequired": "Please enter a glossary name.",
+      "description": "Description",
+      "descriptionPlaceholder": "Enter a description for this glossary...",
+      "type": "Type",
+      "empty": "No glossaries found.",
+      "createFirst": "Create your first glossary",
+      "createBtn": "Create",
+      "confirmDelete": "Delete '{{name}}' glossary? All terms in it will also be deleted."
+    },
+    "term": {
+      "create": "New Term",
+      "edit": "Edit Term",
+      "basicInfo": "Basic Info",
+      "name": "Term Name",
+      "namePlaceholder": "e.g. Customer, Order, Revenue",
+      "nameRequired": "Please enter a term name.",
+      "definition": "Definition",
+      "definitionPlaceholder": "Enter a detailed definition for this term...",
+      "status": "Status",
+      "category": "Category",
+      "selectCategory": "Select category...",
+      "owner": "Owner",
+      "ownerPlaceholder": "Owner name",
+      "synonyms": "Synonyms",
+      "synonymPlaceholder": "Type synonym and press Enter",
+      "noSynonyms": "No synonyms",
+      "tags": "Tags",
+      "tagPlaceholder": "Type tag and press Enter",
+      "noTags": "No tags",
+      "relatedTables": "Related Tables",
+      "tablePlaceholder": "Table name",
+      "columnPlaceholder": "Column name (optional)",
+      "noRelatedTables": "No related tables",
+      "ontologyMapping": "Ontology Mapping",
+      "ontologyNodeId": "Ontology Node ID",
+      "ontologyPlaceholder": "e.g. node-kpi-oee",
+      "empty": "No terms registered.",
+      "createFirst": "Add your first term",
+      "confirmDelete": "Delete term '{{name}}'?"
+    },
+    "detail": {
+      "noSelection": "Select a term to view details.",
+      "noDefinition": "No definition provided.",
+      "createdAt": "Created",
+      "updatedAt": "Updated"
+    },
+    "category": {
+      "add": "Add category",
+      "placeholder": "Category name...",
+      "confirmDelete": "Delete category '{{name}}'?"
+    },
+    "importExport": {
+      "title": "Import/Export",
+      "export": "Export",
+      "import": "Import",
+      "exportDesc": "Export all terms in this glossary as JSON or CSV.",
+      "importDesc": "Import terms from a CSV or JSON file.",
+      "selectFile": "Select a file or drag it here",
+      "importResult": "{{imported}} imported, {{skipped}} skipped"
+    }
+  },
+  "lineage": {
+    "title": "Data Lineage",
+    "subtitle": "Visually explore data flows and transformation processes",
+    "search": "Search tables/columns...",
+    "refresh": "Refresh",
+    "noData": "No data lineage",
+    "noDataHint": "Register a datasource or configure ETL to auto-generate lineage.",
+    "stats": {
+      "source": "Source Tables",
+      "table": "Tables",
+      "transform": "Transforms",
+      "view": "Views",
+      "report": "Reports",
+      "flow": "Data Flows"
+    },
+    "filter": {
+      "upstream": "Upstream",
+      "downstream": "Downstream",
+      "both": "Both",
+      "depth": "Depth"
+    },
+    "detail": {
+      "inbound": "Data Sources",
+      "outbound": "Data Targets",
+      "properties": "Properties",
+      "noConnections": "No connected data flows."
+    }
   },
   "processDesigner": {
     "toolbox": "Toolbox",

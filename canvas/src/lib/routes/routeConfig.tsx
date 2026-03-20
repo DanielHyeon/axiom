@@ -26,6 +26,9 @@ const DatasourcePage = lazy(() => import('@/pages/data/DatasourcePage').then((m)
 const DataIngestionPage = lazy(() => import('@/pages/data/DataIngestionPage').then((m) => ({ default: m.DataIngestionPage })));
 const DomainModelerPage = lazy(() => import('@/pages/domain/DomainModelerPage').then((m) => ({ default: m.DomainModelerPage })));
 const DataQualityPage = lazy(() => import('@/pages/data/DataQualityPage').then((m) => ({ default: m.DataQualityPage })));
+const LineagePage = lazy(() => import('@/pages/lineage/LineagePage').then((m) => ({ default: m.LineagePage })));
+const ObjectExplorerPage = lazy(() => import('@/pages/object-explorer/ObjectExplorerPage').then((m) => ({ default: m.ObjectExplorerPage })));
+const GlossaryPage = lazy(() => import('@/pages/data/GlossaryPage').then((m) => ({ default: m.GlossaryPage })));
 const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage').then((m) => ({ default: m.ProcessDesignerListPage })));
 const ProcessDesignerPage = lazy(() => import('@/pages/process/ProcessDesignerPage').then((m) => ({ default: m.ProcessDesignerPage })));
 const WatchDashboardPage = lazy(() => import('@/pages/watch/WatchDashboardPage').then((m) => ({ default: m.WatchDashboardPage })));
@@ -92,6 +95,9 @@ export const router = createBrowserRouter([
  { path: 'data/ingestion', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DataIngestionPage /></SuspensePage></RoleGuard> },
  { path: 'data/domain', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DomainModelerPage /></SuspensePage></RoleGuard> },
  { path: 'data/quality', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DataQualityPage /></SuspensePage></RoleGuard> },
+{ path: 'data/lineage', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><LineagePage /></SuspensePage></RoleGuard> },
+{ path: 'data/explorer', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><ObjectExplorerPage /></SuspensePage></RoleGuard> },
+{ path: 'data/glossary', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><GlossaryPage /></SuspensePage></RoleGuard> },
  {
  path: 'process-designer',
  children: [

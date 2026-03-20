@@ -31,6 +31,9 @@ export const ROUTES = {
     INGESTION: '/data/ingestion',
     DOMAIN_MODELER: '/data/domain',
     QUALITY: '/data/quality',
+    LINEAGE: '/data/lineage',
+    EXPLORER: '/data/explorer',
+    GLOSSARY: '/data/glossary',
   },
   PROCESS_DESIGNER: {
     LIST: '/process-designer',
