@@ -1,0 +1,54 @@
+# Canvas (React SPA) CI 파이프라인
+name: Canvas CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'canvas/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'canvas/**'
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  lint-and-test:
+    name: 린트 + 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: pnpm 설치
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Node.js 설치
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: canvas/pnpm-lock.yaml
+
+      - name: 의존성 설치
+        run: |
+          cd canvas
+          pnpm install --frozen-lockfile
+
+      - name: TypeScript 타입 검사
+        run: |
+          cd canvas
+          pnpm tsc --noEmit
+
+      - name: Vitest 실행
+        run: |
+          cd canvas
+          pnpm vitest run --reporter=verbose
+
+      - name: 빌드 검증
+        run: |
+          cd canvas
+          pnpm build

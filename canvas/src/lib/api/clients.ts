@@ -10,6 +10,7 @@ const getEnvUrl = (key: string): string => {
         if (key === 'VITE_ORACLE_URL') return 'http://localhost:9004';
         if (key === 'VITE_WEAVER_URL') return 'http://localhost:9001';
         if (key === 'VITE_SYNAPSE_URL') return 'http://localhost:9003';
+        if (key === 'VITE_OLAP_STUDIO_URL') return 'http://localhost:9005';
         console.warn(`Environment variable ${key} is not defined. API calls to this service may fail.`);
         return 'http://localhost:9002';
     }
@@ -22,3 +23,6 @@ export const visionApi = createApiClient(getEnvUrl('VITE_VISION_URL'));
 export const oracleApi = createApiClient(getEnvUrl('VITE_ORACLE_URL'));
 export const synapseApi = createApiClient(getEnvUrl('VITE_SYNAPSE_URL'));
 export const weaverApi = createApiClient(getEnvUrl('VITE_WEAVER_URL'));
+
+// OLAP Studio API 클라이언트 (Gateway 경유 또는 직접 연결)
+export const olapStudioApi = createApiClient(getEnvUrl('VITE_OLAP_STUDIO_URL'));

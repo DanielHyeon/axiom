@@ -34,6 +34,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/synapse/, ''),
       },
+      // OLAP Studio Gateway 프록시 — /api/gateway/olap/* → olap-studio:9005/*
+      '/api/gateway/olap': {
+        target: 'http://localhost:9005',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/gateway\/olap/, ''),
+      },
     },
   },
   build: {

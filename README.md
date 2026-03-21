@@ -39,3 +39,11 @@ Canvas: http://localhost:5173
 - **Frontend:** React, TypeScript, Vite, Tailwind CSS, shadcn/ui
 - **Database:** PostgreSQL, Neo4j, Redis
 - **Infrastructure:** Docker, Kubernetes
+
+## Todo
+
+- **테넌트+업무:** 회사구분 + 업무(프로세스) 구분 되어야 함
+- **업무연결:** 업무(프로세스)간 연결하여 온톨로지 분석 및 What if 분석이 되어야함
+- **버전관리:** 업무(프로세스)데이터의 버전 관리 기능 추가 되어야 함
+- **버전저장:** 버전이 계속 변경되고 이것을 저장되고 버전닝 되어야 함. 리믹스 및 추가 불러오기, 되돌리기 기능 있어야함 
+- **버전파생:** 버전 파생 기능, 리믹스 및 새로 불러오기, 되돌리기 기능 있어야함 

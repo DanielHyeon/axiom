@@ -23,6 +23,8 @@ export const ROUTES = {
     NL2SQL: '/analysis/nl2sql',
     INSIGHT: '/analysis/insight',
     WHATIF_WIZARD: '/analysis/whatif/wizard',
+    // OLAP Studio 라우트
+    OLAP_STUDIO: '/analysis/olap-studio',
   },
   DATA: {
     ONTOLOGY: '/data/ontology',
@@ -36,6 +38,10 @@ export const ROUTES = {
     EXPLORER: '/data/explorer',
     GLOSSARY: '/data/glossary',
     WORKFLOW_EDITOR: '/data/workflow',
+    // OLAP Studio 데이터 관리 라우트
+    SOURCES: '/data/sources',
+    ETL: '/data/etl',
+    CUBES: '/data/cubes',
   },
   PROCESS_DESIGNER: {
     LIST: '/process-designer',
