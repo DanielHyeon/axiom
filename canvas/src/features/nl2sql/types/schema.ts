@@ -4,6 +4,7 @@
  */
 
 import type { TableMeta, ColumnMeta } from './nl2sql';
+import type { ColumnPair } from '@/shared/types/schemaNavigation';
 
 // ─── 트리 노드 타입 ───────────────────────────────────────
 
@@ -40,6 +41,9 @@ export interface TableStats {
 
 // ─── FK 관계 타입 ─────────────────────────────────────────
 
+/** FK 관계 소스 타입 */
+export type FkSource = 'ddl' | 'user' | 'fabric';
+
 /** FK 관계 (사용자가 수동 추가한 관계 포함) */
 export interface SchemaRelationship {
   id?: string;
@@ -50,6 +54,8 @@ export interface SchemaRelationship {
   cardinality: 'one-to-one' | 'one-to-many' | 'many-to-one' | 'many-to-many';
   description?: string;
   isInferred?: boolean; // _id 접미사 기반 추론 여부
+  source?: FkSource;        // G1: 관계 소스 식별
+  columnPairs?: ColumnPair[]; // G4: 복수 컬럼 매핑
 }
 
 // ─── 캔버스 관련 타입 ─────────────────────────────────────
