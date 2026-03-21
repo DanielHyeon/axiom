@@ -13,6 +13,9 @@ from app.api.root_cause import router as root_cause_router
 from app.api.what_if import router as what_if_router
 from app.api.whatif_dag import router as whatif_dag_router
 from app.api.whatif_fork import router as whatif_fork_router
+from app.api.whatif_wizard import router as whatif_wizard_router
+from app.api.business_calendar import router as calendar_router
+from app.api.business_calendar import scenario_router as scenario_store_router
 from app.services.vision_runtime import vision_runtime
 
 logger = logging.getLogger("axiom.vision")
@@ -83,6 +86,9 @@ app.include_router(whatif_dag_router)
 app.include_router(olap_router)
 app.include_router(root_cause_router)
 app.include_router(whatif_fork_router)
+app.include_router(whatif_wizard_router)
+app.include_router(calendar_router)
+app.include_router(scenario_store_router)
 
 # ── DDD-P2-03: CaseEventConsumer background task ── #
 _consumer_task: asyncio.Task | None = None

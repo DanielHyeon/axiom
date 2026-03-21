@@ -9,6 +9,7 @@ from app.api.feedback import router as feedback_router
 from app.api.feedback_stats import router as feedback_stats_router
 from app.api.meta import router as meta_router
 from app.api.events import router as events_router, watch_agent_router
+from app.api.cache import router as cache_router
 from app.core.rate_limit import RateLimitExceeded
 from app.core.config import settings
 import structlog
@@ -263,10 +264,25 @@ def _seed_demo_tables() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
+    # ── Startup ──
+
     _seed_demo_tables()
 
-    # Enum cache bootstrap (#8 P1-1) — best-effort, 실패해도 서비스 가동에 영향 없음
+    # Redis 연결 (LLM 시맨틱 캐시용) -- 실패해도 서비스 가동에 영향 없음
+    if settings.LLM_CACHE_ENABLED:
+        try:
+            import redis.asyncio as aioredis
+            _redis = aioredis.from_url(settings.REDIS_URL, decode_responses=False)
+            await _redis.ping()
+            app.state.redis = _redis
+            logger.info("oracle_redis_connected", url=settings.REDIS_URL)
+        except Exception as exc:
+            app.state.redis = None
+            logger.warning("oracle_redis_connect_failed", error=str(exc))
+    else:
+        app.state.redis = None
+
+    # Enum cache bootstrap (#8 P1-1) -- best-effort, 실패해도 서비스 가동에 영향 없음
     from app.pipelines.enum_cache_bootstrap import enum_cache_bootstrap
     try:
         result = await enum_cache_bootstrap.run()
@@ -281,7 +297,12 @@ async def lifespan(app: FastAPI):
         logger.warning("enum_cache_startup_failed", error=str(exc))
 
     yield
-    # Shutdown (nothing to clean up)
+
+    # ── Shutdown ──
+    _redis_client = getattr(app.state, "redis", None)
+    if _redis_client is not None:
+        await _redis_client.aclose()
+        logger.info("oracle_redis_closed")
 
 
 app = FastAPI(title="Axiom Oracle", version="2.0.0", lifespan=lifespan)
@@ -311,6 +332,7 @@ app.include_router(feedback_stats_router)
 app.include_router(meta_router)
 app.include_router(events_router)
 app.include_router(watch_agent_router)
+app.include_router(cache_router)
 
 @app.get("/health/live")
 async def health_live():

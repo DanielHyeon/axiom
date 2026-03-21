@@ -20,6 +20,11 @@ class Settings(BaseSettings):
     WEAVER_INSIGHT_URL: str = "http://weaver:8001/api/insight/logs"
     WEAVER_INSIGHT_TOKEN: str = ""   # must match WEAVER_INSIGHT_SERVICE_TOKEN in Weaver
 
+    # ── Redis (LLM 시맨틱 캐시용) ──
+    REDIS_URL: str = "redis://localhost:6379"
+    LLM_CACHE_TTL: int = 3600                  # LLM 캐시 기본 TTL (초)
+    LLM_CACHE_ENABLED: bool = True             # False면 캐시 조회/저장 건너뜀
+
     # ── Feature Flags (#12, #13 P1-2) ──
     ENABLE_QUALITY_GATE: bool = True          # True면 LLM 기반 품질 게이트 활성화, False면 항상 APPROVE
     ENABLE_VALUE_MAPPING: bool = True         # True면 Value Mapping 파이프라인 활성화

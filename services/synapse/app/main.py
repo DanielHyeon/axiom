@@ -15,6 +15,8 @@ from app.api.schema_edit import router as schema_edit_router
 from app.api.metadata_graph import router as metadata_graph_router
 from app.api.concept_mapping import router as concept_mapping_router
 from app.api.kinetic import router as kinetic_router
+from app.api.schema_navigation import router as schema_navigation_router
+from app.api.dmn import router as dmn_router
 from app.events.consumer import run_ontology_ingest_consumer
 from app.events.outbox import SynapseRelayWorker, ensure_outbox_table
 import structlog
@@ -158,6 +160,8 @@ app.include_router(schema_edit_router)
 app.include_router(metadata_graph_router)
 app.include_router(concept_mapping_router)
 app.include_router(kinetic_router)
+app.include_router(schema_navigation_router)
+app.include_router(dmn_router)
 
 @app.get("/health/live")
 async def health_live():
