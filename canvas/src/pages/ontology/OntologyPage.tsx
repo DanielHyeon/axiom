@@ -251,7 +251,6 @@ export function OntologyPage() {
  )}
  </div>
  </div>
- </div>
 
  {/* 온톨로지 위자드 모달 */}
  <OntologyWizard />

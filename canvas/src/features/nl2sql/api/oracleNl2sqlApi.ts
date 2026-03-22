@@ -3,6 +3,7 @@ import { createNdjsonStream } from '@/lib/api/streamManager';
 import { toast } from 'sonner';
 import { AppError } from '@/lib/api/errors';
 import type { DatasourceInfo, TableMeta, ColumnMeta } from '@/shared/types/schema';
+import type { ExecutionMetadata } from '@/features/nl2sql/types/nl2sql';
 
 // ── 공통 Meta API re-export (하위 호환성) ──
 // 다른 feature에서 이 파일을 통해 Meta API를 가져가던 코드를 깨뜨리지 않기 위해 re-export
@@ -39,14 +40,7 @@ export interface AskResponse {
     result: { columns: { name: string; type: string }[]; rows: unknown[][]; row_count: number; truncated?: boolean };
     visualization?: { chart_type: string; config?: Record<string, string> } | null;
     summary?: string | null;
-    metadata?: {
-      execution_time_ms?: number;
-      tables_used?: string[];
-      cache_hit?: boolean;
-      semantic_context_used?: boolean;
-      quality_warnings?: string[];
-      intent_type?: string;
-    };
+    metadata?: ExecutionMetadata;
   };
   error?: { code: string; message: string; details?: unknown };
 }
