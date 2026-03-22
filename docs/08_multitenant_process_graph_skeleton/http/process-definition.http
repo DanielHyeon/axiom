@@ -1,0 +1,23 @@
+### Create process definition
+POST http://localhost:8080/api/process-definitions
+Content-Type: application/json
+X-Tenant-Id: 11111111-1111-1111-1111-111111111111
+X-Org-Unit-Id: 22222222-2222-2222-2222-222222222222
+X-Workspace-Id: 33333333-3333-3333-3333-333333333333
+X-User-Id: user-001
+Authorization: Bearer {{token}}
+
+{
+  "workspaceId": "33333333-3333-3333-3333-333333333333",
+  "orgUnitId": "22222222-2222-2222-2222-222222222222",
+  "processKey": "claim.review",
+  "name": "보험금 심사",
+  "description": "보험금 청구 심사 프로세스",
+  "domainCode": "CLAIMS",
+  "ownerRoleCode": "PM"
+}
+
+### Analyze impact
+GET http://localhost:8080/api/process-definitions/aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa/impact?depth=3
+X-Tenant-Id: 11111111-1111-1111-1111-111111111111
+Authorization: Bearer {{token}}
