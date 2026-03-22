@@ -1,5 +1,5 @@
 /**
- * 시멘틱 카탈로그 페이지 — 개념/지표/차원/조인 브라우저
+ * 시멘틱 카탈로그 페이지 — 6탭 브라우저 (개념/엔티티/지표/차원/조인/그레인)
  *
  * Control Plane에서 정의한 시멘틱 계약을 조회하고 관리한다.
  * 개념 상태 전이(draft→review→approved), 지표 컴파일, 배포 등을 지원.
@@ -10,16 +10,20 @@ import { Loader2, BookOpen } from 'lucide-react';
 import {
   useSemanticCatalog,
   useConcepts,
+  useEntities,
   useMeasures,
   useDimensions,
   useJoins,
+  useGrains,
   useChangeConceptStatus,
   useCompileMeasure,
   usePublish,
 } from '@/features/semantic-catalog/hooks/useSemanticCatalog';
 import { CatalogSummaryCards } from '@/features/semantic-catalog/components/CatalogSummaryCards';
 import { ConceptTable } from '@/features/semantic-catalog/components/ConceptTable';
+import { EntityTable } from '@/features/semantic-catalog/components/EntityTable';
 import { MeasureTable } from '@/features/semantic-catalog/components/MeasureTable';
+import { GrainTable } from '@/features/semantic-catalog/components/GrainTable';
 import { StatusBadge } from '@/features/semantic-catalog/components/StatusBadge';
 import type { ConceptStatus, CompileResult } from '@/features/semantic-catalog/types/semantic';
 
@@ -34,9 +38,11 @@ export function SemanticCatalogPage() {
   // 데이터 조회
   const { data: catalog, isLoading: catalogLoading } = useSemanticCatalog(caseId);
   const { data: concepts = [] } = useConcepts({ case_id: caseId });
+  const { data: entities = [] } = useEntities({ case_id: caseId });
   const { data: measures = [] } = useMeasures({ case_id: caseId });
   const { data: dimensions = [] } = useDimensions({ case_id: caseId });
   const { data: joins = [] } = useJoins({ case_id: caseId });
+  const { data: grains = [] } = useGrains({ case_id: caseId });
 
   // 뮤테이션
   const statusMutation = useChangeConceptStatus();
@@ -57,9 +63,16 @@ export function SemanticCatalogPage() {
     [compileMutation],
   );
 
-  const handlePublish = useCallback(
+  const handlePublishMeasure = useCallback(
     (measureId: string) => {
       publishMutation.mutate({ objectType: 'measure', objectId: measureId });
+    },
+    [publishMutation],
+  );
+
+  const handlePublishEntity = useCallback(
+    (entityId: string) => {
+      publishMutation.mutate({ objectType: 'entity', objectId: entityId });
     },
     [publishMutation],
   );
@@ -84,7 +97,7 @@ export function SemanticCatalogPage() {
         <div>
           <h1 className="text-xl font-bold">시멘틱 카탈로그</h1>
           <p className="text-sm text-muted-foreground">
-            온톨로지 개념 · 시멘틱 지표 · 차원 · 조인 계약을 관리합니다
+            온톨로지 개념 · 시멘틱 지표 · 차원 · 조인 · 그레인 계약을 관리합니다
           </p>
         </div>
       </div>
@@ -102,11 +115,19 @@ export function SemanticCatalogPage() {
           />
         )}
 
+        {activeTab === 'entities' && (
+          <EntityTable
+            entities={entities}
+            onPublish={handlePublishEntity}
+            isPublishing={publishMutation.isPending}
+          />
+        )}
+
         {activeTab === 'measures' && (
           <MeasureTable
             measures={measures}
             onCompile={handleCompile}
-            onPublish={handlePublish}
+            onPublish={handlePublishMeasure}
             isPublishing={publishMutation.isPending}
           />
         )}
@@ -199,10 +220,8 @@ export function SemanticCatalogPage() {
           </div>
         )}
 
-        {(activeTab === 'entities' || activeTab === 'grains') && (
-          <div className="py-12 text-center text-muted-foreground">
-            <p className="text-sm">{activeTab === 'entities' ? '엔티티' : '그레인'} 뷰 — 구현 예정</p>
-          </div>
+        {activeTab === 'grains' && (
+          <GrainTable grains={grains} />
         )}
       </div>
     </div>

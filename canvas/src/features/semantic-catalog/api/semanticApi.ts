@@ -11,6 +11,7 @@ import type {
   SemanticMeasure,
   SemanticDimension,
   JoinContract,
+  GrainContract,
   QualityContract,
   ContextPack,
   PromptPolicy,
@@ -92,6 +93,13 @@ export async function listDimensions(params?: { case_id?: string; entity_id?: st
 export async function listJoins(params?: { case_id?: string; allowed_for_ai?: boolean }): Promise<JoinContract[]> {
   const res = await synapseApi.get(`${BASE}/joins`, { params });
   return (res as unknown as ApiResponse<JoinContract[]>).data;
+}
+
+// ── 그레인 계약 ──
+
+export async function listGrains(params?: { case_id?: string; entity_id?: string }): Promise<GrainContract[]> {
+  const res = await synapseApi.get(`${BASE}/grains`, { params });
+  return (res as unknown as ApiResponse<GrainContract[]>).data;
 }
 
 // ── 품질 계약 ──

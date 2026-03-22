@@ -16,6 +16,7 @@ const KEYS = {
   measures: (params?: Record<string, unknown>) => ['semantic', 'measures', params] as const,
   dimensions: (params?: Record<string, unknown>) => ['semantic', 'dimensions', params] as const,
   joins: (params?: Record<string, unknown>) => ['semantic', 'joins', params] as const,
+  grains: (params?: Record<string, unknown>) => ['semantic', 'grains', params] as const,
   qualityContracts: (params?: Record<string, unknown>) => ['semantic', 'quality', params] as const,
   contextPacks: (params?: Record<string, unknown>) => ['semantic', 'context-packs', params] as const,
   compile: (type: string, id: string) => ['semantic', 'compile', type, id] as const,
@@ -112,6 +113,16 @@ export function useJoins(params?: { case_id?: string; allowed_for_ai?: boolean }
   return useQuery({
     queryKey: KEYS.joins(params),
     queryFn: () => api.listJoins(params),
+    staleTime: 60 * 1000,
+  });
+}
+
+// ── 그레인 계약 ──
+
+export function useGrains(params?: { case_id?: string; entity_id?: string }) {
+  return useQuery({
+    queryKey: KEYS.grains(params),
+    queryFn: () => api.listGrains(params),
     staleTime: 60 * 1000,
   });
 }

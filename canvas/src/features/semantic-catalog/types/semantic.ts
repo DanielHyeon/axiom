@@ -119,6 +119,22 @@ export interface JoinContract {
   created_at: string;
 }
 
+// ── L2: 그레인 계약 ──
+
+export interface GrainContract {
+  grain_id: string;
+  entity_id: string;
+  grain_key_set: string[];
+  time_grain: string;
+  uniqueness_test?: string;
+  duplicate_resolution_rule: string;
+  tenant_id: string;
+  case_id: string;
+  version: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // ── L2: 품질 계약 ──
 
 export interface QualityContract {
