@@ -169,15 +169,40 @@ class InsightStore:
                     uniqueness_score DOUBLE PRECISION DEFAULT 0,
                     owner_score DOUBLE PRECISION DEFAULT 0,
                     lineage_score DOUBLE PRECISION DEFAULT 0,
+                    validity_score DOUBLE PRECISION DEFAULT 0,
+                    ri_score DOUBLE PRECISION DEFAULT 0,
+                    test_score DOUBLE PRECISION DEFAULT 0,
+                    incident_score DOUBLE PRECISION DEFAULT 0,
                     overall_score DOUBLE PRECISION DEFAULT 0,
+                    formula_version INT NOT NULL DEFAULT 1,
                     details JSONB DEFAULT '{}'::jsonb,
                     sampled_at TIMESTAMPTZ NOT NULL DEFAULT now(),
                     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
                 )
             """)
+            # 기존 테이블에 새 컬럼이 없으면 추가 (마이그레이션)
+            for col in ("validity_score", "ri_score", "test_score", "incident_score"):
+                await conn.execute(f"""
+                    DO $$ BEGIN
+                        ALTER TABLE weaver.quality_scores ADD COLUMN {col} DOUBLE PRECISION DEFAULT 0;
+                    EXCEPTION WHEN duplicate_column THEN NULL;
+                    END $$
+                """)
+            await conn.execute("""
+                DO $$ BEGIN
+                    ALTER TABLE weaver.quality_scores ADD COLUMN formula_version INT NOT NULL DEFAULT 1;
+                EXCEPTION WHEN duplicate_column THEN NULL;
+                END $$
+            """)
             await conn.execute(
                 "CREATE INDEX IF NOT EXISTS idx_qs_tenant_target "
                 "ON weaver.quality_scores(tenant_id, target_type, target_id, created_at DESC)"
+            )
+            # 품질 breach 조회 가속 — overall_score < 60 인 행만 인덱싱
+            await conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_qs_tenant_breach "
+                "ON weaver.quality_scores(tenant_id, created_at DESC) "
+                "WHERE overall_score < 60"
             )
 
             # RLS policies

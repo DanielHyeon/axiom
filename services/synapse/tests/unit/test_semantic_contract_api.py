@@ -28,6 +28,8 @@ class FakeSemanticStore:
         self.grains: dict[str, dict] = {}
         self.context_packs: dict[str, dict] = {}
         self.prompt_policies: dict[str, dict] = {}
+        self.rules: dict[str, dict] = {}
+        self.policies: dict[str, dict] = {}
         self.releases: list[dict] = []
         self._term_seq = 0
 
@@ -40,6 +42,7 @@ class FakeSemanticStore:
         if cid in self.concepts:
             raise ValueError(f"concept_id '{cid}'가 이미 존재합니다")
         row = {**data, "tenant_id": tenant_id, "version": 1, "status": data.get("status", "draft"),
+               "approval_scope": data.get("approval_scope", "global"), "approved_by": None,
                "created_at": "2026-03-22T00:00:00", "updated_at": "2026-03-22T00:00:00"}
         self.concepts[cid] = row
         return row
@@ -50,12 +53,17 @@ class FakeSemanticStore:
             return c
         return None
 
-    def list_concepts(self, tenant_id, case_id=None, status=None, limit=100, offset=0):
+    def list_concepts(self, tenant_id, case_id=None, status=None, limit=100, offset=0,
+                      approval_scope=None, domain_id=None):
         result = [c for c in self.concepts.values() if c["tenant_id"] == tenant_id]
         if case_id:
             result = [c for c in result if c.get("case_id") == case_id]
         if status:
             result = [c for c in result if c.get("status") == status]
+        if approval_scope:
+            result = [c for c in result if c.get("approval_scope") == approval_scope]
+        if domain_id:
+            result = [c for c in result if c.get("domain_id") == domain_id]
         return result[offset:offset + limit]
 
     def update_concept(self, tenant_id, concept_id, data):
@@ -66,7 +74,7 @@ class FakeSemanticStore:
         c["version"] = c.get("version", 1) + 1
         return c
 
-    def change_concept_status(self, tenant_id, concept_id, new_status):
+    def change_concept_status(self, tenant_id, concept_id, new_status, approved_by=None):
         c = self.get_concept(tenant_id, concept_id)
         if not c:
             raise KeyError(f"concept_id '{concept_id}'를 찾을 수 없습니다")
@@ -75,6 +83,8 @@ class FakeSemanticStore:
         if new_status not in allowed:
             raise ValueError(f"'{c['status']}' → '{new_status}' 전이가 허용되지 않습니다. 가능: {allowed}")
         c["status"] = new_status
+        if new_status == "approved" and approved_by:
+            c["approved_by"] = approved_by
         return c
 
     # 용어
@@ -108,10 +118,12 @@ class FakeSemanticStore:
         e = self.entities.get(entity_id)
         return e if e and e.get("tenant_id") == tenant_id else None
 
-    def list_entities(self, tenant_id, case_id=None, limit=100, offset=0):
+    def list_entities(self, tenant_id, case_id=None, domain_id=None, limit=100, offset=0):
         result = [e for e in self.entities.values() if e["tenant_id"] == tenant_id]
         if case_id:
             result = [e for e in result if e.get("case_id") == case_id]
+        if domain_id:
+            result = [e for e in result if e.get("domain_id") == domain_id]
         return result[offset:offset + limit]
 
     def update_entity(self, tenant_id, entity_id, data):
@@ -137,12 +149,14 @@ class FakeSemanticStore:
         m = self.measures.get(measure_id)
         return m if m and m.get("tenant_id") == tenant_id else None
 
-    def list_measures(self, tenant_id, case_id=None, entity_id=None, limit=100, offset=0):
+    def list_measures(self, tenant_id, case_id=None, entity_id=None, domain_id=None, limit=100, offset=0):
         result = [m for m in self.measures.values() if m["tenant_id"] == tenant_id]
         if case_id:
             result = [m for m in result if m.get("case_id") == case_id]
         if entity_id:
             result = [m for m in result if m.get("entity_id") == entity_id]
+        if domain_id:
+            result = [m for m in result if m.get("domain_id") == domain_id]
         return result[offset:offset + limit]
 
     def update_measure(self, tenant_id, measure_id, data):
@@ -168,12 +182,16 @@ class FakeSemanticStore:
         d = self.dimensions.get(dimension_id)
         return d if d and d.get("tenant_id") == tenant_id else None
 
-    def list_dimensions(self, tenant_id, case_id=None, entity_id=None, limit=100, offset=0):
+    def list_dimensions(self, tenant_id, case_id=None, entity_id=None, domain_id=None, conformed_group=None, limit=100, offset=0):
         result = [d for d in self.dimensions.values() if d["tenant_id"] == tenant_id]
         if case_id:
             result = [d for d in result if d.get("case_id") == case_id]
         if entity_id:
             result = [d for d in result if d.get("entity_id") == entity_id]
+        if domain_id:
+            result = [d for d in result if d.get("domain_id") == domain_id]
+        if conformed_group:
+            result = [d for d in result if d.get("conformed_group") == conformed_group]
         return result[offset:offset + limit]
 
     def update_dimension(self, tenant_id, dimension_id, data):
@@ -200,12 +218,14 @@ class FakeSemanticStore:
         j = self.joins.get(join_id)
         return j if j and j.get("tenant_id") == tenant_id else None
 
-    def list_join_contracts(self, tenant_id, case_id=None, allowed_for_ai=None, limit=100, offset=0):
+    def list_join_contracts(self, tenant_id, case_id=None, allowed_for_ai=None, domain_id=None, limit=100, offset=0):
         result = [j for j in self.joins.values() if j["tenant_id"] == tenant_id]
         if case_id:
             result = [j for j in result if j.get("case_id") == case_id]
         if allowed_for_ai is not None:
             result = [j for j in result if j.get("allowed_for_ai") == allowed_for_ai]
+        if domain_id:
+            result = [j for j in result if j.get("domain_id") == domain_id]
         return result[offset:offset + limit]
 
     def update_join_contract(self, tenant_id, join_id, data):
@@ -336,6 +356,100 @@ class FakeSemanticStore:
             "prompt_policies": [{"rule_type": p["rule_type"], "rule_text": p["rule_text"], "priority": p.get("priority", 0)} for p in policies],
         }
 
+    # 온톨로지 규칙
+    def create_rule(self, tenant_id, data):
+        rid = data["rule_id"]
+        if rid in self.rules:
+            raise ValueError(f"rule_id '{rid}'가 이미 존재합니다")
+        from app.models.semantic_models import VALID_RULE_TYPES, VALID_EXPRESSION_LANGS
+        rt = data.get("rule_type", "")
+        if rt not in VALID_RULE_TYPES:
+            raise ValueError(f"rule_type은 {VALID_RULE_TYPES} 중 하나여야 합니다")
+        el = data.get("expression_lang", "sql")
+        if el not in VALID_EXPRESSION_LANGS:
+            raise ValueError(f"expression_lang은 {VALID_EXPRESSION_LANGS} 중 하나여야 합니다")
+        if not self.get_concept(tenant_id, data["concept_id"]):
+            raise KeyError(f"concept_id '{data['concept_id']}'를 찾을 수 없습니다")
+        row = {**data, "tenant_id": tenant_id, "created_at": "2026-03-22T00:00:00", "updated_at": "2026-03-22T00:00:00"}
+        self.rules[rid] = row
+        return row
+
+    def get_rule(self, tenant_id, rule_id):
+        r = self.rules.get(rule_id)
+        return r if r and r.get("tenant_id") == tenant_id else None
+
+    def list_rules(self, tenant_id, concept_id=None, rule_type=None, limit=100, offset=0):
+        result = [r for r in self.rules.values() if r["tenant_id"] == tenant_id]
+        if concept_id:
+            result = [r for r in result if r.get("concept_id") == concept_id]
+        if rule_type:
+            result = [r for r in result if r.get("rule_type") == rule_type]
+        return result[offset:offset + limit]
+
+    def update_rule(self, tenant_id, rule_id, data):
+        r = self.get_rule(tenant_id, rule_id)
+        if not r:
+            raise KeyError(f"rule_id '{rule_id}'를 찾을 수 없습니다")
+        from app.models.semantic_models import VALID_RULE_TYPES, VALID_EXPRESSION_LANGS
+        if "rule_type" in data and data["rule_type"] not in VALID_RULE_TYPES:
+            raise ValueError(f"rule_type 유효하지 않음: {data['rule_type']}")
+        if "expression_lang" in data and data["expression_lang"] not in VALID_EXPRESSION_LANGS:
+            raise ValueError(f"expression_lang 유효하지 않음: {data['expression_lang']}")
+        r.update({k: v for k, v in data.items() if v is not None})
+        return r
+
+    def delete_rule(self, tenant_id, rule_id):
+        if rule_id in self.rules and self.rules[rule_id].get("tenant_id") == tenant_id:
+            del self.rules[rule_id]
+            return True
+        return False
+
+    # 온톨로지 정책
+    def create_policy(self, tenant_id, data):
+        pid = data["policy_id"]
+        if pid in self.policies:
+            raise ValueError(f"policy_id '{pid}'가 이미 존재합니다")
+        from app.models.semantic_models import VALID_POLICY_TYPES
+        pt = data.get("policy_type", "")
+        if pt not in VALID_POLICY_TYPES:
+            raise ValueError(f"policy_type은 {VALID_POLICY_TYPES} 중 하나여야 합니다")
+        if not self.get_concept(tenant_id, data["concept_id"]):
+            raise KeyError(f"concept_id '{data['concept_id']}'를 찾을 수 없습니다")
+        row = {**data, "tenant_id": tenant_id, "is_active": data.get("is_active", True),
+               "created_at": "2026-03-22T00:00:00", "updated_at": "2026-03-22T00:00:00"}
+        self.policies[pid] = row
+        return row
+
+    def get_policy(self, tenant_id, policy_id):
+        p = self.policies.get(policy_id)
+        return p if p and p.get("tenant_id") == tenant_id else None
+
+    def list_policies(self, tenant_id, concept_id=None, policy_type=None, is_active=None, limit=100, offset=0):
+        result = [p for p in self.policies.values() if p["tenant_id"] == tenant_id]
+        if concept_id:
+            result = [p for p in result if p.get("concept_id") == concept_id]
+        if policy_type:
+            result = [p for p in result if p.get("policy_type") == policy_type]
+        if is_active is not None:
+            result = [p for p in result if p.get("is_active") == is_active]
+        return result[offset:offset + limit]
+
+    def update_policy(self, tenant_id, policy_id, data):
+        p = self.get_policy(tenant_id, policy_id)
+        if not p:
+            raise KeyError(f"policy_id '{policy_id}'를 찾을 수 없습니다")
+        from app.models.semantic_models import VALID_POLICY_TYPES
+        if "policy_type" in data and data["policy_type"] not in VALID_POLICY_TYPES:
+            raise ValueError(f"policy_type 유효하지 않음: {data['policy_type']}")
+        p.update({k: v for k, v in data.items() if v is not None})
+        return p
+
+    def delete_policy(self, tenant_id, policy_id):
+        if policy_id in self.policies and self.policies[policy_id].get("tenant_id") == tenant_id:
+            del self.policies[policy_id]
+            return True
+        return False
+
     # 배포
     def publish(self, tenant_id, object_type, object_id, reviewer=None):
         release = {
@@ -351,6 +465,150 @@ class FakeSemanticStore:
 
     def list_releases(self, tenant_id, limit=50, offset=0):
         return self.releases[offset:offset + limit]
+
+    # L4: 충돌 탐지
+    def detect_conflicts(self, tenant_id):
+        """인메모리 충돌 탐지 — 실제 SQL 대신 Python으로 구현"""
+        import json as _json
+        concept_conflicts = []
+        measure_conflicts = []
+        term_collisions = []
+
+        # 1) 개념 name_ko 충돌
+        from collections import defaultdict
+        ko_map = defaultdict(list)
+        en_map = defaultdict(list)
+        for c in self.concepts.values():
+            if c.get("tenant_id") != tenant_id or c.get("status") == "deprecated":
+                continue
+            nk = c.get("name_ko")
+            if nk:
+                ko_map[nk].append(c)
+            ne = c.get("name_en")
+            if ne:
+                en_map[ne].append(c)
+        for name, cs in ko_map.items():
+            if len(cs) > 1:
+                concept_conflicts.append({
+                    "name": name, "field": "name_ko",
+                    "concept_ids": [c["concept_id"] for c in cs],
+                    "descriptions": [c.get("description", "") for c in cs],
+                })
+        for name, cs in en_map.items():
+            if len(cs) > 1:
+                concept_conflicts.append({
+                    "name": name, "field": "name_en",
+                    "concept_ids": [c["concept_id"] for c in cs],
+                    "descriptions": [c.get("description", "") for c in cs],
+                })
+
+        # 2) 지표 이름 충돌
+        m_map = defaultdict(list)
+        for m in self.measures.values():
+            if m.get("tenant_id") != tenant_id or m.get("status") == "deprecated":
+                continue
+            m_map[m["name"]].append(m)
+        for name, ms in m_map.items():
+            if len(ms) > 1:
+                measure_conflicts.append({
+                    "name": name,
+                    "measure_ids": [m["measure_id"] for m in ms],
+                    "concept_ids": [m.get("bound_concept_id", "") for m in ms],
+                })
+
+        # 3) 용어 충돌
+        t_map = defaultdict(set)
+        for t in self.terms:
+            if t.get("tenant_id") != tenant_id:
+                continue
+            t_map[t["surface_form"]].add(t["concept_id"])
+        for sf, cids in t_map.items():
+            if len(cids) > 1:
+                term_collisions.append({
+                    "surface_form": sf,
+                    "concept_ids": sorted(cids),
+                })
+
+        return {
+            "concept_conflicts": concept_conflicts,
+            "measure_conflicts": measure_conflicts,
+            "term_collisions": term_collisions,
+        }
+
+    # L4: 영향 분석
+    def analyze_impact(self, tenant_id, object_type, object_id):
+        """인메모리 영향 분석 — 실제 SQL 대신 Python으로 구현"""
+        import json as _json
+        affected = {
+            "context_packs": [], "entities": [], "measures": [],
+            "dimensions": [], "joins": [], "grains": [],
+        }
+
+        if object_type == "concept":
+            affected["entities"] = [e["entity_id"] for e in self.entities.values()
+                                     if e.get("tenant_id") == tenant_id and e.get("bound_concept_id") == object_id]
+            affected["measures"] = [m["measure_id"] for m in self.measures.values()
+                                     if m.get("tenant_id") == tenant_id and m.get("bound_concept_id") == object_id]
+            affected["dimensions"] = [d["dimension_id"] for d in self.dimensions.values()
+                                       if d.get("tenant_id") == tenant_id and d.get("bound_concept_id") == object_id]
+            affected["context_packs"] = [
+                cp["context_pack_id"] for cp in self.context_packs.values()
+                if cp.get("tenant_id") == tenant_id and object_id in (cp.get("included_concept_ids") or [])
+            ]
+
+        elif object_type == "entity":
+            affected["measures"] = [m["measure_id"] for m in self.measures.values()
+                                     if m.get("tenant_id") == tenant_id and m.get("entity_id") == object_id]
+            affected["dimensions"] = [d["dimension_id"] for d in self.dimensions.values()
+                                       if d.get("tenant_id") == tenant_id and d.get("entity_id") == object_id]
+            affected["joins"] = [j["join_id"] for j in self.joins.values()
+                                  if j.get("tenant_id") == tenant_id and (j.get("left_entity_id") == object_id or j.get("right_entity_id") == object_id)]
+            affected["grains"] = [g["grain_id"] for g in self.grains.values()
+                                   if g.get("tenant_id") == tenant_id and g.get("entity_id") == object_id]
+
+        elif object_type == "measure":
+            m = self.measures.get(object_id)
+            if m and m.get("tenant_id") == tenant_id:
+                eid = m.get("entity_id")
+                if eid:
+                    affected["entities"] = [eid]
+                    affected["joins"] = [j["join_id"] for j in self.joins.values()
+                                          if j.get("tenant_id") == tenant_id and (j.get("left_entity_id") == eid or j.get("right_entity_id") == eid)]
+            affected["context_packs"] = [
+                cp["context_pack_id"] for cp in self.context_packs.values()
+                if cp.get("tenant_id") == tenant_id and object_id in (cp.get("included_measure_ids") or [])
+            ]
+
+        elif object_type == "dimension":
+            d = self.dimensions.get(object_id)
+            if d and d.get("tenant_id") == tenant_id:
+                eid = d.get("entity_id")
+                if eid:
+                    affected["entities"] = [eid]
+            affected["context_packs"] = [
+                cp["context_pack_id"] for cp in self.context_packs.values()
+                if cp.get("tenant_id") == tenant_id and object_id in (cp.get("included_dimension_ids") or [])
+            ]
+
+        elif object_type == "join":
+            affected["context_packs"] = [
+                cp["context_pack_id"] for cp in self.context_packs.values()
+                if cp.get("tenant_id") == tenant_id and (
+                    object_id in (cp.get("allowed_join_ids") or []) or
+                    object_id in (cp.get("banned_join_ids") or [])
+                )
+            ]
+            j = self.joins.get(object_id)
+            if j and j.get("tenant_id") == tenant_id:
+                affected["entities"] = [j["left_entity_id"], j["right_entity_id"]]
+
+        total = sum(len(v) for v in affected.values())
+        return {
+            "object_type": object_type,
+            "object_id": object_id,
+            "affected": affected,
+            "total_affected": total,
+        }
 
     # 카탈로그
     def get_catalog(self, tenant_id, case_id=None):

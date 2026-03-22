@@ -122,6 +122,146 @@ async def _stop_quality_worker():
             pass
 
 
+# ── P2 §4.5: Synapse 이벤트 기반 품질 스캔 트리거 ── #
+_event_listener_task: asyncio.Task | None = None
+_event_listener_running: bool = False
+
+# Redis Stream 설정
+_SYNAPSE_STREAM = "axiom:synapse:events"
+_CONSUMER_GROUP = "weaver-quality"
+_CONSUMER_NAME = "weaver-quality-worker-0"
+_BLOCK_MS = 5000  # XREAD 블록 타임아웃 (5초)
+
+
+async def _synapse_event_listener() -> None:
+    """Synapse Redis Stream 이벤트 리스너.
+
+    SEMANTIC_ENTITY_PUBLISHED 이벤트를 수신하면
+    QualityWorker의 즉시 스캔을 트리거한다.
+    """
+    global _event_listener_running
+    _event_listener_running = True
+    rd = await get_insight_redis()
+    if rd is None:
+        logger.warning("synapse_event_listener: Redis 미사용 — 이벤트 리스너 비활성")
+        return
+
+    # 컨슈머 그룹 생성 (이미 존재하면 무시)
+    try:
+        await rd.xgroup_create(_SYNAPSE_STREAM, _CONSUMER_GROUP, id="0", mkstream=True)
+        logger.info("synapse_event_listener: consumer group '%s' created", _CONSUMER_GROUP)
+    except Exception as exc:
+        # BUSYGROUP = 이미 존재 → 정상
+        if "BUSYGROUP" in str(exc):
+            logger.debug("synapse_event_listener: consumer group already exists")
+        else:
+            logger.warning("synapse_event_listener: xgroup_create failed: %s", exc)
+
+    logger.info("synapse_event_listener started (stream=%s, group=%s)", _SYNAPSE_STREAM, _CONSUMER_GROUP)
+
+    while _event_listener_running:
+        try:
+            # 미처리 메시지 읽기 (> = 새 메시지만)
+            messages = await rd.xreadgroup(
+                groupname=_CONSUMER_GROUP,
+                consumername=_CONSUMER_NAME,
+                streams={_SYNAPSE_STREAM: ">"},
+                count=10,
+                block=_BLOCK_MS,
+            )
+            if not messages:
+                continue
+
+            for stream_name, entries in messages:
+                for msg_id, data in entries:
+                    await _handle_synapse_event(rd, msg_id, data)
+
+        except asyncio.CancelledError:
+            logger.info("synapse_event_listener cancelled")
+            break
+        except Exception:
+            logger.exception("synapse_event_listener_error")
+            # 에러 후 잠시 대기하여 빠른 재시도 루프 방지
+            await asyncio.sleep(2)
+
+    _event_listener_running = False
+
+
+async def _handle_synapse_event(rd, msg_id: str, data: dict) -> None:
+    """개별 Synapse 이벤트 처리 — SEMANTIC_ENTITY_PUBLISHED만 반응"""
+    event_type = data.get("event_type", "")
+
+    if event_type != "SEMANTIC_ENTITY_PUBLISHED":
+        # 관심 없는 이벤트 → ACK만 하고 넘어감
+        await rd.xack(_SYNAPSE_STREAM, _CONSUMER_GROUP, msg_id)
+        return
+
+    tenant_id = data.get("tenant_id", "")
+    # payload는 JSON 문자열일 수 있음
+    payload_raw = data.get("payload", "{}")
+    if isinstance(payload_raw, str):
+        import json
+        try:
+            payload = json.loads(payload_raw)
+        except (json.JSONDecodeError, TypeError):
+            payload = {}
+    else:
+        payload = payload_raw
+
+    entity_id = payload.get("entity_id", "") or data.get("aggregate_id", "")
+    physical_source_ref = payload.get("physical_source_ref", "")
+
+    if not all([tenant_id, entity_id, physical_source_ref]):
+        logger.debug(
+            "synapse_event: incomplete data, skipping (tenant=%s, entity=%s, ref=%s)",
+            tenant_id, entity_id, physical_source_ref,
+        )
+        await rd.xack(_SYNAPSE_STREAM, _CONSUMER_GROUP, msg_id)
+        return
+
+    # QualityWorker를 통해 즉시 스캔 트리거
+    if _quality_worker is not None:
+        result = await _quality_worker.handle_entity_published(
+            tenant_id=tenant_id,
+            entity_id=entity_id,
+            physical_source_ref=physical_source_ref,
+        )
+        logger.info(
+            "synapse_event_processed",
+            extra={"msg_id": msg_id, "event_type": event_type, "result": result},
+        )
+    else:
+        logger.warning("synapse_event: QualityWorker not initialized, skipping")
+
+    # 처리 완료 ACK
+    await rd.xack(_SYNAPSE_STREAM, _CONSUMER_GROUP, msg_id)
+
+
+@app.on_event("startup")
+async def _start_synapse_event_listener():
+    """P2 §4.5: Synapse 이벤트 기반 품질 스캔 리스너 시작"""
+    global _event_listener_task
+    if not settings.metadata_pg_mode:
+        return
+    try:
+        _event_listener_task = asyncio.create_task(_synapse_event_listener())
+        logger.info("Synapse event listener background task started")
+    except Exception:
+        logger.warning("Synapse event listener failed to start", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def _stop_synapse_event_listener():
+    global _event_listener_task, _event_listener_running
+    _event_listener_running = False
+    if _event_listener_task and not _event_listener_task.done():
+        _event_listener_task.cancel()
+        try:
+            await _event_listener_task
+        except asyncio.CancelledError:
+            pass
+
+
 # ── Phase 2-D: Document→Ontology 파이프라인 테이블 보장 ── #
 @app.on_event("startup")
 async def _ensure_document_tables():

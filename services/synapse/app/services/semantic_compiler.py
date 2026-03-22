@@ -87,6 +87,27 @@ class SemanticCompiler:
         if not has_errors and measures:
             sql_template = self._generate_entity_sql(entity, measures, dimensions, grains, entity_joins)
 
+        # §4.8: 컴파일 성공 시 ONTOLOGY_BINDING_VALIDATED 이벤트 발행
+        if not has_errors:
+            try:
+                from app.events.outbox import EventPublisher
+                EventPublisher.publish(
+                    event_type="ONTOLOGY_BINDING_VALIDATED",
+                    aggregate_type="semantic_entity",
+                    aggregate_id=entity_id,
+                    payload={
+                        "entity_id": entity_id,
+                        "valid": True,
+                        "measure_count": len(measures),
+                        "dimension_count": len(dimensions),
+                        "tenant_id": entity.get("tenant_id", ""),
+                    },
+                    tenant_id=entity.get("tenant_id", ""),
+                )
+            except Exception:
+                # 이벤트 발행 실패가 컴파일 결과를 방해하지 않도록 방어
+                logger.warning("ONTOLOGY_BINDING_VALIDATED 이벤트 발행 실패", exc_info=True)
+
         return {
             "valid": not has_errors,
             "sql_template": sql_template,
@@ -122,6 +143,25 @@ class SemanticCompiler:
         sql_template = None
         if not has_errors:
             sql_template = self._generate_measure_sql(entity, measure)
+
+        # §4.8: 지표 컴파일 성공 시 ONTOLOGY_BINDING_VALIDATED 이벤트 발행
+        if not has_errors:
+            try:
+                from app.events.outbox import EventPublisher
+                EventPublisher.publish(
+                    event_type="ONTOLOGY_BINDING_VALIDATED",
+                    aggregate_type="semantic_measure",
+                    aggregate_id=measure_id,
+                    payload={
+                        "measure_id": measure_id,
+                        "entity_id": measure["entity_id"],
+                        "valid": True,
+                        "tenant_id": tenant_id,
+                    },
+                    tenant_id=tenant_id,
+                )
+            except Exception:
+                logger.warning("ONTOLOGY_BINDING_VALIDATED 이벤트 발행 실패 (measure)", exc_info=True)
 
         return {
             "valid": not has_errors,

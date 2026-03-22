@@ -31,6 +31,21 @@ from app.models.semantic_models import (
     VALID_TIME_GRAINS,
     VALID_INTENT_TYPES,
     VALID_PROMPT_RULE_TYPES,
+    VALID_APPROVAL_SCOPES,
+    VALID_PREDICATE_TYPES,
+    VALID_CARDINALITIES,
+    VALID_DIRECTIONALITIES,
+    VALID_RULE_TYPES,
+    VALID_EXPRESSION_LANGS,
+    VALID_POLICY_TYPES,
+    VALID_EXPANSION_RULE_TYPES,
+    VALID_FEEDBACK_ISSUE_TYPES,
+    VALID_INTENT_MODEL_TYPES,
+    VALID_ALIAS_GROUP_STATUSES,
+    VALID_EXPANSION_RULE_STATUSES,
+    VALID_SEGMENT_TYPES,
+    VALID_TIME_CONTRACT_GRAINS,
+    VALID_ACCESS_POLICY_TYPES,
 )
 
 logger = structlog.get_logger()
@@ -101,23 +116,29 @@ _CONCEPT_UPDATABLE = {
     "domain_id", "name_ko", "name_en", "description", "business_definition",
     "owner_team", "steward_user", "sensitivity_level", "default_time_semantics",
     "default_unit", "version", "updated_at",
+    "approval_scope",  # §5.2: 도메인 스코프 승인 워크플로
 }
 _ENTITY_UPDATABLE = {
     "bound_concept_id", "physical_source_ref", "entity_type", "grain_definition",
     "primary_key_spec", "default_filters", "freshness_sla_minutes", "version", "updated_at",
+    "domain_id",  # §5.1: 도메인 네임스페이스
+    "feature_config",  # P3 §5.3: ML/Feature Source 바인딩
 }
 _MEASURE_UPDATABLE = {
     "bound_concept_id", "entity_id", "name", "description", "measure_type",
     "sql_expression", "filter_expression", "numerator_measure_id", "denominator_measure_id",
     "additive_type", "default_agg_window", "owner_team", "version", "updated_at",
+    "domain_id",  # §5.1: 도메인 네임스페이스
 }
 _DIMENSION_UPDATABLE = {
     "bound_concept_id", "entity_id", "name", "sql_expression", "value_type",
     "hierarchy_path", "conformed_group", "version", "updated_at",
+    "domain_id",  # §5.1: 도메인 네임스페이스
 }
 _JOIN_UPDATABLE = {
     "join_type", "join_condition", "relationship_type", "allowed_for_ai",
     "fanout_risk_score", "updated_at",
+    "domain_id",  # §5.1: 도메인 네임스페이스
 }
 _GRAIN_UPDATABLE = {
     "grain_key_set", "time_grain", "uniqueness_test", "duplicate_resolution_rule", "version", "updated_at",
@@ -129,6 +150,28 @@ _CONTEXT_PACK_UPDATABLE = {
 }
 _PROMPT_POLICY_UPDATABLE = {
     "rule_type", "rule_text", "priority", "updated_at",
+}
+_RELATION_UPDATABLE = {
+    "predicate_type", "cardinality", "directionality", "weight",
+    "confidence", "effective_from", "effective_to", "updated_at",
+}
+_ONTOLOGY_RULE_UPDATABLE = {
+    "rule_type", "rule_expression", "expression_lang", "severity", "description", "updated_at",
+}
+_ONTOLOGY_POLICY_UPDATABLE = {
+    "policy_type", "policy_expression", "description", "is_active", "updated_at",
+}
+# §5.2: 시멘틱 세그먼트 / 시간 계약 / 접근 정책
+_SEGMENT_UPDATABLE = {
+    "name", "filter_expression", "segment_type", "description", "version", "updated_at",
+}
+_TIME_CONTRACT_UPDATABLE = {
+    "time_column", "time_grain", "timezone", "fiscal_calendar_offset",
+    "default_lookback_days", "description", "version", "updated_at",
+}
+_ACCESS_POLICY_UPDATABLE = {
+    "policy_type", "condition_expression", "target_roles", "is_active",
+    "description", "version", "updated_at",
 }
 
 
@@ -254,6 +297,7 @@ class SemanticStore:
                 primary_key_spec      VARCHAR,
                 default_filters       JSONB,
                 freshness_sla_minutes INTEGER,
+                feature_config        JSONB DEFAULT NULL,
                 tenant_id             VARCHAR NOT NULL,
                 case_id               VARCHAR NOT NULL,
                 status                VARCHAR NOT NULL DEFAULT 'draft',
@@ -261,6 +305,11 @@ class SemanticStore:
                 created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
             )
+        """)
+        # P3 §5.3: 기존 테이블에 feature_config 컬럼 추가 (멱등 마이그레이션)
+        cur.execute("""
+            ALTER TABLE semantic_entities
+            ADD COLUMN IF NOT EXISTS feature_config JSONB DEFAULT NULL
         """)
 
         # L2: 시멘틱 지표
@@ -422,6 +471,289 @@ class SemanticStore:
                 ON prompt_policies(context_pack_id)
         """)
 
+        # §5.2 L2: 시멘틱 세그먼트 — 엔티티 필터 기반 데이터 분할
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS semantic_segments (
+                segment_id            VARCHAR PRIMARY KEY,
+                entity_id             VARCHAR NOT NULL REFERENCES semantic_entities(entity_id),
+                name                  VARCHAR NOT NULL,
+                filter_expression     TEXT NOT NULL,
+                segment_type          VARCHAR NOT NULL DEFAULT 'static',
+                description           TEXT,
+                tenant_id             VARCHAR NOT NULL,
+                case_id               VARCHAR NOT NULL DEFAULT '',
+                version               INTEGER NOT NULL DEFAULT 1,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_semantic_segments_entity
+                ON semantic_segments(tenant_id, entity_id)
+        """)
+
+        # §5.2 L2: 시간 계약 — 엔티티의 시간 축 의미론
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS time_contracts (
+                time_contract_id      VARCHAR PRIMARY KEY,
+                entity_id             VARCHAR NOT NULL REFERENCES semantic_entities(entity_id),
+                time_column           VARCHAR NOT NULL,
+                time_grain            VARCHAR NOT NULL,
+                timezone              VARCHAR DEFAULT 'UTC',
+                fiscal_calendar_offset INTEGER DEFAULT 0,
+                default_lookback_days INTEGER DEFAULT 365,
+                description           TEXT,
+                tenant_id             VARCHAR NOT NULL,
+                case_id               VARCHAR NOT NULL DEFAULT '',
+                version               INTEGER NOT NULL DEFAULT 1,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_time_contracts_entity
+                ON time_contracts(tenant_id, entity_id)
+        """)
+
+        # §5.2 L2: 접근 정책 — 행/열 수준 데이터 접근 제어
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS access_policies (
+                access_policy_id      VARCHAR PRIMARY KEY,
+                entity_id             VARCHAR NOT NULL REFERENCES semantic_entities(entity_id),
+                policy_type           VARCHAR NOT NULL,
+                condition_expression  TEXT NOT NULL,
+                target_roles          JSONB DEFAULT '[]',
+                is_active             BOOLEAN DEFAULT TRUE,
+                description           TEXT,
+                tenant_id             VARCHAR NOT NULL,
+                case_id               VARCHAR NOT NULL DEFAULT '',
+                version               INTEGER NOT NULL DEFAULT 1,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_access_policies_entity
+                ON access_policies(tenant_id, entity_id)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_access_policies_active
+                ON access_policies(tenant_id, is_active)
+        """)
+
+        # L3: 온톨로지 규칙 — 개념에 바인딩되는 업무 규칙
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS ontology_rules (
+                rule_id               VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                concept_id            VARCHAR NOT NULL,
+                rule_type             VARCHAR NOT NULL,
+                rule_expression       TEXT NOT NULL,
+                expression_lang       VARCHAR NOT NULL DEFAULT 'sql',
+                severity              VARCHAR DEFAULT 'warning',
+                description           TEXT,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ontology_rules_concept
+                ON ontology_rules(tenant_id, concept_id)
+        """)
+
+        # L3: 온톨로지 정책 — 접근/PII/보존/거주지/집계 거버넌스 정책
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS ontology_policies (
+                policy_id             VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                concept_id            VARCHAR NOT NULL,
+                policy_type           VARCHAR NOT NULL,
+                policy_expression     TEXT NOT NULL,
+                description           TEXT,
+                is_active             BOOLEAN DEFAULT TRUE,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ontology_policies_concept
+                ON ontology_policies(tenant_id, concept_id)
+        """)
+
+        # §5.1: 온톨로지 관계 (Neo4j 보완 PG 구조화 메타데이터)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS ontology_relations (
+                relation_id           VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                subject_concept_id    VARCHAR NOT NULL,
+                predicate_type        VARCHAR NOT NULL,
+                object_concept_id     VARCHAR NOT NULL,
+                cardinality           VARCHAR DEFAULT '1:N',
+                directionality        VARCHAR DEFAULT 'unidirectional',
+                weight                NUMERIC(5,2) DEFAULT 1.0,
+                confidence            NUMERIC(5,2) DEFAULT 1.0,
+                effective_from        TIMESTAMPTZ,
+                effective_to          TIMESTAMPTZ,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ontrel_tenant
+                ON ontology_relations(tenant_id, subject_concept_id)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_ontrel_object
+                ON ontology_relations(tenant_id, object_concept_id)
+        """)
+
+        # Sprint 4: 용어 별칭 그룹 — 여러 alias를 하나의 정규 용어 클러스터로 묶는다
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS ontology_term_alias_groups (
+                id                    VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                domain_id             VARCHAR NOT NULL DEFAULT 'global',
+                canonical_term_id     VARCHAR NOT NULL,
+                group_name            VARCHAR(200) NOT NULL,
+                language_code         VARCHAR(16) NOT NULL DEFAULT 'ko',
+                status                VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                updated_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_alias_groups_tenant
+                ON ontology_term_alias_groups(tenant_id, domain_id)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_alias_groups_canonical
+                ON ontology_term_alias_groups(tenant_id, canonical_term_id)
+        """)
+
+        # Sprint 4: 용어 확장 규칙 — exact/normalized/regex/time_alias 등 매칭 규칙
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS ontology_term_expansion_rules (
+                id                    VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                domain_id             VARCHAR NOT NULL DEFAULT 'global',
+                alias_group_id        VARCHAR NOT NULL,
+                rule_type             VARCHAR(32) NOT NULL,
+                match_pattern         TEXT NOT NULL,
+                normalized_pattern    TEXT,
+                boost                 NUMERIC(5,2) NOT NULL DEFAULT 1.0,
+                priority              INT NOT NULL DEFAULT 100,
+                status                VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+                effective_from        TIMESTAMPTZ,
+                effective_to          TIMESTAMPTZ,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_expansion_rules_group
+                ON ontology_term_expansion_rules(alias_group_id)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_expansion_rules_tenant
+                ON ontology_term_expansion_rules(tenant_id, status)
+        """)
+
+        # Sprint 4: 의도 분류 모델 관리
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS intent_models (
+                id                    VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                model_key             VARCHAR(100) NOT NULL,
+                model_version         VARCHAR(64) NOT NULL,
+                model_type            VARCHAR(32) NOT NULL DEFAULT 'keyword',
+                status                VARCHAR(32) NOT NULL DEFAULT 'ACTIVE',
+                config_json           JSONB NOT NULL DEFAULT '{}',
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_intent_models_tenant
+                ON intent_models(tenant_id, status)
+        """)
+
+        # Sprint 4: 의도 추론 로그 (Oracle에서 기록)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS intent_inference_logs (
+                id                    VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                request_id            VARCHAR(100) NOT NULL,
+                snapshot_version      VARCHAR(100),
+                user_question         TEXT NOT NULL,
+                normalized_question   TEXT NOT NULL DEFAULT '',
+                top_intent            VARCHAR(64),
+                confidence            NUMERIC(5,2),
+                ambiguity_score       NUMERIC(5,2),
+                fallback_mode         VARCHAR(32),
+                feature_json          JSONB NOT NULL DEFAULT '{}',
+                candidate_json        JSONB NOT NULL DEFAULT '{}',
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_inference_logs_tenant
+                ON intent_inference_logs(tenant_id, created_at DESC)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_inference_logs_request
+                ON intent_inference_logs(request_id)
+        """)
+
+        # Sprint 4: 질문 이해 피드백 (운영자 교정)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS semantic_question_feedback (
+                id                    VARCHAR PRIMARY KEY,
+                tenant_id             VARCHAR NOT NULL,
+                request_id            VARCHAR(100) NOT NULL,
+                issue_type            VARCHAR(32) NOT NULL,
+                expected_intent       VARCHAR(64),
+                expected_concept_id   VARCHAR,
+                expected_measure_id   VARCHAR,
+                feedback_note         TEXT,
+                resolved              BOOLEAN NOT NULL DEFAULT FALSE,
+                created_by            VARCHAR,
+                created_at            TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            )
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_question_feedback_tenant
+                ON semantic_question_feedback(tenant_id, resolved)
+        """)
+        cur.execute("""
+            CREATE INDEX IF NOT EXISTS idx_question_feedback_request
+                ON semantic_question_feedback(request_id)
+        """)
+
+        conn.commit()
+
+        # ── §5.1: 도메인 네임스페이스 마이그레이션 (기존 테이블에 domain_id 추가) ──
+        # ALTER TABLE ADD COLUMN IF NOT EXISTS 패턴으로 안전하게 추가
+        _migration_sqls = [
+            # 시멘틱 엔티티에 domain_id 추가 (기본값 'global')
+            "ALTER TABLE semantic_entities ADD COLUMN IF NOT EXISTS domain_id VARCHAR DEFAULT 'global'",
+            # 시멘틱 지표에 domain_id 추가
+            "ALTER TABLE semantic_measures ADD COLUMN IF NOT EXISTS domain_id VARCHAR DEFAULT 'global'",
+            # 시멘틱 차원에 domain_id 추가
+            "ALTER TABLE semantic_dimensions ADD COLUMN IF NOT EXISTS domain_id VARCHAR DEFAULT 'global'",
+            # 조인 계약에 domain_id 추가
+            "ALTER TABLE join_contracts ADD COLUMN IF NOT EXISTS domain_id VARCHAR DEFAULT 'global'",
+            # §5.2: 온톨로지 개념에 승인 스코프 + 승인자 추가
+            "ALTER TABLE ontology_concepts ADD COLUMN IF NOT EXISTS approval_scope VARCHAR DEFAULT 'global'",
+            "ALTER TABLE ontology_concepts ADD COLUMN IF NOT EXISTS approved_by VARCHAR",
+        ]
+        for sql in _migration_sqls:
+            cur.execute(sql)
+
+        # §5.1: 도메인별 조회 인덱스 추가
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_semantic_entities_domain ON semantic_entities(tenant_id, domain_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_semantic_measures_domain ON semantic_measures(tenant_id, domain_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_semantic_dimensions_domain ON semantic_dimensions(tenant_id, domain_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_join_contracts_domain ON join_contracts(tenant_id, domain_id)")
+        cur.execute("CREATE INDEX IF NOT EXISTS idx_ontology_concepts_approval ON ontology_concepts(tenant_id, approval_scope)")
+
         conn.commit()
         cur.close()
         conn.close()
@@ -442,6 +774,10 @@ class SemanticStore:
         sens = data.get("sensitivity_level", "internal")
         if sens not in VALID_SENSITIVITY_LEVELS:
             raise ValueError(f"sensitivity_level은 {VALID_SENSITIVITY_LEVELS} 중 하나여야 합니다: {sens}")
+        # §5.2: 승인 스코프 검증
+        approval_scope = data.get("approval_scope", "global")
+        if approval_scope not in VALID_APPROVAL_SCOPES:
+            raise ValueError(f"approval_scope는 {VALID_APPROVAL_SCOPES} 중 하나여야 합니다: {approval_scope}")
 
         now = _now_dt()
         conn = self._connect()
@@ -452,9 +788,10 @@ class SemanticStore:
                     concept_id, case_id, domain_id, name_ko, name_en,
                     description, business_definition, status, owner_team, steward_user,
                     sensitivity_level, default_time_semantics, default_unit,
+                    approval_scope,
                     version, tenant_id, created_at, updated_at
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 1, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 1, %s, %s, %s
                 )
             """, (
                 data["concept_id"], data["case_id"], data.get("domain_id", "default"),
@@ -462,8 +799,25 @@ class SemanticStore:
                 data.get("description"), data.get("business_definition"),
                 status, data.get("owner_team"), data.get("steward_user"),
                 sens, data.get("default_time_semantics"), data.get("default_unit"),
+                approval_scope,
                 tenant_id, now, now,
             ))
+            # §4.2: ONTOLOGY_CONCEPT_CREATED 이벤트 발행 (같은 트랜잭션)
+            from app.events.outbox import EventPublisher
+            EventPublisher.publish(
+                event_type="ONTOLOGY_CONCEPT_CREATED",
+                aggregate_type="ontology_concept",
+                aggregate_id=data["concept_id"],
+                payload={
+                    "concept_id": data["concept_id"],
+                    "case_id": data["case_id"],
+                    "name_ko": data["name_ko"],
+                    "status": status,
+                    "tenant_id": tenant_id,
+                },
+                tenant_id=tenant_id,
+                conn=conn,
+            )
             conn.commit()
         except Exception as exc:
             conn.rollback()
@@ -481,6 +835,7 @@ class SemanticStore:
             "domain_id": data.get("domain_id", "default"),
             "name_ko": data["name_ko"],
             "status": status,
+            "approval_scope": approval_scope,
             "version": 1,
             "created_at": now.isoformat(),
         }
@@ -502,8 +857,9 @@ class SemanticStore:
     def list_concepts(
         self, tenant_id: str, case_id: str | None = None,
         status: str | None = None, limit: int = 100, offset: int = 0,
+        approval_scope: str | None = None, domain_id: str | None = None,
     ) -> list[dict[str, Any]]:
-        """개념 목록 조회 (상태/케이스 필터)"""
+        """개념 목록 조회 (상태/케이스/승인스코프/도메인 필터)"""
         self.ensure_schema()
         conn = self._connect()
         cur = conn.cursor(cursor_factory=self._dict_cursor())
@@ -516,6 +872,14 @@ class SemanticStore:
         if status:
             conditions.append("status = %s")
             params.append(status)
+        # §5.2: 승인 스코프 필터
+        if approval_scope:
+            conditions.append("approval_scope = %s")
+            params.append(approval_scope)
+        # §5.1: 도메인 필터
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
         where = " AND ".join(conditions)
         params.extend([limit, offset])
         cur.execute(
@@ -542,6 +906,10 @@ class SemanticStore:
         if "sensitivity_level" in update_fields:
             if update_fields["sensitivity_level"] not in VALID_SENSITIVITY_LEVELS:
                 raise ValueError(f"sensitivity_level 유효하지 않음: {update_fields['sensitivity_level']}")
+        # §5.2: approval_scope 검증
+        if "approval_scope" in update_fields:
+            if update_fields["approval_scope"] not in VALID_APPROVAL_SCOPES:
+                raise ValueError(f"approval_scope 유효하지 않음: {update_fields['approval_scope']}")
 
         update_fields["version"] = existing["version"] + 1
         update_fields["updated_at"] = _now_dt()
@@ -557,8 +925,16 @@ class SemanticStore:
             conn.commit()
         return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
 
-    def change_concept_status(self, tenant_id: str, concept_id: str, new_status: str) -> dict[str, Any]:
-        """개념 상태 전이 — 허용된 전이만 가능"""
+    def change_concept_status(
+        self, tenant_id: str, concept_id: str, new_status: str,
+        approved_by: str | None = None,
+    ) -> dict[str, Any]:
+        """개념 상태 전이 — 허용된 전이만 가능
+
+        §5.2: approval_scope='domain'인 개념은 review→approved 직접 전이를 허용한다.
+        approval_scope='global'인 개념은 기존 행동(관리자 리뷰 필요)을 유지한다.
+        approved 전이 시 approved_by를 기록한다.
+        """
         if new_status not in VALID_CONCEPT_STATUSES:
             raise ValueError(f"status는 {VALID_CONCEPT_STATUSES} 중 하나여야 합니다")
         existing = self.get_concept(tenant_id, concept_id)
@@ -571,12 +947,51 @@ class SemanticStore:
 
         now = _now_dt()
         with self._cursor() as (conn, cur):
-            cur.execute(
-                "UPDATE ontology_concepts SET status = %s, updated_at = %s WHERE tenant_id = %s AND concept_id = %s",
-                (new_status, now, tenant_id, concept_id),
+            # §5.2: approved 전이 시 approved_by 기록
+            if new_status == "approved" and approved_by:
+                cur.execute(
+                    "UPDATE ontology_concepts SET status = %s, approved_by = %s, updated_at = %s WHERE tenant_id = %s AND concept_id = %s",
+                    (new_status, approved_by, now, tenant_id, concept_id),
+                )
+            else:
+                cur.execute(
+                    "UPDATE ontology_concepts SET status = %s, updated_at = %s WHERE tenant_id = %s AND concept_id = %s",
+                    (new_status, now, tenant_id, concept_id),
+                )
+            # §4.2: ONTOLOGY_CONCEPT_UPDATED 이벤트 발행 (상태 전이)
+            from app.events.outbox import EventPublisher
+            EventPublisher.publish(
+                event_type="ONTOLOGY_CONCEPT_UPDATED",
+                aggregate_type="ontology_concept",
+                aggregate_id=concept_id,
+                payload={
+                    "concept_id": concept_id,
+                    "previous_status": current,
+                    "new_status": new_status,
+                    "tenant_id": tenant_id,
+                },
+                tenant_id=tenant_id,
+                conn=conn,
             )
+            # §4.8: deprecated 전이 시 SEMANTIC_MEASURE_DEPRECATED 추가 발행
+            if new_status == "deprecated":
+                EventPublisher.publish(
+                    event_type="SEMANTIC_MEASURE_DEPRECATED",
+                    aggregate_type="ontology_concept",
+                    aggregate_id=concept_id,
+                    payload={
+                        "concept_id": concept_id,
+                        "previous_status": current,
+                        "tenant_id": tenant_id,
+                    },
+                    tenant_id=tenant_id,
+                    conn=conn,
+                )
             conn.commit()
-        return {**existing, "status": new_status, "updated_at": now.isoformat()}
+        result = {**existing, "status": new_status, "updated_at": now.isoformat()}
+        if new_status == "approved" and approved_by:
+            result["approved_by"] = approved_by
+        return result
 
     # ========================================
     # 온톨로지 용어 CRUD
@@ -684,8 +1099,13 @@ class SemanticStore:
         etype = data.get("entity_type", "fact")
         if etype not in VALID_ENTITY_TYPES:
             raise ValueError(f"entity_type은 {VALID_ENTITY_TYPES} 중 하나여야 합니다")
+        # P3 §5.3: feature_config는 feature_source 타입에서만 허용
+        feature_config = data.get("feature_config")
+        if feature_config and etype != "feature_source":
+            raise ValueError("feature_config는 entity_type='feature_source'일 때만 설정할 수 있습니다")
         now = _now_dt()
         filters_json = json.dumps(data.get("default_filters")) if data.get("default_filters") else None
+        feature_config_json = json.dumps(feature_config) if feature_config else None
         conn = self._connect()
         cur = conn.cursor()
         try:
@@ -693,13 +1113,15 @@ class SemanticStore:
                 INSERT INTO semantic_entities (
                     entity_id, bound_concept_id, physical_source_ref, entity_type,
                     grain_definition, primary_key_spec, default_filters, freshness_sla_minutes,
+                    feature_config, domain_id,
                     tenant_id, case_id, status, version, created_at, updated_at
-                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'draft', 1, %s, %s)
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, 'draft', 1, %s, %s)
             """, (
                 data["entity_id"], data.get("bound_concept_id"),
                 data["physical_source_ref"], etype,
                 data.get("grain_definition"), data.get("primary_key_spec"),
                 filters_json, data.get("freshness_sla_minutes"),
+                feature_config_json, data.get("domain_id", "global"),
                 tenant_id, data.get("case_id", ""), now, now,
             ))
             conn.commit()
@@ -711,7 +1133,7 @@ class SemanticStore:
         finally:
             cur.close()
             conn.close()
-        return {"entity_id": data["entity_id"], "status": "draft", "version": 1, "created_at": now.isoformat()}
+        return {"entity_id": data["entity_id"], "entity_type": etype, "domain_id": data.get("domain_id", "global"), "status": "draft", "version": 1, "created_at": now.isoformat()}
 
     def get_entity(self, tenant_id: str, entity_id: str) -> dict[str, Any] | None:
         self.ensure_schema()
@@ -726,20 +1148,22 @@ class SemanticStore:
         conn.close()
         return dict(row) if row else None
 
-    def list_entities(self, tenant_id: str, case_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+    def list_entities(self, tenant_id: str, case_id: str | None = None, domain_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """시멘틱 엔티티 목록 조회 — §5.1: domain_id 필터 지원"""
         self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if case_id:
+            conditions.append("case_id = %s")
+            params.append(case_id)
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
         conn = self._connect()
         cur = conn.cursor(cursor_factory=self._dict_cursor())
-        if case_id:
-            cur.execute(
-                "SELECT * FROM semantic_entities WHERE tenant_id = %s AND case_id = %s ORDER BY updated_at DESC LIMIT %s OFFSET %s",
-                (tenant_id, case_id, limit, offset),
-            )
-        else:
-            cur.execute(
-                "SELECT * FROM semantic_entities WHERE tenant_id = %s ORDER BY updated_at DESC LIMIT %s OFFSET %s",
-                (tenant_id, limit, offset),
-            )
+        cur.execute(f"SELECT * FROM semantic_entities WHERE {where} ORDER BY updated_at DESC LIMIT %s OFFSET %s", params)
         rows = cur.fetchall()
         cur.close()
         conn.close()
@@ -758,6 +1182,13 @@ class SemanticStore:
             raise ValueError(f"entity_type 유효하지 않음: {update_fields['entity_type']}")
         if "default_filters" in update_fields:
             update_fields["default_filters"] = json.dumps(update_fields["default_filters"])
+        # P3 §5.3: feature_config도 JSON으로 직렬화
+        if "feature_config" in update_fields:
+            # feature_source 타입이 아닌 엔티티에 feature_config 설정 차단
+            effective_type = update_fields.get("entity_type", existing.get("entity_type"))
+            if effective_type != "feature_source":
+                raise ValueError("feature_config는 entity_type='feature_source'일 때만 설정할 수 있습니다")
+            update_fields["feature_config"] = json.dumps(update_fields["feature_config"])
         update_fields["version"] = existing["version"] + 1
         update_fields["updated_at"] = _now_dt()
         set_clause = ", ".join(f"{k} = %s" for k in update_fields)
@@ -797,14 +1228,16 @@ class SemanticStore:
                     measure_type, sql_expression, filter_expression,
                     numerator_measure_id, denominator_measure_id,
                     additive_type, default_agg_window, owner_team,
+                    domain_id,
                     tenant_id, case_id, status, version, created_at, updated_at
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',1,%s,%s)
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',1,%s,%s)
             """, (
                 data["measure_id"], data.get("bound_concept_id"), data["entity_id"],
                 data["name"], data.get("description"),
                 mtype, data["sql_expression"], data.get("filter_expression"),
                 data.get("numerator_measure_id"), data.get("denominator_measure_id"),
                 atype, data.get("default_agg_window"), data.get("owner_team"),
+                data.get("domain_id", "global"),
                 tenant_id, data.get("case_id", ""), now, now,
             ))
             conn.commit()
@@ -828,7 +1261,8 @@ class SemanticStore:
         conn.close()
         return dict(row) if row else None
 
-    def list_measures(self, tenant_id: str, case_id: str | None = None, entity_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+    def list_measures(self, tenant_id: str, case_id: str | None = None, entity_id: str | None = None, domain_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """시멘틱 지표 목록 조회 — §5.1: domain_id 필터 지원"""
         self.ensure_schema()
         conditions = ["tenant_id = %s"]
         params: list[Any] = [tenant_id]
@@ -838,6 +1272,9 @@ class SemanticStore:
         if entity_id:
             conditions.append("entity_id = %s")
             params.append(entity_id)
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
         where = " AND ".join(conditions)
         params.extend([limit, offset])
         conn = self._connect()
@@ -889,12 +1326,14 @@ class SemanticStore:
                 INSERT INTO semantic_dimensions (
                     dimension_id, bound_concept_id, entity_id, name, sql_expression,
                     value_type, hierarchy_path, conformed_group,
+                    domain_id,
                     tenant_id, case_id, status, version, created_at, updated_at
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',1,%s,%s)
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',1,%s,%s)
             """, (
                 data["dimension_id"], data.get("bound_concept_id"), data["entity_id"],
                 data["name"], data["sql_expression"],
                 vtype, data.get("hierarchy_path"), data.get("conformed_group"),
+                data.get("domain_id", "global"),
                 tenant_id, data.get("case_id", ""), now, now,
             ))
             conn.commit()
@@ -918,7 +1357,8 @@ class SemanticStore:
         conn.close()
         return dict(row) if row else None
 
-    def list_dimensions(self, tenant_id: str, case_id: str | None = None, entity_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+    def list_dimensions(self, tenant_id: str, case_id: str | None = None, entity_id: str | None = None, domain_id: str | None = None, conformed_group: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """시멘틱 차원 목록 조회 — §5.1: domain_id, conformed_group 필터 지원"""
         self.ensure_schema()
         conditions = ["tenant_id = %s"]
         params: list[Any] = [tenant_id]
@@ -928,6 +1368,14 @@ class SemanticStore:
         if entity_id:
             conditions.append("entity_id = %s")
             params.append(entity_id)
+        # §5.1: 도메인 필터
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
+        # §5.1: conformed_group 필터 — 교차 도메인 공유 차원 조회
+        if conformed_group:
+            conditions.append("conformed_group = %s")
+            params.append(conformed_group)
         where = " AND ".join(conditions)
         params.extend([limit, offset])
         conn = self._connect()
@@ -972,9 +1420,24 @@ class SemanticStore:
             raise ValueError(f"relationship_type은 {VALID_RELATIONSHIP_TYPES} 중 하나여야 합니다")
         _validate_sql_fragment(data.get("join_condition", ""), "join_condition")
         # 양쪽 엔티티 존재 확인
-        for eid in (data["left_entity_id"], data["right_entity_id"]):
-            if not self.get_entity(tenant_id, eid):
-                raise KeyError(f"entity_id '{eid}'를 찾을 수 없습니다")
+        left_entity = self.get_entity(tenant_id, data["left_entity_id"])
+        right_entity = self.get_entity(tenant_id, data["right_entity_id"])
+        if not left_entity:
+            raise KeyError(f"entity_id '{data['left_entity_id']}'를 찾을 수 없습니다")
+        if not right_entity:
+            raise KeyError(f"entity_id '{data['right_entity_id']}'를 찾을 수 없습니다")
+        # §5.1: 교차 도메인 조인은 허용하되 경고 로그를 남긴다
+        left_domain = left_entity.get("domain_id", "global")
+        right_domain = right_entity.get("domain_id", "global")
+        if left_domain != right_domain:
+            logger.warning(
+                "cross_domain_join_contract",
+                join_id=data["join_id"],
+                left_entity_id=data["left_entity_id"],
+                left_domain=left_domain,
+                right_entity_id=data["right_entity_id"],
+                right_domain=right_domain,
+            )
         now = _now_dt()
         conn = self._connect()
         cur = conn.cursor()
@@ -983,12 +1446,14 @@ class SemanticStore:
                 INSERT INTO join_contracts (
                     join_id, left_entity_id, right_entity_id, join_type,
                     join_condition, relationship_type, allowed_for_ai, fanout_risk_score,
+                    domain_id,
                     tenant_id, case_id, status, created_at, updated_at
-                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',%s,%s)
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'draft',%s,%s)
             """, (
                 data["join_id"], data["left_entity_id"], data["right_entity_id"],
                 jtype, data["join_condition"], rtype,
                 data.get("allowed_for_ai", True), data.get("fanout_risk_score", 0.0),
+                data.get("domain_id", "global"),
                 tenant_id, data.get("case_id", ""), now, now,
             ))
             conn.commit()
@@ -1012,7 +1477,8 @@ class SemanticStore:
         conn.close()
         return dict(row) if row else None
 
-    def list_join_contracts(self, tenant_id: str, case_id: str | None = None, allowed_for_ai: bool | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+    def list_join_contracts(self, tenant_id: str, case_id: str | None = None, allowed_for_ai: bool | None = None, domain_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """조인 계약 목록 조회 — §5.1: domain_id 필터 지원"""
         self.ensure_schema()
         conditions = ["tenant_id = %s"]
         params: list[Any] = [tenant_id]
@@ -1022,6 +1488,10 @@ class SemanticStore:
         if allowed_for_ai is not None:
             conditions.append("allowed_for_ai = %s")
             params.append(allowed_for_ai)
+        # §5.1: 도메인 필터
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
         where = " AND ".join(conditions)
         params.extend([limit, offset])
         conn = self._connect()
@@ -1148,12 +1618,13 @@ class SemanticStore:
                 raise KeyError(f"join '{object_id}'를 찾을 수 없습니다")
 
         now = _now_dt()
-        # 이벤트 타입 매핑 (모든 object_type 포함)
+        # 이벤트 타입 매핑 (모든 object_type 포함, §4.2 확장)
         _event_type_map = {
             "entity": "SEMANTIC_ENTITY_PUBLISHED",
             "measure": "SEMANTIC_MEASURE_PUBLISHED",
-            "dimension": "SEMANTIC_ENTITY_PUBLISHED",  # 차원도 엔티티 레벨 이벤트
+            "dimension": "SEMANTIC_DIMENSION_PUBLISHED",  # §4.2: 차원 전용 이벤트
             "join": "JOIN_CONTRACT_CREATED",
+            "grain": "GRAIN_CONTRACT_CREATED",  # §4.2: 그레인 계약 이벤트
         }
 
         table_map = {"entity": "semantic_entities", "measure": "semantic_measures", "dimension": "semantic_dimensions", "join": "join_contracts"}
@@ -1197,6 +1668,24 @@ class SemanticStore:
                     tenant_id=tenant_id,
                     conn=conn,
                 )
+
+            # §4.9: SEMANTIC_RELEASE_DEPLOYED — 릴리스 생성 시 배포 이벤트 발행
+            from app.events.outbox import EventPublisher as _EP
+            _EP.publish(
+                event_type="SEMANTIC_RELEASE_DEPLOYED",
+                aggregate_type="semantic_release",
+                aggregate_id=release_id,
+                payload={
+                    "release_id": release_id,
+                    "object_type": object_type,
+                    "object_id": object_id,
+                    "version": version,
+                    "tenant_id": tenant_id,
+                    "deployed_at": now.isoformat(),
+                },
+                tenant_id=tenant_id,
+                conn=conn,
+            )
 
             conn.commit()
 
@@ -1284,6 +1773,21 @@ class SemanticStore:
                 data.get("uniqueness_test"), dr,
                 tenant_id, data.get("case_id", ""), now, now,
             ))
+            # §4.2: GRAIN_CONTRACT_CREATED 이벤트 발행
+            from app.events.outbox import EventPublisher
+            EventPublisher.publish(
+                event_type="GRAIN_CONTRACT_CREATED",
+                aggregate_type="grain_contract",
+                aggregate_id=data["grain_id"],
+                payload={
+                    "grain_id": data["grain_id"],
+                    "entity_id": data["entity_id"],
+                    "time_grain": tg,
+                    "tenant_id": tenant_id,
+                },
+                tenant_id=tenant_id,
+                conn=conn,
+            )
             conn.commit()
         except Exception as exc:
             conn.rollback()
@@ -1347,6 +1851,303 @@ class SemanticStore:
             cur.execute(f"UPDATE grain_contracts SET {set_clause} WHERE tenant_id = %s AND grain_id = %s", values)
             conn.commit()
         return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    # ========================================
+    # §5.2 시멘틱 세그먼트 CRUD
+    # ========================================
+
+    def create_segment(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """시멘틱 세그먼트 등록 — 엔티티의 필터 기반 데이터 분할"""
+        self.ensure_schema()
+        seg_type = data.get("segment_type", "static")
+        if seg_type not in VALID_SEGMENT_TYPES:
+            raise ValueError(f"segment_type은 {VALID_SEGMENT_TYPES} 중 하나여야 합니다")
+        _validate_sql_fragment(data.get("filter_expression", "") or "", "filter_expression")
+        # 엔티티 존재 확인
+        entity = self.get_entity(tenant_id, data["entity_id"])
+        if not entity:
+            raise KeyError(f"entity_id '{data['entity_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO semantic_segments (
+                    segment_id, entity_id, name, filter_expression, segment_type,
+                    description, tenant_id, case_id, created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["segment_id"], data["entity_id"], data["name"],
+                data["filter_expression"], seg_type,
+                data.get("description"), tenant_id, data.get("case_id", ""),
+                now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"segment_id '{data['segment_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {"segment_id": data["segment_id"], "entity_id": data["entity_id"], "created_at": now.isoformat()}
+
+    def get_segment(self, tenant_id: str, segment_id: str) -> dict[str, Any] | None:
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute("SELECT * FROM semantic_segments WHERE tenant_id = %s AND segment_id = %s", (tenant_id, segment_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_segments(self, tenant_id: str, entity_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if entity_id:
+            conditions.append("entity_id = %s")
+            params.append(entity_id)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(f"SELECT * FROM semantic_segments WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s", params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_segment(self, tenant_id: str, segment_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        self.ensure_schema()
+        existing = self.get_segment(tenant_id, segment_id)
+        if not existing:
+            raise KeyError(f"segment_id '{segment_id}'를 찾을 수 없습니다")
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _SEGMENT_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "segment_type" in update_fields and update_fields["segment_type"] not in VALID_SEGMENT_TYPES:
+            raise ValueError(f"segment_type 유효하지 않음: {update_fields['segment_type']}")
+        if "filter_expression" in update_fields:
+            _validate_sql_fragment(update_fields["filter_expression"], "filter_expression")
+        update_fields["version"] = (existing.get("version") or 1) + 1
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, segment_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(f"UPDATE semantic_segments SET {set_clause} WHERE tenant_id = %s AND segment_id = %s", values)
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_segment(self, tenant_id: str, segment_id: str) -> bool:
+        """시멘틱 세그먼트 삭제"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute("DELETE FROM semantic_segments WHERE tenant_id = %s AND segment_id = %s", (tenant_id, segment_id))
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
+    # ========================================
+    # §5.2 시간 계약 CRUD
+    # ========================================
+
+    def create_time_contract(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """시간 계약 등록 — 엔티티의 시간 축 의미론 정의"""
+        self.ensure_schema()
+        tg = data.get("time_grain", "")
+        if tg not in VALID_TIME_CONTRACT_GRAINS:
+            raise ValueError(f"time_grain은 {VALID_TIME_CONTRACT_GRAINS} 중 하나여야 합니다")
+        entity = self.get_entity(tenant_id, data["entity_id"])
+        if not entity:
+            raise KeyError(f"entity_id '{data['entity_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO time_contracts (
+                    time_contract_id, entity_id, time_column, time_grain,
+                    timezone, fiscal_calendar_offset, default_lookback_days,
+                    description, tenant_id, case_id, created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["time_contract_id"], data["entity_id"], data["time_column"], tg,
+                data.get("timezone", "UTC"), data.get("fiscal_calendar_offset", 0),
+                data.get("default_lookback_days", 365), data.get("description"),
+                tenant_id, data.get("case_id", ""), now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"time_contract_id '{data['time_contract_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {"time_contract_id": data["time_contract_id"], "entity_id": data["entity_id"], "created_at": now.isoformat()}
+
+    def get_time_contract(self, tenant_id: str, time_contract_id: str) -> dict[str, Any] | None:
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute("SELECT * FROM time_contracts WHERE tenant_id = %s AND time_contract_id = %s", (tenant_id, time_contract_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_time_contracts(self, tenant_id: str, entity_id: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if entity_id:
+            conditions.append("entity_id = %s")
+            params.append(entity_id)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(f"SELECT * FROM time_contracts WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s", params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_time_contract(self, tenant_id: str, time_contract_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        self.ensure_schema()
+        existing = self.get_time_contract(tenant_id, time_contract_id)
+        if not existing:
+            raise KeyError(f"time_contract_id '{time_contract_id}'를 찾을 수 없습니다")
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _TIME_CONTRACT_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "time_grain" in update_fields and update_fields["time_grain"] not in VALID_TIME_CONTRACT_GRAINS:
+            raise ValueError(f"time_grain 유효하지 않음: {update_fields['time_grain']}")
+        update_fields["version"] = (existing.get("version") or 1) + 1
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, time_contract_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(f"UPDATE time_contracts SET {set_clause} WHERE tenant_id = %s AND time_contract_id = %s", values)
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_time_contract(self, tenant_id: str, time_contract_id: str) -> bool:
+        """시간 계약 삭제"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute("DELETE FROM time_contracts WHERE tenant_id = %s AND time_contract_id = %s", (tenant_id, time_contract_id))
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
+    # ========================================
+    # §5.2 접근 정책 CRUD
+    # ========================================
+
+    def create_access_policy(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """접근 정책 등록 — 행/열 수준 데이터 접근 제어"""
+        self.ensure_schema()
+        pt = data.get("policy_type", "")
+        if pt not in VALID_ACCESS_POLICY_TYPES:
+            raise ValueError(f"policy_type은 {VALID_ACCESS_POLICY_TYPES} 중 하나여야 합니다")
+        _validate_sql_fragment(data.get("condition_expression", "") or "", "condition_expression")
+        entity = self.get_entity(tenant_id, data["entity_id"])
+        if not entity:
+            raise KeyError(f"entity_id '{data['entity_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO access_policies (
+                    access_policy_id, entity_id, policy_type, condition_expression,
+                    target_roles, is_active, description,
+                    tenant_id, case_id, created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["access_policy_id"], data["entity_id"], pt,
+                data["condition_expression"],
+                json.dumps(data.get("target_roles", [])),
+                data.get("is_active", True), data.get("description"),
+                tenant_id, data.get("case_id", ""), now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"access_policy_id '{data['access_policy_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {"access_policy_id": data["access_policy_id"], "entity_id": data["entity_id"], "created_at": now.isoformat()}
+
+    def get_access_policy(self, tenant_id: str, access_policy_id: str) -> dict[str, Any] | None:
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute("SELECT * FROM access_policies WHERE tenant_id = %s AND access_policy_id = %s", (tenant_id, access_policy_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_access_policies(self, tenant_id: str, entity_id: str | None = None, is_active: bool | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if entity_id:
+            conditions.append("entity_id = %s")
+            params.append(entity_id)
+        if is_active is not None:
+            conditions.append("is_active = %s")
+            params.append(is_active)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(f"SELECT * FROM access_policies WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s", params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_access_policy(self, tenant_id: str, access_policy_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        self.ensure_schema()
+        existing = self.get_access_policy(tenant_id, access_policy_id)
+        if not existing:
+            raise KeyError(f"access_policy_id '{access_policy_id}'를 찾을 수 없습니다")
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _ACCESS_POLICY_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "policy_type" in update_fields and update_fields["policy_type"] not in VALID_ACCESS_POLICY_TYPES:
+            raise ValueError(f"policy_type 유효하지 않음: {update_fields['policy_type']}")
+        if "condition_expression" in update_fields:
+            _validate_sql_fragment(update_fields["condition_expression"], "condition_expression")
+        if "target_roles" in update_fields:
+            update_fields["target_roles"] = json.dumps(update_fields["target_roles"])
+        update_fields["version"] = (existing.get("version") or 1) + 1
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, access_policy_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(f"UPDATE access_policies SET {set_clause} WHERE tenant_id = %s AND access_policy_id = %s", values)
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_access_policy(self, tenant_id: str, access_policy_id: str) -> bool:
+        """접근 정책 삭제"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute("DELETE FROM access_policies WHERE tenant_id = %s AND access_policy_id = %s", (tenant_id, access_policy_id))
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
 
     # ========================================
     # AI 컨텍스트 팩 (Oracle/LLM 소비용)
@@ -1495,6 +2296,21 @@ class SemanticStore:
                 data.get("quality_gate_min_score", 0.0),
                 tenant_id, data.get("case_id", ""), now, now,
             ))
+            # §4.9: CONTEXT_PACK_GENERATED 이벤트 발행
+            from app.events.outbox import EventPublisher
+            EventPublisher.publish(
+                event_type="CONTEXT_PACK_GENERATED",
+                aggregate_type="context_pack",
+                aggregate_id=data["context_pack_id"],
+                payload={
+                    "context_pack_id": data["context_pack_id"],
+                    "intent_type": intent,
+                    "action": "created",
+                    "tenant_id": tenant_id,
+                },
+                tenant_id=tenant_id,
+                conn=conn,
+            )
             conn.commit()
         except Exception as exc:
             conn.rollback()
@@ -1559,6 +2375,22 @@ class SemanticStore:
         values = list(update_fields.values()) + [tenant_id, context_pack_id]
         with self._cursor() as (conn, cur):
             cur.execute(f"UPDATE context_packs SET {set_clause} WHERE tenant_id = %s AND context_pack_id = %s", values)
+            # §4.9: CONTEXT_PACK_GENERATED 이벤트 발행 (update)
+            from app.events.outbox import EventPublisher
+            EventPublisher.publish(
+                event_type="CONTEXT_PACK_GENERATED",
+                aggregate_type="context_pack",
+                aggregate_id=context_pack_id,
+                payload={
+                    "context_pack_id": context_pack_id,
+                    "intent_type": update_fields.get("intent_type", existing.get("intent_type", "general")),
+                    "action": "updated",
+                    "version": update_fields["version"],
+                    "tenant_id": tenant_id,
+                },
+                tenant_id=tenant_id,
+                conn=conn,
+            )
             conn.commit()
         return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
 
@@ -1632,6 +2464,456 @@ class SemanticStore:
         return deleted
 
     # ========================================
+    # L3: 온톨로지 규칙 CRUD
+    # ========================================
+
+    def create_rule(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """온톨로지 규칙 등록 — 개념에 바인딩되는 업무 규칙"""
+        self.ensure_schema()
+        rt = data.get("rule_type", "")
+        if rt not in VALID_RULE_TYPES:
+            raise ValueError(f"rule_type은 {VALID_RULE_TYPES} 중 하나여야 합니다")
+        el = data.get("expression_lang", "sql")
+        if el not in VALID_EXPRESSION_LANGS:
+            raise ValueError(f"expression_lang은 {VALID_EXPRESSION_LANGS} 중 하나여야 합니다")
+        # 개념 존재 확인
+        concept = self.get_concept(tenant_id, data["concept_id"])
+        if not concept:
+            raise KeyError(f"concept_id '{data['concept_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO ontology_rules (
+                    rule_id, tenant_id, concept_id, rule_type,
+                    rule_expression, expression_lang, severity, description,
+                    created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["rule_id"], tenant_id, data["concept_id"], rt,
+                data["rule_expression"], el,
+                data.get("severity", "warning"), data.get("description"),
+                now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"rule_id '{data['rule_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {"rule_id": data["rule_id"], "concept_id": data["concept_id"],
+                "rule_type": rt, "expression_lang": el, "created_at": now.isoformat()}
+
+    def get_rule(self, tenant_id: str, rule_id: str) -> dict[str, Any] | None:
+        """단건 규칙 조회"""
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute("SELECT * FROM ontology_rules WHERE tenant_id = %s AND rule_id = %s", (tenant_id, rule_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_rules(self, tenant_id: str, concept_id: str | None = None,
+                   rule_type: str | None = None, limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """규칙 목록 조회 — concept_id, rule_type 필터"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if concept_id:
+            conditions.append("concept_id = %s")
+            params.append(concept_id)
+        if rule_type:
+            conditions.append("rule_type = %s")
+            params.append(rule_type)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(f"SELECT * FROM ontology_rules WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s", params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_rule(self, tenant_id: str, rule_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """규칙 수정 (PATCH 방식)"""
+        self.ensure_schema()
+        existing = self.get_rule(tenant_id, rule_id)
+        if not existing:
+            raise KeyError(f"rule_id '{rule_id}'를 찾을 수 없습니다")
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _ONTOLOGY_RULE_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "rule_type" in update_fields and update_fields["rule_type"] not in VALID_RULE_TYPES:
+            raise ValueError(f"rule_type 유효하지 않음: {update_fields['rule_type']}")
+        if "expression_lang" in update_fields and update_fields["expression_lang"] not in VALID_EXPRESSION_LANGS:
+            raise ValueError(f"expression_lang 유효하지 않음: {update_fields['expression_lang']}")
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, rule_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(f"UPDATE ontology_rules SET {set_clause} WHERE tenant_id = %s AND rule_id = %s", values)
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_rule(self, tenant_id: str, rule_id: str) -> bool:
+        """규칙 삭제"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute("DELETE FROM ontology_rules WHERE tenant_id = %s AND rule_id = %s", (tenant_id, rule_id))
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
+    # ========================================
+    # L3: 온톨로지 정책 CRUD
+    # ========================================
+
+    def create_policy(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """온톨로지 정책 등록 — 접근/PII/보존/거주지/집계 거버넌스 정책"""
+        self.ensure_schema()
+        pt = data.get("policy_type", "")
+        if pt not in VALID_POLICY_TYPES:
+            raise ValueError(f"policy_type은 {VALID_POLICY_TYPES} 중 하나여야 합니다")
+        concept = self.get_concept(tenant_id, data["concept_id"])
+        if not concept:
+            raise KeyError(f"concept_id '{data['concept_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO ontology_policies (
+                    policy_id, tenant_id, concept_id, policy_type,
+                    policy_expression, description, is_active,
+                    created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["policy_id"], tenant_id, data["concept_id"], pt,
+                data["policy_expression"], data.get("description"),
+                data.get("is_active", True), now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"policy_id '{data['policy_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {"policy_id": data["policy_id"], "concept_id": data["concept_id"],
+                "policy_type": pt, "is_active": data.get("is_active", True), "created_at": now.isoformat()}
+
+    def get_policy(self, tenant_id: str, policy_id: str) -> dict[str, Any] | None:
+        """단건 정책 조회"""
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute("SELECT * FROM ontology_policies WHERE tenant_id = %s AND policy_id = %s", (tenant_id, policy_id))
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_policies(self, tenant_id: str, concept_id: str | None = None,
+                      policy_type: str | None = None, is_active: bool | None = None,
+                      limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """정책 목록 조회 — concept_id, policy_type, is_active 필터"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if concept_id:
+            conditions.append("concept_id = %s")
+            params.append(concept_id)
+        if policy_type:
+            conditions.append("policy_type = %s")
+            params.append(policy_type)
+        if is_active is not None:
+            conditions.append("is_active = %s")
+            params.append(is_active)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(f"SELECT * FROM ontology_policies WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s", params)
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_policy(self, tenant_id: str, policy_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """정책 수정 (PATCH 방식)"""
+        self.ensure_schema()
+        existing = self.get_policy(tenant_id, policy_id)
+        if not existing:
+            raise KeyError(f"policy_id '{policy_id}'를 찾을 수 없습니다")
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _ONTOLOGY_POLICY_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "policy_type" in update_fields and update_fields["policy_type"] not in VALID_POLICY_TYPES:
+            raise ValueError(f"policy_type 유효하지 않음: {update_fields['policy_type']}")
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, policy_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(f"UPDATE ontology_policies SET {set_clause} WHERE tenant_id = %s AND policy_id = %s", values)
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_policy(self, tenant_id: str, policy_id: str) -> bool:
+        """정책 삭제"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute("DELETE FROM ontology_policies WHERE tenant_id = %s AND policy_id = %s", (tenant_id, policy_id))
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
+    # ========================================
+    # L4: Reasoning & Governance — 충돌 탐지 + 영향 분석
+    # ========================================
+
+    def detect_conflicts(self, tenant_id: str) -> dict[str, Any]:
+        """동일 이름/용어를 가진 서로 다른 개념/지표를 탐지한다 (L4 거버넌스).
+
+        세 가지 종류의 충돌을 감지한다:
+        1. concept_conflicts: 동일 name_ko 또는 name_en을 공유하는 서로 다른 개념
+        2. measure_conflicts: 동일 name을 공유하는 서로 다른 지표
+        3. term_collisions: 동일 surface_form이 서로 다른 concept_id에 매핑된 용어
+        """
+        self.ensure_schema()
+        concept_conflicts: list[dict] = []
+        measure_conflicts: list[dict] = []
+        term_collisions: list[dict] = []
+
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            # 1) 개념 이름 충돌 — name_ko 기준
+            cur.execute("""
+                SELECT name_ko, array_agg(concept_id) AS concept_ids,
+                       array_agg(COALESCE(description, '')) AS descriptions
+                FROM ontology_concepts
+                WHERE tenant_id = %s AND status != 'deprecated'
+                  AND name_ko IS NOT NULL AND name_ko != ''
+                GROUP BY name_ko
+                HAVING COUNT(*) > 1
+            """, (tenant_id,))
+            for row in cur.fetchall():
+                concept_conflicts.append({
+                    "name": row["name_ko"],
+                    "field": "name_ko",
+                    "concept_ids": row["concept_ids"],
+                    "descriptions": row["descriptions"],
+                })
+
+            # 2) 개념 이름 충돌 — name_en 기준
+            cur.execute("""
+                SELECT name_en, array_agg(concept_id) AS concept_ids,
+                       array_agg(COALESCE(description, '')) AS descriptions
+                FROM ontology_concepts
+                WHERE tenant_id = %s AND status != 'deprecated'
+                  AND name_en IS NOT NULL AND name_en != ''
+                GROUP BY name_en
+                HAVING COUNT(*) > 1
+            """, (tenant_id,))
+            for row in cur.fetchall():
+                concept_conflicts.append({
+                    "name": row["name_en"],
+                    "field": "name_en",
+                    "concept_ids": row["concept_ids"],
+                    "descriptions": row["descriptions"],
+                })
+
+            # 3) 지표 이름 충돌 — 동일 name이 서로 다른 지표에 존재
+            cur.execute("""
+                SELECT name, array_agg(measure_id) AS measure_ids,
+                       array_agg(COALESCE(bound_concept_id, '')) AS concept_ids
+                FROM semantic_measures
+                WHERE tenant_id = %s AND status != 'deprecated'
+                GROUP BY name
+                HAVING COUNT(*) > 1
+            """, (tenant_id,))
+            for row in cur.fetchall():
+                measure_conflicts.append({
+                    "name": row["name"],
+                    "measure_ids": row["measure_ids"],
+                    "concept_ids": row["concept_ids"],
+                })
+
+            # 4) 용어 충돌 — 동일 surface_form이 서로 다른 concept_id에 매핑
+            cur.execute("""
+                SELECT surface_form, array_agg(DISTINCT concept_id) AS concept_ids
+                FROM ontology_terms
+                WHERE tenant_id = %s
+                GROUP BY surface_form
+                HAVING COUNT(DISTINCT concept_id) > 1
+            """, (tenant_id,))
+            for row in cur.fetchall():
+                term_collisions.append({
+                    "surface_form": row["surface_form"],
+                    "concept_ids": row["concept_ids"],
+                })
+
+        return {
+            "concept_conflicts": concept_conflicts,
+            "measure_conflicts": measure_conflicts,
+            "term_collisions": term_collisions,
+        }
+
+    def analyze_impact(self, tenant_id: str, object_type: str, object_id: str) -> dict[str, Any]:
+        """특정 객체 변경 시 영향받는 downstream 객체 목록을 반환한다 (L4 거버넌스).
+
+        지원하는 object_type: concept, measure, entity, join, dimension
+        각 타입에 따라 연관된 하위 객체를 SQL로 조회한다.
+        """
+        self.ensure_schema()
+
+        affected: dict[str, list[str]] = {
+            "context_packs": [],
+            "entities": [],
+            "measures": [],
+            "dimensions": [],
+            "joins": [],
+            "grains": [],
+        }
+
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            if object_type == "concept":
+                # 개념에 바인딩된 엔티티
+                cur.execute(
+                    "SELECT entity_id FROM semantic_entities WHERE tenant_id = %s AND bound_concept_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["entities"] = [r["entity_id"] for r in cur.fetchall()]
+
+                # 개념에 바인딩된 지표
+                cur.execute(
+                    "SELECT measure_id FROM semantic_measures WHERE tenant_id = %s AND bound_concept_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["measures"] = [r["measure_id"] for r in cur.fetchall()]
+
+                # 개념에 바인딩된 차원
+                cur.execute(
+                    "SELECT dimension_id FROM semantic_dimensions WHERE tenant_id = %s AND bound_concept_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["dimensions"] = [r["dimension_id"] for r in cur.fetchall()]
+
+                # 개념을 포함하는 컨텍스트 팩 (JSONB 배열 검색)
+                cur.execute(
+                    "SELECT context_pack_id FROM context_packs WHERE tenant_id = %s AND included_concept_ids @> %s::jsonb",
+                    (tenant_id, json.dumps([object_id])),
+                )
+                affected["context_packs"] = [r["context_pack_id"] for r in cur.fetchall()]
+
+            elif object_type == "entity":
+                # 엔티티에 바인딩된 지표
+                cur.execute(
+                    "SELECT measure_id FROM semantic_measures WHERE tenant_id = %s AND entity_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["measures"] = [r["measure_id"] for r in cur.fetchall()]
+
+                # 엔티티에 바인딩된 차원
+                cur.execute(
+                    "SELECT dimension_id FROM semantic_dimensions WHERE tenant_id = %s AND entity_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["dimensions"] = [r["dimension_id"] for r in cur.fetchall()]
+
+                # 엔티티를 참조하는 조인 계약
+                cur.execute(
+                    "SELECT join_id FROM join_contracts WHERE tenant_id = %s AND (left_entity_id = %s OR right_entity_id = %s)",
+                    (tenant_id, object_id, object_id),
+                )
+                affected["joins"] = [r["join_id"] for r in cur.fetchall()]
+
+                # 엔티티를 참조하는 그레인 계약
+                cur.execute(
+                    "SELECT grain_id FROM grain_contracts WHERE tenant_id = %s AND entity_id = %s",
+                    (tenant_id, object_id),
+                )
+                affected["grains"] = [r["grain_id"] for r in cur.fetchall()]
+
+            elif object_type == "measure":
+                # 지표의 entity_id 조회
+                cur.execute(
+                    "SELECT entity_id FROM semantic_measures WHERE tenant_id = %s AND measure_id = %s",
+                    (tenant_id, object_id),
+                )
+                row = cur.fetchone()
+                if row:
+                    affected["entities"] = [row["entity_id"]]
+
+                    # 해당 엔티티를 참조하는 조인 계약
+                    cur.execute(
+                        "SELECT join_id FROM join_contracts WHERE tenant_id = %s AND (left_entity_id = %s OR right_entity_id = %s)",
+                        (tenant_id, row["entity_id"], row["entity_id"]),
+                    )
+                    affected["joins"] = [r["join_id"] for r in cur.fetchall()]
+
+                # 지표를 포함하는 컨텍스트 팩
+                cur.execute(
+                    "SELECT context_pack_id FROM context_packs WHERE tenant_id = %s AND included_measure_ids @> %s::jsonb",
+                    (tenant_id, json.dumps([object_id])),
+                )
+                affected["context_packs"] = [r["context_pack_id"] for r in cur.fetchall()]
+
+            elif object_type == "dimension":
+                # 차원의 entity_id 조회
+                cur.execute(
+                    "SELECT entity_id FROM semantic_dimensions WHERE tenant_id = %s AND dimension_id = %s",
+                    (tenant_id, object_id),
+                )
+                row = cur.fetchone()
+                if row:
+                    affected["entities"] = [row["entity_id"]]
+
+                # 차원을 포함하는 컨텍스트 팩
+                cur.execute(
+                    "SELECT context_pack_id FROM context_packs WHERE tenant_id = %s AND included_dimension_ids @> %s::jsonb",
+                    (tenant_id, json.dumps([object_id])),
+                )
+                affected["context_packs"] = [r["context_pack_id"] for r in cur.fetchall()]
+
+            elif object_type == "join":
+                # 조인을 포함/금지하는 컨텍스트 팩
+                cur.execute(
+                    """SELECT context_pack_id FROM context_packs
+                       WHERE tenant_id = %s AND (
+                           allowed_join_ids @> %s::jsonb OR banned_join_ids @> %s::jsonb
+                       )""",
+                    (tenant_id, json.dumps([object_id]), json.dumps([object_id])),
+                )
+                affected["context_packs"] = [r["context_pack_id"] for r in cur.fetchall()]
+
+                # 조인의 양쪽 엔티티
+                cur.execute(
+                    "SELECT left_entity_id, right_entity_id FROM join_contracts WHERE tenant_id = %s AND join_id = %s",
+                    (tenant_id, object_id),
+                )
+                row = cur.fetchone()
+                if row:
+                    affected["entities"] = [row["left_entity_id"], row["right_entity_id"]]
+
+        # 총 영향 수 계산
+        total = sum(len(v) for v in affected.values())
+
+        return {
+            "object_type": object_type,
+            "object_id": object_id,
+            "affected": affected,
+            "total_affected": total,
+        }
+
+    # ========================================
     # L5: 컨텍스트 팩 해석 (resolve)
     # ========================================
 
@@ -1696,3 +2978,753 @@ class SemanticStore:
                 for p in policies
             ],
         }
+
+    # ========================================
+    # P3 §5.3: ML/Feature Source 바인딩
+    # ========================================
+
+    def list_feature_sources(self, tenant_id: str, case_id: str | None = None,
+                              limit: int = 100, offset: int = 0) -> list[dict[str, Any]]:
+        """feature_source 타입 엔티티만 조회한다."""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s", "entity_type = 'feature_source'"]
+        params: list[Any] = [tenant_id]
+        if case_id:
+            conditions.append("case_id = %s")
+            params.append(case_id)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(
+            f"SELECT * FROM semantic_entities WHERE {where} ORDER BY updated_at DESC LIMIT %s OFFSET %s",
+            params,
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def generate_training_query(self, tenant_id: str, entity_id: str,
+                                 columns: list[str] | None = None,
+                                 date_range: dict[str, str] | None = None) -> dict[str, Any]:
+        """피처 엔티티 기반 학습 데이터셋 SQL을 생성한다.
+
+        feature_config.feature_columns 또는 사용자 지정 컬럼으로
+        training_query_template을 렌더링한다.
+        """
+        self.ensure_schema()
+        entity = self.get_entity(tenant_id, entity_id)
+        if not entity:
+            raise KeyError(f"entity_id '{entity_id}'를 찾을 수 없습니다")
+        if entity.get("entity_type") != "feature_source":
+            raise ValueError(f"entity_id '{entity_id}'의 타입이 feature_source가 아닙니다: {entity.get('entity_type')}")
+
+        # feature_config 파싱 (JSONB → dict)
+        fc = entity.get("feature_config")
+        if isinstance(fc, str):
+            fc = json.loads(fc)
+        if not fc:
+            raise ValueError(f"entity_id '{entity_id}'에 feature_config가 설정되지 않았습니다")
+
+        # 컬럼 결정: 사용자 지정 → feature_columns → *
+        use_columns = columns or fc.get("feature_columns") or ["*"]
+        col_str = ", ".join(use_columns)
+
+        # 소스 테이블
+        source = entity.get("physical_source_ref", "UNKNOWN_SOURCE")
+
+        # 날짜 필터 생성
+        date_filter = "1=1"
+        if date_range:
+            start = date_range.get("start")
+            end = date_range.get("end")
+            if start and end:
+                date_filter = f"created_at >= '{start}' AND created_at <= '{end}'"
+            elif start:
+                date_filter = f"created_at >= '{start}'"
+            elif end:
+                date_filter = f"created_at <= '{end}'"
+
+        # 템플릿 기반 SQL 생성 (기본 템플릿 제공)
+        template = fc.get(
+            "training_query_template",
+            "SELECT {columns} FROM {entity_source} WHERE {date_filter}",
+        )
+        sql = template.format(
+            columns=col_str,
+            entity_source=source,
+            date_filter=date_filter,
+        )
+
+        return {
+            "sql": sql,
+            "entity_id": entity_id,
+            "columns": use_columns,
+            "source": source,
+            "date_range": date_range,
+        }
+
+    def check_feature_consistency(self, tenant_id: str, entity_id: str) -> dict[str, Any]:
+        """BI 지표와 ML 피처 정의의 일관성을 검증한다.
+
+        feature_source 엔티티에 바인딩된 시멘틱 지표(measure)의 sql_expression을
+        동일 tenant의 fact 엔티티 지표와 비교하여 불일치를 보고한다.
+        """
+        self.ensure_schema()
+        entity = self.get_entity(tenant_id, entity_id)
+        if not entity:
+            raise KeyError(f"entity_id '{entity_id}'를 찾을 수 없습니다")
+        if entity.get("entity_type") != "feature_source":
+            raise ValueError(f"entity_id '{entity_id}'의 타입이 feature_source가 아닙니다")
+
+        # 해당 feature_source 엔티티의 지표 목록
+        feature_measures = self.list_measures(tenant_id, entity_id=entity_id)
+
+        # 동일 tenant의 fact 엔티티 지표 전체 (이름 기반 매칭)
+        all_measures = self.list_measures(tenant_id, limit=500)
+        # fact 엔티티에 속한 지표만 필터 (자기 자신 제외)
+        bi_measures_by_name: dict[str, dict] = {}
+        for m in all_measures:
+            if m.get("entity_id") == entity_id:
+                continue  # 자기 자신 제외
+            # 이름으로 매핑 (첫 번째 발견된 것을 사용)
+            mname = m.get("name", "")
+            if mname and mname not in bi_measures_by_name:
+                bi_measures_by_name[mname] = m
+
+        mismatches: list[dict[str, Any]] = []
+        matched = 0
+        for fm in feature_measures:
+            fname = fm.get("name", "")
+            if fname in bi_measures_by_name:
+                bi_m = bi_measures_by_name[fname]
+                # sql_expression 비교 (공백 정규화)
+                f_sql = (fm.get("sql_expression") or "").strip()
+                b_sql = (bi_m.get("sql_expression") or "").strip()
+                if f_sql == b_sql:
+                    matched += 1
+                else:
+                    mismatches.append({
+                        "measure_name": fname,
+                        "feature_measure_id": fm.get("measure_id"),
+                        "bi_measure_id": bi_m.get("measure_id"),
+                        "feature_sql": f_sql,
+                        "bi_sql": b_sql,
+                    })
+            # BI에 대응하는 지표가 없으면 불일치로 취급하지 않음 (ML 전용 피처)
+
+        return {
+            "entity_id": entity_id,
+            "consistent": len(mismatches) == 0,
+            "total_feature_measures": len(feature_measures),
+            "matched": matched,
+            "mismatches": mismatches,
+        }
+
+    # ========================================
+    # 온톨로지 관계 CRUD (§5.1 Neo4j 보완)
+    # ========================================
+
+    def create_relation(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """온톨로지 관계를 등록한다 — 양쪽 개념 존재 확인 + 자기참조 방지."""
+        self.ensure_schema()
+
+        # 술어 타입 유효성 검증
+        pred = data.get("predicate_type", "")
+        if pred not in VALID_PREDICATE_TYPES:
+            raise ValueError(f"predicate_type은 {VALID_PREDICATE_TYPES} 중 하나여야 합니다: {pred}")
+
+        # 기수성 검증
+        card = data.get("cardinality", "1:N")
+        if card not in VALID_CARDINALITIES:
+            raise ValueError(f"cardinality는 {VALID_CARDINALITIES} 중 하나여야 합니다: {card}")
+
+        # 방향성 검증
+        dirn = data.get("directionality", "unidirectional")
+        if dirn not in VALID_DIRECTIONALITIES:
+            raise ValueError(f"directionality는 {VALID_DIRECTIONALITIES} 중 하나여야 합니다: {dirn}")
+
+        # 자기참조 방지
+        subj = data["subject_concept_id"]
+        obj = data["object_concept_id"]
+        if subj == obj:
+            raise ValueError("subject_concept_id와 object_concept_id가 동일합니다 (자기참조 금지)")
+
+        # 양쪽 개념 존재 확인
+        if not self.get_concept(tenant_id, subj):
+            raise KeyError(f"subject concept_id '{subj}'를 찾을 수 없습니다")
+        if not self.get_concept(tenant_id, obj):
+            raise KeyError(f"object concept_id '{obj}'를 찾을 수 없습니다")
+
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO ontology_relations (
+                    relation_id, tenant_id, subject_concept_id, predicate_type,
+                    object_concept_id, cardinality, directionality,
+                    weight, confidence, effective_from, effective_to,
+                    created_at, updated_at
+                ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            """, (
+                data["relation_id"], tenant_id, subj, pred, obj,
+                card, dirn,
+                data.get("weight", 1.0), data.get("confidence", 1.0),
+                data.get("effective_from"), data.get("effective_to"),
+                now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"relation_id '{data['relation_id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+
+        return {
+            "relation_id": data["relation_id"],
+            "subject_concept_id": subj,
+            "predicate_type": pred,
+            "object_concept_id": obj,
+            "cardinality": card,
+            "directionality": dirn,
+            "weight": data.get("weight", 1.0),
+            "confidence": data.get("confidence", 1.0),
+            "created_at": now.isoformat(),
+        }
+
+    def get_relation(self, tenant_id: str, relation_id: str) -> dict[str, Any] | None:
+        """관계 단건 조회"""
+        self.ensure_schema()
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(
+            "SELECT * FROM ontology_relations WHERE tenant_id = %s AND relation_id = %s",
+            (tenant_id, relation_id),
+        )
+        row = cur.fetchone()
+        cur.close()
+        conn.close()
+        return dict(row) if row else None
+
+    def list_relations(
+        self, tenant_id: str,
+        subject_id: str | None = None,
+        object_id: str | None = None,
+        predicate_type: str | None = None,
+        limit: int = 100, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """관계 목록 조회 — 주체/객체/술어 필터 지원"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if subject_id:
+            conditions.append("subject_concept_id = %s")
+            params.append(subject_id)
+        if object_id:
+            conditions.append("object_concept_id = %s")
+            params.append(object_id)
+        if predicate_type:
+            conditions.append("predicate_type = %s")
+            params.append(predicate_type)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        conn = self._connect()
+        cur = conn.cursor(cursor_factory=self._dict_cursor())
+        cur.execute(
+            f"SELECT * FROM ontology_relations WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+            params,
+        )
+        rows = cur.fetchall()
+        cur.close()
+        conn.close()
+        return [dict(r) for r in rows]
+
+    def update_relation(self, tenant_id: str, relation_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """관계 수정 — None 필드 무시 (PATCH 방식)"""
+        self.ensure_schema()
+        existing = self.get_relation(tenant_id, relation_id)
+        if not existing:
+            raise KeyError(f"relation_id '{relation_id}'를 찾을 수 없습니다")
+
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _RELATION_UPDATABLE}
+        if not update_fields:
+            return existing
+
+        # 유효성 검증
+        if "predicate_type" in update_fields and update_fields["predicate_type"] not in VALID_PREDICATE_TYPES:
+            raise ValueError(f"predicate_type 유효하지 않음: {update_fields['predicate_type']}")
+        if "cardinality" in update_fields and update_fields["cardinality"] not in VALID_CARDINALITIES:
+            raise ValueError(f"cardinality 유효하지 않음: {update_fields['cardinality']}")
+        if "directionality" in update_fields and update_fields["directionality"] not in VALID_DIRECTIONALITIES:
+            raise ValueError(f"directionality 유효하지 않음: {update_fields['directionality']}")
+
+        update_fields["updated_at"] = _now_dt()
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, relation_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                f"UPDATE ontology_relations SET {set_clause} WHERE tenant_id = %s AND relation_id = %s",
+                values,
+            )
+            conn.commit()
+        return {**existing, **update_fields, "updated_at": update_fields["updated_at"].isoformat()}
+
+    def delete_relation(self, tenant_id: str, relation_id: str) -> bool:
+        """관계 삭제 — 존재하면 삭제 후 True, 없으면 False 반환"""
+        self.ensure_schema()
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                "DELETE FROM ontology_relations WHERE tenant_id = %s AND relation_id = %s",
+                (tenant_id, relation_id),
+            )
+            deleted = cur.rowcount > 0
+            conn.commit()
+        return deleted
+
+    # ========================================
+    # Sprint 4: 별칭 그룹 CRUD
+    # ========================================
+
+    def create_alias_group(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """별칭 그룹을 등록한다 — 여러 표면 형태를 정규 용어 클러스터로 묶기"""
+        self.ensure_schema()
+        status = data.get("status", "ACTIVE")
+        if status not in VALID_ALIAS_GROUP_STATUSES:
+            raise ValueError(f"status는 {VALID_ALIAS_GROUP_STATUSES} 중 하나여야 합니다: {status}")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO ontology_term_alias_groups (
+                    id, tenant_id, domain_id, canonical_term_id,
+                    group_name, language_code, status, created_at, updated_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["id"], tenant_id, data.get("domain_id", "global"),
+                data["canonical_term_id"], data["group_name"],
+                data.get("language_code", "ko"), status, now, now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"alias_group id '{data['id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {
+            "id": data["id"], "tenant_id": tenant_id,
+            "domain_id": data.get("domain_id", "global"),
+            "canonical_term_id": data["canonical_term_id"],
+            "group_name": data["group_name"],
+            "language_code": data.get("language_code", "ko"),
+            "status": status,
+            "created_at": now.isoformat(), "updated_at": now.isoformat(),
+        }
+
+    def list_alias_groups(
+        self, tenant_id: str, domain_id: str | None = None,
+        status: str | None = None, limit: int = 100, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """별칭 그룹 목록을 조회한다 — 도메인/상태 필터 지원"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if domain_id:
+            conditions.append("domain_id = %s")
+            params.append(domain_id)
+        if status:
+            conditions.append("status = %s")
+            params.append(status)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                f"SELECT * FROM ontology_term_alias_groups WHERE {where} ORDER BY updated_at DESC LIMIT %s OFFSET %s",
+                params,
+            )
+            rows = cur.fetchall()
+        return [dict(r) for r in rows]
+
+    def get_alias_group(self, tenant_id: str, group_id: str) -> dict[str, Any] | None:
+        """별칭 그룹 단건 조회"""
+        self.ensure_schema()
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM ontology_term_alias_groups WHERE tenant_id = %s AND id = %s",
+                (tenant_id, group_id),
+            )
+            row = cur.fetchone()
+        return dict(row) if row else None
+
+    # ========================================
+    # Sprint 4: 확장 규칙 CRUD
+    # ========================================
+
+    def create_expansion_rule(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """확장 규칙을 등록한다 — 매칭 패턴 정의"""
+        self.ensure_schema()
+        rule_type = data.get("rule_type", "")
+        if rule_type not in VALID_EXPANSION_RULE_TYPES:
+            raise ValueError(f"rule_type은 {VALID_EXPANSION_RULE_TYPES} 중 하나여야 합니다: {rule_type}")
+        status = data.get("status", "ACTIVE")
+        if status not in VALID_EXPANSION_RULE_STATUSES:
+            raise ValueError(f"status는 {VALID_EXPANSION_RULE_STATUSES} 중 하나여야 합니다: {status}")
+        # 별칭 그룹 존재 확인
+        group = self.get_alias_group(tenant_id, data["alias_group_id"])
+        if not group:
+            raise KeyError(f"alias_group_id '{data['alias_group_id']}'를 찾을 수 없습니다")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO ontology_term_expansion_rules (
+                    id, tenant_id, domain_id, alias_group_id, rule_type,
+                    match_pattern, normalized_pattern, boost, priority,
+                    status, effective_from, effective_to, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["id"], tenant_id, data.get("domain_id", "global"),
+                data["alias_group_id"], rule_type,
+                data["match_pattern"], data.get("normalized_pattern"),
+                data.get("boost", 1.0), data.get("priority", 100),
+                status, data.get("effective_from"), data.get("effective_to"), now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"expansion_rule id '{data['id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {
+            "id": data["id"], "tenant_id": tenant_id,
+            "domain_id": data.get("domain_id", "global"),
+            "alias_group_id": data["alias_group_id"],
+            "rule_type": rule_type,
+            "match_pattern": data["match_pattern"],
+            "normalized_pattern": data.get("normalized_pattern"),
+            "boost": data.get("boost", 1.0),
+            "priority": data.get("priority", 100),
+            "status": status, "created_at": now.isoformat(),
+        }
+
+    def list_expansion_rules(
+        self, tenant_id: str, alias_group_id: str | None = None,
+        rule_type: str | None = None, status: str | None = None,
+        limit: int = 100, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """확장 규칙 목록 조회 — 그룹/타입/상태 필터 지원"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if alias_group_id:
+            conditions.append("alias_group_id = %s")
+            params.append(alias_group_id)
+        if rule_type:
+            conditions.append("rule_type = %s")
+            params.append(rule_type)
+        if status:
+            conditions.append("status = %s")
+            params.append(status)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                f"SELECT * FROM ontology_term_expansion_rules WHERE {where} ORDER BY priority DESC, created_at DESC LIMIT %s OFFSET %s",
+                params,
+            )
+            rows = cur.fetchall()
+        return [dict(r) for r in rows]
+
+    def update_expansion_rule(self, tenant_id: str, rule_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """확장 규칙 수정 — 허용된 필드만 업데이트"""
+        self.ensure_schema()
+        _RULE_UPDATABLE = {"rule_type", "match_pattern", "normalized_pattern", "boost", "priority", "effective_from", "effective_to"}
+        # 기존 규칙 확인
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM ontology_term_expansion_rules WHERE tenant_id = %s AND id = %s",
+                (tenant_id, rule_id),
+            )
+            existing = cur.fetchone()
+        if not existing:
+            raise KeyError(f"expansion_rule id '{rule_id}'를 찾을 수 없습니다")
+        existing = dict(existing)
+        update_fields = {k: v for k, v in data.items() if v is not None and k in _RULE_UPDATABLE}
+        if not update_fields:
+            return existing
+        if "rule_type" in update_fields and update_fields["rule_type"] not in VALID_EXPANSION_RULE_TYPES:
+            raise ValueError(f"rule_type 유효하지 않음: {update_fields['rule_type']}")
+        set_clause = ", ".join(f"{k} = %s" for k in update_fields)
+        values = list(update_fields.values()) + [tenant_id, rule_id]
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                f"UPDATE ontology_term_expansion_rules SET {set_clause} WHERE tenant_id = %s AND id = %s",
+                values,
+            )
+            conn.commit()
+        return {**existing, **update_fields}
+
+    def activate_rule(self, tenant_id: str, rule_id: str) -> dict[str, Any]:
+        """확장 규칙을 ACTIVE 상태로 전환한다"""
+        self.ensure_schema()
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM ontology_term_expansion_rules WHERE tenant_id = %s AND id = %s",
+                (tenant_id, rule_id),
+            )
+            row = cur.fetchone()
+        if not row:
+            raise KeyError(f"expansion_rule id '{rule_id}'를 찾을 수 없습니다")
+        row = dict(row)
+        if row["status"] == "ACTIVE":
+            return row
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                "UPDATE ontology_term_expansion_rules SET status = 'ACTIVE' WHERE tenant_id = %s AND id = %s",
+                (tenant_id, rule_id),
+            )
+            conn.commit()
+        row["status"] = "ACTIVE"
+        return row
+
+    def deprecate_rule(self, tenant_id: str, rule_id: str) -> dict[str, Any]:
+        """확장 규칙을 DEPRECATED 상태로 전환한다"""
+        self.ensure_schema()
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM ontology_term_expansion_rules WHERE tenant_id = %s AND id = %s",
+                (tenant_id, rule_id),
+            )
+            row = cur.fetchone()
+        if not row:
+            raise KeyError(f"expansion_rule id '{rule_id}'를 찾을 수 없습니다")
+        row = dict(row)
+        if row["status"] == "DEPRECATED":
+            return row
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                "UPDATE ontology_term_expansion_rules SET status = 'DEPRECATED' WHERE tenant_id = %s AND id = %s",
+                (tenant_id, rule_id),
+            )
+            conn.commit()
+        row["status"] = "DEPRECATED"
+        return row
+
+    # ========================================
+    # Sprint 4: 의도 모델 CRUD
+    # ========================================
+
+    def create_intent_model(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """의도 분류 모델을 등록한다"""
+        self.ensure_schema()
+        model_type = data.get("model_type", "keyword")
+        if model_type not in VALID_INTENT_MODEL_TYPES:
+            raise ValueError(f"model_type은 {VALID_INTENT_MODEL_TYPES} 중 하나여야 합니다: {model_type}")
+        now = _now_dt()
+        config = data.get("config_json", {})
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO intent_models (
+                    id, tenant_id, model_key, model_version,
+                    model_type, status, config_json, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["id"], tenant_id, data["model_key"], data["model_version"],
+                model_type, data.get("status", "ACTIVE"),
+                json.dumps(config), now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"intent_model id '{data['id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {
+            "id": data["id"], "tenant_id": tenant_id,
+            "model_key": data["model_key"], "model_version": data["model_version"],
+            "model_type": model_type, "status": data.get("status", "ACTIVE"),
+            "config_json": config, "created_at": now.isoformat(),
+        }
+
+    def list_intent_models(
+        self, tenant_id: str, status: str | None = None,
+        limit: int = 100, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """의도 분류 모델 목록 조회"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if status:
+            conditions.append("status = %s")
+            params.append(status)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                f"SELECT * FROM intent_models WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+                params,
+            )
+            rows = cur.fetchall()
+        return [dict(r) for r in rows]
+
+    # ========================================
+    # Sprint 4: 추론 로그 CRUD
+    # ========================================
+
+    def create_inference_log(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """의도 추론 로그를 기록한다 — Oracle에서 호출"""
+        self.ensure_schema()
+        now = _now_dt()
+        feature_json = data.get("feature_json", {})
+        candidate_json = data.get("candidate_json", {})
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO intent_inference_logs (
+                    id, tenant_id, request_id, snapshot_version,
+                    user_question, normalized_question, top_intent,
+                    confidence, ambiguity_score, fallback_mode,
+                    feature_json, candidate_json, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["id"], tenant_id, data["request_id"],
+                data.get("snapshot_version"), data["user_question"],
+                data.get("normalized_question", ""), data.get("top_intent"),
+                data.get("confidence"), data.get("ambiguity_score"),
+                data.get("fallback_mode"),
+                json.dumps(feature_json), json.dumps(candidate_json), now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"inference_log id '{data['id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {
+            "id": data["id"], "tenant_id": tenant_id,
+            "request_id": data["request_id"],
+            "user_question": data["user_question"],
+            "top_intent": data.get("top_intent"),
+            "confidence": data.get("confidence"),
+            "created_at": now.isoformat(),
+        }
+
+    def list_inference_logs(
+        self, tenant_id: str, limit: int = 50, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """추론 로그 목록 조회 — 최근순"""
+        self.ensure_schema()
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM intent_inference_logs WHERE tenant_id = %s ORDER BY created_at DESC LIMIT %s OFFSET %s",
+                (tenant_id, limit, offset),
+            )
+            rows = cur.fetchall()
+        return [dict(r) for r in rows]
+
+    # ========================================
+    # Sprint 4: 질문 피드백 CRUD
+    # ========================================
+
+    def create_question_feedback(self, tenant_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        """질문 이해 피드백을 등록한다 — 운영자 교정 기록"""
+        self.ensure_schema()
+        issue_type = data.get("issue_type", "")
+        if issue_type not in VALID_FEEDBACK_ISSUE_TYPES:
+            raise ValueError(f"issue_type은 {VALID_FEEDBACK_ISSUE_TYPES} 중 하나여야 합니다: {issue_type}")
+        now = _now_dt()
+        conn = self._connect()
+        cur = conn.cursor()
+        try:
+            cur.execute("""
+                INSERT INTO semantic_question_feedback (
+                    id, tenant_id, request_id, issue_type,
+                    expected_intent, expected_concept_id, expected_measure_id,
+                    feedback_note, resolved, created_by, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            """, (
+                data["id"], tenant_id, data["request_id"], issue_type,
+                data.get("expected_intent"), data.get("expected_concept_id"),
+                data.get("expected_measure_id"), data.get("feedback_note"),
+                False, data.get("created_by"), now,
+            ))
+            conn.commit()
+        except Exception as exc:
+            conn.rollback()
+            if "duplicate key" in str(exc).lower():
+                raise ValueError(f"feedback id '{data['id']}'가 이미 존재합니다") from exc
+            raise
+        finally:
+            cur.close()
+            conn.close()
+        return {
+            "id": data["id"], "tenant_id": tenant_id,
+            "request_id": data["request_id"], "issue_type": issue_type,
+            "expected_intent": data.get("expected_intent"),
+            "resolved": False, "created_at": now.isoformat(),
+        }
+
+    def list_question_feedback(
+        self, tenant_id: str, resolved: bool | None = None,
+        limit: int = 50, offset: int = 0,
+    ) -> list[dict[str, Any]]:
+        """질문 피드백 목록 조회 — 해결 여부 필터 지원"""
+        self.ensure_schema()
+        conditions = ["tenant_id = %s"]
+        params: list[Any] = [tenant_id]
+        if resolved is not None:
+            conditions.append("resolved = %s")
+            params.append(resolved)
+        where = " AND ".join(conditions)
+        params.extend([limit, offset])
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                f"SELECT * FROM semantic_question_feedback WHERE {where} ORDER BY created_at DESC LIMIT %s OFFSET %s",
+                params,
+            )
+            rows = cur.fetchall()
+        return [dict(r) for r in rows]
+
+    def resolve_feedback(self, tenant_id: str, feedback_id: str) -> dict[str, Any]:
+        """피드백을 해결 완료 상태로 전환한다"""
+        self.ensure_schema()
+        with self._cursor(dict_cursor=True) as (conn, cur):
+            cur.execute(
+                "SELECT * FROM semantic_question_feedback WHERE tenant_id = %s AND id = %s",
+                (tenant_id, feedback_id),
+            )
+            row = cur.fetchone()
+        if not row:
+            raise KeyError(f"feedback id '{feedback_id}'를 찾을 수 없습니다")
+        row = dict(row)
+        if row["resolved"]:
+            return row
+        with self._cursor() as (conn, cur):
+            cur.execute(
+                "UPDATE semantic_question_feedback SET resolved = TRUE WHERE tenant_id = %s AND id = %s",
+                (tenant_id, feedback_id),
+            )
+            conn.commit()
+        row["resolved"] = True
+        return row
