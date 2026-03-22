@@ -28,7 +28,7 @@ const DomainModelerPage = lazy(() => import('@/pages/domain/DomainModelerPage').
 const KineticModelerPage = lazy(() => import('@/pages/domain/KineticModelerPage').then((m) => ({ default: m.KineticModelerPage })));
 const DataQualityPage = lazy(() => import('@/pages/data/DataQualityPage').then((m) => ({ default: m.DataQualityPage })));
 const LineagePage = lazy(() => import('@/pages/lineage/LineagePage').then((m) => ({ default: m.LineagePage })));
-const ObjectExplorerPage = lazy(() => import('@/pages/object-explorer/ObjectExplorerPage').then((m) => ({ default: m.ObjectExplorerPage })));
+const ObjectExplorerPage = lazy(() => import('@/pages/explorer/ExplorerPage').then((m) => ({ default: m.ExplorerPage })));
 const GlossaryPage = lazy(() => import('@/pages/data/GlossaryPage').then((m) => ({ default: m.GlossaryPage })));
 const WorkflowEditorPage = lazy(() => import('@/pages/workflow/WorkflowEditorPage').then((m) => ({ default: m.WorkflowEditorPage })));
 // OLAP Studio 페이지 (지연 로딩)
@@ -36,6 +36,7 @@ const OlapStudioPage = lazy(() => import('@/features/olap-studio/pages/OlapStudi
 const DataSourcesPage = lazy(() => import('@/features/olap-studio/pages/DataSourcesPage').then((m) => ({ default: m.DataSourcesPage })));
 const EtlPipelinesPage = lazy(() => import('@/features/olap-studio/pages/EtlPipelinesPage').then((m) => ({ default: m.EtlPipelinesPage })));
 const CubeManagementPage = lazy(() => import('@/features/olap-studio/pages/CubeManagementPage').then((m) => ({ default: m.CubeManagementPage })));
+const SemanticCatalogPage = lazy(() => import('@/pages/semantic-catalog/SemanticCatalogPage').then((m) => ({ default: m.SemanticCatalogPage })));
 const ProcessDesignerListPage = lazy(() => import('@/pages/process-designer/ProcessDesignerListPage').then((m) => ({ default: m.ProcessDesignerListPage })));
 const ProcessDesignerPage = lazy(() => import('@/pages/process/ProcessDesignerPage').then((m) => ({ default: m.ProcessDesignerPage })));
 const WatchDashboardPage = lazy(() => import('@/pages/watch/WatchDashboardPage').then((m) => ({ default: m.WatchDashboardPage })));
@@ -107,6 +108,8 @@ export const router = createBrowserRouter([
 { path: 'data/explorer', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><ObjectExplorerPage /></SuspensePage></RoleGuard> },
 { path: 'data/glossary', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><GlossaryPage /></SuspensePage></RoleGuard> },
 { path: 'data/workflow', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><WorkflowEditorPage /></SuspensePage></RoleGuard> },
+// 시멘틱 카탈로그
+{ path: 'data/semantic-catalog', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><SemanticCatalogPage /></SuspensePage></RoleGuard> },
 // OLAP Studio 라우트
 { path: 'analysis/olap-studio', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><OlapStudioPage /></SuspensePage></RoleGuard> },
 { path: 'data/sources', element: <RoleGuard roles={['admin', 'manager', 'analyst', 'engineer']}><SuspensePage><DataSourcesPage /></SuspensePage></RoleGuard> },

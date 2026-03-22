@@ -29,7 +29,7 @@ from app.core.sql_exec import sql_executor
 from app.core.sql_guard import GuardConfig, sql_guard
 from app.core.value_mapping import value_mapping_service
 from app.core.visualize import recommend_visualization
-from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, TableInfo, OntologyContext
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, TableInfo, OntologyContext, SemanticContractContext, ResolvedContextPack
 from app.pipelines.cache_postprocess import cache_postprocessor
 
 logger = logging.getLogger("oracle.nl2sql_pipeline")
@@ -149,6 +149,27 @@ class NL2SQLPipeline:
         "duration_minutes": "NUMERIC(10,2)",
     }
 
+    @staticmethod
+    def _classify_intent(question: str) -> str:
+        """간단한 키워드 기반 의도 분류 (향후 LLM 기반으로 교체 가능)"""
+        q = question.lower()
+        # 한국어 + 영어 키워드 매핑
+        if any(kw in q for kw in ("원인", "왜", "root cause", "why", "이유")):
+            return "root_cause"
+        if any(kw in q for kw in ("추세", "변화", "trend", "변동", "시계열")):
+            return "trend"
+        if any(kw in q for kw in ("비교", "대비", "compare", "vs", "차이")):
+            return "comparison"
+        if any(kw in q for kw in ("예측", "전망", "forecast", "predict")):
+            return "forecast_support"
+        if any(kw in q for kw in ("이상", "비정상", "anomaly", "outlier")):
+            return "anomaly"
+        if any(kw in q for kw in ("세그먼트", "그룹", "segment", "분류")):
+            return "segment"
+        if any(kw in q for kw in ("kpi", "지표", "metric", "성과", "실적")):
+            return "kpi_query"
+        return "general"
+
     def _format_schema_ddl(self, schemas: list[TableSchema], value_mappings: list[Any], similar_queries: list[Any]) -> str:
         lines = []
         for s in schemas:
@@ -236,6 +257,110 @@ class NL2SQLPipeline:
             lines.append(f"\nPreferred tables: {', '.join(ctx.preferred_tables)}")
         return "\n".join(lines)
 
+    @staticmethod
+    def _sanitize_prompt_fragment(value: str, max_len: int = 500) -> str:
+        """프롬프트 주입 방어 — SQL 코멘트, 제어문자, 과도한 길이 제거."""
+        import re
+        if not value:
+            return ""
+        # SQL 코멘트 제거 (-- ... 줄끝, /* ... */)
+        cleaned = re.sub(r"--[^\n]*", "", value)
+        cleaned = re.sub(r"/\*.*?\*/", "", cleaned, flags=re.DOTALL)
+        # 줄바꿈/탭 → 공백 (프롬프트 구조 깨짐 방지)
+        cleaned = cleaned.replace("\n", " ").replace("\r", " ").replace("\t", " ")
+        # 연속 공백 정리
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        return cleaned[:max_len]
+
+    @staticmethod
+    def _format_semantic_contract_for_prompt(ctx: SemanticContractContext | None) -> str:
+        """P3: 시멘틱 계약 컨텍스트를 LLM 프롬프트용 텍스트로 변환.
+
+        raw DDL 대신, 승인된 지표/차원/조인 규칙을 제공한다.
+        LLM은 이 정의를 그대로 사용하여 SQL을 생성해야 한다.
+        """
+        if not ctx or (not ctx.measures and not ctx.dimensions):
+            return ""
+
+        _s = NL2SQLPipeline._sanitize_prompt_fragment
+        # 최대 항목 수 제한 (토큰 예산 관리)
+        _MAX_MEASURES = 50
+        _MAX_DIMS = 30
+        _MAX_JOINS = 20
+
+        lines = ["\n## Semantic Layer (approved metric definitions — USE THESE)"]
+
+        # 동의어 맵
+        if ctx.synonym_map:
+            lines.append("\n### Synonym Map (user term → concept ID)")
+            for term, cid in list(ctx.synonym_map.items())[:30]:
+                safe_term = _s(term, 100)
+                lines.append(f"  - \"{safe_term}\" → {_s(cid, 100)}")
+
+        # 지표 정의
+        if ctx.measures:
+            lines.append("\n### Approved Metrics (MUST use these SQL expressions)")
+            for m in ctx.measures[:_MAX_MEASURES]:
+                source = _s(ctx.entity_sources.get(m.entity_id, "UNKNOWN"), 200)
+                desc = f" — {_s(m.description or '', 200)}" if m.description else ""
+                expr = _s(m.sql_expression, 500)
+                lines.append(f"  - {_s(m.name, 100)} [{m.measure_type}]: {expr} FROM {source}{desc}")
+                if m.filter_expression:
+                    lines.append(f"    WHERE {_s(m.filter_expression, 500)}")
+
+        # 차원 정의
+        if ctx.dimensions:
+            lines.append("\n### Approved Dimensions")
+            for d in ctx.dimensions[:_MAX_DIMS]:
+                lines.append(f"  - {_s(d.name, 100)} [{d.value_type or 'any'}]: {_s(d.sql_expression, 300)}")
+                if d.hierarchy_path:
+                    lines.append(f"    hierarchy: {_s(d.hierarchy_path, 100)}")
+
+        # 조인 규칙
+        if ctx.allowed_joins:
+            lines.append("\n### Allowed Joins (ONLY use these join paths)")
+            for j in ctx.allowed_joins[:_MAX_JOINS]:
+                left_src = _s(ctx.entity_sources.get(j.left_entity_id, j.left_entity_id), 200)
+                right_src = _s(ctx.entity_sources.get(j.right_entity_id, j.right_entity_id), 200)
+                risk = f" [fanout_risk={j.fanout_risk_score}]" if j.fanout_risk_score >= 0.5 else ""
+                lines.append(f"  - {left_src} {j.join_type} JOIN {right_src} ON {_s(j.join_condition, 300)}{risk}")
+
+        if ctx.banned_entity_pairs:
+            lines.append("\n### FORBIDDEN Joins (NEVER join these)")
+            for left, right in ctx.banned_entity_pairs[:_MAX_JOINS]:
+                lines.append(f"  - {_s(left, 100)} ✗ {_s(right, 100)}")
+
+        # 품질 경고
+        if ctx.quality_warnings:
+            lines.append("\n### Quality Warnings")
+            for w in ctx.quality_warnings[:10]:
+                lines.append(f"  {_s(w, 200)}")
+
+        return "\n".join(lines)
+
+    @staticmethod
+    def _format_prompt_policies(pack: ResolvedContextPack | None) -> str:
+        """P4: ContextPack의 프롬프트 정책 + 응답 가드레일을 프롬프트 텍스트로 변환."""
+        if not pack:
+            return ""
+        _s = NL2SQLPipeline._sanitize_prompt_fragment
+        lines: list[str] = []
+
+        if pack.prompt_rules:
+            lines.append("\n## Prompt Policies (MANDATORY rules for this query)")
+            for rule in pack.prompt_rules[:20]:
+                lines.append(f"  - {_s(rule, 300)}")
+
+        if pack.answer_guardrails:
+            lines.append("\n## Answer Guardrails")
+            for g in pack.answer_guardrails[:10]:
+                lines.append(f"  - {_s(g, 300)}")
+
+        if pack.quality_gate_min_score > 0:
+            lines.append(f"\n## Quality Gate: minimum score = {pack.quality_gate_min_score}")
+
+        return "\n".join(lines)
+
     async def _generate_sql_llm(
         self,
         question: str,
@@ -245,9 +370,20 @@ class NL2SQLPipeline:
         row_limit: int,
         dialect: str,
         ontology_ctx: OntologyContext | None = None,
+        semantic_ctx: SemanticContractContext | None = None,
+        context_pack: ResolvedContextPack | None = None,
     ) -> str:
         schema_ddl = self._format_schema_ddl(schemas, value_mappings, similar_queries)
-        # O3: ontology context 주입
+        # P4: ContextPack이 있으면 해당 시멘틱 컨텍스트를 우선 사용
+        effective_semantic = context_pack.semantic_context if context_pack else semantic_ctx
+        semantic_section = self._format_semantic_contract_for_prompt(effective_semantic)
+        if semantic_section:
+            schema_ddl += semantic_section
+        # P4: 프롬프트 정책 주입
+        policy_section = self._format_prompt_policies(context_pack)
+        if policy_section:
+            schema_ddl += policy_section
+        # O3: ontology context 주입 (보조)
         ontology_section = self._format_ontology_context_for_prompt(ontology_ctx)
         if ontology_section:
             schema_ddl += ontology_section
@@ -318,11 +454,40 @@ class NL2SQLPipeline:
             except Exception as exc:
                 logger.warning("value_mapping_resolve_failed", error=str(exc))
 
-        # 3. Schema formatting done in _format_schema_ddl
-        # 4. LLM SQL generation (O1-3 + O3 ontology injection)
+        # 3. P3: 시멘틱 계약 컨텍스트 조회 (approved 지표/차원/조인 정의)
+        semantic_ctx: SemanticContractContext | None = None
+        try:
+            semantic_ctx = await oracle_synapse_acl.fetch_semantic_contract_context(
+                tenant_id=tenant_id, case_id=case_id,
+            )
+            if semantic_ctx:
+                logger.info("semantic_contract_context_loaded",
+                            measures=len(semantic_ctx.measures),
+                            dimensions=len(semantic_ctx.dimensions),
+                            joins=len(semantic_ctx.allowed_joins))
+        except Exception as exc:
+            logger.warning("semantic_contract_context_failed", error=str(exc))
+
+        # 3.5 P4: 의도별 ContextPack 조회 (있으면 semantic_ctx보다 우선)
+        context_pack: ResolvedContextPack | None = None
+        try:
+            # 간단한 의도 분류: 질문 키워드 기반 (향후 LLM 기반으로 교체 가능)
+            intent = self._classify_intent(question)
+            if intent != "general":
+                context_pack = await oracle_synapse_acl.find_context_pack_by_intent(
+                    tenant_id=tenant_id, intent_type=intent, case_id=case_id,
+                )
+                if context_pack:
+                    logger.info("context_pack_resolved", pack_id=context_pack.context_pack_id, intent=intent)
+        except Exception as exc:
+            logger.warning("context_pack_resolve_failed", error=str(exc))
+
+        # 4. LLM SQL generation (O1-3 + O3 ontology + P3/P4 semantic context)
         generated_sql = await self._generate_sql_llm(
             question, schema_catalog, value_mappings, similar_queries, row_limit, dialect,
             ontology_ctx=ontology_ctx,
+            semantic_ctx=semantic_ctx,
+            context_pack=context_pack,
         )
 
         # 4.5 SQL 리터럴 검증 (#13 P1-2): WHERE 절의 값이 실제 DB 값과 일치하는지 확인

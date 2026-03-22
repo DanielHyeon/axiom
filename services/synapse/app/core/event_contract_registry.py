@@ -24,7 +24,47 @@ class EventContractError(Exception):
         self.message = message
 
 
+# ── 시멘틱 계약 이벤트 (P2) ──
+_SEMANTIC_EVENTS = {
+    "SEMANTIC_MEASURE_PUBLISHED": EventContract(
+        event_name="SEMANTIC_MEASURE_PUBLISHED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_measure_published/v1",
+        idempotency_key_rule="event_type:aggregate_id:version",
+    ),
+    "SEMANTIC_ENTITY_PUBLISHED": EventContract(
+        event_name="SEMANTIC_ENTITY_PUBLISHED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_entity_published/v1",
+        idempotency_key_rule="event_type:aggregate_id:version",
+    ),
+    "ONTOLOGY_CONCEPT_APPROVED": EventContract(
+        event_name="ONTOLOGY_CONCEPT_APPROVED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/ontology_concept_approved/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "JOIN_CONTRACT_CREATED": EventContract(
+        event_name="JOIN_CONTRACT_CREATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/join_contract_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "QUALITY_CONTRACT_UPDATED": EventContract(
+        event_name="QUALITY_CONTRACT_UPDATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/quality_contract_updated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+}
+
 EVENT_CONTRACTS: dict[str, EventContract] = {
+    **_SEMANTIC_EVENTS,
     "ONTOLOGY_NODE_CREATED": EventContract(
         event_name="ONTOLOGY_NODE_CREATED",
         owner_service="synapse",

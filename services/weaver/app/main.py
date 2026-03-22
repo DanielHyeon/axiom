@@ -12,6 +12,10 @@ from app.api.metadata_catalog import router as metadata_catalog_router
 from app.api.query import router as query_router
 from app.api.document_ingestion import router as document_ingestion_router
 from app.api.auto_binding import router as auto_binding_router
+from app.api.object_explorer import router as object_explorer_router
+from app.api.instance_fetcher import router as instance_fetcher_router
+from app.api.materialized_views import router as materialized_views_router
+from app.api.quality import router as quality_router
 from app.core.config import settings
 from app.core.error_codes import public_error_message
 from app.core.insight_errors import InsightError, insight_error_handler
@@ -46,6 +50,10 @@ app.include_router(query_router)
 app.include_router(metadata_catalog_router)
 app.include_router(document_ingestion_router)
 app.include_router(auto_binding_router)
+app.include_router(object_explorer_router)
+app.include_router(instance_fetcher_router)
+app.include_router(materialized_views_router)
+app.include_router(quality_router)
 
 # ── DDD-P3-01: Weaver Outbox Relay ── #
 _relay_task: asyncio.Task | None = None

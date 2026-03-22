@@ -17,6 +17,10 @@ from app.api.concept_mapping import router as concept_mapping_router
 from app.api.kinetic import router as kinetic_router
 from app.api.schema_navigation import router as schema_navigation_router
 from app.api.dmn import router as dmn_router
+from app.api.behavior_execution import router as behavior_execution_router
+from app.api.ontology_feedback import router as ontology_feedback_router
+from app.api.multi_layer_generation import router as multi_layer_generation_router
+from app.api.semantic_contract import router as semantic_contract_router
 from app.events.consumer import run_ontology_ingest_consumer
 from app.events.outbox import SynapseRelayWorker, ensure_outbox_table
 import structlog
@@ -111,6 +115,13 @@ async def lifespan(app: FastAPI):
     except Exception as e:
         logger.error("neo4j_bootstrap_error", error=str(e))
         raise
+    # 시멘틱 계약 테이블 초기화 (Control Plane 메타스토어)
+    try:
+        from app.services.semantic_store import SemanticStore
+        SemanticStore().ensure_schema()
+        logger.info("semantic_store_initialized")
+    except Exception as e:
+        logger.warning("semantic_store_init_failed", error=str(e))
     # Seed demo ontology data
     try:
         await _seed_demo_ontology()
@@ -162,6 +173,10 @@ app.include_router(concept_mapping_router)
 app.include_router(kinetic_router)
 app.include_router(schema_navigation_router)
 app.include_router(dmn_router)
+app.include_router(behavior_execution_router)
+app.include_router(ontology_feedback_router)
+app.include_router(multi_layer_generation_router)
+app.include_router(semantic_contract_router)
 
 @app.get("/health/live")
 async def health_live():
