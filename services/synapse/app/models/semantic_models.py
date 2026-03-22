@@ -606,6 +606,8 @@ class ExpansionRuleUpdate(BaseModel):
 
 class IntentModelCreate(BaseModel):
     """의도 분류 모델 등록 — 모델 버전 관리"""
+    model_config = {"protected_namespaces": ()}
+
     id: str = Field(..., description="모델 고유 ID")
     model_key: str = Field(..., max_length=100, description="모델 식별 키 (예: 'intent_v2')")
     model_version: str = Field(..., max_length=64, description="모델 버전 (예: '2.1.0')")

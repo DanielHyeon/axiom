@@ -1,0 +1,19 @@
+{
+  "event_name": "QUALITY_THRESHOLD_BREACHED",
+  "version": "1.0.0",
+  "producer": "weaver",
+  "schema": {
+    "type": "object",
+    "required": ["target_id", "overall_score", "breached_dimensions", "tenant_id", "idempotency_key"],
+    "properties": {
+      "target_id": {"type": "string"},
+      "overall_score": {"type": "number"},
+      "breached_dimensions": {"type": "array", "items": {"type": "string"}},
+      "previous_score": {"type": ["number", "null"]},
+      "scanned_at": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

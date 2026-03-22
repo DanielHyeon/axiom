@@ -1,0 +1,16 @@
+{
+  "event_name": "ONTOLOGY_CONCEPT_APPROVED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["concept_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "concept_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "approved_by": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

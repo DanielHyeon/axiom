@@ -1,0 +1,19 @@
+{
+  "event_name": "SEMANTIC_MEASURE_PUBLISHED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["object_type", "object_id", "version", "tenant_id", "deployed_at", "idempotency_key"],
+    "properties": {
+      "object_type": {"type": "string"},
+      "object_id": {"type": "string"},
+      "version": {"type": "integer"},
+      "bound_concept_id": {"type": ["string", "null"]},
+      "tenant_id": {"type": "string"},
+      "deployed_at": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}
