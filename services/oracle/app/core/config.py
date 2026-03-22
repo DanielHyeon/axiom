@@ -35,6 +35,23 @@ class Settings(BaseSettings):
     ENUM_CACHE_MAX_COLUMNS: int = 2000        # information_schema 스캔 대상 최대 컬럼 수
     ENUM_CACHE_TARGET_SCHEMA: str = "public"  # 스캔 대상 PostgreSQL 스키마
 
+    # ── Text2SQL Validity Bootstrap (#P4-16) ──
+    VALIDITY_BOOTSTRAP_ENABLED: bool = True            # True면 유효성 부트스트랩 활성화
+    VALIDITY_BOOTSTRAP_CONCURRENCY: int = 6            # Synapse API 동시 호출 수
+    VALIDITY_BOOTSTRAP_TARGET_SCHEMA: str = "public"   # 스캔 대상 PostgreSQL 스키마
+
+    # ── Query Similarity (#P4-17) ──
+    ENABLE_QUERY_SIMILARITY: bool = True
+    QUERY_SIMILARITY_HIGH_THRESHOLD: float = 0.95
+    QUERY_SIMILARITY_MID_THRESHOLD: float = 0.80
+    QUERY_SIMILARITY_MAX_STORE: int = 10000
+
+    # ── C-Pipeline (#P4 Phase 1-2) ──
+    ENABLE_C_PIPELINE: bool = True            # True면 C-Pipeline(탐색→수렴→탈출) 활성화, False면 기존 ReAct 유지
+    ENABLE_HYDE: bool = True                  # True면 HyDE(가상 SQL) 검색 다양성 활성화
+    ENABLE_TABLE_RERANKING: bool = True       # True면 LLM 기반 테이블 리랭킹 활성화
+    ENABLE_CONVERSATION_STATE: bool = True    # True면 멀티턴 대화 컨텍스트 유지
+
     model_config = ConfigDict(env_file=".env")
 
 settings = Settings()

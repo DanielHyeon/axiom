@@ -6,10 +6,15 @@ Select -> Generate -> Validate -> Fix -> Execute -> Quality -> Triage
 - v1: MockLLM 기반 (score=0.85 고정)
 - v2: QualityJudge LLM 기반 심사 (#12 P1-2)
   - CRITICAL 수정: (preview or {}).get("row_count") 안전 접근 (C7)
+- v3: C-Pipeline 통합 (#P4 Phase 1-2)
+  - HyDE 검색 다양성, 테이블 리랭킹, 루브릭 4후보 평가
+  - 대화 연속성 (conversation_state)
+  - 탐색→수렴→탈출 3단계 파이프라인
 """
 
 import base64
 import json
+import os
 from typing import AsyncGenerator, Dict, Any, List
 
 import structlog
@@ -23,6 +28,13 @@ from app.core.sql_guard import GuardConfig, sql_guard
 from app.core.sql_exec import sql_executor
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
 from app.core.visualize import recommend_visualization
+from app.pipelines.c_pipeline import c_pipeline, NUM_CANDIDATES
+from app.pipelines.conversation_state import (
+    ConversationContext,
+    ConversationTurn,
+    decode_conversation_state,
+    encode_conversation_state,
+)
 
 logger = structlog.get_logger()
 
@@ -52,6 +64,8 @@ class ReactSession(BaseModel):
     # HIL (Human-in-the-Loop) — 사용자 응답으로 세션 재개 시 사용
     session_state: str | None = None
     user_response: str | None = None
+    # 대화 연속성 — 멀티턴 컨텍스트 (P4 Phase 1-2)
+    conversation_state: str | None = None
 
 
 def _step_line(step: str, iteration: int, data: Dict[str, Any]) -> str:
@@ -188,6 +202,155 @@ class ReactAgent:
     async def stream_react_loop(
         self, session: ReactSession, user: CurrentUser | None = None
     ) -> AsyncGenerator[str, None]:
+        """ReAct 루프를 실행한다.
+
+        ENABLE_C_PIPELINE=True이면 C-Pipeline(탐색→수렴→탈출)으로 실행하고,
+        False이면 기존 6단계 루프를 유지한다.
+        """
+        # C-Pipeline 활성화 시 고급 파이프라인 사용
+        if settings.ENABLE_C_PIPELINE:
+            async for line in self._stream_c_pipeline(session, user):
+                yield line
+            return
+
+        # 이하 기존 레거시 루프
+        async for line in self._stream_legacy_loop(session, user):
+            yield line
+
+    async def _stream_c_pipeline(
+        self, session: ReactSession, user: CurrentUser | None = None
+    ) -> AsyncGenerator[str, None]:
+        """C-Pipeline 기반 고급 ReAct 루프.
+
+        1. 대화 컨텍스트 복원
+        2. 테이블 선택 (HyDE + 리랭킹)
+        3. C-Pipeline 실행 (탐색→수렴→탈출)
+        4. SQL 검증 + 실행
+        5. 대화 상태 저장
+        """
+        row_limit = session.options.get("row_limit", 1000)
+        tenant_id = str(user.tenant_id) if user else ""
+        dialect = session.options.get("dialect", "postgres")
+
+        # 대화 컨텍스트 복원
+        conv_ctx = None
+        if settings.ENABLE_CONVERSATION_STATE and session.conversation_state:
+            conv_ctx = decode_conversation_state(session.conversation_state)
+
+        conversation_prompt = conv_ctx.get_context_for_prompt() if conv_ctx else ""
+
+        # HIL 세션 재개
+        if session.session_state and session.user_response:
+            restored = self._decode_session_state(session.session_state)
+            original_q = restored.get("question", session.question)
+            session.question = f"{original_q}\n\n[추가 정보]: {session.user_response}"
+
+        try:
+            iteration = 1
+
+            # Step 1: 테이블 선택
+            table_names, reasoning = await self._select_tables(
+                session.question, tenant_id, session.case_id
+            )
+            yield _step_line("select", iteration, {"tables": table_names, "reasoning": reasoning})
+
+            # Step 2: C-Pipeline 실행 (탐색→수렴→탈출)
+            yield _step_line("c_pipeline", iteration, {"phase": "start", "candidates": NUM_CANDIDATES})
+
+            cp_result = await c_pipeline.run(
+                question=session.question,
+                table_names=table_names,
+                row_limit=row_limit,
+                dialect=dialect,
+                conversation_context=conversation_prompt,
+            )
+
+            # C-Pipeline 단계 스트리밍
+            for step in cp_result.steps:
+                yield _step_line("c_pipeline", iteration, step)
+
+            if not cp_result.passed:
+                # C-Pipeline 실패 — HIL로 폴백
+                session_token = self._encode_session_state({
+                    "question": session.question,
+                    "sql": cp_result.final_sql,
+                    "score": cp_result.final_score,
+                })
+                yield _step_line("needs_user_input", iteration, {
+                    "type": "text",
+                    "question_to_user": f"SQL 생성 품질이 기준에 미달합니다 (점수: {cp_result.final_score:.2f}). 질문을 더 구체적으로 설명해주세요.",
+                    "session_state": session_token,
+                    "partial_sql": cp_result.final_sql,
+                })
+                return
+
+            sql = cp_result.final_sql
+            yield _step_line("generate", iteration, {"sql": sql, "score": cp_result.final_score})
+
+            # Step 3: Validate
+            val_res = await self.run_step_validate(sql, row_limit)
+            if not val_res.passed:
+                yield _step_line("validate", iteration, {"status": "FAIL", "violations": val_res.violations})
+                # Guard 검증 실패 — 원본 SQL이라도 실행 시도
+                sql = val_res.sql or sql
+            else:
+                sql = val_res.sql
+                yield _step_line("validate", iteration, {"status": "PASS", "sql": sql})
+
+            # Step 4: Execute
+            exec_res = await sql_executor.execute_sql(sql, session.datasource_id, user)
+            preview = (exec_res.rows or [])[:10]
+            yield _step_line("execute", iteration, {"row_count": exec_res.row_count, "preview": preview})
+
+            # Step 5: Quality
+            quality_preview = {
+                "columns": exec_res.columns if hasattr(exec_res, 'columns') else [],
+                "rows": preview,
+                "row_count": exec_res.row_count,
+            }
+            qual = await self.run_step_quality(session.question, sql, quality_preview)
+            yield _step_line("quality", iteration, {"score": qual.get("score"), "feedback": qual.get("feedback", "")})
+
+            # Step 6: Result
+            session.status = "completed"
+            col_dicts = [{"name": c, "type": "varchar"} for c in exec_res.columns]
+            viz = recommend_visualization(col_dicts, exec_res.rows or [], exec_res.row_count)
+            result_dict = exec_res.model_dump()
+            result_dict["columns"] = col_dicts
+
+            # 대화 상태 저장
+            new_conv_state = None
+            if settings.ENABLE_CONVERSATION_STATE:
+                if not conv_ctx:
+                    conv_ctx = ConversationContext(
+                        datasource_id=session.datasource_id,
+                        case_id=session.case_id,
+                    )
+                conv_ctx.add_turn(ConversationTurn(
+                    question=session.question,
+                    sql=sql,
+                    tables=table_names,
+                    columns=exec_res.columns[:10],
+                    row_count=exec_res.row_count,
+                ))
+                new_conv_state = encode_conversation_state(conv_ctx)
+
+            yield _step_line("result", iteration, {
+                "sql": sql,
+                "result": result_dict,
+                "visualization": viz,
+                "conversation_state": new_conv_state,
+                "c_pipeline_score": cp_result.final_score,
+            })
+
+        except Exception as exc:
+            logger.exception("c_pipeline_loop_error", error=str(exc))
+            yield _error_step(1, "C_PIPELINE_ERROR", str(exc)[:500])
+
+    async def _stream_legacy_loop(
+        self, session: ReactSession, user: CurrentUser | None = None
+    ) -> AsyncGenerator[str, None]:
+        """기존 레거시 6단계 ReAct 루프 (C-Pipeline 비활성화 시)."""
         row_limit = session.options.get("row_limit", 1000)
         tenant_id = str(user.tenant_id) if user else ""
         dialect = session.options.get("dialect", "postgres")

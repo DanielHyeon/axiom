@@ -10,6 +10,7 @@ from app.api.feedback_stats import router as feedback_stats_router
 from app.api.meta import router as meta_router
 from app.api.events import router as events_router, watch_agent_router
 from app.api.cache import router as cache_router
+from app.api.validity import router as validity_router
 from app.core.rate_limit import RateLimitExceeded
 from app.core.config import settings
 import structlog
@@ -296,6 +297,20 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.warning("enum_cache_startup_failed", error=str(exc))
 
+    # Validity bootstrap (#P4-16) -- best-effort, 실패해도 서비스 가동에 영향 없음
+    from app.pipelines.validity_bootstrap import validity_bootstrap
+    try:
+        vr = await validity_bootstrap.run()
+        logger.info(
+            "validity_bootstrap_startup_complete",
+            invalid_tables=len(vr.invalid_tables),
+            invalid_columns=len(vr.invalid_columns),
+            scanned_tables=vr.scanned_tables,
+            elapsed_ms=vr.elapsed_ms,
+        )
+    except Exception as exc:
+        logger.warning("validity_bootstrap_startup_failed", error=str(exc))
+
     yield
 
     # ── Shutdown ──
@@ -333,6 +348,7 @@ app.include_router(meta_router)
 app.include_router(events_router)
 app.include_router(watch_agent_router)
 app.include_router(cache_router)
+app.include_router(validity_router)
 
 @app.get("/health/live")
 async def health_live():
