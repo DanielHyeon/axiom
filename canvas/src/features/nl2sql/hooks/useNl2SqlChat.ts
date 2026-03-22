@@ -12,6 +12,7 @@ import {
   postAsk,
   type AskResponse,
   type ReactStreamStep,
+  type CPipelineStep,
 } from '@/features/nl2sql/api/oracleNl2sqlApi';
 import { AppError } from '@/lib/api/errors';
 import type { ChartConfig, ExecutionMetadata, HilRequest, HilResponse } from '@/features/nl2sql/types/nl2sql';
@@ -43,6 +44,10 @@ interface UseNl2SqlChatParams {
   rowLimit: number;
   /** 쿼리 모드: react(스트림) 또는 ask(단발 요청) */
   mode: 'react' | 'ask';
+  /** 멀티턴 대화 상태 토큰 (이전 턴에서 받은 값) */
+  conversationState?: string | null;
+  /** 대화 상태 변경 콜백 — result 스텝에서 새 토큰을 전달 */
+  onConversationStateChange?: (newState: string) => void;
 }
 
 // === 훅 반환 타입 ===
@@ -77,6 +82,8 @@ export interface UseNl2SqlChatReturn {
   resultColumns: { name: string; type: string }[];
   /** 결과 행 목록 */
   resultRows: unknown[][];
+  /** C-Pipeline 단계 목록 (스트림에서 수집) */
+  cPipelineSteps: CPipelineStep[];
 }
 
 export function useNl2SqlChat({
@@ -84,6 +91,8 @@ export function useNl2SqlChat({
   caseId,
   rowLimit,
   mode,
+  conversationState,
+  onConversationStateChange,
 }: UseNl2SqlChatParams): UseNl2SqlChatReturn {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
@@ -94,6 +103,8 @@ export function useNl2SqlChat({
   const [reactSteps, setReactSteps] = useState<ReactStreamStep[]>([]);
   const [finalResult, setFinalResult] = useState<AskResponse['data'] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // C-Pipeline 단계 수집
+  const [cPipelineSteps, setCPipelineSteps] = useState<CPipelineStep[]>([]);
 
   // === HIL 상태 ===
   const [hilRequest, setHilRequest] = useState<HilRequest | null>(null);
@@ -108,6 +119,7 @@ export function useNl2SqlChat({
     setMessages([]);
     setFinalResult(null);
     setReactSteps([]);
+    setCPipelineSteps([]);
     setError(null);
     setHilRequest(null);
     setHilSubmitting(false);
@@ -151,12 +163,31 @@ export function useNl2SqlChat({
           return;
         }
 
+        // C-Pipeline 단계 수집
+        if (step.step === 'c_pipeline' && step.data) {
+          const d = step.data as Record<string, unknown>;
+          const cpStep: CPipelineStep = {
+            phase: String(d.phase ?? ''),
+            detail: String(d.detail ?? ''),
+            sql: d.sql != null ? String(d.sql) : undefined,
+            score: typeof d.score === 'number' ? d.score : undefined,
+            count: typeof d.count === 'number' ? d.count : undefined,
+          };
+          setCPipelineSteps((prev) => [...prev, cpStep]);
+        }
+
         // 결과 이벤트
         if (step.step === 'result' && step.data) {
           const d = step.data as Record<string, unknown>;
           const table = d.result as
             | { columns: { name: string; type: string }[]; rows: unknown[][]; row_count: number }
             | undefined;
+
+          // 멀티턴 대화 상태 토큰 추출 및 전달
+          if (d.conversation_state && typeof d.conversation_state === 'string') {
+            onConversationStateChange?.(d.conversation_state);
+          }
+
           if (table || d.sql) {
             const resultData = {
               question,
@@ -208,7 +239,7 @@ export function useNl2SqlChat({
         setLoading(false);
       },
     }),
-    [t, queryClient],
+    [t, queryClient, onConversationStateChange],
   );
 
   // === 질문 제출 ===
@@ -223,6 +254,7 @@ export function useNl2SqlChat({
       setError(null);
       setFinalResult(null);
       setReactSteps([]);
+      setCPipelineSteps([]);
       setHilRequest(null);
       setMessages((prev) => [...prev, { role: 'user', content: question }]);
 
@@ -269,7 +301,11 @@ export function useNl2SqlChat({
           question,
           datasourceId,
           buildStreamCallbacks(question),
-          { case_id: caseId, row_limit: rowLimit },
+          {
+            case_id: caseId,
+            row_limit: rowLimit,
+            conversation_state: conversationState ?? undefined,
+          },
         );
       } catch (err) {
         const errMsg =
@@ -284,7 +320,7 @@ export function useNl2SqlChat({
         setLoading(false);
       }
     },
-    [datasourceId, caseId, rowLimit, mode, loading, t, queryClient, buildStreamCallbacks],
+    [datasourceId, caseId, rowLimit, mode, loading, t, queryClient, buildStreamCallbacks, conversationState],
   );
 
   // === HIL 응답 제출 — 세션을 이어서 ReAct 스트림 재개 ===
@@ -385,5 +421,6 @@ export function useNl2SqlChat({
     effectiveChartConfig,
     resultColumns,
     resultRows,
+    cPipelineSteps,
   };
 }
