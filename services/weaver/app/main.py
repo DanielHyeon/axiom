@@ -89,6 +89,39 @@ async def _stop_weaver_relay():
             pass
 
 
+# ── 품질 수집 백그라운드 워커 ── #
+_quality_task: asyncio.Task | None = None
+_quality_worker = None
+
+
+@app.on_event("startup")
+async def _start_quality_worker():
+    """주기적 품질 수집 워커 시작 (15분 주기)"""
+    global _quality_task, _quality_worker
+    if not settings.metadata_pg_mode:
+        return
+    try:
+        from app.worker.quality_worker import QualityWorker
+        _quality_worker = QualityWorker(poll_interval=900)
+        _quality_task = asyncio.create_task(_quality_worker.run())
+        logger.info("QualityWorker background task started (15min interval)")
+    except Exception:
+        logger.warning("QualityWorker failed to start", exc_info=True)
+
+
+@app.on_event("shutdown")
+async def _stop_quality_worker():
+    global _quality_task, _quality_worker
+    if _quality_worker is not None:
+        _quality_worker.shutdown()
+    if _quality_task and not _quality_task.done():
+        _quality_task.cancel()
+        try:
+            await _quality_task
+        except asyncio.CancelledError:
+            pass
+
+
 # ── Phase 2-D: Document→Ontology 파이프라인 테이블 보장 ── #
 @app.on_event("startup")
 async def _ensure_document_tables():
