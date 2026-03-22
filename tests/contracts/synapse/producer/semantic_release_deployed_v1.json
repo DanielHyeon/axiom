@@ -1,0 +1,19 @@
+{
+  "event_name": "SEMANTIC_RELEASE_DEPLOYED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["release_id", "object_type", "object_id", "version", "tenant_id", "deployed_at", "idempotency_key"],
+    "properties": {
+      "release_id": {"type": ["string", "integer"]},
+      "object_type": {"type": "string"},
+      "object_id": {"type": "string"},
+      "version": {"type": "integer"},
+      "tenant_id": {"type": "string"},
+      "deployed_at": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

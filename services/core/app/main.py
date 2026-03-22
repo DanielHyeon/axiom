@@ -18,6 +18,8 @@ from app.modules.watch.api.routes import router as watch_router
 from app.api.users.routes import router as users_router
 from app.modules.case.api.routes import router as cases_router
 from app.api.admin.event_routes import router as admin_events_router
+from app.modules.watch.cep_api import router as cep_router
+from app.modules.watch.watch_agent_api import router as watch_agent_router
 from app.core.security import get_current_user
 from fastapi import Depends
 
@@ -52,6 +54,8 @@ app.include_router(agent_router, prefix="/api/v1", dependencies=[Depends(get_cur
 app.include_router(gateway_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(admin_events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(cep_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(watch_agent_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 
 
 @app.on_event("startup")

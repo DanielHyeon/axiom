@@ -190,6 +190,22 @@ async def run_impact_task(
         except Exception as exc:
             logger.warning("_persist_driver_scores failed (non-fatal): %s", exc)
 
+        # 품질 점수 주입 — 관련 테이블의 최신 품질 점수를 meta에 포함
+        try:
+            from app.services.quality_collector import QualityCollector
+            from app.services.insight_store import insight_store as _is
+            qc = QualityCollector(_is)
+            quality_scores = await qc.get_latest_scores(tenant_id, target_type="table", limit=50)
+            if quality_scores:
+                result.setdefault("graph", {}).setdefault("meta", {})["quality_context"] = [
+                    {"target_id": qs["target_id"], "overall_score": float(qs.get("overall_score") or 0),
+                     "freshness": float(qs.get("freshness_score") or 0),
+                     "completeness": float(qs.get("completeness_score") or 0)}
+                    for qs in quality_scores[:20]
+                ]
+        except Exception as qe:
+            logger.debug("quality_context injection skipped: %s", qe)
+
         cache_key = _build_cache_key(tenant_id, datasource_id, kpi_fingerprint, time_range, top)
         cache_payload = {"job_id": job_id, "result": result}
         await rd.set(

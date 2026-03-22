@@ -39,6 +39,23 @@ EVENT_CONTRACTS: dict[str, EventContract] = {
         payload_schema="weaver/datasource_schema_changed/v1",
         idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
     ),
+    # §3.3 품질 이벤트 — 스캔 완료 시 항상 발행
+    # timestamp_ms 포함하여 매 주기마다 고유한 멱등키 생성
+    "QUALITY_SCORE_UPDATED": EventContract(
+        event_name="QUALITY_SCORE_UPDATED",
+        owner_service="weaver",
+        version="1.0.0",
+        payload_schema="weaver/quality_score_updated/v1",
+        idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
+    ),
+    # §3.3 품질 이벤트 — overall_score < 60 일 때 발행
+    "QUALITY_THRESHOLD_BREACHED": EventContract(
+        event_name="QUALITY_THRESHOLD_BREACHED",
+        owner_service="weaver",
+        version="1.0.0",
+        payload_schema="weaver/quality_threshold_breached/v1",
+        idempotency_key_rule="event_type:aggregate_id:timestamp_ms",
+    ),
 }
 
 

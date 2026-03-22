@@ -8,9 +8,7 @@
 import React from 'react';
 import { Network, Link2, Unlink, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
 import type { ObjectType } from '../types/domain';
 
 // ──────────────────────────────────────
@@ -29,14 +27,6 @@ interface OntologyMappingPanelProps {
 // ──────────────────────────────────────
 // 레이어 색상
 // ──────────────────────────────────────
-
-const LAYER_COLORS: Record<string, string> = {
-  kpi: 'text-red-400 bg-red-400/10',
-  driver: 'text-amber-400 bg-amber-400/10',
-  measure: 'text-orange-400 bg-orange-400/10',
-  process: 'text-emerald-400 bg-emerald-400/10',
-  resource: 'text-blue-400 bg-blue-400/10',
-};
 
 // ──────────────────────────────────────
 // 컴포넌트

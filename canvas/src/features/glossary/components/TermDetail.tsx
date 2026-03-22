@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useGlossaryStore } from '../store/useGlossaryStore';
 import { useDeleteTerm } from '../hooks/useGlossary';
-import type { GlossaryTerm, TermStatus } from '../types/glossary';
+import type { TermStatus } from '../types/glossary';
 
 /** 상태별 배지 스타일 */
 const statusConfig: Record<TermStatus, { className: string; labelKey: string }> = {

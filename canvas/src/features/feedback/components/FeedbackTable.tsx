@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ThumbsUp, ThumbsDown, Edit3, ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import type { FeedbackEntry, FeedbackListResponse } from '../types/feedback';
 
 interface FeedbackTableProps {

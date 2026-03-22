@@ -1,0 +1,18 @@
+{
+  "event_name": "WHATIF_FORK_COMPLETED",
+  "version": "1.0.0",
+  "producer": "vision",
+  "schema": {
+    "type": "object",
+    "required": ["fork_id", "scenario_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "fork_id": {"type": "string"},
+      "scenario_id": {"type": "string"},
+      "status": {"type": "string"},
+      "result_summary": {"type": "object"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

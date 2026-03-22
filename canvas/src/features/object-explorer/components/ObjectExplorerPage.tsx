@@ -12,8 +12,6 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Search, PanelLeftClose, PanelLeftOpen, Network } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 // ObjectType 목록 조회 훅은 shared를 통해 접근 (feature 간 의존 제거)
@@ -48,7 +46,6 @@ export const ObjectExplorerPage: React.FC = () => {
     selectObjectType,
     selectInstance,
     setFilter,
-    resetFilter,
     setLeftPanelTab,
     toggleGraphPanel,
     reset,
@@ -132,8 +129,6 @@ export const ObjectExplorerPage: React.FC = () => {
   }, [reset]);
 
   // ── 좌측 패널 표시 여부 ──
-  const showLeftPanel = leftPanelTab === 'search' || leftPanelTab === 'detail';
-
   return (
     <div className="flex flex-col h-full overflow-hidden bg-background">
       {/* ─── 메인 3컬럼 레이아웃 ─── */}

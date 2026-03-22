@@ -134,11 +134,15 @@ class GraphSearchService:
         safe_hops = max(1, min(max_hops, 5))
         safe_direction = direction if direction in {"out", "in", "both"} else "both"
 
-        # Verify start table exists
-        check = await self._read(
-            "MATCH (t:Table {name: $name}) RETURN t.name AS name LIMIT 1",
-            {"name": start_table},
-        )
+        # Verify start table exists — Neo4j 미연결 시 빈 결과로 graceful 폴백
+        try:
+            check = await self._read(
+                "MATCH (t:Table {name: $name}) RETURN t.name AS name LIMIT 1",
+                {"name": start_table},
+            )
+        except Exception as exc:
+            logger.warning("fk_path_check_error", error=str(exc))
+            return {"start_table": start_table, "related_tables": []}
         if not check:
             raise ValueError("start_table not found")
 

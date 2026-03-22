@@ -24,7 +24,111 @@ class EventContractError(Exception):
         self.message = message
 
 
+# ── 시멘틱 계약 이벤트 (P2) ──
+_SEMANTIC_EVENTS = {
+    "SEMANTIC_MEASURE_PUBLISHED": EventContract(
+        event_name="SEMANTIC_MEASURE_PUBLISHED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_measure_published/v1",
+        idempotency_key_rule="event_type:aggregate_id:version",
+    ),
+    "SEMANTIC_ENTITY_PUBLISHED": EventContract(
+        event_name="SEMANTIC_ENTITY_PUBLISHED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_entity_published/v1",
+        idempotency_key_rule="event_type:aggregate_id:version",
+    ),
+    "ONTOLOGY_CONCEPT_APPROVED": EventContract(
+        event_name="ONTOLOGY_CONCEPT_APPROVED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/ontology_concept_approved/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "JOIN_CONTRACT_CREATED": EventContract(
+        event_name="JOIN_CONTRACT_CREATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/join_contract_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    "QUALITY_CONTRACT_UPDATED": EventContract(
+        event_name="QUALITY_CONTRACT_UPDATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/quality_contract_updated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.2: 차원 배포 이벤트
+    "SEMANTIC_DIMENSION_PUBLISHED": EventContract(
+        event_name="SEMANTIC_DIMENSION_PUBLISHED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_dimension_published/v1",
+        idempotency_key_rule="event_type:aggregate_id:version",
+    ),
+    # §4.2: 그레인 계약 생성 이벤트
+    "GRAIN_CONTRACT_CREATED": EventContract(
+        event_name="GRAIN_CONTRACT_CREATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/grain_contract_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.2: 온톨로지 개념 생성 이벤트
+    "ONTOLOGY_CONCEPT_CREATED": EventContract(
+        event_name="ONTOLOGY_CONCEPT_CREATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/ontology_concept_created/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.2: 온톨로지 개념 상태 변경 이벤트
+    "ONTOLOGY_CONCEPT_UPDATED": EventContract(
+        event_name="ONTOLOGY_CONCEPT_UPDATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/ontology_concept_updated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.8: 시멘틱 컴파일러 바인딩 검증 완료 이벤트
+    "ONTOLOGY_BINDING_VALIDATED": EventContract(
+        event_name="ONTOLOGY_BINDING_VALIDATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/ontology_binding_validated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.8: 지표/엔티티 deprecated 이벤트
+    "SEMANTIC_MEASURE_DEPRECATED": EventContract(
+        event_name="SEMANTIC_MEASURE_DEPRECATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_measure_deprecated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.9: 컨텍스트 팩 생성/수정 이벤트
+    "CONTEXT_PACK_GENERATED": EventContract(
+        event_name="CONTEXT_PACK_GENERATED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/context_pack_generated/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+    # §4.9: 시멘틱 릴리스 배포 이벤트
+    "SEMANTIC_RELEASE_DEPLOYED": EventContract(
+        event_name="SEMANTIC_RELEASE_DEPLOYED",
+        owner_service="synapse",
+        version="1.0.0",
+        payload_schema="synapse/semantic_release_deployed/v1",
+        idempotency_key_rule="event_type:aggregate_id",
+    ),
+}
+
 EVENT_CONTRACTS: dict[str, EventContract] = {
+    **_SEMANTIC_EVENTS,
     "ONTOLOGY_NODE_CREATED": EventContract(
         event_name="ONTOLOGY_NODE_CREATED",
         owner_service="synapse",

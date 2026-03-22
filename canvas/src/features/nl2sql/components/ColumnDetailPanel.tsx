@@ -5,7 +5,6 @@
  * KAIR ColumnDetailPanel.vue를 React+Tailwind 패턴으로 이식.
  */
 
-import { cn } from '@/lib/utils';
 import {
   X,
   Key,

@@ -2,7 +2,7 @@
 // Transform backend API graph response into Cytoscape.js elements
 
 import type { ElementDefinition } from 'cytoscape';
-import type { GraphData, GraphNode, GraphEdge, NodeType, EdgeType } from '../types/insight';
+import type { GraphData, GraphNode, GraphEdge, NodeType } from '../types/insight';
 
 // ---------------------------------------------------------------------------
 // Node visual mapping
@@ -188,7 +188,7 @@ export function getLayoutConfig(graphType: GraphType): LayoutOptions {
 // Cytoscape stylesheet
 // ---------------------------------------------------------------------------
 
-export function getCytoscapeStylesheet(): cytoscape.Stylesheet[] {
+export function getCytoscapeStylesheet(): cytoscape.StylesheetStyle[] {
   return [
     // Base node style
     {

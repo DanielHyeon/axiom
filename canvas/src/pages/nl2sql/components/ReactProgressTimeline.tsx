@@ -40,6 +40,7 @@ const STEP_META: Record<ReactStepType, { label: string; icon: LucideIcon }> = {
  result: { label: 'Result', icon: CheckCircle2 },
  error: { label: 'Error', icon: XCircle },
  needs_user_input: { label: 'User Input', icon: HelpCircle },
+ c_pipeline: { label: 'C-Pipeline', icon: GitBranch },
 };
 
 /** 각 스트림 단계에서 요약 텍스트를 추출하는 헬퍼 */
@@ -77,7 +78,7 @@ function extractSummary(step: ReactStreamStep): string {
 }
 
 export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelineProps) {
- const receivedSteps = new Set(steps.map((s) => s.step));
+ // receivedSteps는 향후 단계별 필터링에 사용 예정
  const lastStep = steps[steps.length - 1];
  const hasError = steps.some((s) => s.step === 'error');
  const hasResult = steps.some((s) => s.step === 'result');

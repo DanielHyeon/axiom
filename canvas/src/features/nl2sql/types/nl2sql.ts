@@ -32,7 +32,8 @@ export type ReactStepType =
     | 'triage'    // Triage
     | 'result'    // Final result
     | 'error'     // Error
-    | 'needs_user_input';  // HIL: 에이전트가 사용자 입력을 요청
+    | 'needs_user_input'  // HIL: 에이전트가 사용자 입력을 요청
+    | 'c_pipeline';  // C-Pipeline: 탐색/수렴/탈출 단계
 
 /** HIL: 에이전트가 제시하는 선택지 */
 export interface HilOption {
@@ -77,4 +78,30 @@ export interface ExecutionMetadata {
     guard_fixes?: string[];
     cache_hit?: boolean;
     query_id?: string | null;
+    /** P3: 시멘틱 계약 컨텍스트 사용 여부 */
+    semantic_context_used?: boolean;
+    /** P3: 시멘틱 계약 품질 경고 목록 */
+    quality_warnings?: string[];
+    /** P4: ContextPack 사용 시 intent 유형 */
+    intent_type?: string;
+    /** Sprint 2: 품질 신뢰 등급 (TRUSTED / CAUTION / REFERENCE_ONLY / BLOCKED) */
+    quality_grade?: string;
+    /** Sprint 2: 품질 최종 점수 (0~100) */
+    quality_score?: number;
+    /** Sprint 2: 품질 등급 안내 문구 (한국어) */
+    quality_banner?: string;
+    /** Sprint 4: 의도 분류 신뢰도 (0.0~1.0) */
+    intent_confidence?: number;
+    /** Sprint 4: 의도 분류 모호성 점수 (0.0~1.0, 높을수록 모호) */
+    intent_ambiguity?: number;
+    /** Sprint 4: 동의어 매칭 수 */
+    synonym_matches?: number;
+    /** Sprint 4: 폴백 모드 (NONE / SAFE_NARROW / REFERENCE_ONLY) */
+    fallback_mode?: string;
+    /** Sprint 3: 시멘틱 스냅샷 버전 (요청 단위 고정) */
+    snapshot_version?: string;
+    /** Sprint 1: 시멘틱 계약 위반 목록 */
+    contract_violations?: { code: string; message: string }[];
+    /** Sprint 1: 시멘틱 가드 모드 (log_only / warn / enforce) */
+    semantic_guard_mode?: string;
 }

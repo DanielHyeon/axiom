@@ -93,7 +93,7 @@ export function SchemaCanvas({
   onRefresh,
 }: SchemaCanvasProps) {
   // G1: FK 가시성 상태
-  const { visibility, toggle: toggleFkVisibility, isVisible: isFkVisible } = useFkVisibility();
+  const { visibility, toggle: toggleFkVisibility } = useFkVisibility();
 
   // G2: 관계 편집 모달 상태
   const [showCardinalityModal, setShowCardinalityModal] = useState(false);

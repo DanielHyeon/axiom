@@ -1,0 +1,17 @@
+{
+  "event_name": "QUALITY_CONTRACT_UPDATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["quality_contract_id", "tenant_id", "idempotency_key"],
+    "properties": {
+      "quality_contract_id": {"type": "string"},
+      "target_type": {"type": "string"},
+      "target_id": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

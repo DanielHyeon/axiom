@@ -420,6 +420,18 @@ async def list_snapshots(case_id: str):
     return {"success": True, "data": data}
 
 
+@router.post("/cases/{case_id}/snapshots/{snapshot_id}/activate")
+async def activate_snapshot(case_id: str, snapshot_id: str, request: Request):
+    """스냅샷을 활성 버전으로 설정한다. 현재 온톨로지를 해당 스냅샷으로 복원한다."""
+    try:
+        data = await snapshot_service.activate_snapshot(case_id=case_id, snapshot_id=snapshot_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Snapshot activation failed: {exc}") from exc
+    return {"success": True, "data": data}
+
+
 @router.get("/snapshots/diff")
 async def diff_snapshots(snapshot_a: str, snapshot_b: str):
     try:

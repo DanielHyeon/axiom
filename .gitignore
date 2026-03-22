@@ -200,8 +200,8 @@ logs/
 target/
 build/
 
-# DB 데이터 디렉토리 제외
-data/
+# DB 데이터 디렉토리 제외 (루트 data/ 만 — canvas/src/pages/data/ 등 소스 코드는 허용)
+/data/
 db_data/
 mysql_data/
 postgres_data/

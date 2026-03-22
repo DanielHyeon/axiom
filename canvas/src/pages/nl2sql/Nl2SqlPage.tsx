@@ -12,10 +12,13 @@ import { useRole } from '@/shared/hooks/useRole';
 import { useSchemaTree } from '@/features/nl2sql/hooks/useSchemaTree';
 import { useTableDetail } from '@/features/nl2sql/hooks/useTableDetail';
 import { useNl2SqlChat } from '@/features/nl2sql/hooks/useNl2SqlChat';
+import { useConversationState } from '@/features/nl2sql/hooks/useConversationState';
 
 import { HumanInTheLoopInput } from '@/features/nl2sql/components/HumanInTheLoopInput';
 import { QueryHistoryPanel } from '@/features/nl2sql/components/QueryHistoryPanel';
 import { ReactSummaryPanel } from '@/features/nl2sql/components/ReactSummaryPanel';
+import { CPipelineProgress } from '@/features/nl2sql/components/CPipelineProgress';
+import { ConversationIndicator } from '@/features/nl2sql/components/ConversationIndicator';
 import { EmptyState } from '@/shared/components/EmptyState';
 
 import { SchemaSidebar, type CanvasTable } from './components/SchemaSidebar';
@@ -27,6 +30,7 @@ import { DirectSqlPanel } from './components/DirectSqlPanel';
 import { ReactProgressTimeline } from './components/ReactProgressTimeline';
 
 import { Database } from 'lucide-react';
+import { QualityBadge } from '@/features/nl2sql/components/QualityBadge';
 
 export function NL2SQLPage() {
   const { t } = useTranslation();
@@ -45,8 +49,33 @@ export function NL2SQLPage() {
   // === QueryInputForm에서 prompt 값을 설정하는 함수를 받아오기 위한 ref ===
   const setPromptRef = useRef<((value: string) => void) | null>(null);
 
+  // === 멀티턴 대화 상태 ===
+  const conversation = useConversationState();
+
   // === 채팅 + 스트리밍 로직 (커스텀 훅) ===
-  const chat = useNl2SqlChat({ datasourceId, caseId, rowLimit, mode });
+  const chat = useNl2SqlChat({
+    datasourceId,
+    caseId,
+    rowLimit,
+    mode,
+    conversationState: conversation.conversationState,
+    onConversationStateChange: conversation.updateState,
+  });
+
+  // === 새 대화 시작 — 대화 상태 + 채팅 메시지 모두 초기화 ===
+  const handleNewConversation = useCallback(() => {
+    conversation.clearState();
+    chat.handleClear();
+  }, [conversation, chat]);
+
+  // === 질문 제출 래퍼 — 턴 카운트 증가 포함 ===
+  const handleSubmitQuestion = useCallback(
+    async (question: string) => {
+      conversation.incrementTurn();
+      await chat.submitQuestion(question);
+    },
+    [conversation, chat],
+  );
 
   // === 스키마 트리 + 테이블 상세 ===
   const schemaTree = useSchemaTree(datasourceId || null);
@@ -109,11 +138,11 @@ export function NL2SQLPage() {
               rowLimit={rowLimit}
               onRowLimitChange={setRowLimit}
               hasMessages={chat.messages.length > 0}
-              onClear={chat.handleClear}
+              onClear={handleNewConversation}
             />
 
             <QueryInputForm
-              onSubmit={chat.submitQuestion}
+              onSubmit={handleSubmitQuestion}
               loading={chat.loading}
               datasourceId={datasourceId}
               hilActive={!!chat.hilRequest}
@@ -149,6 +178,13 @@ export function NL2SQLPage() {
             <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-red-700">{chat.error}</div>
           )}
 
+          {/* 멀티턴 대화 상태 표시 */}
+          <ConversationIndicator
+            turnCount={conversation.turnCount}
+            isMultiTurn={conversation.isMultiTurn}
+            onNewConversation={handleNewConversation}
+          />
+
           {/* 채팅 메시지 목록 */}
           <ChatMessageList messages={chat.messages} />
 
@@ -162,11 +198,29 @@ export function NL2SQLPage() {
             />
           )}
 
-          {/* ReAct 진행 타임라인 + 요약 */}
+          {/* ReAct 진행 타임라인 + C-Pipeline + 요약 */}
           {mode === 'react' && chat.reactSteps.length > 0 && (
             <div className="space-y-3">
               <ReactProgressTimeline steps={chat.reactSteps} isRunning={chat.loading} />
+              <CPipelineProgress steps={chat.reactSteps} isRunning={chat.loading} />
               <ReactSummaryPanel steps={chat.reactSteps} isRunning={chat.loading} />
+            </div>
+          )}
+
+          {/* 시멘틱 품질 배지 — 결과가 있을 때만 표시 */}
+          {chat.finalResult && (
+            <div className="px-1">
+              <QualityBadge
+                semanticContextUsed={chat.finalResult.metadata?.semantic_context_used}
+                qualityWarnings={chat.finalResult.metadata?.quality_warnings}
+                intentType={chat.finalResult.metadata?.intent_type}
+                qualityGrade={chat.finalResult.metadata?.quality_grade}
+                qualityScore={chat.finalResult.metadata?.quality_score}
+                qualityBanner={chat.finalResult.metadata?.quality_banner}
+                intentConfidence={chat.finalResult.metadata?.intent_confidence}
+                synonymMatches={chat.finalResult.metadata?.synonym_matches}
+                fallbackMode={chat.finalResult.metadata?.fallback_mode}
+              />
             </div>
           )}
 

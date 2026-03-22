@@ -1,0 +1,18 @@
+{
+  "event_name": "CONTEXT_PACK_GENERATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["context_pack_id", "intent_type", "action", "tenant_id", "idempotency_key"],
+    "properties": {
+      "context_pack_id": {"type": "string"},
+      "intent_type": {"type": "string"},
+      "action": {"type": "string"},
+      "version": {"type": "integer"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

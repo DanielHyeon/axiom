@@ -94,6 +94,129 @@ class SnapshotService:
                 raise KeyError(f"Snapshot {snapshot_id} not found")
             return json.loads(record["data"])
 
+    async def activate_snapshot(self, case_id: str, snapshot_id: str) -> dict[str, Any]:
+        """스냅샷을 활성 버전으로 설정 — 현재 온톨로지를 해당 스냅샷으로 복원한다.
+
+        1. 스냅샷 데이터 로드
+        2. 현재 온톨로지 클리어
+        3. 스냅샷의 노드/관계 복원
+        4. 복원 요약 반환
+        """
+        # 1) 스냅샷 데이터 로드
+        snapshot_data = await self._load_snapshot_data(snapshot_id)
+        nodes = snapshot_data.get("nodes", [])
+        relations = snapshot_data.get("relations", [])
+
+        # 2) 현재 온톨로지 노드/관계 전부 삭제
+        try:
+            async with self._neo4j.session() as session:
+                await session.run(
+                    """
+                    MATCH (n:OntologyNode {case_id: $case_id})
+                    DETACH DELETE n
+                    """,
+                    case_id=case_id,
+                )
+        except Exception as exc:
+            logger.error("snapshot_activate_clear_failed", error=str(exc), case_id=case_id)
+            raise
+
+        # 3) 스냅샷 노드 복원
+        restored_nodes = 0
+        restored_relations = 0
+
+        try:
+            async with self._neo4j.session() as session:
+                for node in nodes:
+                    node_id = node.get("id")
+                    if not node_id:
+                        continue
+                    # 노드의 기본 속성 추출
+                    props = {k: v for k, v in node.items() if v is not None}
+                    props["case_id"] = case_id
+                    await session.run(
+                        """
+                        CREATE (n:OntologyNode)
+                        SET n = $props
+                        """,
+                        props=props,
+                    )
+                    restored_nodes += 1
+
+                # 4) 스냅샷 관계 복원
+                for rel in relations:
+                    source_id = rel.get("source") or rel.get("source_id")
+                    target_id = rel.get("target") or rel.get("target_id")
+                    rel_type = rel.get("type", "RELATED_TO")
+                    if not source_id or not target_id:
+                        continue
+                    # 관계 속성 (type, source, target 제외)
+                    rel_props = {
+                        k: v for k, v in rel.items()
+                        if k not in ("source", "target", "source_id", "target_id", "type") and v is not None
+                    }
+                    # 안전한 관계 타입만 허용
+                    safe_type = rel_type if rel_type.replace("_", "").isalpha() else "RELATED_TO"
+                    await session.run(
+                        f"""
+                        MATCH (a:OntologyNode {{id: $source_id}})
+                        MATCH (b:OntologyNode {{id: $target_id}})
+                        CREATE (a)-[r:{safe_type}]->(b)
+                        SET r = $props
+                        """,
+                        source_id=source_id,
+                        target_id=target_id,
+                        props=rel_props,
+                    )
+                    restored_relations += 1
+        except Exception as exc:
+            logger.error("snapshot_activate_restore_failed", error=str(exc), case_id=case_id)
+            raise
+
+        # 5) 스냅샷을 활성으로 표시
+        try:
+            async with self._neo4j.session() as session:
+                # 기존 활성 플래그 제거
+                await session.run(
+                    """
+                    MATCH (s:OntologySnapshot {case_id: $case_id})
+                    SET s.is_active = false
+                    """,
+                    case_id=case_id,
+                )
+                # 현재 스냅샷 활성화
+                await session.run(
+                    """
+                    MATCH (s:OntologySnapshot {id: $snapshot_id})
+                    SET s.is_active = true, s.activated_at = datetime()
+                    """,
+                    snapshot_id=snapshot_id,
+                )
+        except Exception as exc:
+            logger.error("snapshot_activate_flag_failed", error=str(exc), snapshot_id=snapshot_id)
+            raise
+
+        # 인메모리 캐시 무효화
+        if hasattr(self._ontology, "_case_nodes") and case_id in self._ontology._case_nodes:
+            del self._ontology._case_nodes[case_id]
+        if hasattr(self._ontology, "_case_relations") and case_id in self._ontology._case_relations:
+            del self._ontology._case_relations[case_id]
+
+        logger.info(
+            "snapshot_activated",
+            snapshot_id=snapshot_id,
+            case_id=case_id,
+            restored_nodes=restored_nodes,
+            restored_relations=restored_relations,
+        )
+        return {
+            "snapshot_id": snapshot_id,
+            "case_id": case_id,
+            "restored_nodes": restored_nodes,
+            "restored_relations": restored_relations,
+            "status": "activated",
+        }
+
     async def diff_snapshots(self, snapshot_a: str, snapshot_b: str) -> dict[str, Any]:
         """Compare two snapshots → added/removed/modified nodes and relations."""
         data_a = await self._load_snapshot_data(snapshot_a)

@@ -112,7 +112,7 @@ export async function uploadFiles(
 /** 파이프라인 목록 조회 */
 export async function listPipelines(): Promise<PipelineListResponse> {
   const res = await weaverApi.get('/api/v3/weaver/pipelines');
-  const body = res as PipelineListResponse | undefined;
+  const body = res as unknown as PipelineListResponse | undefined;
   return {
     pipelines: Array.isArray(body?.pipelines) ? body!.pipelines : [],
     total: body?.total ?? 0,
@@ -168,7 +168,7 @@ export async function listIngestionHistory(params?: {
   offset?: number;
 }): Promise<IngestionHistoryResponse> {
   const res = await weaverApi.get('/api/v3/weaver/ingestion/history', { params });
-  const body = res as IngestionHistoryResponse | undefined;
+  const body = res as unknown as IngestionHistoryResponse | undefined;
   return {
     records: Array.isArray(body?.records) ? body!.records : [],
     total: body?.total ?? 0,

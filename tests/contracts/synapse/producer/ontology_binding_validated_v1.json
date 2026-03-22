@@ -1,0 +1,19 @@
+{
+  "event_name": "ONTOLOGY_BINDING_VALIDATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["entity_id", "valid", "tenant_id", "idempotency_key"],
+    "properties": {
+      "entity_id": {"type": "string"},
+      "measure_id": {"type": "string"},
+      "valid": {"type": "boolean"},
+      "measure_count": {"type": "integer"},
+      "dimension_count": {"type": "integer"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "event_name": "POLICY_COMMAND",
+  "version": "1.0.0",
+  "producer": "core",
+  "schema": {
+    "type": "object",
+    "required": ["command_type", "tenant_id", "idempotency_key"],
+    "properties": {
+      "command_type": {"type": "string"},
+      "policy_id": {"type": "string"},
+      "target_type": {"type": "string"},
+      "target_id": {"type": "string"},
+      "payload": {"type": "object"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "event_name": "SEMANTIC_MEASURE_DEPRECATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["concept_id", "previous_status", "tenant_id", "idempotency_key"],
+    "properties": {
+      "concept_id": {"type": "string"},
+      "previous_status": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

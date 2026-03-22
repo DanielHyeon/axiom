@@ -103,7 +103,6 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
   onSave,
   onTest,
   initialBehavior,
-  availableColumns = [],
   isSaving = false,
 }) => {
   // 폼 상태

@@ -1,4 +1,8 @@
+from __future__ import annotations
+
+import asyncio
 from contextlib import asynccontextmanager
+from typing import Any
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,8 +14,10 @@ from app.api.feedback_stats import router as feedback_stats_router
 from app.api.meta import router as meta_router
 from app.api.events import router as events_router, watch_agent_router
 from app.api.cache import router as cache_router
+from app.api.validity import router as validity_router
 from app.core.rate_limit import RateLimitExceeded
 from app.core.config import settings
+from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
 import structlog
 
 logger = structlog.get_logger()
@@ -262,25 +268,84 @@ def _seed_demo_tables() -> None:
         logger.warning("demo_tables_seed_failed", error=str(exc))
 
 
+# ---------------------------------------------------------------------------
+# Sprint 3: Synapse 이벤트 수신 → 시멘틱 캐시 무효화
+# ---------------------------------------------------------------------------
+
+_SYNAPSE_STREAM_KEY = "axiom:synapse:events"
+_INVALIDATION_EVENT_TYPES = frozenset({
+    "SEMANTIC_MEASURE_PUBLISHED",
+    "SEMANTIC_ENTITY_PUBLISHED",
+    "JOIN_CONTRACT_CREATED",
+    "GRAIN_CONTRACT_CREATED",
+    "QUALITY_CONTRACT_CREATED",
+})
+
+
+async def _semantic_event_listener(redis_client: Any) -> None:  # noqa: ANN401
+    """Sprint 3: Synapse Redis Stream 이벤트를 구독하여 시멘틱 캐시를 무효화한다.
+
+    XREAD block 방식으로 대기하며, 관련 이벤트 수신 시
+    해당 테넌트의 시멘틱 계약 캐시를 즉시 삭제한다.
+    """
+    last_id = "$"  # 리스너 시작 이후 메시지만 수신
+    while True:
+        try:
+            entries = await redis_client.xread(
+                {_SYNAPSE_STREAM_KEY: last_id}, block=5000, count=10,
+            )
+            if not entries:
+                continue
+            for _stream, messages in entries:
+                for msg_id, data in messages:
+                    event_type = (data.get(b"event_type") or b"").decode()
+                    if event_type in _INVALIDATION_EVENT_TYPES:
+                        tenant_id = (data.get(b"tenant_id") or b"").decode()
+                        deleted = await oracle_synapse_acl.invalidate_cache(tenant_id or None)
+                        logger.info(
+                            "semantic_cache_event_invalidation",
+                            event_type=event_type,
+                            tenant_id=tenant_id,
+                            deleted=deleted,
+                        )
+                    last_id = msg_id
+        except asyncio.CancelledError:
+            logger.info("semantic_event_listener_cancelled")
+            break
+        except Exception as exc:
+            logger.warning("semantic_event_listener_error", error=str(exc))
+            await asyncio.sleep(5)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # ── Startup ──
 
     _seed_demo_tables()
 
-    # Redis 연결 (LLM 시맨틱 캐시용) -- 실패해도 서비스 가동에 영향 없음
-    if settings.LLM_CACHE_ENABLED:
+    # Redis 연결 (LLM 시맨틱 캐시 + 시멘틱 계약 캐시용) -- 실패해도 서비스 가동에 영향 없음
+    if settings.LLM_CACHE_ENABLED or settings.SEMANTIC_CACHE_ENABLED:
         try:
             import redis.asyncio as aioredis
             _redis = aioredis.from_url(settings.REDIS_URL, decode_responses=False)
             await _redis.ping()
             app.state.redis = _redis
+            # Sprint 3: ACL에 Redis 클라이언트 주입
+            oracle_synapse_acl.set_redis(_redis)
             logger.info("oracle_redis_connected", url=settings.REDIS_URL)
         except Exception as exc:
             app.state.redis = None
             logger.warning("oracle_redis_connect_failed", error=str(exc))
     else:
         app.state.redis = None
+
+    # Sprint 3: Synapse 이벤트 리스너 (시멘틱 캐시 무효화)
+    _event_listener_task: asyncio.Task | None = None
+    if settings.SEMANTIC_CACHE_ENABLED and getattr(app.state, "redis", None) is not None:
+        _event_listener_task = asyncio.create_task(
+            _semantic_event_listener(app.state.redis)
+        )
+        logger.info("semantic_event_listener_started", stream=_SYNAPSE_STREAM_KEY)
 
     # Enum cache bootstrap (#8 P1-1) -- best-effort, 실패해도 서비스 가동에 영향 없음
     from app.pipelines.enum_cache_bootstrap import enum_cache_bootstrap
@@ -296,9 +361,32 @@ async def lifespan(app: FastAPI):
     except Exception as exc:
         logger.warning("enum_cache_startup_failed", error=str(exc))
 
+    # Validity bootstrap (#P4-16) -- best-effort, 실패해도 서비스 가동에 영향 없음
+    from app.pipelines.validity_bootstrap import validity_bootstrap
+    try:
+        vr = await validity_bootstrap.run()
+        logger.info(
+            "validity_bootstrap_startup_complete",
+            invalid_tables=len(vr.invalid_tables),
+            invalid_columns=len(vr.invalid_columns),
+            scanned_tables=vr.scanned_tables,
+            elapsed_ms=vr.elapsed_ms,
+        )
+    except Exception as exc:
+        logger.warning("validity_bootstrap_startup_failed", error=str(exc))
+
     yield
 
     # ── Shutdown ──
+    # Sprint 3: 이벤트 리스너 정리
+    if _event_listener_task is not None:
+        _event_listener_task.cancel()
+        try:
+            await _event_listener_task
+        except asyncio.CancelledError:
+            pass
+        logger.info("semantic_event_listener_stopped")
+
     _redis_client = getattr(app.state, "redis", None)
     if _redis_client is not None:
         await _redis_client.aclose()
@@ -333,6 +421,7 @@ app.include_router(meta_router)
 app.include_router(events_router)
 app.include_router(watch_agent_router)
 app.include_router(cache_router)
+app.include_router(validity_router)
 
 @app.get("/health/live")
 async def health_live():

@@ -21,7 +21,7 @@ import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { FieldEditor } from './FieldEditor';
 import { useCreateObjectType, useGenerateFromTable } from '../hooks/useObjectTypes';
-import type { ObjectTypeField, CreateObjectTypePayload, ObjectTypeStatus } from '../types/domain';
+import type { ObjectTypeField, CreateObjectTypePayload } from '../types/domain';
 
 // ──────────────────────────────────────
 // Props
@@ -38,11 +38,6 @@ interface CreateObjectTypeDialogProps {
 // ──────────────────────────────────────
 
 type CreationMode = 'auto' | 'manual';
-
-let _seq = 0;
-function tempId() {
-  return `tmp_${Date.now()}_${++_seq}`;
-}
 
 // ──────────────────────────────────────
 // 컴포넌트

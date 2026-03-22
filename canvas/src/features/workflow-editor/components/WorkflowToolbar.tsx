@@ -14,7 +14,6 @@ import {
   Shield,
   GitBranch,
   Save,
-  FileInput,
   RotateCcw,
   Plus,
 } from 'lucide-react';

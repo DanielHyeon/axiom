@@ -38,6 +38,8 @@ export const ROUTES = {
     EXPLORER: '/data/explorer',
     GLOSSARY: '/data/glossary',
     WORKFLOW_EDITOR: '/data/workflow',
+    // 시멘틱 카탈로그
+    SEMANTIC_CATALOG: '/data/semantic-catalog',
     // OLAP Studio 데이터 관리 라우트
     SOURCES: '/data/sources',
     ETL: '/data/etl',

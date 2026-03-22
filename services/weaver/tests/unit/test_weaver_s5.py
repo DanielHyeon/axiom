@@ -26,7 +26,7 @@ async def test_api_weaver_readiness_probe_returns_up():
         res = await client.get("/health/ready")
         assert res.status_code == 200
         assert res.json()["status"] == "ready"
-        assert res.json()["dependencies"]["neo4j"] == "disabled"
+        assert res.json()["dependencies"]["synapse_graph"] == "disabled"
         assert res.json()["dependencies"]["mindsdb"] == "disabled"
         assert res.json()["dependencies"]["postgres"] == "disabled"
 

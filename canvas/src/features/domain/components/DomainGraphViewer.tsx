@@ -35,12 +35,6 @@ interface DomainGraphViewerProps {
 // 스타일 상수
 // ──────────────────────────────────────
 
-const STATUS_COLORS: Record<string, string> = {
-  active: '#10b981',
-  draft: '#f59e0b',
-  deprecated: '#6b7280',
-};
-
 // ──────────────────────────────────────
 // 컴포넌트
 // ──────────────────────────────────────

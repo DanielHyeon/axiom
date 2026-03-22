@@ -18,7 +18,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { dataSources, type DataSource } from '../api/olapStudioApi';
+import { dataSources } from '../api/olapStudioApi';
 
 export function DataSourcesPage() {
   const qc = useQueryClient();

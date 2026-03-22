@@ -1,0 +1,19 @@
+{
+  "event_name": "QUALITY_SCORE_UPDATED",
+  "version": "1.0.0",
+  "producer": "weaver",
+  "schema": {
+    "type": "object",
+    "required": ["target_id", "overall_score", "tenant_id", "idempotency_key"],
+    "properties": {
+      "target_id": {"type": "string"},
+      "overall_score": {"type": "number"},
+      "formula_version": {"type": "integer"},
+      "dimension_scores": {"type": "object"},
+      "scanned_at": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

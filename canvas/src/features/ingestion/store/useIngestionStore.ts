@@ -6,9 +6,7 @@
 import { create } from 'zustand';
 import type {
   UploadFile,
-  Pipeline,
   FilePreviewData,
-  IngestionRecord,
 } from '../types/ingestion';
 
 // ============================================================================

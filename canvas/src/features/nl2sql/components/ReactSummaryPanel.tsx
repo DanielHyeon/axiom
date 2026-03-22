@@ -17,8 +17,6 @@ import {
   Copy,
   Check,
   AlertTriangle,
-  ChevronDown,
-  ChevronRight,
   Zap,
   MessageSquare,
   CheckCircle2,

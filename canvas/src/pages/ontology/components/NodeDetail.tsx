@@ -7,6 +7,7 @@ import type { OntologyLayer } from '@/features/ontology/types/ontology';
 
 const LAYER_LABELS: Record<OntologyLayer, string> = {
  kpi: 'KPI',
+ driver: 'Driver',
  measure: 'Measure',
  process: 'Process',
  resource: 'Resource'

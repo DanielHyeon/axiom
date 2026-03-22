@@ -6,7 +6,10 @@ Oracle의 NL2SQL 파이프라인이 Synapse API 응답 형식에 직접 의존�
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+import hashlib
+import json
+import time
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 import httpx
@@ -139,6 +142,88 @@ class OntologyContext:
 
 
 # ---------------------------------------------------------------------------
+# P3: 시멘틱 계약 컨텍스트 도메인 모델
+# ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class SemanticMeasureDef:
+    """시멘틱 지표 정의 — LLM이 raw SQL 대신 사용할 표준 지표."""
+
+    measure_id: str
+    name: str
+    description: str | None
+    measure_type: str
+    sql_expression: str
+    filter_expression: str | None
+    additive_type: str | None
+    entity_id: str
+    bound_concept_id: str | None = None
+
+
+@dataclass(frozen=True)
+class SemanticDimensionDef:
+    """시멘틱 차원 정의."""
+
+    dimension_id: str
+    name: str
+    sql_expression: str
+    value_type: str | None
+    hierarchy_path: str | None
+    entity_id: str
+
+
+@dataclass(frozen=True)
+class SemanticJoinRule:
+    """시멘틱 조인 규칙 — 허용/금지 조인 가드레일."""
+
+    join_id: str
+    left_entity_id: str
+    right_entity_id: str
+    join_type: str
+    join_condition: str
+    relationship_type: str
+    fanout_risk_score: float = 0.0
+
+
+@dataclass(frozen=True)
+class SemanticContractContext:
+    """시멘틱 계약 기반 AI 컨텍스트 — raw schema를 대체한다.
+
+    Oracle NL2SQL은 이 컨텍스트를 통해:
+    1. 승인된 지표 정의(sql_expression)를 LLM에 제공
+    2. 허용된 조인만 사용하도록 가드레일 적용
+    3. 동의어 맵으로 사용자 질문을 정규화
+    4. 품질 경고를 응답에 포함
+    """
+
+    measures: list[SemanticMeasureDef] = field(default_factory=list)
+    dimensions: list[SemanticDimensionDef] = field(default_factory=list)
+    allowed_joins: list[SemanticJoinRule] = field(default_factory=list)
+    banned_entity_pairs: list[tuple[str, str]] = field(default_factory=list)
+    synonym_map: dict[str, str] = field(default_factory=dict)
+    concept_definitions: dict[str, str] = field(default_factory=dict)
+    entity_sources: dict[str, str] = field(default_factory=dict)  # entity_id → physical_source_ref
+    quality_warnings: list[str] = field(default_factory=list)
+    provenance: str = "synapse_semantic_contract_v1"
+
+
+@dataclass(frozen=True)
+class ResolvedContextPack:
+    """해석된 AI 컨텍스트 팩 — 의도별 LLM 컨텍스트 프리셋.
+
+    Oracle은 사용자 질문의 의도를 분류한 후,
+    해당 의도에 매칭되는 ContextPack을 조회하여 LLM 프롬프트를 구성한다.
+    """
+    context_pack_id: str
+    intent_type: str
+    semantic_context: SemanticContractContext  # 실제 시멘틱 객체
+    prompt_rules: list[str] = field(default_factory=list)  # 프롬프트 정책 규칙 텍스트 (우선순위순)
+    answer_guardrails: list[str] = field(default_factory=list)  # 응답 가드레일
+    quality_gate_min_score: float = 0.0
+
+
+# ---------------------------------------------------------------------------
 # ACL 구현
 # ---------------------------------------------------------------------------
 
@@ -152,16 +237,127 @@ class OracleSynapseACL:
 
     _SEARCH_FALLBACK = SchemaSearchResult()
 
+    # Sprint 3: Redis 캐시 키 접두사
+    _CACHE_PREFIX = "semantic:contract"
+
     def __init__(
         self,
         base_url: str | None = None,
         schema_edit_base: str | None = None,
         service_token: str | None = None,
+        redis_client: Any | None = None,
     ):
         self._base_url = (base_url or settings.SYNAPSE_API_URL).rstrip("/")
         self._schema_edit_base = schema_edit_base or settings.SYNAPSE_SCHEMA_EDIT_BASE
         self._service_token = service_token or settings.SERVICE_TOKEN_ORACLE
         self._datasources_json = settings.ORACLE_DATASOURCES_JSON
+        # Sprint 3: Redis 클라이언트 (런타임에 lifespan에서 주입)
+        self._redis: Any | None = redis_client
+
+    def set_redis(self, redis_client: Any | None) -> None:
+        """Redis 클라이언트를 주입한다 (lifespan startup에서 호출)."""
+        self._redis = redis_client
+
+    # -----------------------------------------------------------------
+    # Sprint 3: 시멘틱 계약 캐시 헬퍼 메서드
+    # -----------------------------------------------------------------
+
+    def _cache_key(self, tenant_id: str, case_id: str | None) -> str:
+        """테넌트+케이스 기반 캐시 키를 생성한다."""
+        return f"{self._CACHE_PREFIX}:{tenant_id}:{case_id or 'global'}"
+
+    async def _get_from_cache(self, key: str) -> SemanticContractContext | None:
+        """Redis에서 시멘틱 계약 캐시를 역직렬화하여 반환한다."""
+        if self._redis is None or not settings.SEMANTIC_CACHE_ENABLED:
+            return None
+        try:
+            raw = await self._redis.get(key)
+            if raw is None:
+                return None
+            data = json.loads(raw if isinstance(raw, str) else raw.decode("utf-8"))
+            return self._deserialize_contract_context(data)
+        except Exception as exc:
+            logger.warning("semantic_cache_get_error", key=key, error=str(exc))
+            return None
+
+    async def _set_cache(
+        self, key: str, ctx: SemanticContractContext, ttl: int | None = None,
+    ) -> None:
+        """시멘틱 계약 컨텍스트를 Redis에 직렬화하여 저장한다."""
+        if self._redis is None or not settings.SEMANTIC_CACHE_ENABLED:
+            return
+        if ttl is None:
+            ttl = settings.SEMANTIC_CACHE_TTL
+        try:
+            data = self._serialize_contract_context(ctx)
+            payload = json.dumps(data, ensure_ascii=False)
+            await self._redis.set(key, payload, ex=ttl)
+            logger.info("semantic_cache_set", key=key, ttl=ttl)
+        except Exception as exc:
+            logger.warning("semantic_cache_set_error", key=key, error=str(exc))
+
+    async def invalidate_cache(self, tenant_id: str | None = None) -> int:
+        """시멘틱 캐시를 무효화한다.
+
+        tenant_id가 주어지면 해당 테넌트만, 없으면 전체 무효화.
+        반환: 삭제된 키 수
+        """
+        if self._redis is None:
+            return 0
+        try:
+            pattern = f"{self._CACHE_PREFIX}:{tenant_id}:*" if tenant_id else f"{self._CACHE_PREFIX}:*"
+            deleted = 0
+            # SCAN 기반 삭제 (대량 키에도 안전)
+            async for key in self._redis.scan_iter(match=pattern, count=100):
+                await self._redis.delete(key)
+                deleted += 1
+            if deleted:
+                logger.info("semantic_cache_invalidated", tenant_id=tenant_id, deleted=deleted)
+            return deleted
+        except Exception as exc:
+            logger.warning("semantic_cache_invalidate_error", error=str(exc))
+            return 0
+
+    @staticmethod
+    def _serialize_contract_context(ctx: SemanticContractContext) -> dict[str, Any]:
+        """SemanticContractContext → JSON-serializable dict 변환."""
+        return {
+            "measures": [asdict(m) for m in ctx.measures],
+            "dimensions": [asdict(d) for d in ctx.dimensions],
+            "allowed_joins": [asdict(j) for j in ctx.allowed_joins],
+            "banned_entity_pairs": list(ctx.banned_entity_pairs),
+            "synonym_map": dict(ctx.synonym_map),
+            "concept_definitions": dict(ctx.concept_definitions),
+            "entity_sources": dict(ctx.entity_sources),
+            "quality_warnings": list(ctx.quality_warnings),
+            "provenance": ctx.provenance,
+            "cached_at": time.time(),
+        }
+
+    @staticmethod
+    def _deserialize_contract_context(data: dict[str, Any]) -> SemanticContractContext:
+        """JSON dict → SemanticContractContext 역직렬화."""
+        measures = [
+            SemanticMeasureDef(**m) for m in (data.get("measures") or [])
+        ]
+        dimensions = [
+            SemanticDimensionDef(**d) for d in (data.get("dimensions") or [])
+        ]
+        allowed_joins = [
+            SemanticJoinRule(**j) for j in (data.get("allowed_joins") or [])
+        ]
+        banned = [tuple(pair) for pair in (data.get("banned_entity_pairs") or [])]
+        return SemanticContractContext(
+            measures=measures,
+            dimensions=dimensions,
+            allowed_joins=allowed_joins,
+            banned_entity_pairs=banned,
+            synonym_map=data.get("synonym_map") or {},
+            concept_definitions=data.get("concept_definitions") or {},
+            entity_sources=data.get("entity_sources") or {},
+            quality_warnings=data.get("quality_warnings") or [],
+            provenance=data.get("provenance", "synapse_semantic_contract_v1"),
+        )
 
     def _headers(self, tenant_id: str = "") -> dict[str, str]:
         headers = {
@@ -560,6 +756,280 @@ class OracleSynapseACL:
             for item in raw_list
             if isinstance(item, dict) and item.get("id")
         ]
+
+
+    # -----------------------------------------------------------------
+    # P3: 시멘틱 계약 컨텍스트 조회
+    # -----------------------------------------------------------------
+
+    async def fetch_semantic_contract_context(
+        self, tenant_id: str, case_id: str | None = None,
+    ) -> SemanticContractContext | None:
+        """시멘틱 계약 컨텍스트 조회 — Redis 캐시 우선 (Sprint 3).
+
+        1. Redis 캐시 조회
+        2. Cache miss → Synapse API 호출
+        3. 결과 캐싱 (TTL: SEMANTIC_CACHE_TTL)
+        실패 시 None을 반환하여 기존 raw schema 경로로 폴백할 수 있도록 한다.
+        """
+        cache_key = self._cache_key(tenant_id, case_id)
+        t0 = time.monotonic()
+
+        # 1. Redis 캐시 조회
+        cached = await self._get_from_cache(cache_key)
+        if cached is not None:
+            resolve_ms = round((time.monotonic() - t0) * 1000, 1)
+            logger.info(
+                "semantic_context_resolved",
+                cache_hit=True,
+                snapshot_version=self._compute_snapshot_version(tenant_id, cached),
+                resolve_latency_ms=resolve_ms,
+            )
+            return cached
+
+        # 2. Cache miss → Synapse API 호출
+        logger.info("semantic_cache_miss", key=cache_key)
+        ctx = await self._fetch_from_synapse(tenant_id, case_id)
+
+        resolve_ms = round((time.monotonic() - t0) * 1000, 1)
+
+        # 3. 결과 캐싱
+        if ctx is not None:
+            await self._set_cache(cache_key, ctx)
+
+        logger.info(
+            "semantic_context_resolved",
+            cache_hit=False,
+            snapshot_version=self._compute_snapshot_version(tenant_id, ctx) if ctx else None,
+            resolve_latency_ms=resolve_ms,
+        )
+
+        return ctx
+
+    @staticmethod
+    def _compute_snapshot_version(
+        tenant_id: str, ctx: SemanticContractContext | None,
+    ) -> str | None:
+        """Sprint 3: 요청 단위 버전 핀 — 컨텍스트의 해시 기반 스냅샷 버전."""
+        if ctx is None:
+            return None
+        # 지표·차원 이름 목록으로 가볍게 해시 (내용 변경 감지용)
+        sig = f"{tenant_id}:{len(ctx.measures)}:{len(ctx.dimensions)}:{len(ctx.allowed_joins)}"
+        for m in ctx.measures[:20]:
+            sig += f":{m.measure_id}"
+        digest = hashlib.md5(sig.encode()).hexdigest()[:8]
+        return f"sc_{tenant_id}_{digest}"
+
+    async def _fetch_from_synapse(
+        self, tenant_id: str, case_id: str | None = None,
+    ) -> SemanticContractContext | None:
+        """Synapse 시멘틱 계약 API에서 approved 컨텍스트를 가져온다."""
+        params: dict[str, str] = {}
+        if case_id:
+            params["case_id"] = case_id
+
+        try:
+            body = await self._request_with_retry(
+                "GET", "/api/v3/synapse/semantic/ai-context",
+                tenant_id=tenant_id, params=params,
+            )
+        except Exception as exc:
+            logger.warning("semantic_contract_context_fetch_failed", error=str(exc))
+            return None
+
+        data = body.get("data") or {}
+        if not data.get("measures") and not data.get("entities"):
+            # 승인된 계약이 없으면 None → 폴백
+            return None
+
+        # 도메인 모델로 변환
+        measures = [
+            SemanticMeasureDef(
+                measure_id=m.get("measure_id", ""),
+                name=m.get("name", ""),
+                description=m.get("description"),
+                measure_type=m.get("measure_type", "sum"),
+                sql_expression=m.get("sql_expression", ""),
+                filter_expression=m.get("filter_expression"),
+                additive_type=m.get("additive_type"),
+                entity_id=m.get("entity_id", ""),
+                bound_concept_id=m.get("bound_concept_id"),
+            )
+            for m in (data.get("measures") or [])
+        ]
+
+        dimensions = [
+            SemanticDimensionDef(
+                dimension_id=d.get("dimension_id", ""),
+                name=d.get("name", ""),
+                sql_expression=d.get("sql_expression", ""),
+                value_type=d.get("value_type"),
+                hierarchy_path=d.get("hierarchy_path"),
+                entity_id=d.get("entity_id", ""),
+            )
+            for d in (data.get("dimensions") or [])
+        ]
+
+        allowed_joins = [
+            SemanticJoinRule(
+                join_id=j.get("join_id", ""),
+                left_entity_id=j.get("left_entity_id", ""),
+                right_entity_id=j.get("right_entity_id", ""),
+                join_type=j.get("join_type", "LEFT"),
+                join_condition=j.get("join_condition", ""),
+                relationship_type=j.get("relationship_type", "1:N"),
+                fanout_risk_score=float(j.get("fanout_risk_score") or 0),
+            )
+            for j in (data.get("allowed_joins") or [])
+        ]
+
+        banned = [
+            (bj.get("left_entity_id", ""), bj.get("right_entity_id", ""))
+            for bj in (data.get("banned_joins") or [])
+        ]
+
+        entity_sources = {
+            e.get("entity_id", ""): e.get("physical_source_ref", "")
+            for e in (data.get("entities") or [])
+        }
+
+        concept_defs = {
+            c.get("concept_id", ""): c.get("business_definition") or c.get("name_ko", "")
+            for c in (data.get("concepts") or [])
+        }
+
+        # 품질 경고: completeness_threshold < 90인 계약이 있으면 경고
+        quality_warnings = []
+        for q in (data.get("quality_contracts") or []):
+            threshold = float(q.get("completeness_threshold") or 100)
+            if threshold < 90:
+                quality_warnings.append(
+                    f"⚠ {q.get('target_type')} '{q.get('target_id')}'의 완전성 임계치가 낮습니다 ({threshold}%)"
+                )
+
+        return SemanticContractContext(
+            measures=measures,
+            dimensions=dimensions,
+            allowed_joins=allowed_joins,
+            banned_entity_pairs=banned,
+            synonym_map=data.get("synonym_map") or {},
+            concept_definitions=concept_defs,
+            entity_sources=entity_sources,
+            quality_warnings=quality_warnings,
+        )
+
+    # -----------------------------------------------------------------
+    # P4: ContextPack resolve (의도별 AI 컨텍스트 프리셋)
+    # -----------------------------------------------------------------
+
+    async def resolve_context_pack(
+        self, tenant_id: str, context_pack_id: str,
+    ) -> ResolvedContextPack | None:
+        """Synapse에서 ContextPack을 해석하여 Oracle 도메인 모델로 변환한다."""
+        try:
+            body = await self._request_with_retry(
+                "GET", f"/api/v3/synapse/semantic/context-packs/{context_pack_id}/resolve",
+                tenant_id=tenant_id,
+            )
+        except Exception as exc:
+            logger.warning("context_pack_resolve_failed", error=str(exc), pack_id=context_pack_id)
+            return None
+
+        data = body.get("data") or {}
+        if not data:
+            return None
+
+        # 시멘틱 객체 변환
+        measures = [
+            SemanticMeasureDef(
+                measure_id=m.get("measure_id", ""), name=m.get("name", ""),
+                description=m.get("description"), measure_type=m.get("measure_type", "sum"),
+                sql_expression=m.get("sql_expression", ""),
+                filter_expression=m.get("filter_expression"),
+                additive_type=m.get("additive_type"), entity_id=m.get("entity_id", ""),
+                bound_concept_id=m.get("bound_concept_id"),
+            )
+            for m in (data.get("measures") or [])
+        ]
+        dimensions = [
+            SemanticDimensionDef(
+                dimension_id=d.get("dimension_id", ""), name=d.get("name", ""),
+                sql_expression=d.get("sql_expression", ""),
+                value_type=d.get("value_type"), hierarchy_path=d.get("hierarchy_path"),
+                entity_id=d.get("entity_id", ""),
+            )
+            for d in (data.get("dimensions") or [])
+        ]
+        allowed_joins = [
+            SemanticJoinRule(
+                join_id=j.get("join_id", ""), left_entity_id=j.get("left_entity_id", ""),
+                right_entity_id=j.get("right_entity_id", ""),
+                join_type=j.get("join_type", "LEFT"), join_condition=j.get("join_condition", ""),
+                relationship_type=j.get("relationship_type", "1:N"),
+                fanout_risk_score=float(j.get("fanout_risk_score") or 0),
+            )
+            for j in (data.get("allowed_joins") or [])
+        ]
+        banned = [
+            (bj.get("left_entity_id", ""), bj.get("right_entity_id", ""))
+            for bj in (data.get("banned_joins") or [])
+        ]
+        entity_sources = {}
+        for e in (data.get("concepts") or []):
+            # resolve 응답의 entities에서 physical_source_ref 추출
+            pass
+        # measures에서 entity_id → source 매핑 재구성 (resolve 응답에 entities가 직접 없을 수 있음)
+        for m_data in (data.get("measures") or []):
+            eid = m_data.get("entity_id", "")
+            if eid and eid not in entity_sources:
+                entity_sources[eid] = m_data.get("physical_source_ref", eid)
+
+        semantic = SemanticContractContext(
+            measures=measures,
+            dimensions=dimensions,
+            allowed_joins=allowed_joins,
+            banned_entity_pairs=banned,
+            synonym_map=data.get("synonym_map") or {},
+            concept_definitions={},
+            entity_sources=entity_sources,
+        )
+
+        # 프롬프트 정책 규칙 텍스트 (우선순위순)
+        prompt_rules = [p.get("rule_text", "") for p in (data.get("prompt_policies") or [])]
+
+        return ResolvedContextPack(
+            context_pack_id=context_pack_id,
+            intent_type=data.get("intent_type", "general"),
+            semantic_context=semantic,
+            prompt_rules=prompt_rules,
+            answer_guardrails=data.get("answer_guardrails") or [],
+            quality_gate_min_score=float(data.get("quality_gate_min_score") or 0),
+        )
+
+    async def find_context_pack_by_intent(
+        self, tenant_id: str, intent_type: str, case_id: str | None = None,
+    ) -> ResolvedContextPack | None:
+        """의도 유형으로 ContextPack을 검색하여 첫 번째 매칭을 resolve한다."""
+        try:
+            params: dict[str, str] = {"intent_type": intent_type}
+            if case_id:
+                params["case_id"] = case_id
+            body = await self._request_with_retry(
+                "GET", "/api/v3/synapse/semantic/context-packs",
+                tenant_id=tenant_id, params=params,
+            )
+        except Exception as exc:
+            logger.warning("context_pack_search_failed", error=str(exc), intent=intent_type)
+            return None
+
+        packs = body.get("data") or []
+        if not packs:
+            return None
+        # 첫 번째 매칭 팩을 resolve
+        first_id = packs[0].get("context_pack_id")
+        if not first_id:
+            return None
+        return await self.resolve_context_pack(tenant_id, first_id)
 
 
 # Singleton

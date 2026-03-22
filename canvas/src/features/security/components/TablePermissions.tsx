@@ -11,20 +11,10 @@ import {
   RefreshCw,
   Loader2,
   AlertTriangle,
-  ShieldCheck,
   Table2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import {
-  Table,
-  TableHeader,
-  TableBody,
-  TableRow,
-  TableHead,
-  TableCell,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useTablePermissions, useUpdateTablePermission } from '../hooks/useSecurity';
 import type { TablePermission } from '../types/security';

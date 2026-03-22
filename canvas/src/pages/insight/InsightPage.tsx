@@ -5,7 +5,6 @@ import { useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useInsightStore } from '@/features/insight/store/useInsightStore';
 import { useImpactGraph } from '@/features/insight/hooks/useImpactGraph';
-import { ImpactGraphViewer } from '@/features/insight/components/ImpactGraphViewer';
 import { NodeDetailPanel } from '@/features/insight/components/NodeDetailPanel';
 import { PathComparisonPanel } from '@/features/insight/components/PathComparisonPanel';
 import { InsightHeader } from './components/InsightHeader';
@@ -27,7 +26,6 @@ export function InsightPage() {
  impactPaths,
  timeRange,
  selectedDriverId,
- hoveredNodeId,
  nodeDetailOpen,
  highlightedPaths,
  selectKpi,
@@ -65,7 +63,7 @@ export function InsightPage() {
  }, [selectedKpiFingerprint, timeRange, selectedDriverId]);
 
  // Impact graph hook
- const { error, retry } = useImpactGraph({
+ useImpactGraph({
  kpiFingerprint: selectedKpiFingerprint,
  timeRange,
  });
@@ -83,14 +81,6 @@ export function InsightPage() {
  }, [selectedDriverId, impactEvidence]);
 
  // Build path node map for path highlighting
- const pathNodeMap = useMemo(() => {
- const map: Record<string, string[]> = {};
- for (const p of impactPaths) {
- map[p.path_id] = p.nodes;
- }
- return map;
- }, [impactPaths]);
-
  // Build node label map for PathComparisonPanel
  const nodeLabels = useMemo(() => {
  const map: Record<string, string> = {};
@@ -110,14 +100,6 @@ export function InsightPage() {
  [selectKpi, setSearchParams, timeRange],
  );
 
- const handleNodeClick = useCallback(
- (nodeId: string, nodeData: GraphNode) => {
- if (nodeData.type === 'DRIVER' || nodeData.type === 'DIMENSION') {
- selectDriver(nodeId);
- }
- },
- [selectDriver],
- );
 
  const meta = impactGraph?.meta;
 

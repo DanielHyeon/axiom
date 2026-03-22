@@ -1,0 +1,17 @@
+{
+  "event_name": "GRAIN_CONTRACT_CREATED",
+  "version": "1.0.0",
+  "producer": "synapse",
+  "schema": {
+    "type": "object",
+    "required": ["grain_id", "entity_id", "time_grain", "tenant_id", "idempotency_key"],
+    "properties": {
+      "grain_id": {"type": "string"},
+      "entity_id": {"type": "string"},
+      "time_grain": {"type": "string"},
+      "tenant_id": {"type": "string"},
+      "idempotency_key": {"type": "string"},
+      "event_contract": {"type": "object"}
+    }
+  }
+}

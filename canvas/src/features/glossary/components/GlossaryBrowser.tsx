@@ -23,8 +23,6 @@ import {
   Pencil,
   Trash2,
   Download,
-  Upload,
-  ChevronDown,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';

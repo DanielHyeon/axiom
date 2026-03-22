@@ -3,7 +3,7 @@
  * DatasourcePage의 ERD 탭에서 사용.
  */
 
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useERDData } from '../hooks/useERDData';
 import { generateMermaidERCode, getConnectedTables } from '../utils/mermaidCodeGen';
@@ -28,8 +28,6 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
   const { t } = useTranslation();
   const { tables, isLoading, error, refetch } = useERDData(datasourceId);
   const [filter, setFilter] = useState<ERDFilter>(DEFAULT_FILTER);
-  const svgContainerRef = useRef<HTMLDivElement>(null);
-
   // 필터 적용된 테이블 목록
   const filteredTables = useMemo(() => {
     let result = tables;
