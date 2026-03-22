@@ -32,7 +32,8 @@ export type ReactStepType =
     | 'triage'    // Triage
     | 'result'    // Final result
     | 'error'     // Error
-    | 'needs_user_input';  // HIL: 에이전트가 사용자 입력을 요청
+    | 'needs_user_input'  // HIL: 에이전트가 사용자 입력을 요청
+    | 'c_pipeline';  // C-Pipeline: 탐색/수렴/탈출 단계
 
 /** HIL: 에이전트가 제시하는 선택지 */
 export interface HilOption {
@@ -77,4 +78,10 @@ export interface ExecutionMetadata {
     guard_fixes?: string[];
     cache_hit?: boolean;
     query_id?: string | null;
+    /** P3: 시멘틱 계약 컨텍스트 사용 여부 */
+    semantic_context_used?: boolean;
+    /** P3: 시멘틱 계약 품질 경고 목록 */
+    quality_warnings?: string[];
+    /** P4: ContextPack 사용 시 intent 유형 */
+    intent_type?: string;
 }

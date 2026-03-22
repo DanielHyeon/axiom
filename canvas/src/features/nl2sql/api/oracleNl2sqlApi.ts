@@ -39,9 +39,25 @@ export interface AskResponse {
     result: { columns: { name: string; type: string }[]; rows: unknown[][]; row_count: number; truncated?: boolean };
     visualization?: { chart_type: string; config?: Record<string, string> } | null;
     summary?: string | null;
-    metadata?: { execution_time_ms?: number; tables_used?: string[]; cache_hit?: boolean };
+    metadata?: {
+      execution_time_ms?: number;
+      tables_used?: string[];
+      cache_hit?: boolean;
+      semantic_context_used?: boolean;
+      quality_warnings?: string[];
+      intent_type?: string;
+    };
   };
   error?: { code: string; message: string; details?: unknown };
+}
+
+/** C-Pipeline 단계 정보 — 탐색/수렴/탈출 파이프라인 */
+export interface CPipelineStep {
+  phase: string; // exploration, convergence, escape
+  detail: string;
+  sql?: string;
+  score?: number;
+  count?: number;
 }
 
 /** Oracle /text2sql/react NDJSON 스트림 한 줄 */
@@ -168,6 +184,7 @@ export function postReactStream(
     row_limit?: number;
     session_state?: string;
     user_response?: string;
+    conversation_state?: string;
   }
 ): Promise<AbortController> {
   const base = (oracleApi.defaults.baseURL || '').replace(/\/$/, '');
@@ -181,6 +198,8 @@ export function postReactStream(
   // HIL 재개 시 세션 상태와 사용자 응답 추가
   if (options?.session_state) body.session_state = options.session_state;
   if (options?.user_response) body.user_response = options.user_response;
+  // 멀티턴 대화 상태 전달
+  if (options?.conversation_state) body.conversation_state = options.conversation_state;
 
   return createNdjsonStream<ReactStreamStep>(url, body, callbacks);
 }

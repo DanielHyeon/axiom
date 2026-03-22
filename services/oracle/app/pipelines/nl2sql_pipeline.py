@@ -587,6 +587,13 @@ class NL2SQLPipeline:
                     "guard_fixes": guard_res.fixes,
                     "schema_source": schema_source,
                     "tables_used": tables_used,
+                    # P3: 시멘틱 계약 컨텍스트 사용 여부 + 품질 경고
+                    "semantic_context_used": semantic_ctx is not None or context_pack is not None,
+                    "quality_warnings": (
+                        (semantic_ctx.quality_warnings if semantic_ctx else [])
+                        + (context_pack.answer_guardrails if context_pack else [])
+                    ) or [],
+                    "intent_type": context_pack.intent_type if context_pack else None,
                 },
             },
         }
