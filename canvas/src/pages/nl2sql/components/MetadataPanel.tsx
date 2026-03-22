@@ -13,6 +13,7 @@ import {
  Check,
  Zap,
  Hash,
+ GitBranch,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -75,6 +76,12 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  summaryItems.push({
  icon: <Zap className="h-3 w-3" />,
  text: metadata.cache_hit ? 'Cached' : 'Fresh',
+ });
+ }
+ if (metadata.snapshot_version) {
+ summaryItems.push({
+ icon: <GitBranch className="h-3 w-3" />,
+ text: metadata.snapshot_version,
  });
  }
 
@@ -187,6 +194,46 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  >
  {metadata.cache_hit ? 'HIT' : 'MISS'}
  </Badge>
+ </div>
+ )}
+
+ {metadata.snapshot_version && (
+ <div className="flex items-center gap-2">
+ <GitBranch className="h-3.5 w-3.5 text-foreground/60" />
+ <span className="text-foreground/60 font-[IBM_Plex_Mono]">Snapshot:</span>
+ <code className="text-xs text-[#5E5E5E] bg-[#F5F5F5] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]">
+ {metadata.snapshot_version}
+ </code>
+ </div>
+ )}
+
+ {metadata.semantic_guard_mode && (
+ <div className="flex items-center gap-2">
+ <ShieldCheck className="h-3.5 w-3.5 text-foreground/60" />
+ <span className="text-foreground/60 font-[IBM_Plex_Mono]">Semantic Guard:</span>
+ <Badge variant="outline" className={cn('font-[IBM_Plex_Mono]',
+   metadata.semantic_guard_mode === 'enforce' ? 'border-red-300 text-red-600' :
+   metadata.semantic_guard_mode === 'warn' ? 'border-amber-300 text-amber-600' :
+   'border-[#E5E5E5] text-foreground/60'
+ )}>
+ {metadata.semantic_guard_mode}
+ </Badge>
+ </div>
+ )}
+
+ {metadata.contract_violations && metadata.contract_violations.length > 0 && (
+ <div>
+ <div className="flex items-center gap-2 mb-1">
+ <ShieldCheck className="h-3.5 w-3.5 text-red-500" />
+ <span className="text-foreground/60 font-[IBM_Plex_Mono]">Contract Violations:</span>
+ </div>
+ <ul className="ml-6 space-y-0.5">
+ {metadata.contract_violations.map((v, i) => (
+   <li key={i} className="text-xs text-red-600 font-[IBM_Plex_Mono]">
+   - [{v.code}] {v.message}
+   </li>
+ ))}
+ </ul>
  </div>
  )}
 

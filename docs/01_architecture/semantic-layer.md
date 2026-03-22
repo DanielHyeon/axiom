@@ -64,44 +64,61 @@
 - 상위 서비스(Core/Oracle/Vision/Synapse)는 공통 의미 계약(Glossary/Ontology/Metadata/Event Contract)으로만 접근한다.
 - DB 쓰기 경로는 감사 가능해야 하며, 원본 불변 정책 위반 경로를 금지한다.
 
-## 6. 시멘틱 계약 계층 (v5.1 — 2026-03-22 추가)
+## 6. 시멘틱 계약 계층 (v5.2 — 2026-03-23 현행화)
 
 ### 6.1 Option B' 아키텍처 결정
 
 온톨로지와 시멘틱 레이어를 별도 서비스로 분리하지 않고, **Synapse를 Control Plane으로 확장**하여 시멘틱 계약 메타데이터를 관리한다. 실행(Data/Query Plane)은 Weaver에 위임하여 향후 분리 가능성을 유지한다.
 
-- **Control Plane (Synapse)**: 개념 거버넌스, 시멘틱 계약(Entity/Measure/Dimension/Join/Grain/Quality), ContextPack, PromptPolicy, Semantic Compiler, 배포 승인
-- **Data Plane (Weaver)**: 품질 수집(freshness/completeness/uniqueness), 쿼리 실행, 캐시
-- **Consumer (Oracle)**: raw schema → 시멘틱 계약 컨텍스트 전환, 의도 분류 → ContextPack 매칭
+- **Control Plane (Synapse)**: 개념 거버넌스, 시멘틱 계약 전체, L4 추론·거버넌스, 스냅샷 런타임, 질문 이해 인프라, ContextPack, Semantic Compiler, YAML Export/Import, 배포 승인
+- **Data Plane (Weaver)**: 9차원 품질 수집 (v2), 품질 이벤트 발행, 이벤트 기반 자동 스캔, 품질 대시보드 API
+- **Consumer (Oracle)**: 시멘틱 계약 AST 사후 검증 + 품질 신뢰 등급 게이트 + Redis 캐시/이벤트 무효화 + 질문 이해 (동의어 확장 + 의도 신뢰도)
 
 ### 6.2 6계층 의미론적 계층 구조
 
-| 계층 | 담당 서비스 | 구현 상태 |
-|------|------------|----------|
+| 계층 | 담당 서비스 | 구현 상태 (v5.2) |
+|------|------------|-----------------|
 | L0 Physical Data | Weaver 인트로스펙션 | 구현 완료 |
 | L1 Canonical Data Product | OLAP Studio 스타 스키마 | 구현 완료 |
-| L2 Semantic Contract | Synapse: 7개 계약 테이블 + CRUD API (48 endpoints) | **v5.1 신규** |
-| L3 Ontology | Synapse: Neo4j 5계층 + 개념 거버넌스 + 용어 사전 | **v5.1 확장** |
-| L4 Reasoning & Governance | Semantic Compiler 검증 + publish 승인 워크플로 | **v5.1 신규** |
-| L5 AI Context | ContextPack + PromptPolicy → Oracle NL2SQL 소비 | **v5.1 신규** |
+| L2 Semantic Contract | Synapse: 10개 계약 테이블 + CRUD API (100+ endpoints) | **v5.2 완성** |
+| L3 Ontology | Synapse: Neo4j 5계층 + 개념 거버넌스 + 용어 사전 + 관계/규칙/정책 | **v5.2 완성** |
+| L4 Reasoning & Governance | Semantic Compiler + 충돌 탐지 + 영향도 분석 + 도메인 승인 워크플로 | **v5.2 완성** |
+| L5 AI Context | ContextPack + PromptPolicy + 질문 이해 (동의어/의도 신뢰도) → Oracle NL2SQL 소비 | **v5.2 완성** |
 
 ### 6.3 핵심 메타모델
 
+```text
+L3 온톨로지:
+  OntologyConcept (status FSM, approval_scope: domain/global, domain_id)
+    ├─ OntologyTerm (surface_form, language, term_type)
+    ├─ OntologyRelation (subject→predicate→object, cardinality, weight, confidence)    ← v5.2
+    ├─ OntologyRule (rule_type, expression, expression_lang, severity)                  ← v5.2
+    └─ OntologyPolicy (policy_type: access/pii/retention/residency/aggregation)         ← v5.2
+
+L2 시멘틱 계약:
+  SemanticEntity (physical_source_ref, entity_type, grain_definition, feature_config, domain_id)
+    ├─ SemanticMeasure (sql_expression, measure_type, additive_type)
+    ├─ SemanticDimension (sql_expression, value_type, hierarchy_path, conformed_group)
+    ├─ GrainContract (grain_key_set, time_grain, duplicate_resolution_rule)
+    ├─ JoinContract (left/right entity, join_condition, allowed_for_ai, fanout_risk)
+    ├─ SemanticSegment (filter_expression, segment_type: static/dynamic)                ← v5.2
+    ├─ TimeContract (time_column, time_grain, timezone, fiscal_offset, lookback)         ← v5.2
+    └─ AccessPolicy (policy_type: row_filter/column_mask, condition, target_roles)       ← v5.2
+
+  QualityContract (target_type/id, freshness_sla, completeness/uniqueness threshold)
+  SemanticRelease (version, review_status, deployed_at, git_commit_sha)
+
+L5 AI 컨텍스트:
+  ContextPack (intent_type별 프리셋) + PromptPolicy (rule_type 9종)
+
+런타임 인프라:
+  SemanticSnapshot → SnapshotArtifacts → RuntimeBindings → SnapshotLeases               ← v5.2
+  AliasGroup → ExpansionRule (EXACT/REGEX/TIME_ALIAS/NEGATIVE 등)                        ← v5.2
+  IntentModel, InferenceLog, QuestionFeedback                                            ← v5.2
+
+이벤트 13종 (Transactional Outbox → Redis Streams)
+YAML Export/Import (Metrics as Code)
 ```
-OntologyConcept (status: draft→review→approved→deprecated)
-  └─ OntologyTerm (surface_form, language, term_type)
-
-SemanticEntity (physical_source_ref, entity_type, grain_definition)
-  ├─ SemanticMeasure (sql_expression, measure_type, additive_type)
-  ├─ SemanticDimension (sql_expression, value_type, hierarchy_path)
-  ├─ GrainContract (grain_key_set, time_grain, duplicate_resolution_rule)
-  └─ JoinContract (left/right entity, join_condition, allowed_for_ai)
-
-QualityContract (target_type/id, freshness_sla, completeness/uniqueness threshold)
-SemanticRelease (version, review_status, deployed_at)
-
-ContextPack (intent_type별 프리셋: kpi_query, root_cause, trend 등)
-  └─ PromptPolicy (rule_type: must_use_metric, must_avoid_raw_table 등)
 ```
 
 ### 6.4 보안

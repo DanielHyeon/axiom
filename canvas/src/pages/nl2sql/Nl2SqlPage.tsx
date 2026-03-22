@@ -214,6 +214,12 @@ export function NL2SQLPage() {
                 semanticContextUsed={chat.finalResult.metadata?.semantic_context_used}
                 qualityWarnings={chat.finalResult.metadata?.quality_warnings}
                 intentType={chat.finalResult.metadata?.intent_type}
+                qualityGrade={chat.finalResult.metadata?.quality_grade}
+                qualityScore={chat.finalResult.metadata?.quality_score}
+                qualityBanner={chat.finalResult.metadata?.quality_banner}
+                intentConfidence={chat.finalResult.metadata?.intent_confidence}
+                synonymMatches={chat.finalResult.metadata?.synonym_matches}
+                fallbackMode={chat.finalResult.metadata?.fallback_mode}
               />
             </div>
           )}

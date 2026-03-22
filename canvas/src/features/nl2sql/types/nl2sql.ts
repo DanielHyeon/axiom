@@ -84,4 +84,24 @@ export interface ExecutionMetadata {
     quality_warnings?: string[];
     /** P4: ContextPack 사용 시 intent 유형 */
     intent_type?: string;
+    /** Sprint 2: 품질 신뢰 등급 (TRUSTED / CAUTION / REFERENCE_ONLY / BLOCKED) */
+    quality_grade?: string;
+    /** Sprint 2: 품질 최종 점수 (0~100) */
+    quality_score?: number;
+    /** Sprint 2: 품질 등급 안내 문구 (한국어) */
+    quality_banner?: string;
+    /** Sprint 4: 의도 분류 신뢰도 (0.0~1.0) */
+    intent_confidence?: number;
+    /** Sprint 4: 의도 분류 모호성 점수 (0.0~1.0, 높을수록 모호) */
+    intent_ambiguity?: number;
+    /** Sprint 4: 동의어 매칭 수 */
+    synonym_matches?: number;
+    /** Sprint 4: 폴백 모드 (NONE / SAFE_NARROW / REFERENCE_ONLY) */
+    fallback_mode?: string;
+    /** Sprint 3: 시멘틱 스냅샷 버전 (요청 단위 고정) */
+    snapshot_version?: string;
+    /** Sprint 1: 시멘틱 계약 위반 목록 */
+    contract_violations?: { code: string; message: string }[];
+    /** Sprint 1: 시멘틱 가드 모드 (log_only / warn / enforce) */
+    semantic_guard_mode?: string;
 }

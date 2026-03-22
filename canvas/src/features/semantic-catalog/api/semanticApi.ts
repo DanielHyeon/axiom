@@ -16,6 +16,16 @@ import type {
   ContextPack,
   PromptPolicy,
   CompileResult,
+  SemanticRelease,
+  AliasGroup,
+  ExpansionRule,
+  SemanticSnapshot,
+  OntologyRelation,
+  OntologyRule,
+  OntologyPolicy,
+  SemanticSegment,
+  TimeContract,
+  AccessPolicyL2,
 } from '../types/semantic';
 
 const BASE = '/api/v3/synapse/semantic';
@@ -131,6 +141,31 @@ export async function publishObject(objectType: string, objectId: string): Promi
   return (res as unknown as ApiResponse<unknown>).data;
 }
 
+// ── 릴리스 (배포 이력) ──
+
+export async function listReleases(params?: { limit?: number; offset?: number }): Promise<SemanticRelease[]> {
+  const res = await synapseApi.get(`${BASE}/releases`, { params });
+  return (res as unknown as ApiResponse<SemanticRelease[]>).data;
+}
+
+// ── 품질 런타임 ──
+
+export interface TrustTierResult {
+  trust_tier: string;
+  final_score: number;
+  allow_execution: boolean;
+  response_mode: string;
+  user_banner: string;
+  hard_fail_codes: string[];
+  soft_fail_codes: string[];
+  dimension_breakdown: Record<string, number>;
+}
+
+export async function getQualityRuntime(entityId: string): Promise<{ entity_id: string; quality: TrustTierResult }> {
+  const res = await synapseApi.get(`${BASE}/quality/runtime/${entityId}`);
+  return (res as unknown as ApiResponse<{ entity_id: string; quality: TrustTierResult }>).data;
+}
+
 // ── 컨텍스트 팩 ──
 
 export async function listContextPacks(params?: { case_id?: string; intent_type?: string }): Promise<ContextPack[]> {
@@ -162,4 +197,176 @@ export async function listPromptPolicies(contextPackId: string): Promise<PromptP
 export async function createPromptPolicy(data: Partial<PromptPolicy>): Promise<PromptPolicy> {
   const res = await synapseApi.post(`${BASE}/prompt-policies`, data);
   return (res as unknown as ApiResponse<PromptPolicy>).data;
+}
+
+// ── 별칭 그룹 ──
+
+export async function listAliasGroups(params?: {
+  domain_id?: string;
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<AliasGroup[]> {
+  const res = await synapseApi.get(`${BASE}/ontology/alias-groups`, { params });
+  return (res as unknown as ApiResponse<AliasGroup[]>).data;
+}
+
+export async function createAliasGroup(data: Partial<AliasGroup>): Promise<AliasGroup> {
+  const res = await synapseApi.post(`${BASE}/ontology/alias-groups`, data);
+  return (res as unknown as ApiResponse<AliasGroup>).data;
+}
+
+// ── 확장 규칙 ──
+
+export async function listExpansionRules(params?: {
+  alias_group_id?: string;
+  status?: string;
+  limit?: number;
+}): Promise<ExpansionRule[]> {
+  const res = await synapseApi.get(`${BASE}/ontology/expansion-rules`, { params });
+  return (res as unknown as ApiResponse<ExpansionRule[]>).data;
+}
+
+export async function createExpansionRule(data: Partial<ExpansionRule>): Promise<ExpansionRule> {
+  const res = await synapseApi.post(`${BASE}/ontology/expansion-rules`, data);
+  return (res as unknown as ApiResponse<ExpansionRule>).data;
+}
+
+export async function activateExpansionRule(id: string): Promise<ExpansionRule> {
+  const res = await synapseApi.post(`${BASE}/ontology/expansion-rules/${id}/activate`);
+  return (res as unknown as ApiResponse<ExpansionRule>).data;
+}
+
+export async function deprecateExpansionRule(id: string): Promise<ExpansionRule> {
+  const res = await synapseApi.post(`${BASE}/ontology/expansion-rules/${id}/deprecate`);
+  return (res as unknown as ApiResponse<ExpansionRule>).data;
+}
+
+// ── 스냅샷 ──
+
+export async function listSnapshots(params?: {
+  status?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<SemanticSnapshot[]> {
+  const res = await synapseApi.get(`${BASE}/snapshots`, { params });
+  return (res as unknown as ApiResponse<SemanticSnapshot[]>).data;
+}
+
+export async function getActiveSnapshot(): Promise<SemanticSnapshot> {
+  const res = await synapseApi.get(`${BASE}/snapshots/active`);
+  return (res as unknown as ApiResponse<SemanticSnapshot>).data;
+}
+
+export async function buildSnapshot(data?: { release_id?: string }): Promise<SemanticSnapshot> {
+  const res = await synapseApi.post(`${BASE}/snapshots/build`, data ?? {});
+  return (res as unknown as ApiResponse<SemanticSnapshot>).data;
+}
+
+export async function activateSnapshot(version: string): Promise<SemanticSnapshot> {
+  const res = await synapseApi.post(`${BASE}/snapshots/${version}/activate`);
+  return (res as unknown as ApiResponse<SemanticSnapshot>).data;
+}
+
+export async function invalidateSnapshot(version: string, reason: string): Promise<SemanticSnapshot> {
+  const res = await synapseApi.post(`${BASE}/snapshots/${version}/invalidate`, { reason });
+  return (res as unknown as ApiResponse<SemanticSnapshot>).data;
+}
+
+// ── 온톨로지 관계 ──
+
+export async function listRelations(params?: {
+  concept_id?: string;
+  predicate_type?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<OntologyRelation[]> {
+  const res = await synapseApi.get(`${BASE}/ontology/relations`, { params });
+  return (res as unknown as ApiResponse<OntologyRelation[]>).data;
+}
+
+export async function createRelation(data: Partial<OntologyRelation>): Promise<OntologyRelation> {
+  const res = await synapseApi.post(`${BASE}/ontology/relations`, data);
+  return (res as unknown as ApiResponse<OntologyRelation>).data;
+}
+
+export async function deleteRelation(id: string): Promise<void> {
+  await synapseApi.delete(`${BASE}/ontology/relations/${id}`);
+}
+
+// ── 온톨로지 규칙 ──
+
+export async function listRules(params?: {
+  concept_id?: string;
+  rule_type?: string;
+  limit?: number;
+}): Promise<OntologyRule[]> {
+  const res = await synapseApi.get(`${BASE}/ontology/rules`, { params });
+  return (res as unknown as ApiResponse<OntologyRule[]>).data;
+}
+
+export async function createRule(data: Partial<OntologyRule>): Promise<OntologyRule> {
+  const res = await synapseApi.post(`${BASE}/ontology/rules`, data);
+  return (res as unknown as ApiResponse<OntologyRule>).data;
+}
+
+export async function deleteRule(id: string): Promise<void> {
+  await synapseApi.delete(`${BASE}/ontology/rules/${id}`);
+}
+
+// ── 온톨로지 정책 ──
+
+export async function listPolicies(params?: {
+  concept_id?: string;
+  policy_type?: string;
+  limit?: number;
+}): Promise<OntologyPolicy[]> {
+  const res = await synapseApi.get(`${BASE}/ontology/policies`, { params });
+  return (res as unknown as ApiResponse<OntologyPolicy[]>).data;
+}
+
+export async function createPolicy(data: Partial<OntologyPolicy>): Promise<OntologyPolicy> {
+  const res = await synapseApi.post(`${BASE}/ontology/policies`, data);
+  return (res as unknown as ApiResponse<OntologyPolicy>).data;
+}
+
+export async function deletePolicy(id: string): Promise<void> {
+  await synapseApi.delete(`${BASE}/ontology/policies/${id}`);
+}
+
+export async function togglePolicyActive(id: string, isActive: boolean): Promise<OntologyPolicy> {
+  const res = await synapseApi.patch(`${BASE}/ontology/policies/${id}`, { is_active: isActive });
+  return (res as unknown as ApiResponse<OntologyPolicy>).data;
+}
+
+// ── L2 세그먼트 ──
+
+export async function listSegments(params?: {
+  entity_id?: string;
+  segment_type?: string;
+  limit?: number;
+}): Promise<SemanticSegment[]> {
+  const res = await synapseApi.get(`${BASE}/segments`, { params });
+  return (res as unknown as ApiResponse<SemanticSegment[]>).data;
+}
+
+// ── L2 시간 계약 ──
+
+export async function listTimeContracts(params?: {
+  entity_id?: string;
+  limit?: number;
+}): Promise<TimeContract[]> {
+  const res = await synapseApi.get(`${BASE}/time-contracts`, { params });
+  return (res as unknown as ApiResponse<TimeContract[]>).data;
+}
+
+// ── L2 접근 정책 ──
+
+export async function listAccessPolicies(params?: {
+  entity_id?: string;
+  is_active?: boolean;
+  limit?: number;
+}): Promise<AccessPolicyL2[]> {
+  const res = await synapseApi.get(`${BASE}/access-policies`, { params });
+  return (res as unknown as ApiResponse<AccessPolicyL2[]>).data;
 }

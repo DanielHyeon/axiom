@@ -176,6 +176,20 @@ export interface PromptPolicy {
   created_at: string;
 }
 
+// ── 시멘틱 릴리스 (배포 이력) ──
+
+export interface SemanticRelease {
+  release_id: number;
+  semantic_object_type: string;
+  semantic_object_id: string;
+  version: number;
+  review_status: string;
+  reviewer?: string;
+  deployed_at?: string;
+  tenant_id: string;
+  created_at: string;
+}
+
 // ── 통합 카탈로그 ──
 
 export interface CatalogSummary {
@@ -210,6 +224,146 @@ export interface CompileResult {
   sql_template?: string;
   issues: CompileIssue[];
   metadata: Record<string, unknown>;
+}
+
+// ── 별칭 그룹 ──
+
+export interface AliasGroup {
+  id: string;
+  domain_id: string;
+  canonical_term_id: string;
+  group_name: string;
+  language_code: string;
+  status: string;
+  created_at: string;
+}
+
+// ── 확장 규칙 ──
+
+export type ExpansionRuleType =
+  | 'EXACT'
+  | 'NORMALIZED_EXACT'
+  | 'TOKEN_SET'
+  | 'REGEX'
+  | 'TIME_ALIAS'
+  | 'ACRONYM'
+  | 'NEGATIVE_RULE';
+
+export type ExpansionRuleStatus = 'ACTIVE' | 'DEPRECATED';
+
+export interface ExpansionRule {
+  id: string;
+  alias_group_id: string;
+  rule_type: ExpansionRuleType;
+  match_pattern: string;
+  normalized_pattern?: string;
+  boost: number;
+  priority: number;
+  status: ExpansionRuleStatus;
+  effective_from?: string;
+  effective_to?: string;
+  created_at: string;
+}
+
+// ── 시멘틱 스냅샷 ──
+
+export type SnapshotStatus = 'BUILDING' | 'READY' | 'ACTIVE' | 'INVALIDATED';
+
+export interface SemanticSnapshot {
+  id: string;
+  snapshot_version: string;
+  release_id: string;
+  release_version: string;
+  status: SnapshotStatus;
+  content_hash: string;
+  built_at: string;
+  activated_at?: string;
+  invalidated_at?: string;
+  invalidation_reason?: string;
+}
+
+// ── 소비자 바인딩 ──
+
+export interface ConsumerBinding {
+  consumer_name: string;
+  consumer_instance_id: string;
+  bound_snapshot_version: string;
+  binding_mode: string;
+  last_seen_at: string;
+}
+
+// ── L3: 온톨로지 관계 ──
+
+export type PredicateType = 'is_a' | 'part_of' | 'relates_to' | 'derives_from' | 'equivalent_to' | 'owned_by' | 'constrained_by';
+
+export interface OntologyRelation {
+  relation_id: string;
+  subject_concept_id: string;
+  predicate_type: PredicateType;
+  object_concept_id: string;
+  cardinality: string;
+  directionality: string;
+  weight: number;
+  confidence: number;
+  effective_from?: string;
+  effective_to?: string;
+  created_at: string;
+}
+
+// ── L3: 온톨로지 규칙 ──
+
+export type RuleType = 'definition' | 'eligibility' | 'exclusion' | 'time_window' | 'policy';
+export type PolicyType = 'access' | 'pii' | 'retention' | 'residency' | 'aggregation';
+
+export interface OntologyRule {
+  rule_id: string;
+  concept_id: string;
+  rule_type: RuleType;
+  rule_expression: string;
+  expression_lang: string;
+  severity: string;
+  description?: string;
+  created_at: string;
+}
+
+export interface OntologyPolicy {
+  policy_id: string;
+  concept_id: string;
+  policy_type: PolicyType;
+  policy_expression: string;
+  description?: string;
+  is_active: boolean;
+  created_at: string;
+}
+
+// ── L2: 세그먼트 / 시간 계약 / 접근 정책 ──
+
+export interface SemanticSegment {
+  segment_id: string;
+  entity_id: string;
+  name: string;
+  filter_expression: string;
+  segment_type: string;
+  description?: string;
+}
+
+export interface TimeContract {
+  time_contract_id: string;
+  entity_id: string;
+  time_column: string;
+  time_grain: string;
+  timezone: string;
+  fiscal_calendar_offset: number;
+  default_lookback_days: number;
+}
+
+export interface AccessPolicyL2 {
+  access_policy_id: string;
+  entity_id: string;
+  policy_type: string;
+  condition_expression: string;
+  target_roles: string[];
+  is_active: boolean;
 }
 
 // ── API 응답 래퍼 ──
