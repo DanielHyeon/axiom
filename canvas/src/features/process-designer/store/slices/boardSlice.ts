@@ -119,7 +119,7 @@ export const createBoardSlice: StateCreator<
           set({ connected: status === 'connected' });
         });
 
-        provider.on('synced', (synced: boolean) => {
+        provider.on('sync', (synced: boolean) => {
           if (synced) {
             set({
               items: yArrayToJSON<CanvasItem>(yItems),

@@ -17,14 +17,13 @@ import {
   ChevronRight,
   Rows3,
   Columns3,
-  Filter as FilterIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { usePivot } from '../hooks/usePivot';
 import { PivotBuilder } from '../components/PivotBuilder';
 import { PivotResultGrid } from '../components/PivotResultGrid';
 import { PivotSqlPreview } from '../components/PivotSqlPreview';
-import { cubes, type CubeDetail } from '../api/olapStudioApi';
+import { cubes } from '../api/olapStudioApi';
 
 // ─── 메인 페이지 ─────────────────────────────────────────
 

@@ -319,15 +319,11 @@ class TestSchemaCoverageDatasource:
         }
         mock_runtime.catalogs = {"ds-test": mock_catalog}
 
-        mock_synapse._get = AsyncMock(return_value={
-            "data": {
-                "nodes": [
-                    {"id": "n1", "type": "TABLE", "name": "orders", "properties": {"table_name": "orders"}},
-                    {"id": "n2", "type": "TABLE", "name": "customers", "properties": {"table_name": "customers"}},
-                    {"id": "n3", "type": "COLUMN", "name": "amount", "layer": "column", "properties": {}},
-                ],
-            },
-        })
+        mock_synapse.fetch_all_ontology_nodes = AsyncMock(return_value=[
+            {"id": "n1", "type": "TABLE", "name": "orders", "properties": {"table_name": "orders"}},
+            {"id": "n2", "type": "TABLE", "name": "customers", "properties": {"table_name": "customers"}},
+            {"id": "n3", "type": "COLUMN", "name": "amount", "layer": "column", "properties": {}},
+        ])
 
         resp = client.get(
             "/api/insight/schema-coverage/datasource?datasource_id=ds-test&case_id=case-1",

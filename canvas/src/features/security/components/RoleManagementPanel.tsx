@@ -5,7 +5,7 @@
  * - 권한 매트릭스 (리소스 x 액션 체크박스)
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import {
   RefreshCw,
   ShieldCheck,
@@ -19,7 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRoles } from '../hooks/useSecurity';
-import type { Role, Permission, PermissionAction } from '../types/security';
+import type { Permission, PermissionAction } from '../types/security';
 
 // ---------------------------------------------------------------------------
 // 리소스 그룹 라벨 (한글)

@@ -15,7 +15,6 @@ import {
 } from '../api/dataQualityApi';
 import { useDQStore } from '../store/useDQStore';
 import type {
-  DQRule,
   DQStats,
   DQIncident,
   CreateDQRulePayload,

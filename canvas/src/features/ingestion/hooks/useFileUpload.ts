@@ -122,7 +122,7 @@ export function useFileUpload() {
         updateFileStatus(entry.id, 'uploading');
 
         try {
-          const res = await uploadFile(file, metadata, (percent) => {
+          await uploadFile(file, metadata, (percent) => {
             updateFileProgress(entry.id, percent);
           });
           updateFileStatus(entry.id, 'completed');

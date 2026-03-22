@@ -11,7 +11,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { X, ChevronDown, Link2, Info } from 'lucide-react';
+import { X, Link2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';

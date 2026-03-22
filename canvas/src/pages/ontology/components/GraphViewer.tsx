@@ -27,7 +27,7 @@ const LAYER_SHAPES: Record<string, string> = {
  resource: 'rectangle',
 };
 
-const CYTOSCAPE_STYLE: cytoscape.Stylesheet[] = [
+const CYTOSCAPE_STYLE: cytoscape.StylesheetStyle[] = [
  {
  selector: 'node',
  style: {

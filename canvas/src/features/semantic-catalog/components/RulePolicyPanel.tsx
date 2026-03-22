@@ -5,7 +5,7 @@
  * 정책 섹션: 접이식 생성 폼 + 테이블 (policy_type 배지, is_active 토글)
  */
 import { useState } from 'react';
-import { Scale, Shield, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { Scale, Shield, Plus, Trash2, ChevronUp } from 'lucide-react';
 import type {
   OntologyRule,
   OntologyPolicy,

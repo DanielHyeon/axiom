@@ -10,7 +10,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { Database, MousePointerClick } from 'lucide-react';
+import { MousePointerClick } from 'lucide-react';
 import { ObjectTypeList } from './ObjectTypeList';
 import { ObjectTypeDetail } from './ObjectTypeDetail';
 import { DomainGraphViewer } from './DomainGraphViewer';

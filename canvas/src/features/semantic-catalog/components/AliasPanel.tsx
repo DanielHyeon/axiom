@@ -5,7 +5,7 @@
  * 그룹 생성 폼과 규칙 활성화/비활성화 토글을 지원한다.
  */
 import { useState } from 'react';
-import { Tags, Plus, ChevronUp, ChevronDown } from 'lucide-react';
+import { Tags, Plus, ChevronUp } from 'lucide-react';
 import type { AliasGroup, ExpansionRule, ExpansionRuleType, ExpansionRuleStatus } from '../types/semantic';
 
 // ── 규칙 타입 배지 색상 ──

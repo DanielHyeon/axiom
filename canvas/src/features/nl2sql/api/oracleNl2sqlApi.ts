@@ -2,7 +2,6 @@ import { oracleApi } from '@/lib/api/clients';
 import { createNdjsonStream } from '@/lib/api/streamManager';
 import { toast } from 'sonner';
 import { AppError } from '@/lib/api/errors';
-import type { DatasourceInfo, TableMeta, ColumnMeta } from '@/shared/types/schema';
 import type { ExecutionMetadata } from '@/features/nl2sql/types/nl2sql';
 
 // ── 공통 Meta API re-export (하위 호환성) ──

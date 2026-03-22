@@ -35,9 +35,15 @@ class _DummyNeo4jClient:
 @pytest.fixture(autouse=True)
 def _patch_neo4j_client(monkeypatch):
     """
-    모든 단위 테스트에서 ontology_service의 Neo4j 클라이언트를 더미로 교체.
+    모든 단위 테스트에서 Neo4j 클라이언트를 더미로 교체.
 
+    ontology_service와 graph_search_service 모두 패치하여
+    CI 환경(Neo4j 미실행)에서도 안전하게 인메모리 폴백을 사용한다.
     autouse=True이므로 개별 테스트에서 별도 설정이 필요 없다.
     """
     from app.api.ontology import ontology_service
     monkeypatch.setattr(ontology_service, "_neo4j", _DummyNeo4jClient())
+
+    # graph_search_service도 동일하게 더미로 교체 — Neo4j 없이 구조 검증 가능
+    from app.services.graph_search_service import graph_search_service
+    monkeypatch.setattr(graph_search_service, "_neo4j", _DummyNeo4jClient())

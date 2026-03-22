@@ -5,7 +5,7 @@
  * 인라인 폼으로 새 관계를 등록하고 행별 삭제를 지원한다.
  */
 import { useState } from 'react';
-import { GitFork, Plus, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
+import { GitFork, Plus, Trash2, ChevronUp } from 'lucide-react';
 import type { OntologyRelation, PredicateType } from '../types/semantic';
 
 // ── 술어 타입별 배지 색상 ──

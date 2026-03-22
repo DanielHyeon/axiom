@@ -30,7 +30,7 @@ interface CodeViewerProps {
 
 export function CodeViewer({ code, language = 'python', className }: CodeViewerProps) {
   const [copied, setCopied] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // 언마운트 시 타이머 정리 — 메모리 누수 방지
   useEffect(() => () => clearTimeout(timerRef.current), []);

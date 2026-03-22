@@ -6,7 +6,6 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { cn } from '@/lib/utils';
 import { Search, Table2, Columns3, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import type { SchemaSearchResult } from '../types/schema';

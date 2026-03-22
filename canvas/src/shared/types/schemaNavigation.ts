@@ -1,7 +1,6 @@
 /**
  * 스키마 네비게이션 타입 — related-tables API 계약
  */
-import type { SchemaMode } from '@/shared/utils/nodeKey';
 
 /** 가용성 응답 */
 export interface SchemaAvailability {

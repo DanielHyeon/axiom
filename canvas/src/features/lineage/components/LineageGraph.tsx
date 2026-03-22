@@ -27,8 +27,8 @@ try {
 // Cytoscape 스타일시트
 // ---------------------------------------------------------------------------
 
-function buildStylesheet(): cytoscape.Stylesheet[] {
-  const base: cytoscape.Stylesheet[] = [
+function buildStylesheet(): cytoscape.StylesheetStyle[] {
+  const base: cytoscape.StylesheetStyle[] = [
     // 공통 노드 스타일
     {
       selector: 'node',

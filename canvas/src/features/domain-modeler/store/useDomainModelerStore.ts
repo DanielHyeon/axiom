@@ -114,7 +114,7 @@ const initialState = {
 // 스토어 생성
 // ──────────────────────────────────────
 
-export const useDomainModelerStore = create<DomainModelerState>((set, get) => ({
+export const useDomainModelerStore = create<DomainModelerState>((set, _get) => ({
   ...initialState,
 
   setTreeSearchQuery: (q) => set({ treeSearchQuery: q }),

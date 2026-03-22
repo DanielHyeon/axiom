@@ -94,10 +94,13 @@ export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
                   fontSize: '12px',
                 }}
                 labelStyle={{ fontWeight: 600 }}
-                formatter={(value: number, _name: string, entry: { payload: { baseline: number; predicted: number } }) => [
-                  `${value > 0 ? '+' : ''}${value}% (${entry.payload.baseline.toFixed(2)} -> ${entry.payload.predicted.toFixed(2)})`,
-                  '변화율',
-                ]}
+                formatter={((value: number | undefined, _name: string | undefined, entry: { payload: { baseline: number; predicted: number } }) => {
+                  const v = value ?? 0;
+                  return [
+                    `${v > 0 ? '+' : ''}${v}% (${entry.payload.baseline.toFixed(2)} -> ${entry.payload.predicted.toFixed(2)})`,
+                    '변화율',
+                  ];
+                }) as never}
               />
               <ReferenceLine x={0} stroke="hsl(var(--muted-foreground))" strokeDasharray="3 3" />
               <Bar dataKey="pct" radius={[0, 4, 4, 0]}>

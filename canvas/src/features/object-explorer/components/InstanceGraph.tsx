@@ -88,7 +88,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
     const elements: ElementDefinition[] = [];
 
     // 중심 노드 (선택된 인스턴스)
-    const centerColor = getColor(instance.objectTypeName, typeColorMap);
+    getColor(instance.objectTypeName, typeColorMap);
     elements.push({
       data: {
         id: instance.id,

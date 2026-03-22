@@ -13,7 +13,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useGlossaryStore } from '../store/useGlossaryStore';
 import { useCreateTerm, useUpdateTerm, useCategories } from '../hooks/useGlossary';
-import type { GlossaryTerm, TermCreateRequest, TermStatus, RelatedTable } from '../types/glossary';
+import type { TermCreateRequest, TermStatus, RelatedTable } from '../types/glossary';
 
 // 상태 옵션
 const STATUS_OPTIONS: { value: TermStatus; labelKey: string }[] = [

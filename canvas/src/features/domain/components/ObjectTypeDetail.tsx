@@ -26,7 +26,7 @@ import { ChartConfigPanel } from './ChartConfigPanel';
 import { OntologyMappingPanel } from './OntologyMappingPanel';
 import { useUpdateObjectType, useDeleteObjectType } from '../hooks/useObjectTypes';
 import { useDomainStore } from '../store/useDomainStore';
-import type { ObjectType, ObjectTypeField, ObjectTypeRelation, ChartConfig, Behavior } from '../types/domain';
+import type { ObjectType, ObjectTypeField, ObjectTypeRelation, ChartConfig } from '../types/domain';
 
 // ──────────────────────────────────────
 // Props
