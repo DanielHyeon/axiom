@@ -49,9 +49,9 @@
 | Schema | Owner Service | 주요 테이블 |
 |--------|:------------:|-------------|
 | `core` | Core | `event_outbox`, `bpm_work_item`, `bpm_process_definition`, `event_dead_letter`, `saga_execution_log`, `watch_*`, `core_case*` |
-| `synapse` | Synapse | `event_outbox`, `schema_edit_*` |
+| `synapse` | Synapse | `event_outbox`, `schema_edit_*`, `ontology_concepts`, `ontology_terms`, `semantic_entities`, `semantic_measures`, `semantic_dimensions`, `join_contracts`, `grain_contracts`, `quality_contracts`, `semantic_releases`, `context_packs`, `prompt_policies` |
 | `vision` | Vision | `event_outbox`, `case_summary` (CQRS Read Model) |
-| `weaver` | Weaver | `event_outbox`, `metadata_*` |
+| `weaver` | Weaver | `event_outbox`, `metadata_*`, `insight_*`, `quality_scores` |
 | `oracle` | Oracle | `query_history_*` |
 
 ## Inter-Service Communication
