@@ -1,4 +1,4 @@
-# Axiom — 핵심 요약 (v5.0)
+# Axiom — 핵심 요약 (v5.1)
 
 ## 1. 미션
 
@@ -32,9 +32,9 @@
 | 서비스 | 포트 | 역할 |
 |--------|------|------|
 | **Core** | 8002 (→9002) | BPM 오케스트레이션, AI Agent, 인증/인가, 이벤트 소싱, 케이스 관리 |
-| **Synapse** | 8003 (→9003) | 5계층 온톨로지 (KPI/Driver/Measure/Process/Resource), BehaviorModel, 프로세스 마이닝, 그래프 검색 |
-| **Weaver** | 8001 (→9001) | 데이터 패브릭, 메타데이터 카탈로그, 데이터소스 통합, Insight 잡 스토어 |
-| **Oracle** | 8004 (→9004) | NL2SQL 엔진 (ReAct + HIL), SQLGlot AST 검증, 품질 게이트, Value Mapping, Enum Cache, 피드백 분석 |
+| **Synapse** | 8003 (→9003) | 5계층 온톨로지, **시멘틱 계약 계층 (L2 Control Plane)**, L5 AI ContextPack, BehaviorModel, 프로세스 마이닝, 그래프 검색 |
+| **Weaver** | 8001 (→9001) | 데이터 패브릭, 메타데이터 카탈로그, 데이터소스 통합, Insight 잡 스토어, **품질 수집 파이프라인** |
+| **Oracle** | 8004 (→9004) | NL2SQL 엔진 (ReAct + HIL), SQLGlot AST 검증, 품질 게이트, Value Mapping, Enum Cache, 피드백 분석, **시멘틱 계약 컨텍스트 소비 (P3)** |
 | **Vision** | 8000 (→9100) | OLAP 피벗, What-if DAG 시뮬레이션, 인과 분석 (Granger/VAR), 근본 원인 분석 (RCA) |
 | **OLAP Studio** | 8000 (→9005) | 스타 스키마 OLAP 피벗, 큐브/Mondrian 관리, ETL 파이프라인, Airflow 연동, 데이터 리니지, AI 큐브 생성, 탐색형 NL2SQL |
 | **Canvas** | 5173 (→5174) | React SPA — 온톨로지 5계층, NL2SQL 채팅 (HIL), OLAP, ERD, 피드백 대시보드, 프로세스 디자이너 |
@@ -72,6 +72,29 @@ Resource Layer: Machines, Robots, Operators, Materials, Sensors
 관계 속성: `weight` (0.0~1.0), `lag` (일), `confidence` (0.0~1.0), `method`, `direction`
 BehaviorModel: `:OntologyBehavior:Model` 멀티레이블 + `READS_FIELD` / `PREDICTS_FIELD` 링크
 
+### Synapse 시멘틱 계약 계층 (L2 Control Plane + L5 AI Context)
+```
+L3 온톨로지 거버넌스:
+  OntologyConcept (status: draft→review→approved→deprecated, owner_team, steward, sensitivity)
+  OntologyTerm (surface_form, language, term_type: primary/synonym/alias/abbreviation/legacy)
+
+L2 시멘틱 계약:
+  SemanticEntity → SemanticMeasure (sql_expression, measure_type, additive_type)
+  SemanticEntity → SemanticDimension (sql_expression, value_type, hierarchy_path)
+  SemanticEntity → GrainContract (grain_key_set, time_grain, duplicate_resolution_rule)
+  JoinContract (left/right entity, join_condition, allowed_for_ai, fanout_risk_score)
+  QualityContract (target_type/id, freshness_sla, completeness/uniqueness threshold)
+  SemanticRelease (version, review_status, deployed_at)
+
+L5 AI 컨텍스트:
+  ContextPack (intent_type별 프리셋: kpi_query, root_cause, trend, comparison 등)
+  PromptPolicy (rule_type: must_use_metric, must_avoid_raw_table 등)
+
+Semantic Compiler: 계약 검증 + SQL 뷰 템플릿 생성
+이벤트: SEMANTIC_MEASURE_PUBLISHED, SEMANTIC_ENTITY_PUBLISHED, JOIN_CONTRACT_CREATED 등 5종
+```
+API: `/api/v3/synapse/semantic/*` (48 엔드포인트)
+
 ### Synapse 확장 도메인
 ```
 DMN DecisionTable → DecisionRule → 조건 평가 (ast.literal_eval 안전 실행)
@@ -83,6 +106,7 @@ RelationInference: LLM 기반 엔티티 관계 추론 + 레이어 규칙 폴백
 Datasource → Schema → Table → Column (스키마 인트로스펙션)
 MetadataCatalog (글로서리, 비즈니스 용어)
 InsightJob (Redis 캐시 기반 비동기 분석 잡)
+QualityScore (freshness/completeness/uniqueness 자동 수집 + 가중 점수)
 ```
 
 ### OLAP Studio 도메인
@@ -119,6 +143,7 @@ ScenarioStore: Redis 기반 시나리오 영속화
 /data/sources                — OLAP 데이터소스 관리
 /data/etl                    — ETL 파이프라인 관리
 /data/cubes                  — 큐브/Mondrian 관리
+/data/semantic-catalog       — 시멘틱 카탈로그 (개념/엔티티/지표/차원/조인/그레인 6탭 브라우저)
 /data/lineage                — 데이터 리니지 시각화
 /process-designer            — BPM 워크플로 디자이너 (Konva)
 /watch                       — 알림 규칙 & 이벤트 모니터링
@@ -128,6 +153,7 @@ ScenarioStore: Redis 기반 시나리오 영속화
 
 피처 슬라이스 패턴: `features/<name>/{api,components,hooks,store,types,utils}/`
 OLAP Studio 피처 슬라이스: `features/olap-studio/{api,components,hooks,pages}/`
+시멘틱 카탈로그 피처 슬라이스: `features/semantic-catalog/{api,components,hooks,types}/`
 
 ## 6. 시맨틱 레이어 철학
 
@@ -135,6 +161,22 @@ OLAP Studio 피처 슬라이스: `features/olap-studio/{api,components,hooks,pag
 - AI 친화적 시맨틱 계층 (글로서리, 온톨로지, 메타데이터)
 - 4대 정보 소스: 운영 DB, 레거시 코드, 공식 문서, 산업 표준
 - "Golden Question" 방법론 — 목적 주도형 데이터 모델링
+
+### Option B' 아키텍처 (v5.1)
+
+- **Control Plane (Synapse)**: 시멘틱 계약 정의·승인·배포 메타데이터 관리
+- **Data Plane (Weaver)**: 쿼리 실행, 품질 수집, 캐시 — 후속 runtime 분리 가능
+- **Consumer (Oracle)**: raw schema 대신 시멘틱 계약 컨텍스트를 LLM에 주입 (fallback 유지)
+- 온톨로지 = 의미의 원천, 시멘틱 레이어 = 계산의 표준 실행체, AI Context = 의미+계산+품질 조합
+
+### 6계층 의미론적 계층 구조
+
+- L0 Physical Data (Weaver 인트로스펙션)
+- L1 Canonical Data Product (OLAP Studio 스타 스키마)
+- L2 Semantic Contract (Synapse: entity/measure/dimension/join/grain/quality)
+- L3 Ontology (Synapse: Neo4j 5계층 + 개념 거버넌스 + 용어 사전)
+- L4 Reasoning & Governance (Semantic Compiler 검증 + publish 승인 워크플로)
+- L5 AI Context (ContextPack + PromptPolicy → Oracle NL2SQL 소비)
 
 ## 7. 인증 & 권한
 
@@ -225,6 +267,21 @@ DW_SCHEMA=dw                # 데이터 웨어하우스 스키마 접두사
 - LLM 관계 추론 엔진 (+ 레이어 규칙 폴백)
 - LLM 시맨틱 캐시 (해시 + 임베딩 유사도 2단계)
 - 자동 데이터소스 바인딩 (이름 + LLM 시맨틱 2단계)
+
+### 온톨로지-시멘틱 계약 계층 (v5.1)
+
+- L2 시멘틱 계약 7개 테이블 (ontology_concepts, ontology_terms, semantic_entities, semantic_measures, semantic_dimensions, join_contracts, grain_contracts, quality_contracts, semantic_releases)
+- L5 AI ContextPack + PromptPolicy (의도별 LLM 프리셋: kpi_query, root_cause, trend, comparison 등)
+- Semantic Compiler: 계약 검증 + SQL 뷰 템플릿 생성 (binding 검증, fanout 위험, ratio 검증)
+- Oracle NL2SQL 시멘틱 컨텍스트 소비: raw schema → approved 계약 기반 프롬프트 전환 (graceful fallback)
+- Oracle 의도 분류기: 키워드 기반 intent → ContextPack 자동 매칭
+- Weaver 품질 수집 파이프라인: freshness/completeness/uniqueness 자동 측정 (15분 주기 BackgroundWorker)
+- Weaver Insight 응답에 quality_context 자동 포함
+- Canvas 시멘틱 카탈로그 UI: 6탭 브라우저 (/data/semantic-catalog) + 상태 전이 + 컴파일 + 배포
+- Canvas NL2SQL 품질 경고 배지: 시멘틱 계약 사용 여부 + 품질 경고 + 의도 분류 표시
+- 보안: SQL fragment validation (DDL/코멘트 차단), RBAC (ai-context analyst 이상), 프롬프트 주입 방어
+- Transactional Outbox 이벤트 5종 (SEMANTIC_MEASURE_PUBLISHED 등)
+- 테스트: 33 passed (Synapse semantic contract API)
 
 ### 운영 안정화
 - 슬라이딩 윈도우 레이트 리밋 (테넌트별)
