@@ -148,8 +148,14 @@ describe('exportToCsv', () => {
 
     exportToCsv([{ name: 'A' }], [['1']]);
 
-    const text = await blobToText(spy.getBlob()!);
-    expect(text.charCodeAt(0)).toBe(0xfeff);
+    // blob.text()는 UTF-8 디코딩 시 BOM을 제거할 수 있으므로
+    // arrayBuffer로 원시 바이트를 직접 확인한다.
+    const buf = await spy.getBlob()!.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    // UTF-8 BOM: 0xEF 0xBB 0xBF
+    expect(bytes[0]).toBe(0xef);
+    expect(bytes[1]).toBe(0xbb);
+    expect(bytes[2]).toBe(0xbf);
   });
 
   it('다운로드 링크 생성: a.click() 호출됨', () => {
