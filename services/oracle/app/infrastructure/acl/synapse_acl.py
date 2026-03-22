@@ -6,7 +6,10 @@ Oracle의 NL2SQL 파이프라인이 Synapse API 응답 형식에 직접 의존�
 from __future__ import annotations
 
 import asyncio
-from dataclasses import dataclass, field
+import hashlib
+import json
+import time
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 import httpx
@@ -234,16 +237,127 @@ class OracleSynapseACL:
 
     _SEARCH_FALLBACK = SchemaSearchResult()
 
+    # Sprint 3: Redis 캐시 키 접두사
+    _CACHE_PREFIX = "semantic:contract"
+
     def __init__(
         self,
         base_url: str | None = None,
         schema_edit_base: str | None = None,
         service_token: str | None = None,
+        redis_client: Any | None = None,
     ):
         self._base_url = (base_url or settings.SYNAPSE_API_URL).rstrip("/")
         self._schema_edit_base = schema_edit_base or settings.SYNAPSE_SCHEMA_EDIT_BASE
         self._service_token = service_token or settings.SERVICE_TOKEN_ORACLE
         self._datasources_json = settings.ORACLE_DATASOURCES_JSON
+        # Sprint 3: Redis 클라이언트 (런타임에 lifespan에서 주입)
+        self._redis: Any | None = redis_client
+
+    def set_redis(self, redis_client: Any | None) -> None:
+        """Redis 클라이언트를 주입한다 (lifespan startup에서 호출)."""
+        self._redis = redis_client
+
+    # -----------------------------------------------------------------
+    # Sprint 3: 시멘틱 계약 캐시 헬퍼 메서드
+    # -----------------------------------------------------------------
+
+    def _cache_key(self, tenant_id: str, case_id: str | None) -> str:
+        """테넌트+케이스 기반 캐시 키를 생성한다."""
+        return f"{self._CACHE_PREFIX}:{tenant_id}:{case_id or 'global'}"
+
+    async def _get_from_cache(self, key: str) -> SemanticContractContext | None:
+        """Redis에서 시멘틱 계약 캐시를 역직렬화하여 반환한다."""
+        if self._redis is None or not settings.SEMANTIC_CACHE_ENABLED:
+            return None
+        try:
+            raw = await self._redis.get(key)
+            if raw is None:
+                return None
+            data = json.loads(raw if isinstance(raw, str) else raw.decode("utf-8"))
+            return self._deserialize_contract_context(data)
+        except Exception as exc:
+            logger.warning("semantic_cache_get_error", key=key, error=str(exc))
+            return None
+
+    async def _set_cache(
+        self, key: str, ctx: SemanticContractContext, ttl: int | None = None,
+    ) -> None:
+        """시멘틱 계약 컨텍스트를 Redis에 직렬화하여 저장한다."""
+        if self._redis is None or not settings.SEMANTIC_CACHE_ENABLED:
+            return
+        if ttl is None:
+            ttl = settings.SEMANTIC_CACHE_TTL
+        try:
+            data = self._serialize_contract_context(ctx)
+            payload = json.dumps(data, ensure_ascii=False)
+            await self._redis.set(key, payload, ex=ttl)
+            logger.info("semantic_cache_set", key=key, ttl=ttl)
+        except Exception as exc:
+            logger.warning("semantic_cache_set_error", key=key, error=str(exc))
+
+    async def invalidate_cache(self, tenant_id: str | None = None) -> int:
+        """시멘틱 캐시를 무효화한다.
+
+        tenant_id가 주어지면 해당 테넌트만, 없으면 전체 무효화.
+        반환: 삭제된 키 수
+        """
+        if self._redis is None:
+            return 0
+        try:
+            pattern = f"{self._CACHE_PREFIX}:{tenant_id}:*" if tenant_id else f"{self._CACHE_PREFIX}:*"
+            deleted = 0
+            # SCAN 기반 삭제 (대량 키에도 안전)
+            async for key in self._redis.scan_iter(match=pattern, count=100):
+                await self._redis.delete(key)
+                deleted += 1
+            if deleted:
+                logger.info("semantic_cache_invalidated", tenant_id=tenant_id, deleted=deleted)
+            return deleted
+        except Exception as exc:
+            logger.warning("semantic_cache_invalidate_error", error=str(exc))
+            return 0
+
+    @staticmethod
+    def _serialize_contract_context(ctx: SemanticContractContext) -> dict[str, Any]:
+        """SemanticContractContext → JSON-serializable dict 변환."""
+        return {
+            "measures": [asdict(m) for m in ctx.measures],
+            "dimensions": [asdict(d) for d in ctx.dimensions],
+            "allowed_joins": [asdict(j) for j in ctx.allowed_joins],
+            "banned_entity_pairs": list(ctx.banned_entity_pairs),
+            "synonym_map": dict(ctx.synonym_map),
+            "concept_definitions": dict(ctx.concept_definitions),
+            "entity_sources": dict(ctx.entity_sources),
+            "quality_warnings": list(ctx.quality_warnings),
+            "provenance": ctx.provenance,
+            "cached_at": time.time(),
+        }
+
+    @staticmethod
+    def _deserialize_contract_context(data: dict[str, Any]) -> SemanticContractContext:
+        """JSON dict → SemanticContractContext 역직렬화."""
+        measures = [
+            SemanticMeasureDef(**m) for m in (data.get("measures") or [])
+        ]
+        dimensions = [
+            SemanticDimensionDef(**d) for d in (data.get("dimensions") or [])
+        ]
+        allowed_joins = [
+            SemanticJoinRule(**j) for j in (data.get("allowed_joins") or [])
+        ]
+        banned = [tuple(pair) for pair in (data.get("banned_entity_pairs") or [])]
+        return SemanticContractContext(
+            measures=measures,
+            dimensions=dimensions,
+            allowed_joins=allowed_joins,
+            banned_entity_pairs=banned,
+            synonym_map=data.get("synonym_map") or {},
+            concept_definitions=data.get("concept_definitions") or {},
+            entity_sources=data.get("entity_sources") or {},
+            quality_warnings=data.get("quality_warnings") or [],
+            provenance=data.get("provenance", "synapse_semantic_contract_v1"),
+        )
 
     def _headers(self, tenant_id: str = "") -> dict[str, str]:
         headers = {
@@ -651,10 +765,65 @@ class OracleSynapseACL:
     async def fetch_semantic_contract_context(
         self, tenant_id: str, case_id: str | None = None,
     ) -> SemanticContractContext | None:
-        """Synapse 시멘틱 계약 API에서 approved 컨텍스트를 가져온다.
+        """시멘틱 계약 컨텍스트 조회 — Redis 캐시 우선 (Sprint 3).
 
+        1. Redis 캐시 조회
+        2. Cache miss → Synapse API 호출
+        3. 결과 캐싱 (TTL: SEMANTIC_CACHE_TTL)
         실패 시 None을 반환하여 기존 raw schema 경로로 폴백할 수 있도록 한다.
         """
+        cache_key = self._cache_key(tenant_id, case_id)
+        t0 = time.monotonic()
+
+        # 1. Redis 캐시 조회
+        cached = await self._get_from_cache(cache_key)
+        if cached is not None:
+            resolve_ms = round((time.monotonic() - t0) * 1000, 1)
+            logger.info(
+                "semantic_context_resolved",
+                cache_hit=True,
+                snapshot_version=self._compute_snapshot_version(tenant_id, cached),
+                resolve_latency_ms=resolve_ms,
+            )
+            return cached
+
+        # 2. Cache miss → Synapse API 호출
+        logger.info("semantic_cache_miss", key=cache_key)
+        ctx = await self._fetch_from_synapse(tenant_id, case_id)
+
+        resolve_ms = round((time.monotonic() - t0) * 1000, 1)
+
+        # 3. 결과 캐싱
+        if ctx is not None:
+            await self._set_cache(cache_key, ctx)
+
+        logger.info(
+            "semantic_context_resolved",
+            cache_hit=False,
+            snapshot_version=self._compute_snapshot_version(tenant_id, ctx) if ctx else None,
+            resolve_latency_ms=resolve_ms,
+        )
+
+        return ctx
+
+    @staticmethod
+    def _compute_snapshot_version(
+        tenant_id: str, ctx: SemanticContractContext | None,
+    ) -> str | None:
+        """Sprint 3: 요청 단위 버전 핀 — 컨텍스트의 해시 기반 스냅샷 버전."""
+        if ctx is None:
+            return None
+        # 지표·차원 이름 목록으로 가볍게 해시 (내용 변경 감지용)
+        sig = f"{tenant_id}:{len(ctx.measures)}:{len(ctx.dimensions)}:{len(ctx.allowed_joins)}"
+        for m in ctx.measures[:20]:
+            sig += f":{m.measure_id}"
+        digest = hashlib.md5(sig.encode()).hexdigest()[:8]
+        return f"sc_{tenant_id}_{digest}"
+
+    async def _fetch_from_synapse(
+        self, tenant_id: str, case_id: str | None = None,
+    ) -> SemanticContractContext | None:
+        """Synapse 시멘틱 계약 API에서 approved 컨텍스트를 가져온다."""
         params: dict[str, str] = {}
         if case_id:
             params["case_id"] = case_id

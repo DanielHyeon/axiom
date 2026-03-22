@@ -25,12 +25,17 @@ import httpx
 from app.core.auth import CurrentUser
 from app.core.config import settings
 from app.core.llm_factory import llm_factory
+from app.core.question_understanding import QuestionUnderstandingEngine
+
+# Sprint 4: 질문 이해 엔진 싱글톤 (상태 없음, 매 요청마다 생성할 필요 없음)
+_qu_engine = QuestionUnderstandingEngine()
 from app.core.sql_exec import sql_executor
-from app.core.sql_guard import GuardConfig, sql_guard
+from app.core.sql_guard import GuardConfig, sql_guard, SemanticValidationResult
 from app.core.value_mapping import value_mapping_service
 from app.core.visualize import recommend_visualization
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl, TableInfo, OntologyContext, SemanticContractContext, ResolvedContextPack
 from app.pipelines.cache_postprocess import cache_postprocessor
+from app.pipelines.quality_gate import evaluate_trust_tier
 
 logger = logging.getLogger("oracle.nl2sql_pipeline")
 
@@ -455,24 +460,58 @@ class NL2SQLPipeline:
                 logger.warning("value_mapping_resolve_failed", error=str(exc))
 
         # 3. P3: 시멘틱 계약 컨텍스트 조회 (approved 지표/차원/조인 정의)
+        #    Sprint 3: Redis 캐시 우선 조회 + 스냅샷 버전 고정
         semantic_ctx: SemanticContractContext | None = None
+        snapshot_version: str | None = None
         try:
             semantic_ctx = await oracle_synapse_acl.fetch_semantic_contract_context(
                 tenant_id=tenant_id, case_id=case_id,
             )
             if semantic_ctx:
+                # Sprint 3: 요청 단위 버전 고정
+                snapshot_version = oracle_synapse_acl._compute_snapshot_version(
+                    tenant_id, semantic_ctx,
+                )
                 logger.info("semantic_contract_context_loaded",
                             measures=len(semantic_ctx.measures),
                             dimensions=len(semantic_ctx.dimensions),
-                            joins=len(semantic_ctx.allowed_joins))
+                            joins=len(semantic_ctx.allowed_joins),
+                            snapshot_version=snapshot_version)
         except Exception as exc:
             logger.warning("semantic_contract_context_failed", error=str(exc))
 
+        # === Sprint 4: 질문 이해 + 동의어 확장 ===
+        # 시멘틱 계약의 synonym_map을 사용하여 질문을 정규화하고,
+        # 의도를 분류하며 신뢰도 점수를 산출한다.
+        question_understanding = None
+        try:
+            synonym_map = semantic_ctx.synonym_map if semantic_ctx else None
+            question_understanding = _qu_engine.understand(question, synonym_map)
+            logger.info(
+                "question_understanding_complete",
+                intent=question_understanding.intent.top_intent,
+                confidence=question_understanding.intent.confidence,
+                synonym_matches=len(question_understanding.synonym_matches),
+                fallback_mode=question_understanding.fallback_mode,
+            )
+        except Exception as exc:
+            logger.warning("question_understanding_failed", error=str(exc))
+
+        # 동의어 힌트를 질문에 부가하여 LLM에 전달할 enhanced_question 생성
+        enhanced_question = question
+        if question_understanding and question_understanding.semantic_hints:
+            hint_text = "\n".join(question_understanding.semantic_hints)
+            enhanced_question = f"{question}\n\n[시멘틱 해석 힌트]\n{hint_text}"
+
         # 3.5 P4: 의도별 ContextPack 조회 (있으면 semantic_ctx보다 우선)
+        # Sprint 4: question understanding 결과의 의도를 우선 사용 (fallback: _classify_intent)
         context_pack: ResolvedContextPack | None = None
         try:
-            # 간단한 의도 분류: 질문 키워드 기반 (향후 LLM 기반으로 교체 가능)
-            intent = self._classify_intent(question)
+            intent = (
+                question_understanding.intent.top_intent
+                if question_understanding
+                else self._classify_intent(question)
+            )
             if intent != "general":
                 context_pack = await oracle_synapse_acl.find_context_pack_by_intent(
                     tenant_id=tenant_id, intent_type=intent, case_id=case_id,
@@ -482,9 +521,34 @@ class NL2SQLPipeline:
         except Exception as exc:
             logger.warning("context_pack_resolve_failed", error=str(exc))
 
+        # 3.7 Sprint 2: 품질 신뢰 등급 평가
+        # — 시멘틱 컨텍스트의 품질 경고를 기반으로 등급을 결정하고
+        #   BLOCKED이면 실행을 차단한다
+        quality_grade: dict | None = None
+        effective_semantic = context_pack.semantic_context if context_pack else semantic_ctx
+        if effective_semantic and effective_semantic.quality_warnings:
+            quality_grade = evaluate_trust_tier(effective_semantic.quality_warnings)
+            if quality_grade and not quality_grade.get("allow_execution"):
+                return {
+                    "success": False,
+                    "error": {
+                        "code": "QUALITY_GATE_BLOCKED",
+                        "message": quality_grade.get("user_banner", "품질 기준 미달로 실행이 제한됩니다."),
+                        "details": {
+                            "trust_tier": quality_grade["trust_tier"],
+                            "score": quality_grade["final_score"],
+                            "hard_fail_codes": quality_grade.get("hard_fail_codes", []),
+                        },
+                    },
+                }
+            logger.info("quality_gate_passed",
+                        tier=quality_grade.get("trust_tier"),
+                        score=quality_grade.get("final_score"))
+
         # 4. LLM SQL generation (O1-3 + O3 ontology + P3/P4 semantic context)
+        # Sprint 4: enhanced_question 사용 — 동의어 힌트가 포함된 질문을 LLM에 전달
         generated_sql = await self._generate_sql_llm(
-            question, schema_catalog, value_mappings, similar_queries, row_limit, dialect,
+            enhanced_question, schema_catalog, value_mappings, similar_queries, row_limit, dialect,
             ontology_ctx=ontology_ctx,
             semantic_ctx=semantic_ctx,
             context_pack=context_pack,
@@ -513,6 +577,29 @@ class NL2SQLPipeline:
                     "details": {"violations": guard_res.violations},
                 },
             }
+
+        # === Sprint 1: 시멘틱 계약 사후 검증 ===
+        # LLM이 생성한 SQL이 시멘틱 계약(허용 조인, 승인 테이블 등)을 위반하는지 검사한다.
+        # effective_semantic은 3.7 단계에서 이미 계산됨 (context_pack 우선, fallback semantic_ctx)
+        semantic_validation: SemanticValidationResult | None = None
+        if effective_semantic and (effective_semantic.allowed_joins or effective_semantic.entity_sources or effective_semantic.banned_entity_pairs):
+            semantic_validation = sql_guard.validate_semantic_contract(
+                guard_res.sql, effective_semantic, mode=settings.SEMANTIC_GUARD_MODE,
+            )
+            if not semantic_validation.passed and settings.SEMANTIC_GUARD_MODE == "enforce":
+                return {
+                    "success": False,
+                    "error": {
+                        "code": "SEMANTIC_CONTRACT_VIOLATION",
+                        "details": {
+                            "violations": [
+                                {"code": v.code, "message": v.user_message}
+                                for v in semantic_validation.violations
+                                if v.severity == "BLOCK"
+                            ],
+                        },
+                    },
+                }
 
         # 6. Execute
         exec_res = await sql_executor.execute_sql(guard_res.sql, datasource_id, user)
@@ -593,7 +680,27 @@ class NL2SQLPipeline:
                         (semantic_ctx.quality_warnings if semantic_ctx else [])
                         + (context_pack.answer_guardrails if context_pack else [])
                     ) or [],
-                    "intent_type": context_pack.intent_type if context_pack else None,
+                    "intent_type": context_pack.intent_type if context_pack else (
+                        question_understanding.intent.top_intent if question_understanding else None
+                    ),
+                    # Sprint 4: 질문 이해 메타데이터
+                    "intent_confidence": question_understanding.intent.confidence if question_understanding else None,
+                    "intent_ambiguity": question_understanding.intent.ambiguity_score if question_understanding else None,
+                    "synonym_matches": len(question_understanding.synonym_matches) if question_understanding else 0,
+                    "fallback_mode": question_understanding.fallback_mode if question_understanding else None,
+                    # Sprint 3: 시멘틱 스냅샷 버전 (캐시 디버깅 + 추적용)
+                    "snapshot_version": snapshot_version,
+                    # Sprint 1: 시멘틱 계약 사후 검증 결과
+                    "contract_violations": [
+                        {"code": v.code, "message": v.message}
+                        for v in (semantic_validation.violations + semantic_validation.warnings
+                                  if semantic_validation else [])
+                    ],
+                    "semantic_guard_mode": settings.SEMANTIC_GUARD_MODE,
+                    # Sprint 2: 품질 신뢰 등급
+                    "quality_grade": quality_grade.get("trust_tier") if quality_grade else None,
+                    "quality_score": quality_grade.get("final_score") if quality_grade else None,
+                    "quality_banner": quality_grade.get("user_banner") if quality_grade else None,
                 },
             },
         }

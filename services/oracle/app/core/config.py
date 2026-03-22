@@ -25,6 +25,16 @@ class Settings(BaseSettings):
     LLM_CACHE_TTL: int = 3600                  # LLM 캐시 기본 TTL (초)
     LLM_CACHE_ENABLED: bool = True             # False면 캐시 조회/저장 건너뜀
 
+    # ── Semantic Contract Cache (Sprint 3) ──
+    SEMANTIC_CACHE_TTL: int = 1800             # 시멘틱 계약 캐시 TTL (초, 기본 30분)
+    SEMANTIC_CACHE_ENABLED: bool = True        # False면 항상 Synapse 직접 호출
+
+    # ── Sprint 1: 시멘틱 계약 사후 검증 모드 ──
+    # "log_only" = 위반 기록만 (항상 통과)
+    # "warn"    = 위반 경고 포함하되 통과
+    # "enforce" = BLOCK 위반 시 SQL 실행 차단
+    SEMANTIC_GUARD_MODE: str = "warn"
+
     # ── Feature Flags (#12, #13 P1-2) ──
     ENABLE_QUALITY_GATE: bool = True          # True면 LLM 기반 품질 게이트 활성화, False면 항상 APPROVE
     ENABLE_VALUE_MAPPING: bool = True         # True면 Value Mapping 파이프라인 활성화
