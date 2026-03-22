@@ -38,7 +38,7 @@ async def test_weaver_external_modes_e2e() -> None:
     if not _enabled(os.getenv("WEAVER_RUN_E2E")):
         pytest.skip("set WEAVER_RUN_E2E=1 to run external integration test")
 
-    required = ["MINDSDB_URL", "POSTGRES_DSN", "NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD"]
+    required = ["MINDSDB_URL", "POSTGRES_DSN", "NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "SYNAPSE_BASE_URL"]
     missing = [k for k in required if not os.getenv(k)]
     if missing:
         pytest.skip(f"missing env for e2e: {', '.join(missing)}")
