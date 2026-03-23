@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next';
+
 interface ListSkeletonProps {
  rows?: number;
  className?: string;
@@ -13,8 +15,9 @@ function SkeletonBar({ className = '' }: { className?: string }) {
 }
 
 export function ListSkeleton({ rows = 5, className = '' }: ListSkeletonProps) {
+ const { t } = useTranslation();
  return (
- <div className={`space-y-3 ${className}`} aria-busy="true" aria-label="로딩 중">
+ <div className={`space-y-3 ${className}`} aria-busy="true" aria-label={t('common.loading')}>
  {Array.from({ length: rows }).map((_, i) => (
  <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-border bg-card">
  <SkeletonBar className="w-8 h-8 rounded-full shrink-0" />
@@ -29,8 +32,9 @@ export function ListSkeleton({ rows = 5, className = '' }: ListSkeletonProps) {
 }
 
 export function TableRowsSkeleton({ rows = 5 }: { rows?: number }) {
+ const { t } = useTranslation();
  return (
- <div className="space-y-2" aria-busy="true" aria-label="로딩 중">
+ <div className="space-y-2" aria-busy="true" aria-label={t('common.loading')}>
  {Array.from({ length: rows }).map((_, i) => (
  <div key={i} className="flex gap-4 py-3 border-b border-border">
  <div className="h-4 w-24 rounded bg-secondary animate-pulse" />
@@ -44,8 +48,9 @@ export function TableRowsSkeleton({ rows = 5 }: { rows?: number }) {
 }
 
 export function CardGridSkeleton({ count = 4 }: { count?: number }) {
+ const { t } = useTranslation();
  return (
- <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true" aria-label="로딩 중">
+ <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-busy="true" aria-label={t('common.loading')}>
  {Array.from({ length: count }).map((_, i) => (
  <div key={i} className="p-4 rounded-lg border border-border bg-card">
  <div className="h-4 w-1/2 rounded bg-secondary animate-pulse mb-3" />

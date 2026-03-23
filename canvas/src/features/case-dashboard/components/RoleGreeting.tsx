@@ -20,8 +20,8 @@ export function RoleGreeting({ userName, role, workCount = 0 }: RoleGreetingProp
  const name = userName ?? '사용자';
  const roleText = role ? ROLE_LABEL[role] : '';
  return (
- <div className="mb-6">
- <h1 className="text-2xl font-bold tracking-tight text-foreground">
+ <div className="mb-4 md:mb-6">
+ <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
  안녕하세요, {name}님.
  </h1>
  {roleText && (

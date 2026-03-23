@@ -71,13 +71,13 @@ export const DataIngestionPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full overflow-hidden">
       {/* 페이지 헤더 */}
-      <div className="px-12 pt-8 pb-4 shrink-0">
+      <div className="px-4 md:px-8 lg:px-12 pt-4 md:pt-8 pb-3 md:pb-4 shrink-0">
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
-            <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">
+            <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">
               데이터 수집
             </h1>
-            <p className="text-[13px] text-muted-foreground font-mono">
+            <p className="text-[12px] md:text-[13px] text-muted-foreground font-mono">
               파일 업로드 및 ETL 파이프라인을 통해 데이터를 수집합니다
             </p>
           </div>
@@ -85,7 +85,7 @@ export const DataIngestionPage: React.FC = () => {
       </div>
 
       {/* 탭 헤더 */}
-      <div className="px-12 shrink-0 border-b border-border">
+      <div className="px-4 md:px-8 lg:px-12 shrink-0 border-b border-border overflow-x-auto">
         <div className="flex items-center gap-1">
           {TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;
@@ -110,12 +110,12 @@ export const DataIngestionPage: React.FC = () => {
       </div>
 
       {/* 탭 컨텐츠 */}
-      <div className="flex-1 overflow-auto px-12 py-6">
+      <div className="flex-1 overflow-auto px-4 md:px-8 lg:px-12 py-4 md:py-6">
         {/* ============================================================ */}
         {/* 업로드 탭 */}
         {/* ============================================================ */}
         {activeTab === 'upload' && (
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8 max-w-6xl">
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-4 md:gap-8 max-w-6xl">
             {/* 좌측: 드롭존 + 진행률 + 미리보기 */}
             <div className="space-y-6">
               <FileDropZone

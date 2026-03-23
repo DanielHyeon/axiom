@@ -48,7 +48,7 @@ export function DQScoreCard() {
 
   if (!stats) {
     return (
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
         ))}
@@ -59,10 +59,10 @@ export function DQScoreCard() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* 카드 1: 전체 테스트 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg gap-3">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">전체 테스트</p>
-          <p className="text-3xl font-bold text-foreground">{stats.totalTests}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.totalTests}</p>
         </div>
         <div className="flex items-center gap-3">
           <DonutGauge value={stats.successRate} color="text-green-500" />
@@ -84,19 +84,19 @@ export function DQScoreCard() {
       </div>
 
       {/* 카드 2: 정상 데이터 자산 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">정상 데이터 자산</p>
-          <p className="text-3xl font-bold text-foreground">{stats.healthyAssets}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.healthyAssets}</p>
         </div>
         <DonutGauge value={stats.healthyRate} color="text-primary" />
       </div>
 
       {/* 카드 3: 데이터 자산 커버리지 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg">
         <div className="space-y-1">
           <p className="text-sm text-muted-foreground">데이터 자산 커버리지</p>
-          <p className="text-3xl font-bold text-foreground">{stats.totalAssets}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.totalAssets}</p>
         </div>
         <DonutGauge value={Math.round(stats.coverageRate)} color="text-primary" />
       </div>

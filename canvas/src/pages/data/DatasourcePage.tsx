@@ -110,28 +110,28 @@ export const DatasourcePage: React.FC = () => {
 
  if (loading) {
  return (
- <div className="px-12 py-8 space-y-6">
- <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <div className="px-4 md:px-8 lg:px-12 py-4 md:py-8 space-y-6">
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
  <ListSkeleton rows={6} className="max-w-2xl" />
  </div>
  );
  }
  if (error) {
  return (
- <div className="px-12 py-8 space-y-6">
- <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <div className="px-4 md:px-8 lg:px-12 py-4 md:py-8 space-y-6">
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
  <ErrorState message={`목록을 불러올 수 없습니다. ${error.message}`} onRetry={refetch} />
  </div>
  );
  }
 
  return (
- <div className="px-12 py-8 space-y-8 overflow-auto h-full">
+ <div className="px-4 md:px-8 lg:px-12 py-4 md:py-8 space-y-6 md:space-y-8 overflow-auto h-full">
  {/* Title Row */}
- <div className="flex items-start justify-between">
+ <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
  <div className="space-y-1.5">
- <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
- <p className="text-[13px] text-muted-foreground font-mono">
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <p className="text-[12px] md:text-[13px] text-muted-foreground font-mono">
  데이터베이스 연결을 설정하고 스키마를 관리합니다
  </p>
  </div>
@@ -250,9 +250,9 @@ export const DatasourcePage: React.FC = () => {
  description="위 폼에서 연결 정보를 입력한 뒤 추가하면 스키마 탐색과 동기화를 사용할 수 있습니다."
  />
  ) : (
- <div className="border border-border rounded overflow-hidden">
+ <div className="border border-border rounded overflow-x-auto">
  {/* Table header */}
- <div className="grid grid-cols-[1fr_100px_100px_100px_80px_100px] bg-muted px-5 py-3">
+ <div className="grid grid-cols-[1fr_100px_100px_100px_80px_100px] min-w-[640px] bg-muted px-5 py-3">
  <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Name</span>
  <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Type</span>
  <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Status</span>
@@ -269,7 +269,7 @@ export const DatasourcePage: React.FC = () => {
  return (
  <div
  key={ds.name}
- className={`grid grid-cols-[1fr_100px_100px_100px_80px_100px] items-center px-5 py-3 border-t border-border transition-colors ${
+ className={`grid grid-cols-[1fr_100px_100px_100px_80px_100px] min-w-[640px] items-center px-5 py-3 border-t border-border transition-colors ${
  isSelected ? 'bg-red-50' : 'hover:bg-background'
  }`}
  >

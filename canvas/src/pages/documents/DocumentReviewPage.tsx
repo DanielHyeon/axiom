@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/lib/routes/routes';
 import { useDocumentParams } from '@/lib/routes/params';
 import { Button } from '@/components/ui/button';
@@ -29,8 +30,9 @@ const MOCK_CURRENT = `1. 계약 당사자
 
 /** 문서 리뷰 페이지. Diff 뷰(react-diff-viewer-continued), 코멘트 쓰레드, 승인/반려/수정요청 API 연동·낙관적 업데이트·실패 시 롤백. */
 export function DocumentReviewPage() {
+ const { t } = useTranslation();
  const { caseId, docId } = useDocumentParams();
- const userEmail = useAuthStore((s) => s.user?.email ?? '사용자');
+ const userEmail = useAuthStore((s) => s.user?.email ?? 'user');
  const [comments, setComments] = useState<ReviewComment[]>([
  {
  id: '1',
@@ -45,14 +47,12 @@ export function DocumentReviewPage() {
  caseId,
  docId,
  onSuccess: (action) => {
- if (action === 'approve') setActionMessage('승인되었습니다.');
- else if (action === 'reject') setActionMessage('반려 처리되었습니다.');
- else setActionMessage('수정 요청이 전송되었습니다.');
+ if (action === 'approve') setActionMessage(t('documents.review.approved'));
+ else if (action === 'reject') setActionMessage(t('documents.review.rejected'));
+ else setActionMessage(t('documents.review.changesRequested'));
  },
  onError: () => {
- setActionMessage(
- '요청 처리에 실패했습니다. 리뷰 API가 아직 등록되지 않았을 수 있습니다.'
- );
+ setActionMessage(t('documents.review.requestFailed'));
  },
  });
 
@@ -86,15 +86,15 @@ export function DocumentReviewPage() {
  const errorMessage = useMemo(() => {
  if (!isError || !error) return null;
  const err = error as { response?: { status?: number } };
- if (err.response?.status === 404) return '리뷰 API가 등록되지 않았습니다.';
- return '요청 처리에 실패했습니다.';
- }, [isError, error]);
+ if (err.response?.status === 404) return t('documents.review.apiNotFound');
+ return t('documents.review.genericError');
+ }, [isError, error, t]);
 
  return (
- <div className="space-y-4 p-6">
- <h1 className="text-xl font-semibold text-primary-foreground">문서 리뷰</h1>
+ <div className="space-y-4 p-4 md:p-6">
+ <h1 className="text-lg md:text-xl font-semibold text-primary-foreground">{t('documents.review.title')}</h1>
  <p className="text-sm text-foreground0">
- 케이스: {caseId} / 문서: {docId}
+ {t('documents.review.caseDoc', { caseId, docId })}
  </p>
 
  <DocumentDiffViewer oldValue={MOCK_ORIGINAL} newValue={MOCK_CURRENT} splitView />
@@ -103,13 +103,13 @@ export function DocumentReviewPage() {
 
  <div className="flex flex-wrap items-center gap-2">
  <Button onClick={handleApprove} disabled={isPending}>
- 승인
+ {t('common.approve')}
  </Button>
  <Button variant="destructive" onClick={handleReject} disabled={isPending}>
- 반려
+ {t('common.reject')}
  </Button>
  <Button variant="outline" onClick={handleRequestChanges} disabled={isPending}>
- 수정 요청
+ {t('documents.review.requestChanges')}
  </Button>
  </div>
 
@@ -123,7 +123,7 @@ export function DocumentReviewPage() {
  to={ROUTES.CASES.DOCUMENT(caseId, docId)}
  className="text-primary hover:underline"
  >
- 편집으로
+ {t('documents.review.goToEditor')}
  </Link>
  </div>
  );

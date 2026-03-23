@@ -56,14 +56,14 @@ export function LineageDashboard() {
   return (
     <div className="flex h-full flex-col bg-background">
       {/* ── 헤더 ── */}
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-6 py-4">
+      <header className="flex flex-wrap items-center justify-between gap-2 md:gap-3 border-b border-border bg-card px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-base md:text-lg font-semibold text-foreground">
             데이터 리니지
           </h2>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3">
           {/* 검색 */}
           <LineageSearchBar onNodeSelect={handleSearchSelect} />
 
@@ -82,20 +82,20 @@ export function LineageDashboard() {
 
       {/* ── 통계 바 ── */}
       {stats && (
-        <div className="flex gap-3 border-b border-border bg-card px-6 py-3">
+        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 border-b border-border bg-card px-4 md:px-6 py-2 md:py-3">
           {STAT_CARDS.map(({ key, label, color }) => (
             <div
               key={key}
-              className="flex flex-1 flex-col items-center rounded-xl border border-border/60 bg-muted/20 p-3"
+              className="flex flex-col items-center rounded-xl border border-border/60 bg-muted/20 p-2 md:p-3"
               style={{
                 background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
                 borderColor: `${color}30`,
               }}
             >
-              <span className="text-xl font-bold leading-none" style={{ color }}>
+              <span className="text-lg md:text-xl font-bold leading-none" style={{ color }}>
                 {stats[key]}
               </span>
-              <span className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="mt-0.5 md:mt-1 text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground">
                 {label}
               </span>
             </div>
@@ -104,7 +104,7 @@ export function LineageDashboard() {
       )}
 
       {/* ── 필터 도구 모음 ── */}
-      <div className="border-b border-border bg-card px-6 py-2.5">
+      <div className="border-b border-border bg-card px-4 md:px-6 py-2 md:py-2.5">
         <LineageFilter />
       </div>
 

@@ -1,4 +1,5 @@
-import { NavLink } from 'react-router-dom';
+import { useState, useCallback, useEffect } from 'react';
+import { NavLink, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/lib/routes/routes';
 import { useRole } from '@/shared/hooks/useRole';
@@ -21,6 +22,8 @@ import {
  BookOpen,
  Route,
  Library,
+ Menu,
+ X,
 } from 'lucide-react';
 
 /** H7: 사이드바 네비게이션을 그룹별로 분리 — 인지 부하 감소 */
@@ -70,9 +73,45 @@ const navGroups: NavGroup[] = [
 export const Sidebar: React.FC = () => {
  const { t } = useTranslation();
  const isAdmin = useRole(['admin']);
+ const location = useLocation();
+ const [mobileOpen, setMobileOpen] = useState(false);
+
+ const toggleMobile = useCallback(() => setMobileOpen((v) => !v), []);
+
+ useEffect(() => {
+  setMobileOpen(false);
+ }, [location.pathname]);
 
  return (
- <aside aria-label="Main navigation" className="w-16 shrink-0 flex flex-col justify-between bg-sidebar">
+ <>
+ {/* 모바일 햄버거 버튼 */}
+ <button
+  type="button"
+  onClick={toggleMobile}
+  className="fixed top-3 left-3 z-50 flex items-center justify-center w-10 h-10 rounded-lg bg-sidebar text-sidebar-foreground shadow-md md:hidden"
+  aria-label={mobileOpen ? t('sidebar.close') : t('sidebar.open')}
+ >
+  {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+ </button>
+
+ {/* 모바일 오버레이 */}
+ {mobileOpen && (
+  <div
+   className="fixed inset-0 z-30 bg-black/40 md:hidden"
+   onClick={() => setMobileOpen(false)}
+   aria-hidden="true"
+  />
+ )}
+
+ <aside
+  aria-label="Main navigation"
+  className={`
+   fixed inset-y-0 left-0 z-40 w-16 shrink-0 flex flex-col justify-between bg-sidebar
+   transition-transform duration-200 ease-in-out
+   ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}
+   md:relative md:translate-x-0
+  `}
+ >
  {/* Top: Logo + Nav */}
  <div className="flex flex-col items-center pt-8 min-h-0 overflow-y-auto">
  {/* Logo */}
@@ -143,5 +182,6 @@ export const Sidebar: React.FC = () => {
  )}
  </div>
  </aside>
+ </>
  );
 };

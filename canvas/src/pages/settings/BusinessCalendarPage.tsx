@@ -4,6 +4,7 @@
  */
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,7 @@ import { useCalendars, useCalendar, useAddHoliday, useRemoveHoliday } from '@/fe
 import { Calendar, Plus, Trash2 } from 'lucide-react';
 
 export function BusinessCalendarPage() {
+  const { t } = useTranslation();
   const { data: calendars = [], isLoading } = useCalendars();
   const [selectedId, setSelectedId] = useState<string>('');
   const { data: calendar } = useCalendar(selectedId);
@@ -31,20 +33,20 @@ export function BusinessCalendarPage() {
     setNewDate('');
   };
 
-  if (isLoading) return <LoadingSpinner size="lg" label="캘린더 로딩 중" />;
+  if (isLoading) return <LoadingSpinner size="lg" label={t('businessCalendar.loading')} />;
 
   return (
     <div className="px-4 sm:px-8 lg:px-12 py-4 sm:py-8 space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight flex items-center gap-2">
-          <Calendar className="h-6 w-6" /> 비즈니스 캘린더
+          <Calendar className="h-6 w-6" /> {t('businessCalendar.title')}
         </h1>
-        <p className="text-sm text-muted-foreground mt-1">공휴일 관리 및 영업일 계산</p>
+        <p className="text-sm text-muted-foreground mt-1">{t('businessCalendar.subtitle')}</p>
       </div>
 
       {/* 캘린더 선택 */}
       {calendars.length === 0 ? (
-        <EmptyState title="캘린더가 없습니다" message="시스템 관리자에게 캘린더 생성을 요청하세요" />
+        <EmptyState title={t('businessCalendar.noCalendars')} message={t('businessCalendar.noCalendarsHint')} />
       ) : (
         <div className="flex gap-2">
           {calendars.map((c) => (
@@ -72,9 +74,9 @@ export function BusinessCalendarPage() {
           {/* 공휴일 목록 + 추가 */}
           <div className="space-y-4">
             <div className="border border-border rounded-lg bg-card p-4">
-              <h3 className="text-sm font-medium mb-3">공휴일 목록</h3>
+              <h3 className="text-sm font-medium mb-3">{t('businessCalendar.holidayList')}</h3>
               {calendar.holidays.length === 0 ? (
-                <p className="text-xs text-muted-foreground">등록된 공휴일이 없습니다</p>
+                <p className="text-xs text-muted-foreground">{t('businessCalendar.noHolidays')}</p>
               ) : (
                 <div className="space-y-2 max-h-60 overflow-auto">
                   {calendar.holidays.map((h) => (
@@ -82,12 +84,12 @@ export function BusinessCalendarPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-mono text-xs text-muted-foreground">{h.date}</span>
                         <span>{h.name}</span>
-                        {h.recurring && <Badge variant="outline" className="text-[10px]">매년</Badge>}
+                        {h.recurring && <Badge variant="outline" className="text-[10px]">{t('businessCalendar.recurring')}</Badge>}
                       </div>
                       <button
                         onClick={() => removeMutation.mutate(h.id)}
                         className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                        aria-label={`${h.name} 삭제`}
+                        aria-label={t('businessCalendar.deleteHoliday', { name: h.name })}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>
@@ -99,22 +101,22 @@ export function BusinessCalendarPage() {
 
             {/* 공휴일 추가 폼 */}
             <div className="border border-border rounded-lg bg-card p-4">
-              <h3 className="text-sm font-medium mb-3">공휴일 추가</h3>
-              <div className="flex gap-2">
+              <h3 className="text-sm font-medium mb-3">{t('businessCalendar.addHoliday')}</h3>
+              <div className="flex flex-col sm:flex-row gap-2">
                 <Input
                   type="date"
                   value={newDate}
                   onChange={(e) => setNewDate(e.target.value)}
-                  className="h-8 text-sm w-40"
+                  className="h-8 text-sm w-full sm:w-40"
                 />
                 <Input
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
-                  placeholder="공휴일 이름"
+                  placeholder={t('businessCalendar.holidayName')}
                   className="h-8 text-sm flex-1"
                 />
                 <Button size="sm" onClick={handleAddHoliday} disabled={!newName.trim() || !newDate} className="gap-1">
-                  <Plus className="h-3.5 w-3.5" /> 추가
+                  <Plus className="h-3.5 w-3.5" /> {t('common.add')}
                 </Button>
               </div>
             </div>

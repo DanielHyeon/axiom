@@ -121,21 +121,22 @@ export function InsightPage() {
  const KPI_FILTERS = ['Balance Pending', 'Revenue Total', 'Product Count', 'Churn Rate'];
 
  return (
- <div className="flex h-full">
+ <div className="flex flex-col lg:flex-row h-full">
  {/* Content Column */}
  <div className="flex-1 flex flex-col min-w-0">
- <div className="flex-1 overflow-auto py-8 px-12 space-y-8">
+ <div className="flex-1 overflow-auto py-4 px-4 md:py-6 md:px-8 lg:py-8 lg:px-12 space-y-6 md:space-y-8">
  {/* Header: Title + search + controls */}
  <InsightHeader timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
  {/* KPI filter tabs */}
- <div className="flex items-center gap-2.5">
- <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('insight.selectedKpi')}</span>
+ <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-2.5 overflow-x-auto">
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider shrink-0">{t('insight.selectedKpi')}</span>
+ <div className="flex items-center gap-1 sm:gap-2">
  {KPI_FILTERS.map((tab, i) => (
  <button
  key={tab}
  type="button"
- className={`px-4 py-2.5 text-[12px] font-heading transition-colors ${
+ className={`px-3 md:px-4 py-2 md:py-2.5 text-[11px] md:text-[12px] font-heading transition-colors whitespace-nowrap ${
  i === 0
  ? 'text-foreground font-semibold border-b-2 border-red-600'
  : 'text-foreground/60 hover:text-muted-foreground'
@@ -145,10 +146,11 @@ export function InsightPage() {
  </button>
  ))}
  </div>
+ </div>
 
  {/* KPI Summary Cards */}
  {kpiStats && (
- <div className="flex gap-4">
+ <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
  <KpiCard
  label="Balance Pending"
  value="₩42.8M"
@@ -213,8 +215,8 @@ export function InsightPage() {
 
  {/* Right: Driver Detail panel */}
  {nodeDetailOpen && (
- <div className="w-80 shrink-0 border-l border-border bg-card flex flex-col">
- <div className="flex items-center justify-between h-[52px] px-6 border-b border-border">
+ <div className="w-full lg:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-border bg-card flex flex-col max-h-[50vh] lg:max-h-none">
+ <div className="flex items-center justify-between h-[52px] px-4 md:px-6 border-b border-border">
  <span className="text-[13px] font-semibold text-foreground font-heading">{t('insight.driverDetail')}</span>
  <button
  type="button"
@@ -224,7 +226,7 @@ export function InsightPage() {
  ×
  </button>
  </div>
- <div className="flex-1 overflow-auto p-6">
+ <div className="flex-1 overflow-auto p-4 md:p-6">
  <NodeDetailPanel
  nodeId={selectedDriverId}
  graphNode={selectedNode}
@@ -259,10 +261,10 @@ function KpiCard({
  showBar?: boolean;
 }) {
  return (
- <div className="flex-1 border border-border rounded py-5 px-6 space-y-2">
+ <div className="border border-border rounded py-3 px-4 md:py-5 md:px-6 space-y-1.5 md:space-y-2">
  <p className="text-[11px] text-muted-foreground font-mono font-medium">{label}</p>
- <div className="flex items-end gap-3">
- <span className="text-[28px] font-semibold tracking-[-1px] text-foreground font-heading">{value}</span>
+ <div className="flex items-end gap-2 md:gap-3">
+ <span className="text-xl md:text-[28px] font-semibold tracking-[-1px] text-foreground font-heading">{value}</span>
  {change && (
  <span className={`flex items-center gap-1 text-[12px] font-medium font-mono ${positive ? 'text-success' : 'text-destructive'}`}>
  {positive && <ArrowUpRight className="h-3 w-3" />}
@@ -286,7 +288,7 @@ type MetaType = NonNullable<ReturnType<typeof useInsightStore.getState>['impactG
 
 function MetaBar({ meta }: { meta: MetaType }) {
  return (
- <div className="flex items-center gap-4 px-4 py-1.5 bg-muted rounded text-[10px] text-foreground/60">
+ <div className="flex flex-wrap items-center gap-2 md:gap-4 px-3 md:px-4 py-1.5 bg-muted rounded text-[10px] text-foreground/60">
  <div className="flex items-center gap-1">
  <Info className="h-3 w-3" />
  <span>

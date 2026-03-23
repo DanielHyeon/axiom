@@ -157,13 +157,13 @@ export function Step5ResultCompare() {
   return (
     <div className="space-y-6 max-w-5xl">
       {/* 헤더 */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
             {t('whatifWizard.step5.title', '결과 비교')}
           </h3>
-          <p className="text-sm text-muted-foreground mt-1">
+          <p className="text-xs md:text-sm text-muted-foreground mt-1">
             {t(
               'whatifWizard.step5.description',
               '시뮬레이션 결과를 확인하고 시나리오를 비교합니다.',
@@ -180,7 +180,7 @@ export function Step5ResultCompare() {
       {/* 시뮬레이션 실행 버튼 */}
       <Card>
         <CardContent className="py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <p className="text-sm font-medium">
                 {scenarioName || '시뮬레이션'}

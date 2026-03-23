@@ -1,17 +1,19 @@
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { useAuthStore } from '@/stores/authStore';
 import { ROUTES } from '@/lib/routes/routes';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 
 export function UserMenu() {
+ const { t } = useTranslation();
  const user = useAuthStore((s) => s.user);
  const logout = useAuthStore((s) => s.logout);
 
  if (!user) {
  return (
  <Link to={ROUTES.AUTH.LOGIN}>
- <Button variant="ghost" size="sm">로그인</Button>
+ <Button variant="ghost" size="sm">{t('userMenu.login')}</Button>
  </Link>
  );
  }
@@ -32,11 +34,11 @@ export function UserMenu() {
  <hr className="border-border" />
  <Link to={ROUTES.SETTINGS_USERS}>
  <Button variant="ghost" size="sm" className="w-full justify-start">
- 설정
+ {t('userMenu.settings')}
  </Button>
  </Link>
  <Button variant="ghost" size="sm" className="w-full justify-start text-destructive hover:text-destructive" onClick={logout}>
- 로그아웃
+ {t('userMenu.logout')}
  </Button>
  </div>
  </PopoverContent>

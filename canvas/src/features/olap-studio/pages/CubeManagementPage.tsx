@@ -130,7 +130,7 @@ export function CubeManagementPage() {
       {/* 생성 폼 */}
       {showForm && (
         <div className="px-6 py-4 bg-amber-50/30 border-b border-border space-y-3">
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
             <div className="space-y-1">
               <Label className="text-[11px] font-mono">이름</Label>
               <Input

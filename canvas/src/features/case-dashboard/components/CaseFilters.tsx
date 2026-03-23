@@ -45,9 +45,9 @@ export function CaseFilters({
  onSearchQueryChange,
 }: CaseFiltersProps) {
  return (
- <div className="flex flex-wrap items-center gap-4">
+ <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 sm:gap-4">
  <Select value={status} onValueChange={(v) => onStatusChange(v as CaseStatusFilter)}>
- <SelectTrigger className="w-[180px]">
+ <SelectTrigger className="w-full sm:w-[180px]">
  <SelectValue placeholder="상태" />
  </SelectTrigger>
  <SelectContent>
@@ -60,7 +60,7 @@ export function CaseFilters({
  </Select>
  {onTypeChange && (
  <Select value={type} onValueChange={(v) => onTypeChange(v as CaseTypeFilter)}>
- <SelectTrigger className="w-[180px]">
+ <SelectTrigger className="w-full sm:w-[180px]">
  <SelectValue placeholder="우선순위" />
  </SelectTrigger>
  <SelectContent>
@@ -73,7 +73,7 @@ export function CaseFilters({
  </Select>
  )}
  {onSearchQueryChange && (
- <div className="relative w-56">
+ <div className="relative w-full sm:w-56">
  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-foreground" aria-hidden />
  <Input
  type="search"

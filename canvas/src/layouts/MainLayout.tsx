@@ -14,7 +14,7 @@ export const MainLayout: React.FC = () => (
   Skip to main content
  </a>
  <Sidebar />
- <div className="flex-1 flex flex-col min-w-0">
+ <div className="flex-1 flex flex-col min-w-0 w-full md:w-auto">
  <ServiceStatusBanner />
  <PageTabHeader />
  <main id="main-content" className="flex-1 overflow-hidden min-w-0" tabIndex={-1}>

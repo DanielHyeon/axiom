@@ -51,7 +51,7 @@ export function SystemHealthMiniCard() {
         <Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         <h3 className="text-sm font-medium">시스템 상태</h3>
       </div>
-      <div className="grid grid-cols-3 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
         {services.map((svc) => (
           <div key={svc.name} className="flex items-center gap-1.5">
             <div className={`h-2 w-2 rounded-full ${statusColor[svc.status] ?? 'bg-muted'}`}

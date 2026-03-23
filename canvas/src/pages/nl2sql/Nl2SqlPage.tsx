@@ -105,7 +105,7 @@ export function NL2SQLPage() {
   const isEmpty = chat.messages.length === 0 && !chat.loading;
 
   return (
-    <div className="flex h-full">
+    <div className="flex flex-col lg:flex-row h-full">
       {/* 좌측 사이드바: 스키마 트리 + 테이블 상세 */}
       {schemaTreeOpen && (
         <SchemaSidebar
@@ -119,11 +119,11 @@ export function NL2SQLPage() {
 
       {/* 메인 콘텐츠 영역 */}
       <div className="flex-1 flex flex-col min-w-0">
-        <div className="flex-1 overflow-auto p-12 space-y-10">
+        <div className="flex-1 overflow-auto p-4 md:p-8 lg:p-12 space-y-6 md:space-y-10">
           {/* 제목 */}
           <div className="space-y-2">
-            <h1 className="text-[48px] font-semibold tracking-[-2px] text-foreground font-heading">{t('nl2sql.title')}</h1>
-            <p className="text-[13px] text-muted-foreground font-mono">{t('nl2sql.subtitle')}</p>
+            <h1 className="text-2xl md:text-4xl lg:text-[48px] font-semibold tracking-tight lg:tracking-[-2px] text-foreground font-heading">{t('nl2sql.title')}</h1>
+            <p className="text-[12px] md:text-[13px] text-muted-foreground font-mono">{t('nl2sql.subtitle')}</p>
           </div>
 
           {/* 쿼리 영역 */}
@@ -239,8 +239,8 @@ export function NL2SQLPage() {
 
       {/* 우측 사이드바: 쿼리 히스토리 */}
       {historyOpen && (
-        <div className="w-80 shrink-0 border-l border-border flex flex-col">
-          <div className="flex items-center justify-between h-[52px] px-6 border-b border-border">
+        <div className="hidden lg:flex w-80 shrink-0 border-l border-border flex-col">
+          <div className="flex items-center justify-between h-[52px] px-4 lg:px-6 border-b border-border">
             <span className="text-[13px] font-semibold text-foreground font-heading">{t('nl2sql.queryHistory')}</span>
             <span className="bg-muted px-2.5 py-1 text-[11px] text-muted-foreground font-mono font-medium rounded">12</span>
           </div>

@@ -5,6 +5,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Shield, Users, ShieldCheck, Database, FileText } from 'lucide-react';
 import { useSecurityStore } from '@/features/security/store/useSecurityStore';
 import { UserManagementPanel } from '@/features/security/components/UserManagementPanel';
@@ -19,15 +20,15 @@ import type { SecurityTab } from '@/features/security/types/security';
 
 interface TabDef {
   id: SecurityTab;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
 }
 
 const TABS: TabDef[] = [
-  { id: 'users', label: '사용자', icon: Users },
-  { id: 'roles', label: '역할', icon: ShieldCheck },
-  { id: 'table-permissions', label: '테이블 권한', icon: Database },
-  { id: 'audit-logs', label: '감사 로그', icon: FileText },
+  { id: 'users', labelKey: 'settingsSecurity.tabs.users', icon: Users },
+  { id: 'roles', labelKey: 'settingsSecurity.tabs.roles', icon: ShieldCheck },
+  { id: 'table-permissions', labelKey: 'settingsSecurity.tabs.tablePermissions', icon: Database },
+  { id: 'audit-logs', labelKey: 'settingsSecurity.tabs.auditLogs', icon: FileText },
 ];
 
 // ---------------------------------------------------------------------------
@@ -35,29 +36,30 @@ const TABS: TabDef[] = [
 // ---------------------------------------------------------------------------
 
 export const SettingsSecurityPage: React.FC = () => {
+  const { t } = useTranslation();
   const activeTab = useSecurityStore((s) => s.activeTab);
   const setActiveTab = useSecurityStore((s) => s.setActiveTab);
 
   return (
     <div className="flex flex-col gap-6">
       {/* 페이지 헤더 */}
-      <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center shadow-md">
-          <Shield className="h-6 w-6 text-primary-foreground" />
+      <div className="flex items-center gap-3 md:gap-4">
+        <div className="h-10 w-10 md:h-12 md:w-12 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center shadow-md shrink-0">
+          <Shield className="h-5 w-5 md:h-6 md:w-6 text-primary-foreground" />
         </div>
         <div>
-          <h1 className="text-xl font-bold text-foreground">보안 관리</h1>
-          <p className="text-sm text-muted-foreground">
-            RBAC 기반 접근 제어, 테이블 권한 및 감사 로그를 관리합니다
+          <h1 className="text-lg md:text-xl font-bold text-foreground">{t('settingsSecurity.title')}</h1>
+          <p className="text-xs md:text-sm text-muted-foreground">
+            {t('settingsSecurity.subtitle')}
           </p>
         </div>
       </div>
 
       {/* 서브 탭 내비게이션 */}
       <nav
-        className="flex gap-2 border-b border-border overflow-x-auto pb-px"
+        className="flex gap-1 md:gap-2 border-b border-border overflow-x-auto pb-px scrollbar-none"
         role="tablist"
-        aria-label="보안 관리 탭"
+        aria-label={t('settingsSecurity.tabLabel')}
       >
         {TABS.map((tab) => {
           const isActive = activeTab === tab.id;
@@ -76,7 +78,7 @@ export const SettingsSecurityPage: React.FC = () => {
               onClick={() => setActiveTab(tab.id)}
             >
               <Icon className="h-4 w-4" />
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           );
         })}

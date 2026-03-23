@@ -25,7 +25,26 @@
     "noSearchResults": "No search results",
     "period": "Period:",
     "daily": "Daily",
-    "weekly": "Weekly"
+    "weekly": "Weekly",
+    "edit": "Edit",
+    "approve": "Approve",
+    "reject": "Reject",
+    "back": "Back",
+    "viewAll": "View All",
+    "login": "Login",
+    "logout": "Logout",
+    "comparedToYesterday": "vs. yesterday",
+    "skipToContent": "Skip to main content",
+    "status": "Status",
+    "version": "Version",
+    "normal": "Normal",
+    "abnormal": "Abnormal",
+    "email": "Email",
+    "role": "Role",
+    "tenant": "Tenant",
+    "permissions": "Permissions",
+    "caseRoles": "Case Roles",
+    "import": "Import"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -53,7 +72,8 @@
     "glossary": "Glossary",
     "lineage": "Lineage",
     "objectExplorer": "Explorer",
-    "workflowEditor": "Workflow"
+    "workflowEditor": "Workflow",
+    "semanticCatalog": "Semantic Catalog"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -67,7 +87,11 @@
     "myWork": "My Work",
     "approvalQueue": "Approval Queue",
     "noAssignedWork": "No assigned workitems.",
-    "noApprovalItems": "No items pending approval."
+    "noApprovalItems": "No items pending approval.",
+    "errorLoadCases": "Failed to load cases. {{message}}",
+    "noCases": "No cases",
+    "noCasesDesc": "No cases are registered or match the filter criteria.",
+    "viewCaseList": "View case list"
   },
   "theme": {
     "light": "Light",
@@ -546,6 +570,158 @@
       "policyCreated": "Policy \"{{name}}\" created",
       "policyUpdated": "Policy \"{{name}}\" updated",
       "policyDeleted": "Policy deleted"
+    }
+  },
+  "breadcrumb": {
+    "dashboard": "Dashboard",
+    "ontology": "Ontology Explorer",
+    "watch": "Monitoring & Alerts",
+    "olapPivot": "OLAP Pivot Analysis",
+    "default": "Axiom Canvas"
+  },
+  "userMenu": {
+    "login": "Login",
+    "settings": "Settings",
+    "logout": "Logout"
+  },
+  "notification": {
+    "title": "Notifications",
+    "newCount": "{{count}} new notifications",
+    "empty": "No new notifications.",
+    "viewAll": "View all notifications"
+  },
+  "errors": {
+    "notFound": "The requested page could not be found.",
+    "goToDashboard": "Go to Dashboard",
+    "unknownError": "An unknown error occurred.",
+    "somethingWentWrong": "Something went wrong"
+  },
+  "auth": {
+    "loginTitle": "Axiom Canvas",
+    "loginSubtitle": "Log in to access the system",
+    "loggingIn": "Logging in...",
+    "login": "Login",
+    "loginFailed": "Login failed.",
+    "testAccounts": "Test Accounts (Docker/Dev)",
+    "loginAs": "Login as {{label}} ({{email}})"
+  },
+  "documents": {
+    "title": "Document Management",
+    "subtitle": "Review and approve AI documents with HITL workflow",
+    "newDocument": "New Document",
+    "aiGenerateRequest": "AI Generate Request",
+    "noDocuments": "No documents",
+    "noDocumentsDesc": "Create a new document or request AI to generate a draft",
+    "loadingDocuments": "Loading documents",
+    "errorLoadDocuments": "Failed to load documents",
+    "columns": {
+      "name": "Document Name",
+      "type": "Type",
+      "status": "Status",
+      "version": "Version",
+      "updatedAt": "Last Modified"
+    },
+    "status": {
+      "draft": "Draft",
+      "in_review": "In Review",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "changes_requested": "Changes Requested"
+    },
+    "editor": {
+      "reviewPanel": "Review Panel",
+      "reviewer": "Reviewer",
+      "deadline": "Deadline",
+      "comments": "Comments",
+      "line": "Line",
+      "resolved": "Resolved",
+      "addComment": "Add Comment",
+      "undo": "Undo",
+      "viewDiff": "View Diff",
+      "history": "History"
+    },
+    "review": {
+      "title": "Document Review",
+      "caseDoc": "Case: {{caseId}} / Document: {{docId}}",
+      "requestChanges": "Request Changes",
+      "approved": "Document approved.",
+      "rejected": "Document rejected.",
+      "changesRequested": "Change request sent.",
+      "requestFailed": "Request failed. Review API may not be registered yet.",
+      "apiNotFound": "Review API is not registered.",
+      "genericError": "Request processing failed.",
+      "goToEditor": "Go to Editor"
+    }
+  },
+  "cases": {
+    "title": "Case List",
+    "errorLoadData": "An error occurred while loading data.",
+    "detail": {
+      "title": "Case Detail",
+      "notFound": "Case not found. (ID: {{id}})",
+      "backToList": "Back to List",
+      "createdAt": "Created",
+      "dueDate": "Due",
+      "documents": "Documents",
+      "ontology": "Ontology",
+      "scenarios": "Scenarios"
+    },
+    "status": {
+      "PENDING": "Pending",
+      "IN_PROGRESS": "In Progress",
+      "COMPLETED": "Completed",
+      "REJECTED": "Rejected"
+    }
+  },
+  "settingsSystem": {
+    "title": "System",
+    "loading": "Loading...",
+    "errorLoad": "Failed to load system status.",
+    "serviceStatus": "Service Status",
+    "coreDetail": "Core Details (DB / Redis)"
+  },
+  "settingsLogs": {
+    "title": "Logs",
+    "tabLabel": "Log tabs",
+    "explorer": "Explorer",
+    "explorerLabel": "Explorer logs",
+    "aiAnalysis": "AI Analysis",
+    "aiAnalysisLabel": "AI analysis logs",
+    "explorerPlaceholder": "System/app log viewing will be available in a future update.",
+    "aiAnalysisPlaceholder": "AI analysis log viewing will be available in a future update."
+  },
+  "settingsConfig": {
+    "title": "Configuration",
+    "placeholder": "Environment and feature settings will be available in a future update."
+  },
+  "settingsUsers": {
+    "title": "Users",
+    "noUser": "No logged-in user information available.",
+    "currentUser": "Current User",
+    "userListPlaceholder": "User list management will be available after backend API integration."
+  },
+  "businessCalendar": {
+    "title": "Business Calendar",
+    "subtitle": "Manage holidays and calculate business days",
+    "loading": "Loading calendars",
+    "noCalendars": "No calendars found",
+    "noCalendarsHint": "Please contact the system administrator to create a calendar",
+    "holidayList": "Holiday List",
+    "noHolidays": "No holidays registered",
+    "recurring": "Yearly",
+    "deleteHoliday": "Delete {{name}}",
+    "addHoliday": "Add Holiday",
+    "holidayName": "Holiday name"
+  },
+  "settingsSecurity": {
+    "title": "Security Management",
+    "subtitle": "Manage RBAC-based access control, table permissions, and audit logs",
+    "tabLabel": "Security management tabs",
+    "tabs": {
+      "users": "Users",
+      "roles": "Roles",
+      "tablePermissions": "Table Permissions",
+      "auditLogs": "Audit Logs"
     }
   }
 }

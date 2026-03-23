@@ -34,7 +34,7 @@ const CARDS = [
 
 export function CatalogSummaryCards({ summary, activeTab, onTabChange, extraCounts = {} }: Props) {
   return (
-    <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-2">
+    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-11 gap-1.5 sm:gap-2">
       {CARDS.map(({ key, label, icon: Icon, color }) => {
         // CatalogSummary에 있는 키는 summary에서, 나머지는 extraCounts에서 조회
         const count = (key in summary)
@@ -53,8 +53,8 @@ export function CatalogSummaryCards({ summary, activeTab, onTabChange, extraCoun
             <div className={`rounded-md p-1.5 ${color}`}>
               <Icon className="h-4 w-4" />
             </div>
-            <span className="text-xl font-bold tabular-nums">{count}</span>
-            <span className="text-[11px] text-muted-foreground truncate w-full text-center">{label}</span>
+            <span className="text-lg md:text-xl font-bold tabular-nums">{count}</span>
+            <span className="text-[10px] md:text-[11px] text-muted-foreground truncate w-full text-center">{label}</span>
           </button>
         );
       })}
