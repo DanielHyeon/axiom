@@ -3,6 +3,7 @@ import logging
 import time
 import uuid
 
+from app.core.tenant_context import _workspace_id_header
 
 logger = logging.getLogger("axiom.core")
 
@@ -18,7 +19,18 @@ def get_current_request_id() -> str:
     return _request_id.get()
 
 
+def get_current_workspace_id() -> str:
+    """미들웨어가 추출한 X-Axiom-Workspace-Id 헤더 원본값."""
+    return _workspace_id_header.get()
+
+
 class TenantMiddleware:
+    """X-Tenant-Id + X-Axiom-Workspace-Id 헤더 추출 미들웨어.
+
+    workspace_id는 여기서 추출만 하고, 실제 membership 검증은
+    서비스 레이어(Phase 1 GovernanceService)에서 수행한다.
+    """
+
     def __init__(self, app):
         self.app = app
 
@@ -36,11 +48,17 @@ class TenantMiddleware:
             or (headers.get("x-forwarded-host", "").split(".")[0] if headers.get("x-forwarded-host") else "")
             or "default"
         )
-        token = _tenant_id.set(tenant_id)
+        # Phase 0: workspace 헤더 추출 (검증은 Phase 1에서)
+        # UUID는 최대 36자 — 메모리 남용 방지를 위해 64자로 제한
+        workspace_id_raw = headers.get("x-axiom-workspace-id", "")[:64]
+
+        tenant_token = _tenant_id.set(tenant_id)
+        ws_token = _workspace_id_header.set(workspace_id_raw)
         try:
             await self.app(scope, receive, send)
         finally:
-            _tenant_id.reset(token)
+            _tenant_id.reset(tenant_token)
+            _workspace_id_header.reset(ws_token)
 
 
 class RequestIdMiddleware:

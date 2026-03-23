@@ -21,6 +21,7 @@ from app.api.behavior_execution import router as behavior_execution_router
 from app.api.ontology_feedback import router as ontology_feedback_router
 from app.api.multi_layer_generation import router as multi_layer_generation_router
 from app.api.semantic_contract import router as semantic_contract_router
+from app.api.process_graph import router as process_graph_router
 from app.events.consumer import run_ontology_ingest_consumer
 from app.events.outbox import SynapseRelayWorker, ensure_outbox_table
 import structlog
@@ -177,6 +178,7 @@ app.include_router(behavior_execution_router)
 app.include_router(ontology_feedback_router)
 app.include_router(multi_layer_generation_router)
 app.include_router(semantic_contract_router)
+app.include_router(process_graph_router)
 
 @app.get("/health/live")
 async def health_live():
