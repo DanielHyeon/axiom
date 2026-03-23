@@ -26,14 +26,14 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
           className={cn(
             'rounded p-4',
             msg.role === 'user'
-              ? 'bg-[#F5F5F5] ml-12'
+              ? 'bg-muted ml-12'
               : msg.role === 'assistant' && 'isHilQuestion' in msg && msg.isHilQuestion
                 ? 'border border-amber-300 bg-amber-50/50 mr-12'
-                : 'border border-[#E5E5E5] mr-12',
+                : 'border border-border mr-12',
           )}
         >
           {/* 역할 라벨 */}
-          <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">
+          <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">
             {msg.role === 'user'
               ? t('nl2sql.chatUser')
               : msg.role === 'assistant' && 'isHilQuestion' in msg && msg.isHilQuestion
@@ -42,7 +42,7 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
           </span>
 
           {/* 메시지 본문 */}
-          <p className="text-sm text-black mt-1">
+          <p className="text-sm text-foreground mt-1">
             {msg.content ||
               (msg.role === 'assistant' && 'streaming' in msg && msg.streaming
                 ? t('common.processing')
@@ -58,7 +58,7 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
                     {msg.result.result.columns.map((col) => (
                       <th
                         key={col.name}
-                        className="bg-[#F5F5F5] px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase border-b border-[#E5E5E5]"
+                        className="bg-muted px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-mono uppercase border-b border-border"
                       >
                         {col.name}
                       </th>
@@ -67,11 +67,11 @@ export function ChatMessageList({ messages }: ChatMessageListProps) {
                 </thead>
                 <tbody>
                   {(msg.result.result.rows ?? []).slice(0, 5).map((row, ri) => (
-                    <tr key={ri} className="border-b border-[#E5E5E5] last:border-0">
+                    <tr key={ri} className="border-b border-border last:border-0">
                       {row.map((cell, ci) => (
                         <td
                           key={ci}
-                          className="px-3 py-2 text-[13px] text-[#333] font-[IBM_Plex_Mono]"
+                          className="px-3 py-2 text-[13px] text-foreground font-mono"
                         >
                           {cell == null ? '--' : String(cell)}
                         </td>

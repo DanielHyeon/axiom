@@ -46,7 +46,7 @@ export function TemporalProperties({ temporal, onUpdate }: TemporalPropertiesPro
  type="number"
  value={t.expectedDuration ?? ''}
  onChange={(e) => update('expectedDuration', e.target.value ? Number(e.target.value) : undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-primary-foreground"
  placeholder="—"
  />
  </div>
@@ -56,7 +56,7 @@ export function TemporalProperties({ temporal, onUpdate }: TemporalPropertiesPro
  type="number"
  value={t.sla ?? ''}
  onChange={(e) => update('sla', e.target.value ? Number(e.target.value) : undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-primary-foreground"
  placeholder="—"
  />
  </div>

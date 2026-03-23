@@ -30,7 +30,7 @@ export const CaseDetailPage: React.FC = () => {
  if (error || !caseItem) {
  return (
  <div className="space-y-4 p-6">
- <h1 className="text-xl font-semibold text-white">케이스 상세</h1>
+ <h1 className="text-xl font-semibold text-primary-foreground">케이스 상세</h1>
  <p className="text-sm text-foreground0">
  케이스를 찾을 수 없습니다. (ID: {caseId})
  </p>
@@ -43,7 +43,7 @@ export const CaseDetailPage: React.FC = () => {
 
  return (
  <div className="space-y-4 p-6">
- <h1 className="text-xl font-semibold text-white">{caseItem.title}</h1>
+ <h1 className="text-xl font-semibold text-primary-foreground">{caseItem.title}</h1>
  <div className="flex flex-wrap items-center gap-2 text-sm">
  <Badge variant="outline">{statusLabel[caseItem.status] ?? caseItem.status}</Badge>
  <Badge variant="secondary">{caseItem.priority}</Badge>

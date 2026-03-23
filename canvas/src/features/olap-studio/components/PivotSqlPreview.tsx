@@ -31,10 +31,10 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
   }, [sql]);
 
   return (
-    <div className="flex flex-col h-full bg-[#1E1E1E] rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full bg-card rounded-lg overflow-hidden">
       {/* 헤더 — 타이틀 + 복사 버튼 */}
-      <div className="flex items-center justify-between px-3 py-1.5 bg-[#2D2D2D] border-b border-[#3E3E3E]">
-        <div className="flex items-center gap-1.5 text-[10px] text-[#999] font-[IBM_Plex_Mono]">
+      <div className="flex items-center justify-between px-3 py-1.5 bg-muted border-b border-border">
+        <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono">
           <Code className="h-3 w-3" />
           SQL 미리보기
         </div>
@@ -42,7 +42,7 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
           type="button"
           onClick={handleCopy}
           disabled={!sql}
-          className="flex items-center gap-1 text-[9px] text-[#888] hover:text-white font-[IBM_Plex_Mono] transition-colors disabled:opacity-30"
+          className="flex items-center gap-1 text-[9px] text-muted-foreground hover:text-primary-foreground font-mono transition-colors disabled:opacity-30"
           aria-label="SQL 복사"
         >
           {copied ? (
@@ -57,15 +57,15 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
       {/* SQL 본문 */}
       <div className="flex-1 overflow-auto p-3">
         {isLoading ? (
-          <div className="text-[10px] text-[#666] font-[IBM_Plex_Mono] animate-pulse">
+          <div className="text-[10px] text-muted-foreground font-mono animate-pulse">
             SQL 생성 중...
           </div>
         ) : sql ? (
-          <pre className="text-[11px] text-[#D4D4D4] font-[IBM_Plex_Mono] whitespace-pre-wrap leading-relaxed">
+          <pre className="text-[11px] text-muted-foreground font-mono whitespace-pre-wrap leading-relaxed">
             {sql}
           </pre>
         ) : (
-          <div className="text-[10px] text-[#555] font-[IBM_Plex_Mono]">
+          <div className="text-[10px] text-muted-foreground font-mono">
             피벗을 설정하고 미리보기를 클릭하세요
           </div>
         )}

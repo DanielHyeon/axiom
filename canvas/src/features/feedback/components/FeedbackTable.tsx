@@ -57,7 +57,7 @@ export function FeedbackTable({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold font-[Sora]">{t('feedback.table.title')}</CardTitle>
+        <CardTitle className="text-sm font-semibold font-heading">{t('feedback.table.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -76,16 +76,16 @@ export function FeedbackTable({
               <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-border">
-                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
+                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-mono uppercase">
                       {t('feedback.table.date')}
                     </th>
-                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
+                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-mono uppercase">
                       {t('feedback.table.question')}
                     </th>
-                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
+                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-mono uppercase">
                       {t('feedback.table.rating')}
                     </th>
-                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-[IBM_Plex_Mono] uppercase">
+                    <th className="px-3 py-2 text-left text-[11px] font-medium text-muted-foreground font-mono uppercase">
                       {t('feedback.table.comment')}
                     </th>
                   </tr>
@@ -96,7 +96,7 @@ export function FeedbackTable({
                       key={item.id}
                       className="border-b border-border last:border-0 hover:bg-muted/50"
                     >
-                      <td className="px-3 py-2.5 text-xs text-muted-foreground font-[IBM_Plex_Mono] whitespace-nowrap">
+                      <td className="px-3 py-2.5 text-xs text-muted-foreground font-mono whitespace-nowrap">
                         {new Date(item.created_at).toLocaleDateString('ko-KR')}
                       </td>
                       <td className="px-3 py-2.5 text-xs text-foreground max-w-[300px] truncate">
@@ -117,7 +117,7 @@ export function FeedbackTable({
             {/* 페이지네이션 */}
             {pagination && pagination.total_pages > 1 && (
               <div className="flex items-center justify-between mt-4">
-                <span className="text-xs text-muted-foreground font-[IBM_Plex_Mono]">
+                <span className="text-xs text-muted-foreground font-mono">
                   {pagination.total_count}건 중 {(page - 1) * pagination.page_size + 1}-
                   {Math.min(page * pagination.page_size, pagination.total_count)}
                 </span>
@@ -131,7 +131,7 @@ export function FeedbackTable({
                   >
                     <ChevronLeft className="h-3.5 w-3.5" />
                   </Button>
-                  <span className="text-xs font-[IBM_Plex_Mono] px-2">
+                  <span className="text-xs font-mono px-2">
                     {page} / {pagination.total_pages}
                   </span>
                   <Button

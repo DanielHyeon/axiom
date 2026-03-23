@@ -39,7 +39,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-blue-500" />
-          <h4 className="text-sm font-semibold text-gray-900 font-[Sora]">
+          <h4 className="text-sm font-semibold text-gray-900 font-heading">
             대상 데이터소스
           </h4>
         </div>
@@ -62,7 +62,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
         className={`w-full text-left px-3 py-2 rounded-lg text-[13px] transition-colors ${
           selectedName === null
             ? 'bg-blue-50 border border-blue-200 text-blue-700 font-medium'
-            : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+            : 'bg-card border border-gray-200 text-gray-500 hover:bg-gray-50'
         }`}
       >
         선택 안 함 (파일만 업로드)
@@ -94,7 +94,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
                 className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-left transition-colors ${
                   isSelected
                     ? 'bg-blue-50 border border-blue-200'
-                    : 'bg-white border border-gray-200 hover:bg-gray-50'
+                    : 'bg-card border border-gray-200 hover:bg-gray-50'
                 }`}
               >
                 {/* 상태 아이콘 */}
@@ -106,11 +106,11 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
 
                 {/* 이름 + 엔진 */}
                 <div className="flex-1 min-w-0">
-                  <span className="text-[13px] font-medium text-gray-900 font-[Sora] truncate block">
+                  <span className="text-[13px] font-medium text-gray-900 font-heading truncate block">
                     {ds.name}
                   </span>
                 </div>
-                <span className="text-[10px] text-gray-400 font-[IBM_Plex_Mono] uppercase shrink-0">
+                <span className="text-[10px] text-gray-400 font-mono uppercase shrink-0">
                   {ds.engine}
                 </span>
               </button>

@@ -74,12 +74,12 @@ export function SchemaEmptyState({
         <Icon className="mb-4 h-10 w-10 text-foreground/15" />
 
         {/* 제목 */}
-        <p className="font-[Sora] text-[14px] font-medium text-foreground/60">
+        <p className="font-heading text-[14px] font-medium text-foreground/60">
           {config.title}
         </p>
 
         {/* 설명 */}
-        <p className="mt-1.5 font-[IBM_Plex_Mono] text-[11px] text-foreground/30">
+        <p className="mt-1.5 font-mono text-[11px] text-foreground/30">
           {config.description}
         </p>
 

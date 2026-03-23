@@ -52,7 +52,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  type="text"
  value={item.label}
  onChange={(e) => onUpdate(item.id, { label: e.target.value })}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  />
  )}
  </Field>
@@ -66,7 +66,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  value={item.description ?? ''}
  onChange={(e) => onUpdate(item.id, { description: e.target.value || undefined })}
  rows={2}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white resize-none"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground resize-none"
  placeholder="노드 설명을 입력하세요"
  />
  )}
@@ -93,7 +93,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  value={item.width}
  onChange={(e) => onUpdate(item.id, { width: Math.max(40, Number(e.target.value)) })}
  aria-label="Width"
- className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-primary-foreground"
  />
  )}
  </Field>
@@ -106,7 +106,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  value={item.height}
  onChange={(e) => onUpdate(item.id, { height: Math.max(30, Number(e.target.value)) })}
  aria-label="Height"
- className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1 text-sm text-primary-foreground"
  />
  )}
  </Field>
@@ -122,7 +122,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  value={item.parentContextBoxId ?? ''}
  onChange={(e) => onUpdate(item.id, { parentContextBoxId: e.target.value || null })}
  aria-label="소속 Domain"
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  >
  <option value="">없음</option>
  {contextBoxes.map((cb) => (

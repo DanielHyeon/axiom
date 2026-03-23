@@ -4,7 +4,7 @@ import { useRole } from '@/shared/hooks/useRole';
 import { Link } from 'react-router-dom';
 
 const ForbiddenPage = () => (
- <div className="flex flex-col items-center justify-center min-h-screen bg-background text-white p-6">
+ <div className="flex flex-col items-center justify-center min-h-screen bg-background text-primary-foreground p-6">
  <h1 className="text-4xl font-bold mb-4">403 Forbidden</h1>
  <p className="text-muted-foreground mb-6">You do not have permission to access this resource.</p>
  <Link to="/" className="text-primary hover:underline">Return to Dashboard</Link>

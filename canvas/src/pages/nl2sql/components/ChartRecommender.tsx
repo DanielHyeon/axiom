@@ -36,19 +36,19 @@ export function ChartRecommender({ data, config }: ChartRecommenderProps) {
  : String(rawValue ?? '--');
 
  return (
- <div className="w-full border border-[#E5E5E5] rounded-md bg-white p-6 mt-2 mb-4 flex flex-col items-center justify-center min-h-[180px]">
- <div className="text-xs font-medium text-foreground/60 uppercase tracking-wider mb-2 font-[IBM_Plex_Mono]">KPI</div>
- <div className="text-5xl font-bold text-black tabular-nums tracking-tight font-[Sora]">
+ <div className="w-full border border-border rounded-md bg-card p-6 mt-2 mb-4 flex flex-col items-center justify-center min-h-[180px]">
+ <div className="text-xs font-medium text-foreground/60 uppercase tracking-wider mb-2 font-mono">KPI</div>
+ <div className="text-5xl font-bold text-foreground tabular-nums tracking-tight font-heading">
  {formattedValue}
  </div>
- <div className="text-sm text-foreground/60 mt-3 font-[IBM_Plex_Mono]">{label}</div>
+ <div className="text-sm text-foreground/60 mt-3 font-mono">{label}</div>
  </div>
  );
  }
 
  return (
- <div className="w-full h-72 border border-[#E5E5E5] rounded-md bg-white p-4 mt-2 mb-4">
- <div className="text-sm font-medium text-[#5E5E5E] mb-4 flex justify-between items-center font-[Sora]">
+ <div className="w-full h-72 border border-border rounded-md bg-card p-4 mt-2 mb-4">
+ <div className="text-sm font-medium text-muted-foreground mb-4 flex justify-between items-center font-heading">
  <span>AI 추천 차트: {chart_type === 'bar' ? '막대 차트' : chart_type === 'line' ? '선 차트' : chart_type === 'pie' ? '파이 차트' : chart_type === 'scatter' ? '산점도' : '차트'}</span>
  </div>
  <ResponsiveContainer width="100%" height="85%">
@@ -95,7 +95,7 @@ export function ChartRecommender({ data, config }: ChartRecommenderProps) {
  <Scatter data={chartData} fill="#DC2626" />
  </ScatterChart>
  ) : (
- <div className="flex items-center justify-center h-full text-foreground/60 text-sm font-[IBM_Plex_Mono]">
+ <div className="flex items-center justify-center h-full text-foreground/60 text-sm font-mono">
  차트 렌더링을 지원하지 않는 형식입니다.
  </div>
  )}

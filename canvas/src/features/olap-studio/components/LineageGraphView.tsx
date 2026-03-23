@@ -114,7 +114,7 @@ export function LineageGraphView({ entities, edges }: LineageGraphViewProps) {
   // 빈 상태
   if (!mermaidCode) {
     return (
-      <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-[IBM_Plex_Mono]">
+      <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-mono">
         리니지 데이터가 없습니다
       </div>
     );

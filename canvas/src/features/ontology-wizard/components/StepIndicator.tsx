@@ -40,7 +40,7 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                   w-9 h-9 rounded-full flex items-center justify-center
                   text-sm font-semibold transition-colors duration-300
                   ${isCompleted
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-green-500 text-primary-foreground'
                     : isActive
                       ? 'bg-primary text-primary-foreground ring-2 ring-primary/30'
                       : 'bg-muted text-muted-foreground'

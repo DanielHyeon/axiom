@@ -17,7 +17,7 @@ export function EventTimeline({ events, onMarkAsRead }: EventTimelineProps) {
  {sorted.map((alert) => (
  <li key={alert.id} className="relative flex gap-4 pl-10 pb-6 last:pb-0">
  <span
- className={`absolute left-2.5 top-1.5 w-3 h-3 rounded-full border-2 border-[#1a1a1a] ${
+ className={`absolute left-2.5 top-1.5 w-3 h-3 rounded-full border-2 border-border ${
  alert.severity === 'critical' ? 'bg-destructive' :
  alert.severity === 'warning' ? 'bg-warning' : 'bg-primary'
  }`}
@@ -27,7 +27,7 @@ export function EventTimeline({ events, onMarkAsRead }: EventTimelineProps) {
  onClick={onMarkAsRead && !alert.isRead ? () => onMarkAsRead(alert.id) : undefined}
  className={`flex-1 min-w-0 p-3 rounded-lg border ${
  !alert.isRead
- ? 'bg-[#1e1e1e] border-border cursor-pointer hover:border-border'
+ ? 'bg-card border-border cursor-pointer hover:border-border'
  : 'bg-card/50 border-border opacity-80'
  }`}
  >

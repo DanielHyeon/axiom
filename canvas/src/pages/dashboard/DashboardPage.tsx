@@ -26,7 +26,7 @@ export const DashboardPage: React.FC = () => {
  {loading ? (
  <p className="text-muted-foreground animate-pulse">Loading analytics...</p>
  ) : (
- <div className="bg-white p-6 rounded shadow">
+ <div className="bg-card p-6 rounded shadow">
  <h2 className="text-lg font-semibold mb-2">Metrics Loaded Successfully</h2>
  <pre className="text-sm bg-background p-4 rounded overflow-auto">
  {JSON.stringify(data, null, 2)}

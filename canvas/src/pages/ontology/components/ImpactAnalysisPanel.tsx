@@ -40,7 +40,7 @@ function DepthGroup({ depth, nodes }: { depth: number; nodes: ImpactNode[] }) {
  ) : (
  <ChevronRight size={14} className="text-foreground/60" />
  )}
- <span className="text-sm font-semibold text-black font-[Sora]">{depth}-hop</span>
+ <span className="text-sm font-semibold text-foreground font-heading">{depth}-hop</span>
  <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
  {nodes.length}
  </Badge>
@@ -60,34 +60,34 @@ function ImpactNodeRow({ node }: { node: ImpactNode }) {
  const layerColor = LAYER_COLORS[node.layer] ?? LAYER_COLORS.unknown;
 
  return (
- <div className="p-2 rounded border border-[#E5E5E5] hover:bg-[#F5F5F5] transition-colors">
+ <div className="p-2 rounded border border-border hover:bg-muted transition-colors">
  <div className="flex items-center gap-2">
  <span
  className="w-2 h-2 rounded-full shrink-0"
  style={{ backgroundColor: layerColor }}
  />
- <span className="text-[13px] text-black flex-1 truncate font-[Sora]" title={node.label}>
+ <span className="text-[13px] text-foreground flex-1 truncate font-heading" title={node.label}>
  {node.label}
  </span>
- <Badge variant="outline" className="text-[10px] border-[#E5E5E5] text-foreground/60 font-[IBM_Plex_Mono]">
+ <Badge variant="outline" className="text-[10px] border-border text-foreground/60 font-mono">
  {node.layer}
  </Badge>
  </div>
  {/* Path breadcrumb */}
  {node.path.length > 1 && (
- <div className="mt-1.5 text-[10px] text-foreground/60 font-[IBM_Plex_Mono] flex flex-wrap items-center gap-0.5">
+ <div className="mt-1.5 text-[10px] text-foreground/60 font-mono flex flex-wrap items-center gap-0.5">
  {node.path.map((step, i) => (
  <span key={i} className="flex items-center gap-0.5">
  {i > 0 && step.rel_type && (
  <>
- <span className="text-[#CCC]">{step.rel_type}</span>
- <ArrowRight size={8} className="text-[#CCC]" />
+ <span className="text-muted-foreground">{step.rel_type}</span>
+ <ArrowRight size={8} className="text-muted-foreground" />
  </>
  )}
  <span
  className={
  i === node.path.length - 1
- ? 'text-black font-medium'
+ ? 'text-foreground font-medium'
  : ''
  }
  >
@@ -126,15 +126,15 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  return (
  <div className="flex flex-col h-full overflow-hidden">
  {/* Header */}
- <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5] shrink-0">
+ <div className="flex items-center justify-between h-[52px] px-6 border-b border-border shrink-0">
  <div className="flex items-center gap-2">
  <Zap size={14} className="text-warning" />
- <span className="text-[13px] font-semibold text-black font-[Sora]">영향 분석</span>
+ <span className="text-[13px] font-semibold text-foreground font-heading">영향 분석</span>
  </div>
  <button
  type="button"
  onClick={onClose}
- className="text-foreground/60 hover:text-black text-lg transition-colors"
+ className="text-foreground/60 hover:text-foreground text-lg transition-colors"
  >
  ×
  </button>
@@ -142,8 +142,8 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
 
  {/* Root info */}
  {data?.root && (
- <div className="px-6 py-3 border-b border-[#E5E5E5]">
- <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+ <div className="px-6 py-3 border-b border-border">
+ <p className="text-[13px] text-muted-foreground font-mono">
  {data.root.label}{' '}
  <span
  className="inline-block w-1.5 h-1.5 rounded-full ml-1 align-middle"
@@ -159,7 +159,7 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
 
  {/* Summary */}
  {data && (
- <div className="px-6 py-3 border-b border-[#E5E5E5] flex gap-4 text-[11px] text-foreground/60 font-[IBM_Plex_Mono]">
+ <div className="px-6 py-3 border-b border-border flex gap-4 text-[11px] text-foreground/60 font-mono">
  <span>영향 노드: {data.total_affected}</span>
  <span>최대 깊이: {data.max_depth_reached}</span>
  <span>{data.analysis_time_ms}ms</span>
@@ -167,8 +167,8 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  )}
 
  {/* Depth Slider */}
- <div className="px-6 py-3 border-b border-[#E5E5E5]">
- <label className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono] block mb-2">
+ <div className="px-6 py-3 border-b border-border">
+ <label className="text-[11px] text-foreground/60 font-mono block mb-2">
  탐색 깊이: {maxDepth}
  </label>
  <Slider
@@ -185,7 +185,7 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  {isLoading && (
  <div className="flex flex-col items-center justify-center py-12 text-foreground/60">
  <Loader2 size={24} className="animate-spin mb-2" />
- <p className="text-sm font-[IBM_Plex_Mono]">BFS 탐색 중...</p>
+ <p className="text-sm font-mono">BFS 탐색 중...</p>
  </div>
  )}
 
@@ -196,7 +196,7 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  )}
 
  {data && data.total_affected === 0 && !isLoading && (
- <div className="text-center py-8 text-foreground/60 text-sm font-[IBM_Plex_Mono]">
+ <div className="text-center py-8 text-foreground/60 text-sm font-mono">
  연결된 영향 노드가 없습니다.
  </div>
  )}

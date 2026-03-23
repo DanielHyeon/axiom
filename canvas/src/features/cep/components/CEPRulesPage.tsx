@@ -326,7 +326,7 @@ export function CEPRulesPage() {
                   >
                     <span
                       className={`
-                        inline-block h-3.5 w-3.5 rounded-full bg-white transition-transform
+                        inline-block h-3.5 w-3.5 rounded-full bg-card transition-transform
                         ${rule.enabled ? 'translate-x-4.5' : 'translate-x-0.5'}
                       `}
                     />
@@ -397,9 +397,9 @@ export function CEPRulesPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => e.target === e.currentTarget && closeModal()}
         >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto">
+          <div className="bg-card rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[85vh] overflow-y-auto">
             {/* 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="text-base font-semibold">
                 {editingId ? '규칙 수정' : '새 규칙 생성'}
               </h2>
@@ -516,7 +516,7 @@ export function CEPRulesPage() {
             </div>
 
             {/* 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#E5E5E5]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
               <Button variant="outline" onClick={closeModal} disabled={saving}>
                 취소
               </Button>
@@ -535,8 +535,8 @@ export function CEPRulesPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => e.target === e.currentTarget && setEvalRuleId(null)}
         >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E5E5E5]">
+          <div className="bg-card rounded-lg shadow-xl w-full max-w-sm mx-4">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border">
               <h3 className="text-sm font-semibold">수동 평가</h3>
               <button
                 onClick={() => setEvalRuleId(null)}
@@ -590,8 +590,8 @@ export function CEPRulesPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => e.target === e.currentTarget && setHistoryRuleId(null)}
         >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[70vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-3 border-b border-[#E5E5E5] shrink-0">
+          <div className="bg-card rounded-lg shadow-xl w-full max-w-lg mx-4 max-h-[70vh] flex flex-col">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-border shrink-0">
               <h3 className="text-sm font-semibold">평가 이력</h3>
               <button
                 onClick={() => setHistoryRuleId(null)}
@@ -617,7 +617,7 @@ export function CEPRulesPage() {
                       key={item.id}
                       className={`
                         flex items-center justify-between rounded-md px-3 py-2 text-xs border
-                        ${item.triggered ? 'border-red-200 bg-red-50/50' : 'border-[#E5E5E5] bg-[#FAFAFA]'}
+                        ${item.triggered ? 'border-red-200 bg-red-50/50' : 'border-border bg-muted/50'}
                       `}
                     >
                       <div className="flex items-center gap-2">

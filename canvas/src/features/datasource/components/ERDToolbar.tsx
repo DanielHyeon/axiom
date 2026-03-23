@@ -51,7 +51,7 @@ export function ERDToolbar({
   );
 
   return (
-    <div className="flex items-center gap-3 p-3 border-b border-[#E5E5E5] bg-[#FAFAFA]">
+    <div className="flex items-center gap-3 p-3 border-b border-border bg-muted/50">
       {/* 검색 */}
       <div className="relative flex-1 max-w-xs">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-foreground/40" />
@@ -59,7 +59,7 @@ export function ERDToolbar({
           placeholder="테이블 검색..."
           defaultValue={filter.searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
-          className="pl-8 h-8 text-xs bg-white border-[#E5E5E5] font-[IBM_Plex_Mono]"
+          className="pl-8 h-8 text-xs bg-card border-border font-mono"
         />
       </div>
 
@@ -74,7 +74,7 @@ export function ERDToolbar({
         />
         <label
           htmlFor="erd-connected-only"
-          className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono] cursor-pointer whitespace-nowrap"
+          className="text-[11px] text-foreground/60 font-mono cursor-pointer whitespace-nowrap"
         >
           연결된 테이블만
         </label>
@@ -82,13 +82,13 @@ export function ERDToolbar({
 
       {/* 최대 테이블 수 */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono]">최대:</span>
+        <span className="text-[11px] text-foreground/60 font-mono">최대:</span>
         <select
           value={filter.maxTables}
           onChange={(e) =>
             onFilterChange({ ...filter, maxTables: Number(e.target.value) })
           }
-          className="h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono] text-foreground/80"
+          className="h-7 px-2 text-[11px] border border-border rounded bg-card font-mono text-foreground/80"
           aria-label="최대 테이블 수"
         >
           {MAX_TABLE_OPTIONS.map((n) => (
@@ -100,10 +100,10 @@ export function ERDToolbar({
       </div>
 
       {/* 구분선 */}
-      <div className="h-5 w-px bg-[#E5E5E5]" />
+      <div className="h-5 w-px bg-border" />
 
       {/* 통계 표시 */}
-      <div className="flex items-center gap-3 text-[10px] text-foreground/50 font-[IBM_Plex_Mono]">
+      <div className="flex items-center gap-3 text-[10px] text-foreground/50 font-mono">
         <span className="flex items-center gap-1">
           <Table className="h-3 w-3" />
           {stats.tables}
@@ -124,7 +124,7 @@ export function ERDToolbar({
           type="button"
           onClick={onRefresh}
           disabled={isLoading}
-          className="p-1.5 rounded text-foreground/60 hover:text-black hover:bg-[#F0F0F0] transition-colors disabled:opacity-40"
+          className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
           title="새로고침"
         >
           <RotateCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
@@ -132,7 +132,7 @@ export function ERDToolbar({
         <button
           type="button"
           onClick={onDownloadSvg}
-          className="p-1.5 rounded text-foreground/60 hover:text-black hover:bg-[#F0F0F0] transition-colors"
+          className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
           title="SVG 다운로드"
         >
           <Download className="h-3.5 w-3.5" />

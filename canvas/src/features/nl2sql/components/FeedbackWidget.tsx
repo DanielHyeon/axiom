@@ -54,7 +54,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
 
   if (submitted) {
     return (
-      <div className="flex items-center gap-2 text-xs text-green-600 font-[IBM_Plex_Mono]">
+      <div className="flex items-center gap-2 text-xs text-green-600 font-mono">
         <ThumbsUp className="h-3 w-3" />
         피드백이 기록되었습니다
       </div>
@@ -64,7 +64,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-xs text-foreground/60 font-[IBM_Plex_Mono]">결과 평가:</span>
+        <span className="text-xs text-foreground/60 font-mono">결과 평가:</span>
         <Button
           variant="ghost"
           size="icon"
@@ -111,7 +111,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
             placeholder="올바른 SQL을 입력하세요..."
             value={correctedSql}
             onChange={(e) => setCorrectedSql(e.target.value)}
-            className="text-xs font-[IBM_Plex_Mono] h-8"
+            className="text-xs font-mono h-8"
           />
           <Input
             placeholder="코멘트 (선택)"

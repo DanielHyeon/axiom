@@ -94,10 +94,10 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-blue-500" />
-          <h3 className="text-sm font-semibold text-gray-900 font-[Sora]">
+          <h3 className="text-sm font-semibold text-gray-900 font-heading">
             ETL 파이프라인
           </h3>
-          <span className="text-xs text-gray-400 font-[IBM_Plex_Mono]">
+          <span className="text-xs text-gray-400 font-mono">
             {pipelines.length}개
           </span>
         </div>
@@ -105,7 +105,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
           <button
             type="button"
             onClick={onCreate}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-primary-foreground bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
             파이프라인 생성
@@ -149,7 +149,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
             return (
               <div
                 key={pipeline.id}
-                className="rounded-xl border border-gray-200 bg-white overflow-hidden"
+                className="rounded-xl border border-gray-200 bg-card overflow-hidden"
               >
                 {/* 카드 헤더 */}
                 <div className="flex items-center gap-3 px-4 py-3">
@@ -170,14 +170,14 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                   {/* 이름 + 메타 */}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-semibold text-gray-900 font-[Sora] truncate">
+                      <span className="text-[13px] font-semibold text-gray-900 font-heading truncate">
                         {pipeline.name}
                       </span>
                       <span className={`inline-flex items-center px-2 py-0.5 text-[10px] font-medium rounded-full ${badge.className}`}>
                         {badge.label}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 mt-0.5 text-[11px] text-gray-400 font-[IBM_Plex_Mono]">
+                    <div className="flex items-center gap-3 mt-0.5 text-[11px] text-gray-400 font-mono">
                       <span>DS: {pipeline.datasourceId}</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />

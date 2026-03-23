@@ -21,7 +21,7 @@ export function SearchPanel() {
  <Input
  type="text"
  placeholder="노드 검색..."
- className="pl-9 bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="pl-9 bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  value={localQuery}
  onChange={(e) => setLocalQuery(e.target.value)}
  />

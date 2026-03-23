@@ -44,7 +44,7 @@ export function MetadataBar({ metadata }: MetadataBarProps) {
  return (
  <div className="flex flex-wrap items-center gap-2 py-2">
  {items.map((item, i) => (
- <Badge key={i} variant="outline" className="gap-1 text-foreground/60 border-[#E5E5E5] font-normal font-[IBM_Plex_Mono]">
+ <Badge key={i} variant="outline" className="gap-1 text-foreground/60 border-border font-normal font-mono">
  {item.icon}
  {item.text}
  </Badge>

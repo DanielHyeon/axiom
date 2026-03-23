@@ -69,7 +69,7 @@ export function LayerProgressCard({ progress }: LayerProgressCardProps) {
       </div>
 
       {/* 진행 바 */}
-      <div className="h-2 bg-white/60 rounded-full overflow-hidden mb-2">
+      <div className="h-2 bg-card/60 rounded-full overflow-hidden mb-2">
         <div
           className={`h-full rounded-full transition-all duration-500 ease-out ${colors.progress}`}
           style={{ width: `${Math.min(pct, 100)}%` }}

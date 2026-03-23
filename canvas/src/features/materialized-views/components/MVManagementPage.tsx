@@ -243,9 +243,9 @@ export function MVManagementPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => e.target === e.currentTarget && setCreateOpen(false)}
         >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+          <div className="bg-card rounded-lg shadow-xl w-full max-w-lg mx-4">
             {/* 모달 헤더 */}
-            <div className="flex items-center justify-between px-6 py-4 border-b border-[#E5E5E5]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-border">
               <h2 className="text-base font-semibold">새 Materialized View 생성</h2>
               <button
                 onClick={() => setCreateOpen(false)}
@@ -309,7 +309,7 @@ export function MVManagementPage() {
             </div>
 
             {/* 푸터 */}
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#E5E5E5]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
               <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={saving}>
                 취소
               </Button>
@@ -328,7 +328,7 @@ export function MVManagementPage() {
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
           onClick={(e) => e.target === e.currentTarget && setDeleteTarget(null)}
         >
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-sm mx-4">
+          <div className="bg-card rounded-lg shadow-xl w-full max-w-sm mx-4">
             <div className="px-6 py-5">
               <h3 className="text-base font-semibold text-foreground mb-2">MV 삭제 확인</h3>
               <p className="text-sm text-foreground/60">
@@ -336,7 +336,7 @@ export function MVManagementPage() {
                 을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
               </p>
             </div>
-            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-[#E5E5E5]">
+            <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
               <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
                 취소
               </Button>

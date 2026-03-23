@@ -121,7 +121,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
         ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
         ${isDragOver
           ? 'border-blue-500 bg-blue-50/60 shadow-lg scale-[1.01]'
-          : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50/30'}
+          : 'border-gray-300 bg-card hover:border-blue-400 hover:bg-blue-50/30'}
       `}
     >
       {/* 숨겨진 파일 input */}

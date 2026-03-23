@@ -55,7 +55,7 @@ function stepBgClass(status: PipelineStep['status']): string {
     case 'failed':
       return 'bg-red-50/50 border-red-200';
     default:
-      return 'bg-white border-gray-200';
+      return 'bg-card border-gray-200';
   }
 }
 
@@ -88,7 +88,7 @@ export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
           >
             {/* 순서 + 아이콘 */}
             <div className="flex items-center gap-2 shrink-0">
-              <span className="text-[11px] font-bold text-gray-400 font-[IBM_Plex_Mono] w-4 text-center">
+              <span className="text-[11px] font-bold text-gray-400 font-mono w-4 text-center">
                 {idx + 1}
               </span>
               <StepIcon status={step.status} />
@@ -97,7 +97,7 @@ export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
             {/* 단계 정보 */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-semibold text-gray-900 font-[Sora]">
+                <span className="text-[13px] font-semibold text-gray-900 font-heading">
                   {STEP_LABELS[step.type] ?? step.name}
                 </span>
                 {step.status === 'running' && (
@@ -114,7 +114,7 @@ export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
             </div>
 
             {/* 통계 */}
-            <div className="flex items-center gap-3 shrink-0 text-[11px] text-gray-500 font-[IBM_Plex_Mono]">
+            <div className="flex items-center gap-3 shrink-0 text-[11px] text-gray-500 font-mono">
               {step.rowsProcessed != null && step.rowsProcessed > 0 && (
                 <span>{step.rowsProcessed.toLocaleString()} rows</span>
               )}

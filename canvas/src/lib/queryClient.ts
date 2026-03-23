@@ -1,7 +1,9 @@
 import { QueryClient } from '@tanstack/react-query';
+import { onQueryError, onMutationError } from './observability';
 
 /**
  * TanStack Query 전역 클라이언트.
+ * Phase 2: 글로벌 에러 핸들러 연결 (observability.ts).
  * 기본 옵션은 docs/06_data/cache-strategy.md 및 docs/04_frontend/query-client.md 참고.
  */
 export const queryClient = new QueryClient({
@@ -16,7 +18,17 @@ export const queryClient = new QueryClient({
       refetchOnMount: true,
     },
     mutations: {
-      retry: 0, // mutation은 기본 재시도 없음. 필요 시 useMutation 옵션으로 지정
+      retry: 0,
+      onError: onMutationError, // Phase 2: 글로벌 mutation 에러 수집
     },
   },
+  // Phase 2: 글로벌 query 에러 수집
+  queryDefaults: [{
+    queryKey: [],
+    defaultOptions: {
+      queries: {
+        meta: { onError: onQueryError },
+      },
+    },
+  }],
 });

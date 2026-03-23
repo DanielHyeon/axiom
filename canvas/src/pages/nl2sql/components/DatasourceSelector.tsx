@@ -30,13 +30,13 @@ export function DatasourceSelector({ value, onChange }: DatasourceSelectorProps)
 
  if (isLoading) {
  return (
- <div className="h-10 w-56 animate-pulse rounded-md bg-[#E5E5E5]" />
+ <div className="h-10 w-56 animate-pulse rounded-md bg-border" />
  );
  }
 
  if (datasources.length === 0) {
  return (
- <div className="flex items-center gap-2 text-sm text-foreground/60 font-[IBM_Plex_Mono]">
+ <div className="flex items-center gap-2 text-sm text-foreground/60 font-mono">
  <Database className="h-4 w-4" />
  <span>데이터소스 없음</span>
  </div>
@@ -45,7 +45,7 @@ export function DatasourceSelector({ value, onChange }: DatasourceSelectorProps)
 
  return (
  <Select value={value} onValueChange={onChange}>
- <SelectTrigger className="w-56 border-[#E5E5E5] bg-white">
+ <SelectTrigger className="w-56 border-border bg-card">
  <div className="flex items-center gap-2">
  <Database className="h-4 w-4 text-foreground/60" />
  <SelectValue placeholder="데이터소스 선택" />

@@ -51,9 +51,9 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  return (
  <div className="flex flex-col h-full overflow-hidden">
  {/* Header */}
- <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5] shrink-0">
- <span className="text-[13px] font-semibold text-black font-[Sora]">데이터 품질</span>
- <button type="button" onClick={onClose} className="text-foreground/60 hover:text-black text-lg transition-colors">
+ <div className="flex items-center justify-between h-[52px] px-6 border-b border-border shrink-0">
+ <span className="text-[13px] font-semibold text-foreground font-heading">데이터 품질</span>
+ <button type="button" onClick={onClose} className="text-foreground/60 hover:text-foreground text-lg transition-colors">
  ×
  </button>
  </div>
@@ -75,7 +75,7 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  {report && (
  <>
  {/* Summary stats */}
- <div className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono] mb-1">
+ <div className="text-[11px] text-foreground/60 font-mono mb-1">
  전체: {report.total_nodes} nodes, {report.total_relations} relations
  </div>
 
@@ -113,37 +113,37 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
 
  {/* Coverage by layer */}
  <div className="space-y-2">
- <div className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">계층별 커버리지</div>
+ <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">계층별 커버리지</div>
  {Object.entries(report.coverage_by_layer).map(([layer, data]) => {
  const pct = data.total > 0 ? Math.round((data.verified / data.total) * 100) : 0;
  return (
  <div key={layer} className="space-y-1">
  <div className="flex items-center justify-between text-xs">
  <div className="flex items-center gap-1.5">
- <Badge variant="outline" className="text-[10px] capitalize border-[#E5E5E5] font-[IBM_Plex_Mono]">
+ <Badge variant="outline" className="text-[10px] capitalize border-border font-mono">
  {layer}
  </Badge>
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">
+ <span className="text-foreground/60 font-mono">
  {data.verified}/{data.total}
  </span>
  </div>
  <span
  className={cn(
- 'font-[IBM_Plex_Mono] text-[11px]',
+ 'font-mono text-[11px]',
  pct >= 80 ? 'text-success' : pct >= 50 ? 'text-warning' : 'text-destructive',
  )}
  >
  {pct}%
  </span>
  </div>
- <div className="h-1.5 rounded-full bg-[#E5E5E5] overflow-hidden">
+ <div className="h-1.5 rounded-full bg-border overflow-hidden">
  <div
- className={cn('h-full rounded-full transition-all', LAYER_COLORS[layer] ?? 'bg-[#999]')}
+ className={cn('h-full rounded-full transition-all', LAYER_COLORS[layer] ?? 'bg-muted-foreground')}
  style={{ width: `${pct}%` }}
  />
  </div>
  {data.orphan > 0 && (
- <div className="text-[10px] text-warning pl-1 font-[IBM_Plex_Mono]">
+ <div className="text-[10px] text-warning pl-1 font-mono">
  고립: {data.orphan}
  </div>
  )}
@@ -155,11 +155,11 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  {/* Duplicate details */}
  {report.duplicate_names > 0 && (
  <div className="space-y-1">
- <div className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">중복 이름 상세</div>
+ <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">중복 이름 상세</div>
  {Object.entries(report.duplicate_details).map(([name, count]) => (
- <div key={name} className="flex items-center justify-between text-xs text-[#5E5E5E]">
- <span className="truncate max-w-[180px] font-[IBM_Plex_Mono]">{name}</span>
- <Badge variant="outline" className="text-[10px] border-[#E5E5E5] font-[IBM_Plex_Mono]">
+ <div key={name} className="flex items-center justify-between text-xs text-muted-foreground">
+ <span className="truncate max-w-[180px] font-mono">{name}</span>
+ <Badge variant="outline" className="text-[10px] border-border font-mono">
  x{count}
  </Badge>
  </div>
@@ -188,16 +188,16 @@ function StatCard({
 }) {
  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
  return (
- <div className="rounded border border-[#E5E5E5] bg-white p-2.5 space-y-1">
+ <div className="rounded border border-border bg-card p-2.5 space-y-1">
  <div className="flex items-center gap-1.5">
  {icon}
- <span className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono]">{label}</span>
+ <span className="text-[11px] text-foreground/60 font-mono">{label}</span>
  </div>
  <div className="flex items-baseline gap-1">
- <span className={cn('text-lg font-semibold tabular-nums font-[Sora]', `text-${color}-500`)}>
+ <span className={cn('text-lg font-semibold tabular-nums font-heading', `text-${color}-500`)}>
  {value}
  </span>
- <span className="text-[10px] text-foreground/60 font-[IBM_Plex_Mono]">/ {total} ({pct}%)</span>
+ <span className="text-[10px] text-foreground/60 font-mono">/ {total} ({pct}%)</span>
  </div>
  </div>
  );

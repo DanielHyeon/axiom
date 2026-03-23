@@ -109,7 +109,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
             type="button"
             onClick={executeQuery}
             disabled={isLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-white text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-primary-foreground text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             {isLoading ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
             {isLoading ? '검색 중...' : '검색'}

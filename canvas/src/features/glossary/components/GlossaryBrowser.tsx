@@ -131,7 +131,7 @@ export const GlossaryBrowser: React.FC = () => {
                   className="w-6 h-6 rounded flex items-center justify-center shrink-0"
                   style={{ backgroundColor: typeColorMap[g.type] ?? '#6b7280' }}
                 >
-                  <BookOpen className="h-3.5 w-3.5 text-white" />
+                  <BookOpen className="h-3.5 w-3.5 text-primary-foreground" />
                 </span>
 
                 {/* 이름 */}

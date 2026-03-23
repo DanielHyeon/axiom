@@ -296,7 +296,7 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
  }, []);
 
  return (
- <div className="flex-1 w-full h-full bg-[#F5F5F5] overflow-hidden relative"
+ <div className="flex-1 w-full h-full bg-muted overflow-hidden relative"
  role="application"
  aria-label={`온톨로지 그래프. 노드 ${data.nodes.length}개 표출됨. 마우스 드래그로 이동.`}>
  {data.nodes.length > 0 ? (

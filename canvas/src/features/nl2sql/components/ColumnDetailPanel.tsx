@@ -40,12 +40,12 @@ export function ColumnDetailPanel({
   const isInferredFk = column.name.endsWith('_id') && !column.is_primary_key;
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-[#E5E5E5]">
+    <div className="flex flex-col h-full bg-card border-l border-border">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 h-10 border-b border-[#E5E5E5] shrink-0">
+      <div className="flex items-center justify-between px-4 h-10 border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Columns3 className="h-3.5 w-3.5 text-foreground/40 shrink-0" />
-          <span className="text-[12px] font-semibold text-black font-[Sora] truncate">
+          <span className="text-[12px] font-semibold text-foreground font-heading truncate">
             {column.name}
           </span>
         </div>
@@ -53,7 +53,7 @@ export function ColumnDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded hover:bg-[#F0F0F0] transition-colors"
+            className="p-1 rounded hover:bg-muted transition-colors"
             aria-label="닫기"
           >
             <X className="h-3.5 w-3.5 text-foreground/40" />
@@ -62,8 +62,8 @@ export function ColumnDetailPanel({
       </div>
 
       {/* 테이블 컨텍스트 */}
-      <div className="px-4 py-2 bg-[#FAFAFA] border-b border-[#E5E5E5]">
-        <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">
+      <div className="px-4 py-2 bg-muted/50 border-b border-border">
+        <span className="text-[10px] text-foreground/40 font-mono">
           {tableName}.{column.name}
         </span>
       </div>
@@ -151,11 +151,11 @@ function PropertyRow({ icon, label, value, children }: PropertyRowProps) {
     <div className="flex items-start gap-3">
       <div className="mt-0.5 shrink-0">{icon}</div>
       <div className="flex-1 min-w-0">
-        <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] uppercase tracking-[0.5px]">
+        <span className="text-[10px] text-foreground/40 font-mono uppercase tracking-[0.5px]">
           {label}
         </span>
         {value && (
-          <p className="text-[12px] text-black font-[IBM_Plex_Mono] mt-0.5 break-all">
+          <p className="text-[12px] text-foreground font-mono mt-0.5 break-all">
             {value}
           </p>
         )}

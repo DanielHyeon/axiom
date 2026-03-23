@@ -100,7 +100,7 @@ export function RelationshipManager({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Layers className="h-4 w-4 text-foreground/50" />
-          <span className="text-[13px] font-semibold text-black font-[Sora]">
+          <span className="text-[13px] font-semibold text-foreground font-heading">
             릴레이션 관리
           </span>
         </div>
@@ -119,11 +119,11 @@ export function RelationshipManager({
 
       {/* 사용자 관계 목록 */}
       <div className="space-y-1">
-        <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] uppercase tracking-[0.5px]">
+        <span className="text-[10px] text-foreground/40 font-mono uppercase tracking-[0.5px]">
           사용자 추가 ({userRelationships.length})
         </span>
         {userRelationships.length === 0 && (
-          <p className="text-[11px] text-foreground/30 font-[IBM_Plex_Mono] py-2">
+          <p className="text-[11px] text-foreground/30 font-mono py-2">
             사용자가 추가한 관계가 없습니다.
           </p>
         )}
@@ -139,7 +139,7 @@ export function RelationshipManager({
       {/* 추론된 관계 목록 (접기/펼치기) */}
       {inferredRelationships.length > 0 && (
         <details className="group">
-          <summary className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] uppercase tracking-[0.5px] cursor-pointer hover:text-foreground/60 transition-colors">
+          <summary className="text-[10px] text-foreground/40 font-mono uppercase tracking-[0.5px] cursor-pointer hover:text-foreground/60 transition-colors">
             자동 추론 ({inferredRelationships.length})
           </summary>
           <div className="mt-1 space-y-1">
@@ -166,19 +166,19 @@ export function RelationshipManager({
           관계 추가
         </Button>
       ) : (
-        <div className="space-y-2 p-3 bg-[#FAFAFA] rounded border border-[#E5E5E5]">
-          <span className="text-[10px] font-medium text-foreground/50 font-[IBM_Plex_Mono] uppercase">
+        <div className="space-y-2 p-3 bg-muted/50 rounded border border-border">
+          <span className="text-[10px] font-medium text-foreground/50 font-mono uppercase">
             새 관계
           </span>
 
           {/* From */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">From 테이블</label>
+              <label className="text-[10px] text-foreground/40 font-mono">From 테이블</label>
               <select
                 value={form.fromTable}
                 onChange={(e) => setForm((p) => ({ ...p, fromTable: e.target.value, fromColumn: '' }))}
-                className="w-full h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono]"
+                className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
               >
                 <option value="">선택</option>
                 {tables.map((t) => (
@@ -187,11 +187,11 @@ export function RelationshipManager({
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">From 컬럼</label>
+              <label className="text-[10px] text-foreground/40 font-mono">From 컬럼</label>
               <select
                 value={form.fromColumn}
                 onChange={(e) => setForm((p) => ({ ...p, fromColumn: e.target.value }))}
-                className="w-full h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono]"
+                className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
                 disabled={!form.fromTable}
               >
                 <option value="">선택</option>
@@ -205,11 +205,11 @@ export function RelationshipManager({
           {/* To */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">To 테이블</label>
+              <label className="text-[10px] text-foreground/40 font-mono">To 테이블</label>
               <select
                 value={form.toTable}
                 onChange={(e) => setForm((p) => ({ ...p, toTable: e.target.value, toColumn: '' }))}
-                className="w-full h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono]"
+                className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
               >
                 <option value="">선택</option>
                 {tables.map((t) => (
@@ -218,11 +218,11 @@ export function RelationshipManager({
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">To 컬럼</label>
+              <label className="text-[10px] text-foreground/40 font-mono">To 컬럼</label>
               <select
                 value={form.toColumn}
                 onChange={(e) => setForm((p) => ({ ...p, toColumn: e.target.value }))}
-                className="w-full h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono]"
+                className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
                 disabled={!form.toTable}
               >
                 <option value="">선택</option>
@@ -235,13 +235,13 @@ export function RelationshipManager({
 
           {/* 설명 */}
           <div>
-            <label className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">설명 (선택)</label>
+            <label className="text-[10px] text-foreground/40 font-mono">설명 (선택)</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
               placeholder="관계 설명..."
-              className="w-full h-7 px-2 text-[11px] border border-[#E5E5E5] rounded bg-white font-[IBM_Plex_Mono] outline-none focus:border-blue-300"
+              className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono outline-none focus:border-blue-300"
             />
           </div>
 
@@ -282,8 +282,8 @@ function RelationshipRow({ relationship, isInferred, onRemove }: RelationshipRow
   return (
     <div
       className={cn(
-        'flex items-center gap-2 px-2 py-1.5 rounded text-[11px] font-[IBM_Plex_Mono]',
-        isInferred ? 'bg-[#FAFAFA] text-foreground/40' : 'bg-blue-50/50 text-foreground/70'
+        'flex items-center gap-2 px-2 py-1.5 rounded text-[11px] font-mono',
+        isInferred ? 'bg-muted/50 text-foreground/40' : 'bg-blue-50/50 text-foreground/70'
       )}
     >
       {/* From */}

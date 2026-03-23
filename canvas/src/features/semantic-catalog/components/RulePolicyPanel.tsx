@@ -381,7 +381,7 @@ export function RulePolicyPanel({
                       title={p.is_active ? '비활성화' : '활성화'}
                     >
                       <span
-                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white transition-transform ${p.is_active ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+                        className={`inline-block h-3.5 w-3.5 transform rounded-full bg-card transition-transform ${p.is_active ? 'translate-x-4.5' : 'translate-x-0.5'}`}
                       />
                     </button>
                   </td>

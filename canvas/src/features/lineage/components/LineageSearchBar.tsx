@@ -136,7 +136,7 @@ export function LineageSearchBar({ onNodeSelect }: LineageSearchBarProps) {
                   </div>
                   {/* 타입 뱃지 */}
                   <span
-                    className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase text-white"
+                    className="shrink-0 rounded px-1.5 py-0.5 text-[9px] font-semibold uppercase text-primary-foreground"
                     style={{ background: nodeStyle.color }}
                   >
                     {nodeStyle.label}

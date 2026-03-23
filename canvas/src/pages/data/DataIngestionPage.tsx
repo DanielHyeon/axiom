@@ -74,10 +74,10 @@ export const DataIngestionPage: React.FC = () => {
       <div className="px-12 pt-8 pb-4 shrink-0">
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
-            <h1 className="text-5xl font-semibold tracking-tight text-black font-[Sora]">
+            <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">
               데이터 수집
             </h1>
-            <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+            <p className="text-[13px] text-muted-foreground font-mono">
               파일 업로드 및 ETL 파이프라인을 통해 데이터를 수집합니다
             </p>
           </div>
@@ -85,7 +85,7 @@ export const DataIngestionPage: React.FC = () => {
       </div>
 
       {/* 탭 헤더 */}
-      <div className="px-12 shrink-0 border-b border-[#E5E5E5]">
+      <div className="px-12 shrink-0 border-b border-border">
         <div className="flex items-center gap-1">
           {TAB_CONFIG.map((tab) => {
             const Icon = tab.icon;
@@ -95,9 +95,9 @@ export const DataIngestionPage: React.FC = () => {
                 key={tab.key}
                 type="button"
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-[Sora] transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading transition-colors ${
                   isActive
-                    ? 'text-black font-semibold border-b-2 border-red-600'
+                    ? 'text-foreground font-semibold border-b-2 border-red-600'
                     : 'text-foreground/60 hover:text-muted-foreground'
                 }`}
               >
@@ -157,7 +157,7 @@ export const DataIngestionPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setTestDialogDs(selectedDs)}
-                  className="w-full flex items-center justify-center gap-1.5 px-4 py-2 text-[12px] font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-[Sora]"
+                  className="w-full flex items-center justify-center gap-1.5 px-4 py-2 text-[12px] font-medium text-gray-600 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-heading"
                 >
                   <Database className="h-3.5 w-3.5" />
                   연결 테스트
@@ -166,7 +166,7 @@ export const DataIngestionPage: React.FC = () => {
 
               {/* 사용 가이드 */}
               <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-100 space-y-3">
-                <h4 className="text-[12px] font-semibold text-blue-900 font-[Sora]">
+                <h4 className="text-[12px] font-semibold text-blue-900 font-heading">
                   사용 가이드
                 </h4>
                 <ol className="space-y-2 text-[11px] text-blue-800/80 leading-relaxed">

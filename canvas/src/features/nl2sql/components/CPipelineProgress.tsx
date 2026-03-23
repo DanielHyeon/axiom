@@ -66,12 +66,12 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
   const currentPhase = pipelineSteps[pipelineSteps.length - 1]?.phase ?? '';
 
   return (
-    <div className="rounded border border-[#E5E5E5] overflow-hidden">
+    <div className="rounded border border-border overflow-hidden">
       {/* 헤더 — 클릭으로 접기/펼치기 */}
       <button
         type="button"
         onClick={() => setIsOpen((v) => !v)}
-        className="flex items-center justify-between w-full px-3 py-2 hover:bg-[#FAFAFA] transition-colors"
+        className="flex items-center justify-between w-full px-3 py-2 hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2">
           {isOpen ? (
@@ -79,7 +79,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
           ) : (
             <ChevronRight className="h-3.5 w-3.5 text-foreground/40" />
           )}
-          <span className="text-[12px] font-semibold font-[IBM_Plex_Mono] text-foreground/70">
+          <span className="text-[12px] font-semibold font-mono text-foreground/70">
             C-Pipeline
           </span>
           {/* 단계 진행 도트 */}
@@ -101,7 +101,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
                   />
                   <span
                     className={cn(
-                      'text-[10px] font-[IBM_Plex_Mono]',
+                      'text-[10px] font-mono',
                       isDone && config.color,
                       isCurrent && cn(config.color, 'font-semibold'),
                       isPending && 'text-gray-400',
@@ -114,14 +114,14 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
             })}
           </div>
         </div>
-        <Badge variant="secondary" className="text-[10px] font-[IBM_Plex_Mono]">
+        <Badge variant="secondary" className="text-[10px] font-mono">
           {pipelineSteps.length}단계
         </Badge>
       </button>
 
       {/* 세부 내용 — 접기/펼치기 */}
       {isOpen && (
-        <div className="border-t border-[#E5E5E5] px-3 py-2 space-y-1.5">
+        <div className="border-t border-border px-3 py-2 space-y-1.5">
           {pipelineSteps.map((step, idx) => {
             const config = PHASE_CONFIG[step.phase] ?? {
               label: step.phase,
@@ -129,7 +129,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
               bgColor: 'bg-gray-400',
             };
             return (
-              <div key={idx} className="flex items-start gap-2 text-[11px] font-[IBM_Plex_Mono]">
+              <div key={idx} className="flex items-start gap-2 text-[11px] font-mono">
                 {/* 단계 배지 */}
                 <span
                   className={cn(

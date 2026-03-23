@@ -116,7 +116,7 @@ export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: P
                               {compileResult.valid ? 'Valid' : 'Invalid'} — {compileResult.issues.length} issue(s)
                             </div>
                             {compileResult.sql_template && (
-                              <pre className="bg-white/60 rounded p-1.5 overflow-x-auto mt-1">{compileResult.sql_template}</pre>
+                              <pre className="bg-card/60 rounded p-1.5 overflow-x-auto mt-1">{compileResult.sql_template}</pre>
                             )}
                             {compileResult.issues.map((iss, i) => (
                               <div key={i} className={`mt-1 ${iss.severity === 'error' ? 'text-red-700' : 'text-yellow-700'}`}>

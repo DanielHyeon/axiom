@@ -170,7 +170,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  type="button"
  onClick={handleDiscover}
  disabled={!sourceTable.trim()}
- className="px-4 py-2 text-sm bg-primary text-white rounded disabled:opacity-50 hover:bg-primary"
+ className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded disabled:opacity-50 hover:bg-primary"
  >
  프로세스 발견
  </button>

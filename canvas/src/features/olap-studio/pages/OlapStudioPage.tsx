@@ -82,10 +82,10 @@ export function OlapStudioPage() {
   return (
     <div className="flex h-full">
       {/* ─── 좌측 패널: 큐브 선택 + 필드 목록 ──────────── */}
-      <div className="w-[240px] border-r border-[#E5E5E5] flex flex-col shrink-0 bg-white">
+      <div className="w-[240px] border-r border-border flex flex-col shrink-0 bg-card">
         {/* 큐브 선택 드롭다운 */}
-        <div className="px-3 py-3 border-b border-[#E5E5E5]">
-          <label className="text-[10px] text-foreground/50 font-[IBM_Plex_Mono] mb-1 block">
+        <div className="px-3 py-3 border-b border-border">
+          <label className="text-[10px] text-foreground/50 font-mono mb-1 block">
             큐브 선택
           </label>
           <select
@@ -94,7 +94,7 @@ export function OlapStudioPage() {
               const cube = pivot.cubeList.data?.find((c) => c.id === e.target.value);
               if (cube) pivot.selectCube(cube);
             }}
-            className="w-full rounded border border-[#E5E5E5] bg-white px-2 py-1.5 text-[11px] font-[IBM_Plex_Mono]"
+            className="w-full rounded border border-border bg-card px-2 py-1.5 text-[11px] font-mono"
             aria-label="큐브 선택"
           >
             <option value="">선택...</option>
@@ -111,13 +111,13 @@ export function OlapStudioPage() {
         {/* 차원 + 측정값 목록 */}
         <div className="flex-1 overflow-y-auto">
           {/* 차원 섹션 헤더 */}
-          <div className="px-3 py-2 text-[10px] text-foreground/40 font-[IBM_Plex_Mono] font-medium border-b border-[#F0F0F0]">
+          <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-b border-border">
             차원 (Dimensions)
           </div>
 
           {/* 큐브 미선택 또는 로딩 중 안내 */}
           {!pivot.selectedCubeId && (
-            <div className="px-3 py-4 text-[10px] text-foreground/30 font-[IBM_Plex_Mono] text-center">
+            <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
               큐브를 선택하세요
             </div>
           )}
@@ -127,7 +127,7 @@ export function OlapStudioPage() {
             </div>
           )}
           {pivot.selectedCubeId && !cubeDetail.isLoading && dimensions.length === 0 && (
-            <div className="px-3 py-4 text-[10px] text-foreground/30 font-[IBM_Plex_Mono] text-center">
+            <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
               차원이 없습니다
             </div>
           )}
@@ -140,7 +140,7 @@ export function OlapStudioPage() {
                 onClick={() =>
                   setExpandedDim(expandedDim === dim.dimension ? null : dim.dimension)
                 }
-                className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 text-[11px] font-[IBM_Plex_Mono] hover:bg-[#F5F5F5] transition-colors"
+                className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors"
                 aria-expanded={expandedDim === dim.dimension}
               >
                 {expandedDim === dim.dimension ? (
@@ -156,7 +156,7 @@ export function OlapStudioPage() {
                 <div className="pl-7 pb-1">
                   {dim.levels.map((level) => (
                     <div key={level} className="flex items-center gap-1 py-0.5">
-                      <span className="text-[10px] text-foreground/50 font-[IBM_Plex_Mono] flex-1">
+                      <span className="text-[10px] text-foreground/50 font-mono flex-1">
                         {level}
                       </span>
                       <button
@@ -185,7 +185,7 @@ export function OlapStudioPage() {
           ))}
 
           {/* 측정값 섹션 헤더 */}
-          <div className="px-3 py-2 text-[10px] text-foreground/40 font-[IBM_Plex_Mono] font-medium border-y border-[#F0F0F0] mt-2">
+          <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-y border-border mt-2">
             측정값 (Measures)
           </div>
 
@@ -195,7 +195,7 @@ export function OlapStudioPage() {
               key={m.name}
               type="button"
               onClick={() => pivot.addMeasure(m)}
-              className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-[11px] font-[IBM_Plex_Mono] hover:bg-[#F5F5F5] transition-colors"
+              className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors"
               aria-label={`측정값 ${m.name} 추가`}
             >
               <BarChart3 className="h-3 w-3 text-emerald-400" />
@@ -209,11 +209,11 @@ export function OlapStudioPage() {
       {/* ─── 중앙 + 하단 영역 ─────────────────────────── */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* 상단 바 — 타이틀 + 액션 버튼 */}
-        <div className="flex items-center gap-2 px-4 h-10 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+        <div className="flex items-center gap-2 px-4 h-10 border-b border-border bg-muted/50 shrink-0">
           <BarChart3 className="h-4 w-4 text-blue-500" />
-          <h1 className="text-[14px] font-semibold font-[Sora]">OLAP Studio</h1>
+          <h1 className="text-[14px] font-semibold font-heading">OLAP Studio</h1>
           {pivot.selectedCubeName && (
-            <span className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <span className="text-[11px] text-foreground/40 font-mono">
               {pivot.selectedCubeName}
             </span>
           )}
@@ -268,16 +268,16 @@ export function OlapStudioPage() {
         />
 
         {/* 결과 / SQL 프리뷰 — 탭 전환 */}
-        <div className="flex-1 flex flex-col border-t border-[#E5E5E5] min-h-0">
+        <div className="flex-1 flex flex-col border-t border-border min-h-0">
           {/* 탭 헤더 */}
-          <div className="flex items-center gap-0.5 px-4 pt-1 bg-[#FAFAFA] border-b border-[#E5E5E5] shrink-0">
+          <div className="flex items-center gap-0.5 px-4 pt-1 bg-muted/50 border-b border-border shrink-0">
             <button
               type="button"
               onClick={() => setShowSql(false)}
               className={cn(
-                'px-3 py-1 text-[10px] font-[IBM_Plex_Mono] rounded-t transition-colors',
+                'px-3 py-1 text-[10px] font-mono rounded-t transition-colors',
                 !showSql
-                  ? 'bg-white border border-b-0 border-[#E5E5E5] text-foreground/70 font-medium'
+                  ? 'bg-card border border-b-0 border-border text-foreground/70 font-medium'
                   : 'text-foreground/30 hover:text-foreground/50',
               )}
               aria-selected={!showSql}
@@ -289,9 +289,9 @@ export function OlapStudioPage() {
               type="button"
               onClick={() => setShowSql(true)}
               className={cn(
-                'px-3 py-1 text-[10px] font-[IBM_Plex_Mono] rounded-t transition-colors',
+                'px-3 py-1 text-[10px] font-mono rounded-t transition-colors',
                 showSql
-                  ? 'bg-white border border-b-0 border-[#E5E5E5] text-foreground/70 font-medium'
+                  ? 'bg-card border border-b-0 border-border text-foreground/70 font-medium'
                   : 'text-foreground/30 hover:text-foreground/50',
               )}
               aria-selected={showSql}

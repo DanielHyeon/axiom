@@ -180,7 +180,7 @@ export function SchemaCanvas({
   return (
     <div className="flex flex-col h-full">
       {/* 상단 바: 모드 전환 + 통계 + 테이블 칩 + 도구 버튼 */}
-      <div className="flex items-center gap-2 px-3 py-2 bg-[#FAFAFA] border-b border-[#E5E5E5] overflow-x-auto">
+      <div className="flex items-center gap-2 px-3 py-2 bg-muted/50 border-b border-border overflow-x-auto">
         {/* 모드 전환 탭 — 제공된 경우에만 표시 */}
         {mode && onModeChange && (
           <div className="flex items-center gap-0.5 mr-3 shrink-0">
@@ -188,7 +188,7 @@ export function SchemaCanvas({
               type="button"
               onClick={() => onModeChange('robo')}
               className={cn(
-                'px-2 py-0.5 rounded text-[10px] font-[IBM_Plex_Mono] transition-colors',
+                'px-2 py-0.5 rounded text-[10px] font-mono transition-colors',
                 mode === 'robo'
                   ? 'bg-foreground/10 text-foreground/70 font-medium'
                   : 'text-foreground/30 hover:text-foreground/50'
@@ -205,7 +205,7 @@ export function SchemaCanvas({
               type="button"
               onClick={() => onModeChange('text2sql')}
               className={cn(
-                'px-2 py-0.5 rounded text-[10px] font-[IBM_Plex_Mono] transition-colors',
+                'px-2 py-0.5 rounded text-[10px] font-mono transition-colors',
                 mode === 'text2sql'
                   ? 'bg-foreground/10 text-foreground/70 font-medium'
                   : 'text-foreground/30 hover:text-foreground/50'
@@ -222,7 +222,7 @@ export function SchemaCanvas({
         )}
 
         {/* 통계 */}
-        <div className="flex items-center gap-2 text-[10px] text-foreground/40 font-[IBM_Plex_Mono] shrink-0 mr-2">
+        <div className="flex items-center gap-2 text-[10px] text-foreground/40 font-mono shrink-0 mr-2">
           <Sparkles className="h-3 w-3" />
           <span>{includedCount}/{tables.length} 컨텍스트 포함</span>
         </div>
@@ -246,13 +246,13 @@ export function SchemaCanvas({
           <FkVisibilityToolbar visibility={visibility} onToggle={toggleFkVisibility} />
 
           {/* 구분선 */}
-          <div className="w-px h-4 bg-[#E5E5E5] mx-1" />
+          <div className="w-px h-4 bg-border mx-1" />
 
           {/* G7: 논리명/물리명 토글 */}
           <button
             type="button"
             onClick={toggleDisplayMode}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-[IBM_Plex_Mono] text-foreground/50 hover:text-foreground/70 transition-colors"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-foreground/50 hover:text-foreground/70 transition-colors"
             title={displayMode === 'physical' ? '논리명으로 전환' : '물리명으로 전환'}
           >
             {displayMode === 'physical' ? (
@@ -267,7 +267,7 @@ export function SchemaCanvas({
           <button
             type="button"
             onClick={() => setShowCardinalityModal(true)}
-            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-[IBM_Plex_Mono] text-foreground/50 hover:text-foreground/70 transition-colors"
+            className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-foreground/50 hover:text-foreground/70 transition-colors"
             title="FK 관계 추가"
           >
             <ArrowLeftRight className="h-3 w-3" />
@@ -283,7 +283,7 @@ export function SchemaCanvas({
           {code ? (
             <MermaidERDRenderer mermaidCode={code} />
           ) : (
-            <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-[IBM_Plex_Mono]">
+            <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-mono">
               ERD를 생성할 수 없습니다
             </div>
           )}
@@ -333,10 +333,10 @@ function TableChip({
   return (
     <div
       className={cn(
-        'flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-[IBM_Plex_Mono] shrink-0 transition-colors',
+        'flex items-center gap-1.5 px-2 py-1 rounded text-[10px] font-mono shrink-0 transition-colors',
         includedInContext
           ? 'bg-blue-50 text-blue-700 border border-blue-200'
-          : 'bg-[#F0F0F0] text-foreground/40 border border-[#E5E5E5]'
+          : 'bg-muted text-foreground/40 border border-border'
       )}
     >
       {/* NL2SQL 컨텍스트 토글 */}

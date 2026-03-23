@@ -68,13 +68,13 @@ export function DataSourcesPage() {
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-6 h-12 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+      <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-blue-500" />
-          <h1 className="text-[14px] font-semibold font-[Sora]">
+          <h1 className="text-[14px] font-semibold font-heading">
             데이터 소스
           </h1>
-          <span className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+          <span className="text-[11px] text-foreground/40 font-mono">
             {sources.length}개
           </span>
         </div>
@@ -85,23 +85,23 @@ export function DataSourcesPage() {
 
       {/* 생성 폼 */}
       {showForm && (
-        <div className="px-6 py-4 bg-blue-50/50 border-b border-[#E5E5E5] space-y-3">
+        <div className="px-6 py-4 bg-blue-50/50 border-b border-border space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">이름</Label>
+              <Label className="text-[11px] font-mono">이름</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="데이터소스 이름"
-                className="text-[12px] font-[IBM_Plex_Mono]"
+                className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">유형</Label>
+              <Label className="text-[11px] font-mono">유형</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
-                className="w-full rounded border border-[#E5E5E5] bg-white px-2 py-1.5 text-[12px] font-[IBM_Plex_Mono]"
+                className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
                 <option value="POSTGRES">PostgreSQL</option>
                 <option value="MYSQL">MySQL</option>
@@ -144,7 +144,7 @@ export function DataSourcesPage() {
         {!isLoading && sources.length === 0 && (
           <div className="text-center py-12">
             <Database className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
-            <p className="text-[12px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <p className="text-[12px] text-foreground/40 font-mono">
               등록된 데이터소스가 없습니다
             </p>
           </div>
@@ -154,19 +154,19 @@ export function DataSourcesPage() {
           {sources.map((ds) => (
             <div
               key={ds.id}
-              className="border border-[#E5E5E5] rounded-lg p-4 bg-white hover:shadow-sm transition-shadow"
+              className="border border-border rounded-lg p-4 bg-card hover:shadow-sm transition-shadow"
             >
               {/* 카드 헤더: 이름 + 상태 */}
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center gap-2">
                   <Database className="h-4 w-4 text-blue-400" />
-                  <span className="text-[13px] font-semibold font-[Sora]">
+                  <span className="text-[13px] font-semibold font-heading">
                     {ds.name}
                   </span>
                 </div>
                 <span
                   className={cn(
-                    'text-[9px] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]',
+                    'text-[9px] px-1.5 py-0.5 rounded font-mono',
                     ds.is_active
                       ? 'bg-green-50 text-green-600'
                       : 'bg-red-50 text-red-500',
@@ -177,7 +177,7 @@ export function DataSourcesPage() {
               </div>
 
               {/* 유형 표시 */}
-              <div className="text-[10px] text-foreground/50 font-[IBM_Plex_Mono] mb-3">
+              <div className="text-[10px] text-foreground/50 font-mono mb-3">
                 {ds.source_type}
               </div>
 
@@ -185,7 +185,7 @@ export function DataSourcesPage() {
               {testResult[ds.id] && (
                 <div
                   className={cn(
-                    'flex items-center gap-1 text-[10px] font-[IBM_Plex_Mono] mb-2',
+                    'flex items-center gap-1 text-[10px] font-mono mb-2',
                     testResult[ds.id].status === 'OK'
                       ? 'text-green-600'
                       : 'text-red-500',
@@ -201,17 +201,17 @@ export function DataSourcesPage() {
               )}
 
               {/* 액션 버튼 */}
-              <div className="flex items-center gap-2 pt-2 border-t border-[#F0F0F0]">
+              <div className="flex items-center gap-2 pt-2 border-t border-border">
                 <button
                   onClick={() => testMut.mutate(ds.id)}
-                  className="flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-600 font-[IBM_Plex_Mono]"
+                  className="flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-600 font-mono"
                   disabled={testMut.isPending}
                 >
                   <Zap className="h-3 w-3" /> 연결 테스트
                 </button>
                 <button
                   onClick={() => deleteMut.mutate(ds.id)}
-                  className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-500 font-[IBM_Plex_Mono] ml-auto"
+                  className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-500 font-mono ml-auto"
                 >
                   <Trash2 className="h-3 w-3" /> 삭제
                 </button>

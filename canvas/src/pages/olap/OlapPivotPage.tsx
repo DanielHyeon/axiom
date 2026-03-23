@@ -114,7 +114,7 @@ export function OlapPivotPage() {
  <div className="flex flex-col h-[calc(100vh-4rem)] bg-background text-foreground">
 
  {/* Top Header Controls */}
- <div className="h-14 border-b border-border bg-[#121212] px-6 flex items-center justify-between shrink-0">
+ <div className="h-14 border-b border-border bg-background px-6 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-4">
  <h1 className="font-semibold flex items-center gap-2">
  <span className="text-xl">📊</span> {t('olap.title')}

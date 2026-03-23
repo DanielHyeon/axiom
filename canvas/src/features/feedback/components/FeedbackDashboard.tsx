@@ -63,7 +63,7 @@ export function FeedbackDashboard() {
       {/* 필터 바 */}
       <div className="flex items-center gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-[IBM_Plex_Mono]">{t('feedback.dashboard.periodLabel')}</label>
+          <label className="text-xs text-muted-foreground font-mono">{t('feedback.dashboard.periodLabel')}</label>
           <Input
             type="date"
             value={dateFrom}

@@ -70,7 +70,7 @@ export function QueryInputForm({
         <div className="flex items-end gap-3">
           <div
             className={cn(
-              'flex-1 flex items-center gap-3 px-5 py-3.5 border border-[#E5E5E5] rounded',
+              'flex-1 flex items-center gap-3 px-5 py-3.5 border border-border rounded',
               hilActive && 'opacity-50 pointer-events-none',
             )}
           >
@@ -78,7 +78,7 @@ export function QueryInputForm({
             <input
               type="text"
               placeholder={t('nl2sql.placeholder')}
-              className="flex-1 bg-transparent text-[13px] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] outline-none"
+              className="flex-1 bg-transparent text-[13px] text-foreground placeholder:text-foreground/60 font-mono outline-none"
               disabled={hilActive}
               {...register('prompt')}
             />
@@ -86,7 +86,7 @@ export function QueryInputForm({
           <button
             type="submit"
             disabled={loading || !promptValue?.trim() || !datasourceId || hilActive}
-            className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded disabled:opacity-50 hover:bg-red-700 transition-colors shrink-0"
+            className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded disabled:opacity-50 hover:bg-red-700 transition-colors shrink-0"
           >
             <ArrowRight className="h-3.5 w-3.5" />
             {t('nl2sql.run')}
@@ -97,13 +97,13 @@ export function QueryInputForm({
 
       {/* SQL 미리보기 */}
       {generatedSql && (
-        <div className="bg-[#F5F5F5] rounded py-4 px-5 space-y-2">
+        <div className="bg-muted rounded py-4 px-5 space-y-2">
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-[1px]">
+            <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-[1px]">
               {t('nl2sql.generatedSql')}
             </span>
           </div>
-          <pre className="text-[12px] text-black font-[IBM_Plex_Mono] whitespace-pre-wrap break-words">
+          <pre className="text-[12px] text-foreground font-mono whitespace-pre-wrap break-words">
             {generatedSql}
           </pre>
         </div>

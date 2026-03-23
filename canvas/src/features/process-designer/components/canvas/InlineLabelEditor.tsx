@@ -76,7 +76,7 @@ export function InlineLabelEditor({ stageView }: InlineLabelEditorProps) {
  e.stopPropagation();
  }}
  onBlur={commit}
- className="bg-white text-black text-center text-sm font-bold px-2 py-1 rounded border-2 border-blue-500 outline-none shadow-lg"
+ className="bg-card text-foreground text-center text-sm font-bold px-2 py-1 rounded border-2 border-blue-500 outline-none shadow-lg"
  style={{
  width: Math.max(60, screenW - 16),
  fontSize: Math.max(10, 13 * stageView.scale),

@@ -73,7 +73,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  type="button"
  onClick={handleCreateBoard}
  disabled={creating}
- className="rounded bg-primary text-white px-4 py-2 text-sm font-medium disabled:opacity-50"
+ className="rounded bg-primary text-primary-foreground px-4 py-2 text-sm font-medium disabled:opacity-50"
  >
  {creating ? '생성 중...' : '새 보드'}
  </button>

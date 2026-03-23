@@ -138,7 +138,7 @@ export function ProcessDesignerPage() {
  );
 
  return (
- <div className="flex flex-col h-[calc(100vh-4rem)] bg-background text-white overflow-hidden border-t border-border">
+ <div className="flex flex-col h-[calc(100vh-4rem)] bg-background text-primary-foreground overflow-hidden border-t border-border">
  <ConnectionStatusBanner connected={connected} wsEnabled={wsEnabled} />
  {fromOntology && (
  <div className="shrink-0 text-xs text-primary/80 bg-blue-950/50 border-b border-blue-800 px-3 py-1.5">
@@ -155,7 +155,7 @@ export function ProcessDesignerPage() {
  <button
  type="button"
  onClick={handleSaveBoard}
- className="rounded bg-success text-white px-2 py-1 text-xs font-medium"
+ className="rounded bg-success text-primary-foreground px-2 py-1 text-xs font-medium"
  >
  저장
  </button>
@@ -196,7 +196,7 @@ export function ProcessDesignerPage() {
  role="tab"
  aria-selected={viewMode === 'canvas' || undefined}
  onClick={() => setViewMode('canvas')}
- className={`px-3 py-1 text-xs rounded ${viewMode === 'canvas' ? 'bg-muted text-white' : 'text-muted-foreground hover:text-foreground'}`}
+ className={`px-3 py-1 text-xs rounded ${viewMode === 'canvas' ? 'bg-muted text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
  >
  캔버스 뷰
  </button>
@@ -205,7 +205,7 @@ export function ProcessDesignerPage() {
  role="tab"
  aria-selected={viewMode === 'tree' || undefined}
  onClick={() => setViewMode('tree')}
- className={`px-3 py-1 text-xs rounded ${viewMode === 'tree' ? 'bg-muted text-white' : 'text-muted-foreground hover:text-foreground'}`}
+ className={`px-3 py-1 text-xs rounded ${viewMode === 'tree' ? 'bg-muted text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
  >
  트리 뷰
  </button>
@@ -243,7 +243,7 @@ export function ProcessDesignerPage() {
  <button
  type="button"
  onClick={() => setAiDiscoverOpen(true)}
- className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary hover:bg-primary text-white px-4 py-2 rounded text-sm font-medium shadow-lg"
+ className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary hover:bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium shadow-lg"
  >
  AI 프로세스 발견
  </button>

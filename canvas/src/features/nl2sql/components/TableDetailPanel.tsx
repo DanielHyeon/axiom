@@ -75,15 +75,15 @@ export function TableDetailPanel({
   };
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-[#E5E5E5]">
+    <div className="flex flex-col h-full bg-card border-l border-border">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 h-10 border-b border-[#E5E5E5] shrink-0">
+      <div className="flex items-center justify-between px-4 h-10 border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Table2 className="h-3.5 w-3.5 text-blue-500 shrink-0" />
-          <span className="text-[12px] font-semibold text-black font-[Sora] truncate">
+          <span className="text-[12px] font-semibold text-foreground font-heading truncate">
             {tableName}
           </span>
-          <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] shrink-0">
+          <span className="text-[10px] text-foreground/40 font-mono shrink-0">
             {schema}
           </span>
         </div>
@@ -91,7 +91,7 @@ export function TableDetailPanel({
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded hover:bg-[#F0F0F0] transition-colors"
+            className="p-1 rounded hover:bg-muted transition-colors"
             aria-label="닫기"
           >
             <X className="h-3.5 w-3.5 text-foreground/40" />
@@ -100,7 +100,7 @@ export function TableDetailPanel({
       </div>
 
       {/* 통계 바 */}
-      <div className="flex items-center gap-4 px-4 py-2 bg-[#FAFAFA] border-b border-[#E5E5E5] text-[10px] font-[IBM_Plex_Mono] text-foreground/50">
+      <div className="flex items-center gap-4 px-4 py-2 bg-muted/50 border-b border-border text-[10px] font-mono text-foreground/50">
         <span className="flex items-center gap-1">
           <Columns3 className="h-3 w-3" />
           {columns.length} 컬럼
@@ -120,14 +120,14 @@ export function TableDetailPanel({
       </div>
 
       {/* 검색 */}
-      <div className="px-3 py-2 border-b border-[#E5E5E5]">
+      <div className="px-3 py-2 border-b border-border">
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-foreground/30" />
           <Input
             placeholder="컬럼 검색..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-7 h-7 text-[11px] bg-white border-[#E5E5E5] font-[IBM_Plex_Mono]"
+            className="pl-7 h-7 text-[11px] bg-card border-border font-mono"
           />
         </div>
       </div>
@@ -142,7 +142,7 @@ export function TableDetailPanel({
 
         {!isLoading && filteredColumns.length === 0 && columns.length > 0 && (
           <div className="py-6 text-center">
-            <p className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <p className="text-[11px] text-foreground/40 font-mono">
               검색 결과가 없습니다
             </p>
           </div>
@@ -150,7 +150,7 @@ export function TableDetailPanel({
 
         {!isLoading && columns.length === 0 && (
           <div className="py-6 text-center">
-            <p className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <p className="text-[11px] text-foreground/40 font-mono">
               컬럼 정보 없음
             </p>
           </div>
@@ -160,7 +160,7 @@ export function TableDetailPanel({
           filteredColumns.map((col) => (
             <div
               key={col.name}
-              className="flex items-start gap-2 px-4 py-2 border-b border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors group"
+              className="flex items-start gap-2 px-4 py-2 border-b border-border hover:bg-muted/50 transition-colors group"
             >
               {/* 타입 아이콘 */}
               <div className="mt-0.5 shrink-0">
@@ -176,19 +176,19 @@ export function TableDetailPanel({
               {/* 컬럼 정보 */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-medium text-black font-[IBM_Plex_Mono] truncate">
+                  <span className="text-[11px] font-medium text-foreground font-mono truncate">
                     {col.name}
                   </span>
                   <span
                     className={cn(
-                      'text-[9px] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]',
-                      'bg-[#F0F0F0] text-foreground/50'
+                      'text-[9px] px-1.5 py-0.5 rounded font-mono',
+                      'bg-muted text-foreground/50'
                     )}
                   >
                     {col.data_type}
                   </span>
                   {col.nullable && (
-                    <span className="text-[9px] text-foreground/30 font-[IBM_Plex_Mono]">
+                    <span className="text-[9px] text-foreground/30 font-mono">
                       NULL
                     </span>
                   )}
@@ -204,7 +204,7 @@ export function TableDetailPanel({
               <button
                 type="button"
                 onClick={() => handleCopyColumn(col.name)}
-                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-[#E5E5E5] transition-all shrink-0"
+                className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-border transition-all shrink-0"
                 aria-label={`${col.name} 복사`}
               >
                 {copiedCol === col.name ? (

@@ -75,7 +75,7 @@ function SortablePill({ id, item, onRemove }: { id: string, item: Dimension | Me
  <div
  ref={setNodeRef}
  style={style}
- className={`${bgClass} flex items-center h-[28px] pl-2.5 pr-1 rounded text-xs text-white border`}
+ className={`${bgClass} flex items-center h-[28px] pl-2.5 pr-1 rounded text-xs text-primary-foreground border`}
  >
  <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing font-medium pr-2">
  {item.name}

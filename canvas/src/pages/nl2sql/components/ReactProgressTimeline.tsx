@@ -90,16 +90,16 @@ export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelin
  }
 
  return (
- <div className="rounded border border-[#E5E5E5] p-3">
+ <div className="rounded border border-border p-3">
  <div className="flex items-center justify-between mb-2">
- <span className="text-xs font-medium text-foreground/60 font-[IBM_Plex_Mono]">
+ <span className="text-xs font-medium text-foreground/60 font-mono">
  ReAct Loop {currentIteration > 1 ? `(iteration ${currentIteration})` : ''}
  </span>
  {hasResult && (
- <span className="text-xs text-green-600 font-[IBM_Plex_Mono]">Complete</span>
+ <span className="text-xs text-green-600 font-mono">Complete</span>
  )}
  {hasError && (
- <span className="text-xs text-destructive font-[IBM_Plex_Mono]">Failed</span>
+ <span className="text-xs text-destructive font-mono">Failed</span>
  )}
  </div>
  <div className="space-y-1">
@@ -120,15 +120,15 @@ export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelin
  isDone && !isErrorStep && 'bg-green-50 text-green-600',
  isActive && 'bg-blue-50 text-primary animate-pulse',
  isErrorStep && 'bg-red-50 text-destructive',
- !isDone && !isActive && !isErrorStep && 'bg-[#E5E5E5] text-foreground/60'
+ !isDone && !isActive && !isErrorStep && 'bg-border text-foreground/60'
  )}
  >
  <Icon className="h-3 w-3" />
  </div>
  <span
  className={cn(
- 'text-xs font-[IBM_Plex_Mono]',
- isDone && !isErrorStep && 'text-[#5E5E5E]',
+ 'text-xs font-mono',
+ isDone && !isErrorStep && 'text-muted-foreground',
  isActive && 'text-primary',
  isErrorStep && 'text-destructive',
  !isDone && !isActive && !isErrorStep && 'text-foreground/60'
@@ -137,7 +137,7 @@ export function ReactProgressTimeline({ steps, isRunning }: ReactProgressTimelin
  {meta.label}
  </span>
  {summary && (
- <span className="text-xs text-foreground/60 ml-auto truncate max-w-[200px] font-[IBM_Plex_Mono]">
+ <span className="text-xs text-foreground/60 ml-auto truncate max-w-[200px] font-mono">
  {summary}
  </span>
  )}

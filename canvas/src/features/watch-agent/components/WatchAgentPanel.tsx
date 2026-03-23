@@ -123,7 +123,7 @@ export function WatchAgentPanel() {
   return (
     <div className="flex flex-col h-full max-w-2xl mx-auto">
       {/* 헤더 */}
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-[#E5E5E5]">
+      <div className="flex items-center gap-2 px-5 py-4 border-b border-border">
         <Sparkles className="h-4 w-4 text-purple-500" />
         <h2 className="text-base font-semibold">Watch Agent</h2>
         <Badge variant="ai" className="text-[10px]">AI</Badge>
@@ -156,8 +156,8 @@ export function WatchAgentPanel() {
               className={`
                 max-w-[80%] rounded-lg px-3.5 py-2.5 text-sm
                 ${msg.role === 'user'
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-[#F5F5F5] text-foreground'}
+                  ? 'bg-blue-500 text-primary-foreground'
+                  : 'bg-muted text-foreground'}
               `}
             >
               {/* 텍스트 내용 */}
@@ -165,7 +165,7 @@ export function WatchAgentPanel() {
 
               {/* 제안 카드 — agent 메시지에만 */}
               {msg.proposal && (
-                <Card className="mt-3 p-3 bg-white border-[#E5E5E5] text-foreground">
+                <Card className="mt-3 p-3 bg-card border-border text-foreground">
                   <div className="flex flex-col gap-2 text-xs">
                     {/* 규칙 이름 */}
                     <div className="flex items-center justify-between">
@@ -176,7 +176,7 @@ export function WatchAgentPanel() {
                     </div>
 
                     {/* SQL 쿼리 */}
-                    <div className="rounded bg-[#FAFAFA] border border-[#E5E5E5] p-2 font-mono text-[11px] overflow-x-auto">
+                    <div className="rounded bg-muted/50 border border-border p-2 font-mono text-[11px] overflow-x-auto">
                       {msg.proposal.sql_query}
                     </div>
 
@@ -205,7 +205,7 @@ export function WatchAgentPanel() {
             <div className="shrink-0 h-7 w-7 rounded-full bg-purple-100 flex items-center justify-center">
               <Bot className="h-4 w-4 text-purple-600" />
             </div>
-            <div className="bg-[#F5F5F5] rounded-lg px-4 py-3 text-sm text-foreground/50 flex items-center gap-2">
+            <div className="bg-muted rounded-lg px-4 py-3 text-sm text-foreground/50 flex items-center gap-2">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
               규칙을 생성하고 있습니다...
             </div>
@@ -215,7 +215,7 @@ export function WatchAgentPanel() {
 
       {/* 제안 확인 버튼 영역 */}
       {pendingProposal && (
-        <div className="flex items-center justify-center gap-2 px-5 py-3 border-t border-[#E5E5E5] bg-[#FAFAFA]">
+        <div className="flex items-center justify-center gap-2 px-5 py-3 border-t border-border bg-muted/50">
           <Button onClick={handleConfirm} disabled={confirming} className="gap-1.5">
             {confirming ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -232,7 +232,7 @@ export function WatchAgentPanel() {
       )}
 
       {/* 입력 영역 */}
-      <div className="flex items-end gap-2 px-5 py-3 border-t border-[#E5E5E5]">
+      <div className="flex items-end gap-2 px-5 py-3 border-t border-border">
         <Textarea
           value={input}
           onChange={(e) => setInput(e.target.value)}

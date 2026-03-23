@@ -61,7 +61,7 @@ export function ApprovalQueuePanel() {
  })
  }
  disabled={approveHitl.isPending}
- className="inline-flex items-center gap-1.5 rounded-lg bg-success/90 px-3 py-1.5 text-xs font-medium text-white transition-all duration-200 hover:bg-success hover:shadow-sm hover:shadow-success/25 disabled:opacity-50"
+ className="inline-flex items-center gap-1.5 rounded-lg bg-success/90 px-3 py-1.5 text-xs font-medium text-primary-foreground transition-all duration-200 hover:bg-success hover:shadow-sm hover:shadow-success/25 disabled:opacity-50"
  >
  <CheckCircle2 className="h-3.5 w-3.5" />
  승인

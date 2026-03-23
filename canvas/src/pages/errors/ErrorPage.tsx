@@ -12,10 +12,10 @@ export const ErrorPage: React.FC<ErrorPageProps> = ({ error }) => {
  return (
  <div className="flex min-h-screen flex-col items-center justify-center gap-4 p-8">
  <h1 className="text-xl font-semibold">문제가 발생했습니다</h1>
- <p className="max-w-md text-center text-sm text-foreground0">{message}</p>
+ <p className="max-w-md text-center text-sm text-muted-foreground">{message}</p>
  <Link
  to={ROUTES.DASHBOARD}
- className="rounded bg-primary px-4 py-2 text-white hover:bg-primary/90"
+ className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
  >
  대시보드로 이동
  </Link>

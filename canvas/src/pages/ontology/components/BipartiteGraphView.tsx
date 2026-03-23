@@ -285,16 +285,16 @@ export function BipartiteGraphView({
  return (
  <div className="flex flex-col items-center justify-center py-12 text-foreground/60">
  <Link size={24} className="mb-2 opacity-30" />
- <p className="text-sm font-[IBM_Plex_Mono]">매핑이 없습니다. 위에서 새 매핑을 추가하면 시각화가 표시됩니다.</p>
+ <p className="text-sm font-mono">매핑이 없습니다. 위에서 새 매핑을 추가하면 시각화가 표시됩니다.</p>
  </div>
  );
  }
 
  return (
- <div className="w-full border border-[#E5E5E5] rounded bg-[#F5F5F5] overflow-hidden">
+ <div className="w-full border border-border rounded bg-muted overflow-hidden">
  {/* Legend */}
- <div className="flex items-center gap-4 px-3 py-2 border-b border-[#E5E5E5] text-[10px] text-foreground/60 font-[IBM_Plex_Mono]">
- <span className="font-medium text-[#5E5E5E]">범례:</span>
+ <div className="flex items-center gap-4 px-3 py-2 border-b border-border text-[10px] text-foreground/60 font-mono">
+ <span className="font-medium text-muted-foreground">범례:</span>
  {Object.entries(LAYER_COLORS).map(([layer, color]) => (
  <span key={layer} className="flex items-center gap-1">
  <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />
@@ -305,7 +305,7 @@ export function BipartiteGraphView({
  <span className="w-2 h-2 rounded inline-block" style={{ backgroundColor: SCHEMA_COLOR }} />
  Table
  </span>
- <span className="border-l border-[#E5E5E5] pl-3 ml-1" />
+ <span className="border-l border-border pl-3 ml-1" />
  {Object.entries(REL_COLORS).map(([rel, color]) => (
  <span key={rel} className="flex items-center gap-1">
  <span className="w-4 h-0.5 inline-block" style={{ backgroundColor: color }} />

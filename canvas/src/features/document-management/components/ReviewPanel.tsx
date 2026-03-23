@@ -28,7 +28,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
 
  return (
  <div className="rounded-lg border border-border bg-card/50 p-4">
- <h3 className="mb-3 text-sm font-semibold text-white">리뷰 코멘트</h3>
+ <h3 className="mb-3 text-sm font-semibold text-primary-foreground">리뷰 코멘트</h3>
  <ul className="mb-4 space-y-2 max-h-48 overflow-auto">
  {comments.map((c) => (
  <li key={c.id} className="rounded border border-border bg-background p-2 text-sm">
@@ -51,7 +51,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
  onChange={(e) => setNewComment(e.target.value)}
  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
  placeholder="코멘트 입력..."
- className="flex-1 rounded border border-border bg-card px-3 py-2 text-sm text-white placeholder:text-foreground0"
+ className="flex-1 rounded border border-border bg-card px-3 py-2 text-sm text-primary-foreground placeholder:text-foreground0"
  />
  <Button type="button" variant="secondary" size="sm" onClick={handleSubmit}>
  추가

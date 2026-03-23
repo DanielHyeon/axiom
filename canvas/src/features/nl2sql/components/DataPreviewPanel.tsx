@@ -106,22 +106,22 @@ export function DataPreviewPanel({
   }, [tableName, schema, datasource, retryCount]);
 
   return (
-    <div className="flex flex-col h-full bg-white border-l border-[#E5E5E5] w-[400px]">
+    <div className="flex flex-col h-full bg-card border-l border-border w-[400px]">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 h-10 border-b border-[#E5E5E5] shrink-0">
+      <div className="flex items-center justify-between px-4 h-10 border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Database className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
-          <span className="text-[12px] font-semibold text-black font-[Sora] truncate">
+          <span className="text-[12px] font-semibold text-foreground font-heading truncate">
             {tableName}
           </span>
-          <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] shrink-0">
+          <span className="text-[10px] text-foreground/40 font-mono shrink-0">
             프리뷰
           </span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="p-1 rounded hover:bg-[#F0F0F0] transition-colors"
+          className="p-1 rounded hover:bg-muted transition-colors"
           aria-label="닫기"
         >
           <X className="h-3.5 w-3.5 text-foreground/40" />
@@ -134,7 +134,7 @@ export function DataPreviewPanel({
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <Loader2 className="h-5 w-5 text-foreground/30 animate-spin" />
-            <span className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <span className="text-[11px] text-foreground/40 font-mono">
               데이터 조회 중...
             </span>
           </div>
@@ -144,7 +144,7 @@ export function DataPreviewPanel({
         {error && !isLoading && (
           <div className="flex flex-col items-center justify-center py-12 gap-2 px-4">
             <AlertCircle className="h-5 w-5 text-red-400" />
-            <span className="text-[11px] text-red-500 font-[IBM_Plex_Mono] text-center">
+            <span className="text-[11px] text-red-500 font-mono text-center">
               {error}
             </span>
             <Button
@@ -162,15 +162,15 @@ export function DataPreviewPanel({
         {data && !isLoading && !error && (
           <div className="overflow-x-auto">
             {/* 행 수 표시 */}
-            <div className="px-4 py-1.5 bg-[#FAFAFA] border-b border-[#E5E5E5] text-[9px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <div className="px-4 py-1.5 bg-muted/50 border-b border-border text-[9px] text-foreground/40 font-mono">
               {data.rowCount > 10
                 ? `상위 10행 / 전체 ${data.rowCount.toLocaleString()}행`
                 : `${data.rows.length}행`}
             </div>
 
-            <table className="w-full text-[10px] font-[IBM_Plex_Mono]">
+            <table className="w-full text-[10px] font-mono">
               <thead>
-                <tr className="bg-[#F5F5F5] border-b border-[#E5E5E5]">
+                <tr className="bg-muted border-b border-border">
                   {data.columns.map((col) => (
                     <th
                       key={col}
@@ -186,8 +186,8 @@ export function DataPreviewPanel({
                   <tr
                     key={rowIdx}
                     className={cn(
-                      'border-b border-[#F0F0F0] hover:bg-[#FAFAFA] transition-colors',
-                      rowIdx % 2 === 0 ? 'bg-white' : 'bg-[#FCFCFC]'
+                      'border-b border-border hover:bg-muted/50 transition-colors',
+                      rowIdx % 2 === 0 ? 'bg-card' : 'bg-card'
                     )}
                   >
                     {row.map((cell, colIdx) => (
@@ -210,7 +210,7 @@ export function DataPreviewPanel({
 
             {/* 빈 데이터 */}
             {data.rows.length === 0 && (
-              <div className="py-8 text-center text-[11px] text-foreground/30 font-[IBM_Plex_Mono]">
+              <div className="py-8 text-center text-[11px] text-foreground/30 font-mono">
                 데이터가 없습니다
               </div>
             )}

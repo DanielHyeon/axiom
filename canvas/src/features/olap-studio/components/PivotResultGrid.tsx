@@ -4,10 +4,11 @@
  * 컬럼 헤더 + 데이터 행 + 실행 통계를 표시한다.
  * 대량 결과(100행 초과)는 페이지네이션 기반으로 점진 로딩한다.
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import { AlertCircle, Clock, Hash, ChevronDown } from 'lucide-react';
+import { AlertCircle, Clock, Hash, ChevronDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { exportToCsv } from '@/lib/csvExport';
 import type { PivotResult } from '../hooks/usePivot';
 
 // ─── 상수 ───────────────────────────────────────────────
@@ -51,6 +52,13 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
     setVisibleCount((prev) => Math.min(prev + PAGE_SIZE, totalRows));
   };
 
+  // CSV 내보내기 — 전체 결과 다운로드
+  const handleExportCsv = useCallback(() => {
+    if (!result) return;
+    const columns = result.columns.map((name) => ({ name }));
+    exportToCsv(columns, result.rows, `pivot-result-${Date.now()}.csv`);
+  }, [result]);
+
   // ─── 로딩 상태 ──────────────────────────────────────────
   if (isLoading) {
     return (
@@ -63,7 +71,7 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
   // ─── 초기 상태 — 아직 실행하지 않음 ────────────────────
   if (!result) {
     return (
-      <div className="flex items-center justify-center py-12 text-[11px] text-foreground/30 font-[IBM_Plex_Mono]">
+      <div className="flex items-center justify-center py-12 text-[11px] text-muted-foreground font-mono">
         피벗을 실행하면 결과가 여기에 표시됩니다
       </div>
     );
@@ -73,8 +81,8 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
   if (result.error) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-2">
-        <AlertCircle className="h-5 w-5 text-red-400" />
-        <span className="text-[11px] text-red-500 font-[IBM_Plex_Mono]">{result.error}</span>
+        <AlertCircle className="h-5 w-5 text-destructive" />
+        <span className="text-[11px] text-destructive font-mono">{result.error}</span>
       </div>
     );
   }
@@ -82,28 +90,40 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
   return (
     <div className="flex flex-col h-full">
       {/* 통계 바 — 행 수, 표시 수, 실행 시간 */}
-      <div className="flex items-center gap-4 px-4 py-1.5 bg-[#FAFAFA] border-b border-[#E5E5E5] text-[9px] font-[IBM_Plex_Mono] text-foreground/50 shrink-0">
-        <span className="flex items-center gap-1">
-          <Hash className="h-3 w-3" />
-          {result.row_count.toLocaleString()}행
-        </span>
-        {/* 페이지네이션 중일 때 표시 행 수 안내 */}
-        {totalRows > PAGE_SIZE && (
-          <span className="text-foreground/30">
-            (표시: {visibleRows.length.toLocaleString()}/{totalRows.toLocaleString()})
+      <div className="flex items-center justify-between px-4 py-1.5 bg-muted border-b border-border text-[9px] text-muted-foreground shrink-0">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1">
+            <Hash className="h-3 w-3" />
+            {result.row_count.toLocaleString()}행
           </span>
-        )}
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {result.execution_time_ms}ms
-        </span>
+          {totalRows > PAGE_SIZE && (
+            <span className="text-foreground/30">
+              (표시: {visibleRows.length.toLocaleString()}/{totalRows.toLocaleString()})
+            </span>
+          )}
+          <span className="flex items-center gap-1">
+            <Clock className="h-3 w-3" />
+            {result.execution_time_ms}ms
+          </span>
+        </div>
+        {/* CSV 내보내기 버튼 */}
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-6 text-xs gap-1"
+          onClick={handleExportCsv}
+          aria-label="CSV 내보내기"
+        >
+          <Download className="h-3 w-3" />
+          CSV
+        </Button>
       </div>
 
       {/* 결과 테이블 */}
       <div className="flex-1 overflow-auto">
-        <table className="w-full text-[10px] font-[IBM_Plex_Mono]">
+        <table className="w-full text-[10px] font-mono">
           <thead className="sticky top-0 z-10">
-            <tr className="bg-[#F5F5F5] border-b border-[#E5E5E5]">
+            <tr className="bg-muted border-b border-border">
               {result.columns.map((col) => (
                 <th
                   key={col}
@@ -119,8 +139,8 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
               <tr
                 key={rowIdx}
                 className={cn(
-                  'border-b border-[#F0F0F0] hover:bg-blue-50/30 transition-colors',
-                  rowIdx % 2 === 0 ? 'bg-white' : 'bg-[#FCFCFC]',
+                  'border-b border-border hover:bg-blue-50/30 transition-colors',
+                  rowIdx % 2 === 0 ? 'bg-card' : 'bg-card',
                 )}
               >
                 {(row as unknown[]).map((cell, colIdx) => (
@@ -139,19 +159,19 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
 
         {/* 빈 결과 */}
         {result.rows.length === 0 && (
-          <div className="py-8 text-center text-[11px] text-foreground/30 font-[IBM_Plex_Mono]">
+          <div className="py-8 text-center text-[11px] text-muted-foreground font-mono">
             결과가 없습니다
           </div>
         )}
 
         {/* "더 보기" 버튼 — 표시할 행이 남아있을 때만 렌더링 */}
         {hasMore && (
-          <div className="flex justify-center py-3 border-t border-[#F0F0F0]">
+          <div className="flex justify-center py-3 border-t border-border">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLoadMore}
-              className="h-7 text-[10px] font-[IBM_Plex_Mono] text-foreground/50 hover:text-foreground/70 gap-1"
+              className="h-7 text-[10px] font-mono text-foreground/50 hover:text-foreground/70 gap-1"
             >
               <ChevronDown className="h-3 w-3" />
               더 보기 ({Math.min(PAGE_SIZE, remainingCount).toLocaleString()}행
