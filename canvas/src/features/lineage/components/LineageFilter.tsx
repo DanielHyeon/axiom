@@ -5,6 +5,7 @@
 
 import { ArrowLeft, ArrowRight, ArrowLeftRight } from 'lucide-react';
 import { useLineageStore } from '../store/useLineageStore';
+import { useTranslation } from 'react-i18next';
 import {
   LINEAGE_NODE_STYLES,
   type LineageDirection,
@@ -29,13 +30,14 @@ const NODE_TYPE_LIST: LineageNodeType[] = [
 ];
 
 export function LineageFilter() {
+  const { t } = useTranslation();
   const { filters, setDirection, setDepth, toggleNodeType } = useLineageStore();
 
   return (
-    <div className="flex flex-wrap items-center gap-4" role="toolbar" aria-label="리니지 필터">
+    <div className="flex flex-wrap items-center gap-4" role="toolbar" aria-label={t('lineageExt.filterAria')}>
       {/* ── 방향 토글 ── */}
       <fieldset className="flex items-center gap-1">
-        <legend className="sr-only">탐색 방향</legend>
+        <legend className="sr-only">{t('lineageExt.directionLegend')}</legend>
         {DIRECTION_OPTIONS.map(({ value, label, Icon }) => {
           const active = filters.direction === value;
           return (
@@ -74,13 +76,13 @@ export function LineageFilter() {
           value={filters.depth}
           onChange={(e) => setDepth(Number(e.target.value))}
           className="h-1.5 w-24 appearance-none rounded-full bg-muted accent-primary cursor-pointer"
-          aria-label="리니지 탐색 깊이"
+          aria-label={t('lineageExt.depthAria')}
         />
       </div>
 
       {/* ── 노드 타입 토글 ── */}
       <fieldset className="flex items-center gap-1">
-        <legend className="sr-only">노드 타입 필터</legend>
+        <legend className="sr-only">{t('lineageExt.typeLegend')}</legend>
         {NODE_TYPE_LIST.map((type) => {
           const style = LINEAGE_NODE_STYLES[type];
           const active = filters.nodeTypes.has(type);

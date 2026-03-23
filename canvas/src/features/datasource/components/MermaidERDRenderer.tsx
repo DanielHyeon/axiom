@@ -6,6 +6,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import mermaid from 'mermaid';
+import { useTranslation } from 'react-i18next';
 
 interface MermaidERDRendererProps {
   /** Mermaid erDiagram 코드 */
@@ -37,6 +38,7 @@ function ensureMermaidInit() {
 }
 
 export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRendererProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -165,7 +167,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={() => setScale((s) => Math.min(s + 0.2, 4))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title="확대"
+          title={t('datasourceExt.zoomIn')}
           aria-label="확대"
         >
           +
@@ -177,7 +179,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={() => setScale((s) => Math.max(s - 0.2, 0.2))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title="축소"
+          title={t('datasourceExt.zoomOut')}
           aria-label="축소"
         >
           -
@@ -186,7 +188,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={handleResetZoom}
           className="px-2 py-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors border-l border-border"
-          title="줌 초기화"
+          title={t('datasourceExt.resetZoom')}
           aria-label="원래 크기"
         >
           Reset

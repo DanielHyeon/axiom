@@ -18,6 +18,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { useTablePermissions, useUpdateTablePermission } from '../hooks/useSecurity';
 import type { TablePermission } from '../types/security';
+import { useTranslation } from 'react-i18next';
 
 // ---------------------------------------------------------------------------
 // 역할 라벨 (한글)
@@ -37,6 +38,7 @@ const ROLE_LABEL: Record<string, string> = {
 // ---------------------------------------------------------------------------
 
 export const TablePermissions: React.FC = () => {
+  const { t } = useTranslation();
   const {
     data: permissions = [],
     isLoading,
@@ -100,7 +102,7 @@ export const TablePermissions: React.FC = () => {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">테이블 권한</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('securityExt.tablePermissions')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
             스키마/테이블별 역할 접근 권한을 관리합니다. 체크박스로 읽기/쓰기 권한을 제어합니다.
           </p>
@@ -150,7 +152,7 @@ export const TablePermissions: React.FC = () => {
             <Input
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="테이블 또는 스키마 검색..."
+              placeholder={t('securityExt.searchTableSchema')}
               className="pl-9"
             />
           </div>
@@ -250,7 +252,7 @@ export const TablePermissions: React.FC = () => {
 
           {/* 범례 */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="font-medium">범례:</span>
+            <span className="font-medium">{t('securityExt.legend')}</span>
             <span>R = 읽기 (Read)</span>
             <span>W = 쓰기 (Write)</span>
             <span className="text-amber-600">

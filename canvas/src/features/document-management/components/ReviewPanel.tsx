@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 export interface ReviewComment {
  id: string;
@@ -16,6 +17,7 @@ interface ReviewPanelProps {
 
 /** 리뷰 코멘트 쓰레드. 인라인 앵커는 선택 사항으로 추후 확장. */
 export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelProps) {
+  const { t } = useTranslation();
  const [newComment, setNewComment] = useState('');
 
  const handleSubmit = () => {
@@ -28,7 +30,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
 
  return (
  <div className="rounded-lg border border-border bg-card/50 p-4">
- <h3 className="mb-3 text-sm font-semibold text-primary-foreground">리뷰 코멘트</h3>
+ <h3 className="mb-3 text-sm font-semibold text-primary-foreground">{t('documentExt.reviewComments')}</h3>
  <ul className="mb-4 space-y-2 max-h-48 overflow-auto">
  {comments.map((c) => (
  <li key={c.id} className="rounded border border-border bg-background p-2 text-sm">
@@ -40,7 +42,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
  </li>
  ))}
  {comments.length === 0 && (
- <li className="text-sm text-foreground0">아직 코멘트가 없습니다.</li>
+ <li className="text-sm text-foreground0">{t('documentExt.noComments')}</li>
  )}
  </ul>
  {!readonly && onAddComment && (
@@ -50,7 +52,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
  value={newComment}
  onChange={(e) => setNewComment(e.target.value)}
  onKeyDown={(e) => e.key === 'Enter' && handleSubmit()}
- placeholder="코멘트 입력..."
+ placeholder={t('documentExt.commentPlaceholder')}
  className="flex-1 rounded border border-border bg-card px-3 py-2 text-sm text-primary-foreground placeholder:text-foreground0"
  />
  <Button type="button" variant="secondary" size="sm" onClick={handleSubmit}>

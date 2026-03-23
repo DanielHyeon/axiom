@@ -1,4 +1,5 @@
 import { Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export interface TimelineItem {
  id: string;
@@ -7,9 +8,10 @@ export interface TimelineItem {
 }
 
 export function CaseTimeline({ items = [] }: { items?: TimelineItem[] }) {
+  const { t } = useTranslation();
  return (
  <div className="glass-card rounded-xl p-5">
- <h3 className="mb-4 text-[13px] font-semibold text-foreground">최근 활동</h3>
+ <h3 className="mb-4 text-[13px] font-semibold text-foreground">{t('caseDashboardExt.recentActivity')}</h3>
  <ul className="space-y-3">
  {items.map((item) => (
  <li key={item.id} className="flex gap-3 text-sm">
@@ -28,7 +30,7 @@ export function CaseTimeline({ items = [] }: { items?: TimelineItem[] }) {
  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
  <Clock className="h-5 w-5 text-muted-foreground/50" />
  </div>
- <p className="text-sm text-muted-foreground">최근 활동이 없습니다.</p>
+ <p className="text-sm text-muted-foreground">{t('caseDashboardExt.noRecentActivity')}</p>
  </div>
  )}
  </div>

@@ -3,6 +3,7 @@
 // Renders a simple line chart without an external chart library.
 
 import type { ActivityPoint } from '../api/insightApi';
+import { useTranslation } from 'react-i18next';
 
 interface KpiMiniChartProps {
  series: ActivityPoint[];
@@ -17,6 +18,7 @@ export function KpiMiniChart({
  height = 32,
  className,
 }: KpiMiniChartProps) {
+  const { t } = useTranslation();
  if (series.length < 2) {
  return (
  <div
@@ -50,7 +52,7 @@ export function KpiMiniChart({
  width={width}
  height={height}
  className={className}
- aria-label="쿼리 활동도 트렌드"
+ aria-label={t('insightExt.trendAria')}
  >
  <polyline
  points={points}

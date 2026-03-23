@@ -7,6 +7,19 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MondrianXmlEditor } from './MondrianXmlEditor';
 
+// i18n mock — t()가 키 대신 한글 값을 반환
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'olapStudioExt.noContent': '내용이 없습니다',
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: 'ko' },
+  }),
+}));
+
 // ─── 테스트 헬퍼 ──────────────────────────────────────────────
 
 const SAMPLE_XML = '<Schema name="test"></Schema>';

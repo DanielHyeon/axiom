@@ -9,6 +9,7 @@ import { useEffect, useRef, useCallback } from 'react';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import { useLineageStore } from '../store/useLineageStore';
+import { useTranslation } from 'react-i18next';
 import {
   LINEAGE_NODE_STYLES,
   type LineageNode,
@@ -153,6 +154,7 @@ interface LineageGraphProps {
 }
 
 export function LineageGraph({ isLoading = false }: LineageGraphProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
 
@@ -251,7 +253,7 @@ export function LineageGraph({ isLoading = false }: LineageGraphProps) {
         ref={containerRef}
         className="h-full w-full"
         role="img"
-        aria-label="데이터 리니지 그래프"
+        aria-label={t('lineageExt.graphAria')}
       />
 
       {/* 로딩 오버레이 */}

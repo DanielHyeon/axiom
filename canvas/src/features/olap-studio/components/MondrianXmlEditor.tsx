@@ -14,6 +14,7 @@ import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Copy, Check, Upload, Download, Eye, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -39,6 +40,7 @@ export function MondrianXmlEditor({
   onUpload,
   onValidate,
 }: MondrianXmlEditorProps) {
+  const { t } = useTranslation();
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [copied, setCopied] = useState(false);
 
@@ -169,7 +171,7 @@ export function MondrianXmlEditor({
           />
         ) : (
           <pre className="w-full h-full overflow-auto p-3 text-[11px] font-mono leading-relaxed bg-card text-muted-foreground">
-            {value || '내용이 없습니다'}
+            {value || t('olapStudioExt.noContent')}
           </pre>
         )}
       </div>

@@ -39,6 +39,7 @@ import {
 } from '@/components/ui/select';
 import { useAuditLogs } from '../hooks/useSecurity';
 import type { AuditLogEntry, AuditLogFilter, AuditLogStatus } from '../types/security';
+import { useTranslation } from 'react-i18next';
 
 // ---------------------------------------------------------------------------
 // 상태 배지 스타일
@@ -83,6 +84,7 @@ function formatFullTimestamp(ts: string): string {
 const PAGE_SIZE = 20;
 
 export const AuditLogViewer: React.FC = () => {
+  const { t } = useTranslation();
   // 필터 상태
   const [filter, setFilter] = useState<AuditLogFilter>({
     page: 1,
@@ -128,7 +130,7 @@ export const AuditLogViewer: React.FC = () => {
     <div className="flex flex-col gap-5">
       {/* 헤더 */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground">감사 로그</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t('securityExt.auditLog')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
           시스템 활동 이력을 조회하고 보안 이벤트를 모니터링합니다
         </p>
@@ -143,7 +145,7 @@ export const AuditLogViewer: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && applySearch()}
-            placeholder="사용자 이메일 검색..."
+            placeholder={t('securityExt.searchEmail')}
             className="pl-9"
           />
         </div>
@@ -160,10 +162,10 @@ export const AuditLogViewer: React.FC = () => {
             <SelectValue placeholder="상태" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">모든 상태</SelectItem>
-            <SelectItem value="allowed">허용</SelectItem>
-            <SelectItem value="denied">거부</SelectItem>
-            <SelectItem value="rewritten">변경됨</SelectItem>
+            <SelectItem value="all">{t('securityExt.allStatus')}</SelectItem>
+            <SelectItem value="allowed">{t('securityExt.decision.allowed')}</SelectItem>
+            <SelectItem value="denied">{t('securityExt.decision.denied')}</SelectItem>
+            <SelectItem value="rewritten">{t('securityExt.decision.rewritten')}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -178,7 +180,7 @@ export const AuditLogViewer: React.FC = () => {
               setFilter((prev) => ({ ...prev, page: 1 }));
             }}
             className="w-36 text-xs"
-            aria-label="시작 날짜"
+            aria-label={t('securityExt.startDate')}
           />
           <span className="text-muted-foreground text-sm">~</span>
           <Input
@@ -189,7 +191,7 @@ export const AuditLogViewer: React.FC = () => {
               setFilter((prev) => ({ ...prev, page: 1 }));
             }}
             className="w-36 text-xs"
-            aria-label="종료 날짜"
+            aria-label={t('securityExt.endDate')}
           />
         </div>
 
@@ -237,11 +239,11 @@ export const AuditLogViewer: React.FC = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>시간</TableHead>
-                  <TableHead>사용자</TableHead>
-                  <TableHead>액션</TableHead>
-                  <TableHead>리소스</TableHead>
-                  <TableHead>상태</TableHead>
+                  <TableHead>{t('securityExt.time')}</TableHead>
+                  <TableHead>{t('securityExt.user')}</TableHead>
+                  <TableHead>{t('securityExt.action')}</TableHead>
+                  <TableHead>{t('securityExt.resourceCol')}</TableHead>
+                  <TableHead>{t('securityExt.statusCol')}</TableHead>
                   <TableHead>IP</TableHead>
                   <TableHead className="w-16">상세</TableHead>
                 </TableRow>
@@ -283,7 +285,7 @@ export const AuditLogViewer: React.FC = () => {
                         size="icon"
                         className="h-7 w-7"
                         onClick={() => setSelectedLog(log)}
-                        aria-label="상세 보기"
+                        aria-label={t('securityExt.viewDetail')}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -336,12 +338,12 @@ export const AuditLogViewer: React.FC = () => {
           }}
           role="dialog"
           aria-modal="true"
-          aria-label="감사 로그 상세"
+          aria-label={t('securityExt.auditDetail')}
         >
           <div className="bg-card border border-border rounded-2xl w-[600px] max-h-[80vh] overflow-hidden shadow-2xl flex flex-col">
             {/* 헤더 */}
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
-              <h3 className="text-lg font-semibold text-foreground">감사 로그 상세</h3>
+              <h3 className="text-lg font-semibold text-foreground">{t('securityExt.auditDetail')}</h3>
               <Button variant="ghost" size="icon" onClick={() => setSelectedLog(null)}>
                 <X className="h-5 w-5" />
               </Button>
@@ -378,7 +380,7 @@ export const AuditLogViewer: React.FC = () => {
               {/* SQL (있을 경우) */}
               {selectedLog.original_sql && (
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">원본 SQL</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t('securityExt.originalSql')}</span>
                   <pre className="p-4 bg-muted/50 border border-border rounded-lg text-xs font-mono whitespace-pre-wrap break-all text-foreground">
                     {selectedLog.original_sql}
                   </pre>
@@ -387,7 +389,7 @@ export const AuditLogViewer: React.FC = () => {
 
               {selectedLog.rewritten_sql && (
                 <div className="flex flex-col gap-2">
-                  <span className="text-sm font-medium text-muted-foreground">변환된 SQL</span>
+                  <span className="text-sm font-medium text-muted-foreground">{t('securityExt.rewrittenSql')}</span>
                   <pre className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-xs font-mono whitespace-pre-wrap break-all text-foreground">
                     {selectedLog.rewritten_sql}
                   </pre>

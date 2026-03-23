@@ -13,6 +13,7 @@ import { LineageGraph } from './LineageGraph';
 import { LineageNodeDetail } from './LineageNodeDetail';
 import { LineageLegend } from './LineageLegend';
 import { LINEAGE_NODE_STYLES } from '../types/lineage';
+import { useTranslation } from 'react-i18next';
 
 /** 통계 카드 항목 */
 const STAT_CARDS = [
@@ -25,6 +26,7 @@ const STAT_CARDS = [
 ] as const;
 
 export function LineageDashboard() {
+  const { t } = useTranslation();
   // 전체 개요 쿼리
   const { isLoading: overviewLoading, refetch: refetchOverview } = useLineageOverview();
 
@@ -72,10 +74,10 @@ export function LineageDashboard() {
             onClick={handleRefresh}
             disabled={isLoading}
             className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="새로고침"
+            aria-label={t('lineageExt.refresh')}
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">새로고침</span>
+            <span className="hidden sm:inline">{t('lineageExt.refresh')}</span>
           </button>
         </div>
       </header>

@@ -6,6 +6,7 @@
  * 하단: SQL 미리보기
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -40,6 +41,7 @@ interface MeasureEntry {
 }
 
 export function OlapStudioPage() {
+  const { t } = useTranslation();
   const pivot = usePivot();
   const [showSql, setShowSql] = useState(false);
   const [expandedDim, setExpandedDim] = useState<string | null>(null);
@@ -95,9 +97,9 @@ export function OlapStudioPage() {
               if (cube) pivot.selectCube(cube);
             }}
             className="w-full rounded border border-border bg-card px-2 py-1.5 text-[11px] font-mono"
-            aria-label="큐브 선택"
+            aria-label={t('olapStudioExt.selectCube')}
           >
-            <option value="">선택...</option>
+            <option value="">{t('olapStudioExt.selectPlaceholder')}</option>
             {(pivot.cubeList.data || [])
               .filter((c) => c.cube_status === 'PUBLISHED')
               .map((c) => (
@@ -163,7 +165,7 @@ export function OlapStudioPage() {
                         type="button"
                         onClick={() => pivot.addRow({ dimension: dim.dimension, level })}
                         className="p-0.5 rounded hover:bg-blue-50 text-blue-400"
-                        title="행에 추가"
+                        title={t('olapStudioExt.addToRows')}
                         aria-label={`${level}을 행에 추가`}
                       >
                         <Rows3 className="h-2.5 w-2.5" />
@@ -172,7 +174,7 @@ export function OlapStudioPage() {
                         type="button"
                         onClick={() => pivot.addColumn({ dimension: dim.dimension, level })}
                         className="p-0.5 rounded hover:bg-purple-50 text-purple-400"
-                        title="열에 추가"
+                        title={t('olapStudioExt.addToCols')}
                         aria-label={`${level}을 열에 추가`}
                       >
                         <Columns3 className="h-2.5 w-2.5" />

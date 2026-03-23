@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableHeader,
@@ -41,6 +42,7 @@ function formatValue(value: unknown): string {
 // ──────────────────────────────────────
 
 export const PropertiesTable: React.FC<PropertiesTableProps> = ({ properties }) => {
+  const { t } = useTranslation();
   const entries = Object.entries(properties);
 
   // 빈 속성 처리
@@ -57,8 +59,8 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({ properties }) 
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-xs w-[140px]">속성</TableHead>
-            <TableHead className="text-xs">값</TableHead>
+            <TableHead className="text-xs w-[140px]">{t('explorerExt.properties')}</TableHead>
+            <TableHead className="text-xs">{t('explorerExt.value')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>

@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { Database, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DataSourceItem {
   name: string;
@@ -33,6 +34,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
   loading = false,
   onRefresh,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       {/* 헤더 */}
@@ -48,7 +50,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
             type="button"
             onClick={onRefresh}
             className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            title="새로고침"
+            title={t('ingestionExt.refreshBtn')}
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
           </button>

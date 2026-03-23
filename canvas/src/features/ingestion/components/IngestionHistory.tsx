@@ -12,6 +12,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import type { IngestionRecord } from '../types/ingestion';
+import { useTranslation } from 'react-i18next';
 
 interface IngestionHistoryProps {
   /** 수집 이력 목록 */
@@ -64,6 +65,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
   loading = false,
   onRefresh,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       {/* 헤더 */}
@@ -101,7 +103,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
       {!loading && records.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2 border border-dashed border-gray-200 rounded-xl">
           <History className="h-8 w-8 opacity-30" />
-          <p className="text-sm">수집 이력이 없습니다</p>
+          <p className="text-sm">{t('ingestionExt.noHistory')}</p>
         </div>
       )}
 

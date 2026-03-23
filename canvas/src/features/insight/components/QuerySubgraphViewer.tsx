@@ -7,6 +7,7 @@ import dagre from 'cytoscape-dagre';
 import { Loader2, Network, AlertCircle } from 'lucide-react';
 import { postQuerySubgraph } from '../api/insightApi';
 import type { GraphData } from '../types/insight';
+import { useTranslation } from 'react-i18next';
 import {
  toCytoscapeElements,
  getLayoutConfig,
@@ -25,6 +26,7 @@ interface QuerySubgraphViewerProps {
 }
 
 export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
+  const { t } = useTranslation();
  const containerRef = useRef<HTMLDivElement>(null);
  const cyRef = useRef<cytoscape.Core | null>(null);
 
@@ -109,7 +111,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Network className="h-10 w-10 mb-3 opacity-30" />
- <p className="text-sm">SQL이 실행되면 구조 그래프가 표시됩니다</p>
+ <p className="text-sm">{t('insightExt.sqlHint')}</p>
  </div>
  );
  }
@@ -127,7 +129,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <AlertCircle className="h-8 w-8 mb-3 text-destructive/60" />
- <p className="text-sm text-destructive mb-2">파싱 실패</p>
+ <p className="text-sm text-destructive mb-2">{t('insightExt.parseFailed')}</p>
  <p className="text-xs text-muted-foreground text-center max-w-xs">{error}</p>
  </div>
  );
@@ -137,7 +139,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Network className="h-10 w-10 mb-3 opacity-30" />
- <p className="text-sm">그래프 노드가 없습니다</p>
+ <p className="text-sm">{t('insightExt.noGraphNodes')}</p>
  </div>
  );
  }

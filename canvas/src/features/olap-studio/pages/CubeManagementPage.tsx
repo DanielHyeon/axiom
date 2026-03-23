@@ -21,6 +21,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cubes, type Cube, type CubeDetail } from '../api/olapStudioApi';
+import { useTranslation } from 'react-i18next';
 
 // ─── 상태 배지 스타일 ─────────────────────────────────────
 
@@ -33,6 +34,7 @@ const CUBE_STATUS_STYLE: Record<string, string> = {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function CubeManagementPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -117,7 +119,7 @@ export function CubeManagementPage() {
       <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <Box className="h-4 w-4 text-amber-500" />
-          <h1 className="text-[14px] font-semibold font-heading">큐브 관리</h1>
+          <h1 className="text-[14px] font-semibold font-heading">{t('olapStudio.cubes.title')}</h1>
           <span className="text-[11px] text-foreground/40 font-mono">
             {cubeList.length}개
           </span>
@@ -136,7 +138,7 @@ export function CubeManagementPage() {
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="큐브 이름"
+                placeholder={t('olapStudioExt.cubeName')}
                 className="text-[12px] font-mono"
               />
             </div>
@@ -145,7 +147,7 @@ export function CubeManagementPage() {
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
-                placeholder="설명 (선택)"
+                placeholder={t('olapStudioExt.descriptionOpt')}
                 className="text-[12px] font-mono"
               />
             </div>
@@ -378,7 +380,7 @@ function CubeDetailView({
         <button
           onClick={onBack}
           className="text-foreground/40 hover:text-foreground/70 transition-colors"
-          aria-label="목록으로 돌아가기"
+          aria-label={t('olapStudioExt.backToList')}
         >
           <ArrowLeft className="h-4 w-4" />
         </button>

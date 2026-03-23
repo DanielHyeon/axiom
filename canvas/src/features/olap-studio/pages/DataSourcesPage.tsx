@@ -19,8 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { dataSources } from '../api/olapStudioApi';
+import { useTranslation } from 'react-i18next';
 
 export function DataSourcesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -88,16 +90,16 @@ export function DataSourcesPage() {
         <div className="px-6 py-4 bg-blue-50/50 border-b border-border space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">이름</Label>
+              <Label className="text-[11px] font-mono">{t('olapStudioExt.name')}</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="데이터소스 이름"
+                placeholder={t('olapStudioExt.datasourceName')}
                 className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">유형</Label>
+              <Label className="text-[11px] font-mono">{t('olapStudioExt.type')}</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
@@ -126,7 +128,7 @@ export function DataSourcesPage() {
               {createMut.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                '생성'
+                t('olapStudioExt.create')
               )}
             </Button>
           </div>
@@ -172,7 +174,7 @@ export function DataSourcesPage() {
                       : 'bg-red-50 text-red-500',
                   )}
                 >
-                  {ds.is_active ? '활성' : '비활성'}
+                  {ds.is_active ? t('olapStudioExt.active') : t('olapStudioExt.inactive')}
                 </span>
               </div>
 

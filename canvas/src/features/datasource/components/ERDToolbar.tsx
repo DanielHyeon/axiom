@@ -7,6 +7,7 @@ import { Search, Download, RotateCw, Table, Link, Columns3 } from 'lucide-react'
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ERDStats, ERDFilter } from '../types/erd';
+import { useTranslation } from 'react-i18next';
 
 interface ERDToolbarProps {
   filter: ERDFilter;
@@ -28,6 +29,7 @@ export function ERDToolbar({
   onRefresh,
   isLoading,
 }: ERDToolbarProps) {
+  const { t } = useTranslation();
   // 디바운스 타이머를 ref로 관리 (불필요한 리렌더 방지 + 클린업 보장)
   const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -56,7 +58,7 @@ export function ERDToolbar({
       <div className="relative flex-1 max-w-xs">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-foreground/40" />
         <Input
-          placeholder="테이블 검색..."
+          placeholder={t('datasourceExt.searchTable')}
           defaultValue={filter.searchQuery}
           onChange={(e) => handleSearchChange(e.target.value)}
           className="pl-8 h-8 text-xs bg-card border-border font-mono"
@@ -89,7 +91,7 @@ export function ERDToolbar({
             onFilterChange({ ...filter, maxTables: Number(e.target.value) })
           }
           className="h-7 px-2 text-[11px] border border-border rounded bg-card font-mono text-foreground/80"
-          aria-label="최대 테이블 수"
+          aria-label={t('datasourceExt.maxTableCount')}
         >
           {MAX_TABLE_OPTIONS.map((n) => (
             <option key={n} value={n}>
@@ -125,7 +127,7 @@ export function ERDToolbar({
           onClick={onRefresh}
           disabled={isLoading}
           className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors disabled:opacity-40"
-          title="새로고침"
+          title={t('datasourceExt.refreshBtn')}
         >
           <RotateCw className={`h-3.5 w-3.5 ${isLoading ? 'animate-spin' : ''}`} />
         </button>
@@ -133,7 +135,7 @@ export function ERDToolbar({
           type="button"
           onClick={onDownloadSvg}
           className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
-          title="SVG 다운로드"
+          title={t('datasourceExt.downloadSvg')}
         >
           <Download className="h-3.5 w-3.5" />
         </button>

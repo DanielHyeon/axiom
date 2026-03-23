@@ -82,7 +82,7 @@ export function DriverRankingPanel({
  value={search}
  onChange={(e) => setSearch(e.target.value)}
  placeholder={t('insight.driverRanking.searchPlaceholder')}
- aria-label="드라이버 검색"
+ aria-label={t('insightExt.driverSearchAria')}
  className="w-full pl-6 pr-2 py-1 text-xs bg-muted/50 border border-border rounded text-foreground/80 placeholder-neutral-600 focus:outline-none focus:border-neutral-500"
  />
  </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { extractMetadataStream } from '../api/weaverDatasourceApi';
 import { RefreshCw, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SyncProgressProps {
  selectedDsName: string | null;
@@ -8,6 +9,7 @@ interface SyncProgressProps {
 }
 
 export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) {
+  const { t } = useTranslation();
  const [syncing, setSyncing] = useState(false);
  const [progress, setProgress] = useState<{ phase?: string; percent?: number } | null>(null);
  const [error, setError] = useState<string | null>(null);
@@ -48,7 +50,7 @@ export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) 
 
  return (
  <div className="border border-border rounded-lg bg-card overflow-hidden">
- <div className="p-3 border-b border-border bg-background font-medium text-sm">스키마 동기화</div>
+ <div className="p-3 border-b border-border bg-background font-medium text-sm">{t('datasourceExt.syncTitle')}</div>
  <div className="p-3 space-y-2">
  <button
  type="button"

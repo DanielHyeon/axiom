@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 // 연결 테스트 API는 shared를 통해 접근한다 (feature 간 의존 제거)
 import { testConnection } from '@/shared/api/datasourceApi';
+import { useTranslation } from 'react-i18next';
 
 interface ConnectionTestDialogProps {
   /** 다이얼로그 표시 여부 */
@@ -35,6 +36,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
   onClose,
   datasourceName,
 }) => {
+  const { t } = useTranslation();
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
 
@@ -67,7 +69,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
-      aria-label="연결 테스트"
+      aria-label={t('ingestionExt.connectionTestAria')}
     >
       <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* 헤더 */}
@@ -82,7 +84,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
             type="button"
             onClick={onClose}
             className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="닫기"
+            aria-label={t('ingestionExt.closeBtn')}
           >
             <X className="h-5 w-5" />
           </button>

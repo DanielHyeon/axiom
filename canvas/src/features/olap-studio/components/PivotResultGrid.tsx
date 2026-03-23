@@ -10,6 +10,7 @@ import { AlertCircle, Clock, Hash, ChevronDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/csvExport';
 import type { PivotResult } from '../hooks/usePivot';
+import { useTranslation } from 'react-i18next';
 
 // ─── 상수 ───────────────────────────────────────────────
 
@@ -26,6 +27,7 @@ interface PivotResultGridProps {
 // ─── 컴포넌트 ────────────────────────────────────────────
 
 export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
+  const { t } = useTranslation();
   // 페이지네이션 — 표시할 행 수 관리
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -112,7 +114,7 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
           size="sm"
           className="h-6 text-xs gap-1"
           onClick={handleExportCsv}
-          aria-label="CSV 내보내기"
+          aria-label={t('olapStudioExt.csvExport')}
         >
           <Download className="h-3 w-3" />
           CSV

@@ -20,6 +20,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { etlPipelines, type ETLPipeline, type ETLRun } from '../api/olapStudioApi';
+import { useTranslation } from 'react-i18next';
 
 // ─── 상태 배지 색상 매핑 ─────────────────────────────────
 
@@ -42,6 +43,7 @@ const RUN_STATUS_STYLE: Record<string, string> = {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function EtlPipelinesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -121,7 +123,7 @@ export function EtlPipelinesPage() {
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="파이프라인 이름"
+                placeholder={t('olapStudioExt.pipelineName')}
                 className="text-[12px] font-mono"
               />
             </div>
@@ -132,9 +134,9 @@ export function EtlPipelinesPage() {
                 onChange={(e) => setFormType(e.target.value)}
                 className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
-                <option value="FULL">전체 적재</option>
-                <option value="INCREMENTAL">증분 적재</option>
-                <option value="SNAPSHOT">스냅샷</option>
+                <option value="FULL">{t('olapStudioExt.fullLoad')}</option>
+                <option value="INCREMENTAL">{t('olapStudioExt.incrementalLoad')}</option>
+                <option value="SNAPSHOT">{t('olapStudioExt.snapshot')}</option>
               </select>
             </div>
             <div className="space-y-1">
@@ -142,7 +144,7 @@ export function EtlPipelinesPage() {
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
-                placeholder="설명 (선택)"
+                placeholder={t('olapStudioExt.descriptionOpt')}
                 className="text-[12px] font-mono"
               />
             </div>
@@ -235,7 +237,7 @@ function PipelineRow({
         <button
           onClick={onToggle}
           className="text-foreground/30 hover:text-foreground/60 transition-colors"
-          aria-label={isExpanded ? '실행 이력 접기' : '실행 이력 펼치기'}
+          aria-label={isExpanded ? t('olapStudioExt.foldHistory') : t('olapStudioExt.expandHistory')}
         >
           {isExpanded ? (
             <ChevronDown className="h-4 w-4" />

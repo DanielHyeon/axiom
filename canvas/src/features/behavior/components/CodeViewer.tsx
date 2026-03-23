@@ -10,6 +10,7 @@ import { Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
+import { useTranslation } from 'react-i18next';
 
 // ──────────────────────────────────────
 // Props
@@ -29,6 +30,7 @@ interface CodeViewerProps {
 // ──────────────────────────────────────
 
 export function CodeViewer({ code, language = 'python', className }: CodeViewerProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
@@ -40,11 +42,11 @@ export function CodeViewer({ code, language = 'python', className }: CodeViewerP
     try {
       await navigator.clipboard.writeText(code);
       setCopied(true);
-      toast.success('클립보드에 복사되었습니다.');
+      toast.success(t('behaviorExt.clipboardCopied'));
       clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => setCopied(false), 2000);
     } catch {
-      toast.error('복사에 실패했습니다.');
+      toast.error(t('behaviorExt.copyFailed'));
     }
   }, [code]);
 
@@ -60,7 +62,7 @@ export function CodeViewer({ code, language = 'python', className }: CodeViewerP
           size="icon"
           className="h-7 w-7"
           onClick={handleCopy}
-          title="클립보드에 복사"
+          title={t('behaviorExt.copyToClipboard')}
         >
           {copied ? (
             <Check className="h-3.5 w-3.5 text-emerald-400" />

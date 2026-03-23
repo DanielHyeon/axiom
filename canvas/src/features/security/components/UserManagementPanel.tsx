@@ -23,8 +23,10 @@ import { UserTable } from './user-management/UserTable';
 import { UserFormDialog } from './user-management/UserFormDialog';
 import type { UserFormData } from './user-management/UserFormDialog';
 import { DeleteConfirmDialog } from './user-management/DeleteConfirmDialog';
+import { useTranslation } from 'react-i18next';
 
 export const UserManagementPanel: React.FC = () => {
+  const { t } = useTranslation();
   // 서버 상태
   const { data: users = [], isLoading, isError, error, refetch } = useUsers();
   const createMutation = useCreateUser();
@@ -142,12 +144,12 @@ export const UserManagementPanel: React.FC = () => {
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="사용자 검색..."
+            placeholder={t('securityExt.searchUsers')}
             className="pl-9"
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading} aria-label="새로고침">
+          <Button variant="outline" size="icon" onClick={() => refetch()} disabled={isLoading} aria-label={t('securityExt.refreshBtn')}>
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
           <Button onClick={handleOpenCreate}>

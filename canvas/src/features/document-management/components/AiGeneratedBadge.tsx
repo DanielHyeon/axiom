@@ -4,22 +4,24 @@
  */
 
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface AiGeneratedBadgeProps {
   isAiGenerated: boolean;
 }
 
 export function AiGeneratedBadge({ isAiGenerated }: AiGeneratedBadgeProps) {
+  const { t } = useTranslation();
   if (!isAiGenerated) return null;
 
   return (
     <Badge
       variant="secondary"
       className="text-xs gap-1"
-      title="AI가 생성한 문서입니다"
+      title={t('documentExt.aiGenerated')}
     >
       <span aria-hidden="true">AI</span>
-      <span className="sr-only">AI 생성 문서</span>
+      <span className="sr-only">{t('documentExt.aiGeneratedSr')}</span>
     </Badge>
   );
 }

@@ -8,6 +8,7 @@ import { Search, X } from 'lucide-react';
 import { useLineageSearch } from '../hooks/useLineage';
 import { useLineageStore } from '../store/useLineageStore';
 import { LINEAGE_NODE_STYLES, type LineageSearchResult } from '../types/lineage';
+import { useTranslation } from 'react-i18next';
 
 interface LineageSearchBarProps {
   /** 검색 결과 노드 선택 시 호출 — 해당 노드 기준 그래프 로드 */
@@ -15,6 +16,7 @@ interface LineageSearchBarProps {
 }
 
 export function LineageSearchBar({ onNodeSelect }: LineageSearchBarProps) {
+  const { t } = useTranslation();
   const { setSearchQuery: setStoreQuery } = useLineageStore();
 
   const [query, setQuery] = useState('');
@@ -71,9 +73,9 @@ export function LineageSearchBar({ onNodeSelect }: LineageSearchBarProps) {
             setIsOpen(true);
           }}
           onFocus={() => query.length >= 2 && setIsOpen(true)}
-          placeholder="테이블/컬럼 검색..."
+          placeholder={t('lineageExt.searchPlaceholder')}
           className="w-full rounded-lg border border-border bg-muted/50 py-2 pl-8 pr-8 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors"
-          aria-label="리니지 노드 검색"
+          aria-label={t('lineageExt.searchAria')}
           aria-expanded={isOpen}
           role="combobox"
           aria-autocomplete="list"
@@ -82,7 +84,7 @@ export function LineageSearchBar({ onNodeSelect }: LineageSearchBarProps) {
           <button
             onClick={handleClear}
             className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            aria-label="검색어 지우기"
+            aria-label={t('lineageExt.clearSearch')}
           >
             <X className="h-4 w-4" />
           </button>

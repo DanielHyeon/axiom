@@ -8,6 +8,22 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { PivotBuilder } from './PivotBuilder';
 
+// i18n mock — t()가 키 대신 한글 값을 반환
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'olapStudioExt.rowsLabel': '행 (Rows)',
+        'olapStudioExt.colsLabel': '열 (Columns)',
+        'olapStudioExt.measuresLabel': '측정값 (Measures)',
+        'olapStudioExt.filtersLabel': '필터 (Filters)',
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: 'ko' },
+  }),
+}));
+
 // ─── 테스트 헬퍼 ──────────────────────────────────────────
 
 /** 기본 props — 행 1개, 측정값 1개, 열/필터 비어있음 */

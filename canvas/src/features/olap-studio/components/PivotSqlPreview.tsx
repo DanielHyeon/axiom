@@ -5,6 +5,7 @@
  */
 import { useState, useCallback } from 'react';
 import { Copy, Check, Code } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -16,6 +17,7 @@ interface PivotSqlPreviewProps {
 // ─── 컴포넌트 ────────────────────────────────────────────
 
 export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   /** 클립보드에 SQL 복사 — 실패 시 경고만 출력 */
@@ -43,14 +45,14 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
           onClick={handleCopy}
           disabled={!sql}
           className="flex items-center gap-1 text-[9px] text-muted-foreground hover:text-primary-foreground font-mono transition-colors disabled:opacity-30"
-          aria-label="SQL 복사"
+          aria-label={t('olapStudioExt.copySql')}
         >
           {copied ? (
             <Check className="h-3 w-3 text-green-400" />
           ) : (
             <Copy className="h-3 w-3" />
           )}
-          {copied ? '복사됨' : '복사'}
+          {copied ? t('olapStudioExt.copied') : t('olapStudioExt.copy')}
         </button>
       </div>
 

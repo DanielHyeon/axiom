@@ -20,6 +20,7 @@ import {
 import type { SecurityUser, UserStatus } from '../../types/security';
 import type { UserRole } from '@/types/auth.types';
 import { ROLE_LABEL, STATUS_CONFIG, ALL_ROLES, ALL_STATUSES } from './constants';
+import { useTranslation } from 'react-i18next';
 
 export interface UserFormData {
   email: string;
@@ -52,6 +53,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
   onClose,
   isPending,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -60,13 +62,13 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
       }}
       role="dialog"
       aria-modal="true"
-      aria-label={editingUser ? '사용자 수정' : '사용자 추가'}
+      aria-label={editingUser ? t('securityExt.editUser') : t('securityExt.addUser')}
     >
       <div className="bg-card border border-border rounded-2xl w-[480px] max-h-[90vh] overflow-hidden shadow-2xl">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-5 border-b border-border">
           <h3 className="text-lg font-semibold text-foreground">
-            {editingUser ? '사용자 수정' : '사용자 추가'}
+            {editingUser ? t('securityExt.editUser') : t('securityExt.addUser')}
           </h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
@@ -78,7 +80,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
           <div className="p-6 flex flex-col gap-5 max-h-[60vh] overflow-y-auto">
             {/* 이메일 */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-muted-foreground">이메일</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('securityExt.emailLabel')}</label>
               <Input
                 type="email"
                 placeholder="user@example.com"
@@ -90,10 +92,10 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             </div>
             {/* 이름 */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-muted-foreground">이름</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('securityExt.nameLabel')}</label>
               <Input
                 type="text"
-                placeholder="사용자명"
+                placeholder={t('securityExt.usernamePlaceholder')}
                 value={formData.name}
                 onChange={(e) => onFormDataChange({ ...formData, name: e.target.value })}
                 required
@@ -102,10 +104,10 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             {/* 비밀번호 (생성 시에만 표시) */}
             {!editingUser && (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-muted-foreground">비밀번호</label>
+                <label className="text-sm font-medium text-muted-foreground">{t('securityExt.passwordLabel')}</label>
                 <Input
                   type="password"
-                  placeholder="비밀번호 입력 (최소 8자)"
+                  placeholder={t('securityExt.passwordPlaceholder')}
                   value={formData.password}
                   onChange={(e) => onFormDataChange({ ...formData, password: e.target.value })}
                   required
@@ -115,7 +117,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             )}
             {/* 역할 선택 */}
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium text-muted-foreground">역할</label>
+              <label className="text-sm font-medium text-muted-foreground">{t('securityExt.roleLabel')}</label>
               <Select
                 value={formData.role}
                 onValueChange={(v) => onFormDataChange({ ...formData, role: v as UserRole })}
@@ -135,7 +137,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             {/* 상태 (수정 시에만 표시) */}
             {editingUser && (
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-medium text-muted-foreground">상태</label>
+                <label className="text-sm font-medium text-muted-foreground">{t('securityExt.statusLabel')}</label>
                 <Select
                   value={formData.status}
                   onValueChange={(v) => onFormDataChange({ ...formData, status: v as UserStatus })}
@@ -162,7 +164,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-              {editingUser ? '수정' : '생성'}
+              {editingUser ? t('securityExt.editBtn') : t('securityExt.createBtn')}
             </Button>
           </div>
         </form>

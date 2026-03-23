@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { FileText, Table2, X } from 'lucide-react';
 import type { FilePreviewData } from '../types/ingestion';
+import { useTranslation } from 'react-i18next';
 
 interface FilePreviewProps {
   /** 파일 이름 */
@@ -21,6 +22,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   data,
   onClose,
 }) => {
+  const { t } = useTranslation();
   /** 표시할 행 (최대 20행) */
   const displayRows = useMemo(() => data.rows.slice(0, 20), [data.rows]);
 
@@ -46,7 +48,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
               type="button"
               onClick={onClose}
               className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              aria-label="미리보기 닫기"
+              aria-label={t('ingestionExt.previewClose')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -100,7 +102,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2">
           <FileText className="h-8 w-8 opacity-30" />
-          <p className="text-sm">미리보기할 데이터가 없습니다</p>
+          <p className="text-sm">{t('ingestionExt.noPreviewData')}</p>
         </div>
       )}
 

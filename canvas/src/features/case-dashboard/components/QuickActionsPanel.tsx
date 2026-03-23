@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
 import { List, MessageSquare, BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 const ACTIONS = [
  { label: '케이스 목록', to: ROUTES.CASES.LIST, icon: List },
@@ -9,9 +10,10 @@ const ACTIONS = [
 ];
 
 export function QuickActionsPanel() {
+  const { t } = useTranslation();
  return (
  <div className="glass-card rounded-xl p-5">
- <h3 className="mb-3 text-[13px] font-semibold text-foreground">바로가기</h3>
+ <h3 className="mb-3 text-[13px] font-semibold text-foreground">{t('caseDashboardExt.quickActions')}</h3>
  <div className="flex flex-wrap gap-2">
  {ACTIONS.map((a) => (
  <Link
