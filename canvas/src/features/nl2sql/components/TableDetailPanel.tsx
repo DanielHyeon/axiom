@@ -10,6 +10,7 @@
  */
 
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   X,
@@ -48,6 +49,7 @@ export function TableDetailPanel({
   isLoading,
   onClose,
 }: TableDetailPanelProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [copiedCol, setCopiedCol] = useState<string | null>(null);
 
@@ -92,7 +94,7 @@ export function TableDetailPanel({
             type="button"
             onClick={onClose}
             className="p-1 rounded hover:bg-muted transition-colors"
-            aria-label="닫기"
+            aria-label={t('tableDetail.close')}
           >
             <X className="h-3.5 w-3.5 text-foreground/40" />
           </button>
@@ -103,7 +105,7 @@ export function TableDetailPanel({
       <div className="flex items-center gap-4 px-4 py-2 bg-muted/50 border-b border-border text-[10px] font-mono text-foreground/50">
         <span className="flex items-center gap-1">
           <Columns3 className="h-3 w-3" />
-          {columns.length} 컬럼
+          {columns.length} {t('tableDetail.columns')}
         </span>
         {pkCount > 0 && (
           <span className="flex items-center gap-1">
@@ -124,7 +126,7 @@ export function TableDetailPanel({
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-foreground/30" />
           <Input
-            placeholder="컬럼 검색..."
+            placeholder={t('tableDetail.searchColumns')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-7 h-7 text-[11px] bg-card border-border font-mono"
@@ -143,7 +145,7 @@ export function TableDetailPanel({
         {!isLoading && filteredColumns.length === 0 && columns.length > 0 && (
           <div className="py-6 text-center">
             <p className="text-[11px] text-foreground/40 font-mono">
-              검색 결과가 없습니다
+              {t('tableDetail.noSearchResults')}
             </p>
           </div>
         )}
@@ -151,7 +153,7 @@ export function TableDetailPanel({
         {!isLoading && columns.length === 0 && (
           <div className="py-6 text-center">
             <p className="text-[11px] text-foreground/40 font-mono">
-              컬럼 정보 없음
+              {t('tableDetail.noColumns')}
             </p>
           </div>
         )}
@@ -205,7 +207,7 @@ export function TableDetailPanel({
                 type="button"
                 onClick={() => handleCopyColumn(col.name)}
                 className="opacity-0 group-hover:opacity-100 p-0.5 rounded hover:bg-border transition-all shrink-0"
-                aria-label={`${col.name} 복사`}
+                aria-label={t('tableDetail.copyColumn', { name: col.name })}
               >
                 {copiedCol === col.name ? (
                   <Check className="h-3 w-3 text-green-500" />

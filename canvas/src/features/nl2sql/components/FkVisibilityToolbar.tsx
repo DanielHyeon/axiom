@@ -4,6 +4,7 @@
  * DDL(초록), User(주황), Fabric(파랑) 3가지 소스별로
  * 관계선 표시/숨김을 토글하는 칩 버튼을 렌더링한다.
  */
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { Eye, EyeOff } from 'lucide-react';
 import type { FkSource, FkVisibilityState } from '../hooks/useFkVisibility';
@@ -17,6 +18,7 @@ interface FkVisibilityToolbarProps {
 const SOURCES: FkSource[] = ['ddl', 'user', 'fabric'];
 
 export function FkVisibilityToolbar({ visibility, onToggle }: FkVisibilityToolbarProps) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-1 shrink-0">
       {SOURCES.map((source) => {
@@ -33,7 +35,7 @@ export function FkVisibilityToolbar({ visibility, onToggle }: FkVisibilityToolba
                 ? 'opacity-100'
                 : 'opacity-30 line-through'
             )}
-            title={`${style.label} FK ${active ? '숨기기' : '표시'}`}
+            title={t('schemaCanvas.fkToggle', { label: style.label, action: active ? 'hide' : 'show' })}
           >
             {/* 색상 인디케이터 도트 */}
             <span

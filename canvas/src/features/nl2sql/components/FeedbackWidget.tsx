@@ -5,6 +5,7 @@
  * 선택적으로 SQL 수정이나 코멘트를 남길 수 있다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ThumbsUp, ThumbsDown, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,6 +23,7 @@ interface FeedbackWidgetProps {
 type Rating = 'positive' | 'negative' | 'partial' | null;
 
 export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
+  const { t } = useTranslation();
   const [rating, setRating] = useState<Rating>(null);
   const [showCorrection, setShowCorrection] = useState(false);
   const [correctedSql, setCorrectedSql] = useState(sql ?? '');
@@ -44,9 +46,9 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
         corrected_sql: showCorrection ? correctedSql : undefined,
       });
       setSubmitted(true);
-      toast.success('피드백이 저장되었습니다.');
+      toast.success(t('feedbackWidget.saved'));
     } catch {
-      toast.error('피드백 저장에 실패했습니다.');
+      toast.error(t('feedbackWidget.saveFailed'));
     } finally {
       setSubmitting(false);
     }
@@ -56,7 +58,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
     return (
       <div className="flex items-center gap-2 text-xs text-green-600 font-mono">
         <ThumbsUp className="h-3 w-3" />
-        피드백이 기록되었습니다
+        {t('feedbackWidget.recorded')}
       </div>
     );
   }
@@ -64,7 +66,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-2">
-        <span className="text-xs text-foreground/60 font-mono">결과 평가:</span>
+        <span className="text-xs text-foreground/60 font-mono">{t('feedbackWidget.rateResult')}</span>
         <Button
           variant="ghost"
           size="icon"
@@ -74,7 +76,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
             handleSubmit('positive');
           }}
           disabled={submitting}
-          title="정확한 결과"
+          title={t('feedbackWidget.accurateResult')}
         >
           <ThumbsUp className="h-3.5 w-3.5" />
         </Button>
@@ -87,7 +89,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
             handleSubmit('negative');
           }}
           disabled={submitting}
-          title="부정확한 결과"
+          title={t('feedbackWidget.inaccurateResult')}
         >
           <ThumbsDown className="h-3.5 w-3.5" />
         </Button>
@@ -97,10 +99,10 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
           className={cn('h-7 text-xs gap-1', showCorrection && 'bg-blue-50 text-blue-600')}
           onClick={() => setShowCorrection(!showCorrection)}
           disabled={submitting}
-          title="SQL 수정 제안"
+          title={t('feedbackWidget.sqlSuggestion')}
         >
           <Edit3 className="h-3 w-3" />
-          수정
+          {t('feedbackWidget.correction')}
         </Button>
       </div>
 
@@ -108,13 +110,13 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
       {showCorrection && (
         <div className="space-y-2 animate-in fade-in slide-in-from-top-1 duration-200">
           <Input
-            placeholder="올바른 SQL을 입력하세요..."
+            placeholder={t('feedbackWidget.enterCorrectSql')}
             value={correctedSql}
             onChange={(e) => setCorrectedSql(e.target.value)}
             className="text-xs font-mono h-8"
           />
           <Input
-            placeholder="코멘트 (선택)"
+            placeholder={t('feedbackWidget.commentOptional')}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             className="text-xs h-8"
@@ -128,7 +130,7 @@ export function FeedbackWidget({ queryId, sql }: FeedbackWidgetProps) {
             }}
             disabled={submitting || !correctedSql.trim()}
           >
-            수정 SQL 제출
+            {t('feedbackWidget.submitCorrection')}
           </Button>
         </div>
       )}

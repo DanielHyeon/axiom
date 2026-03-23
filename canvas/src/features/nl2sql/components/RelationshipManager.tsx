@@ -8,6 +8,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   ArrowRight,
@@ -65,6 +66,7 @@ export function RelationshipManager({
   onRefresh,
   getColumnNames,
 }: RelationshipManagerProps) {
+  const { t } = useTranslation();
   const [form, setForm] = useState<NewRelForm>(EMPTY_FORM);
   const [showForm, setShowForm] = useState(false);
 
@@ -101,7 +103,7 @@ export function RelationshipManager({
         <div className="flex items-center gap-2">
           <Layers className="h-4 w-4 text-foreground/50" />
           <span className="text-[13px] font-semibold text-foreground font-heading">
-            릴레이션 관리
+            {t('relationship.title')}
           </span>
         </div>
         {onRefresh && (
@@ -112,7 +114,7 @@ export function RelationshipManager({
             className="h-7 px-2 text-[11px]"
           >
             <RefreshCw className="h-3 w-3 mr-1" />
-            새로고침
+            {t('common.refresh')}
           </Button>
         )}
       </div>
@@ -120,11 +122,11 @@ export function RelationshipManager({
       {/* 사용자 관계 목록 */}
       <div className="space-y-1">
         <span className="text-[10px] text-foreground/40 font-mono uppercase tracking-[0.5px]">
-          사용자 추가 ({userRelationships.length})
+          {t('relationship.userAdded')} ({userRelationships.length})
         </span>
         {userRelationships.length === 0 && (
           <p className="text-[11px] text-foreground/30 font-mono py-2">
-            사용자가 추가한 관계가 없습니다.
+            {t('relationship.noUserRelations')}
           </p>
         )}
         {userRelationships.map((rel, idx) => (
@@ -140,7 +142,7 @@ export function RelationshipManager({
       {inferredRelationships.length > 0 && (
         <details className="group">
           <summary className="text-[10px] text-foreground/40 font-mono uppercase tracking-[0.5px] cursor-pointer hover:text-foreground/60 transition-colors">
-            자동 추론 ({inferredRelationships.length})
+            {t('relationship.inferred')} ({inferredRelationships.length})
           </summary>
           <div className="mt-1 space-y-1">
             {inferredRelationships.map((rel, idx) => (
@@ -163,38 +165,38 @@ export function RelationshipManager({
           className="h-8 text-[11px] border-dashed"
         >
           <Plus className="h-3 w-3 mr-1" />
-          관계 추가
+          {t('relationship.addRelation')}
         </Button>
       ) : (
         <div className="space-y-2 p-3 bg-muted/50 rounded border border-border">
           <span className="text-[10px] font-medium text-foreground/50 font-mono uppercase">
-            새 관계
+            {t('relationship.newRelation')}
           </span>
 
           {/* From */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-foreground/40 font-mono">From 테이블</label>
+              <label className="text-[10px] text-foreground/40 font-mono">{t('relationship.fromTable')}</label>
               <select
                 value={form.fromTable}
                 onChange={(e) => setForm((p) => ({ ...p, fromTable: e.target.value, fromColumn: '' }))}
                 className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
               >
-                <option value="">선택</option>
+                <option value="">{t('relationship.select')}</option>
                 {tables.map((t) => (
                   <option key={t.name} value={t.name}>{t.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-foreground/40 font-mono">From 컬럼</label>
+              <label className="text-[10px] text-foreground/40 font-mono">{t('relationship.fromColumn')}</label>
               <select
                 value={form.fromColumn}
                 onChange={(e) => setForm((p) => ({ ...p, fromColumn: e.target.value }))}
                 className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
                 disabled={!form.fromTable}
               >
-                <option value="">선택</option>
+                <option value="">{t('relationship.select')}</option>
                 {fromColumns.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -205,27 +207,27 @@ export function RelationshipManager({
           {/* To */}
           <div className="grid grid-cols-2 gap-2">
             <div>
-              <label className="text-[10px] text-foreground/40 font-mono">To 테이블</label>
+              <label className="text-[10px] text-foreground/40 font-mono">{t('relationship.toTable')}</label>
               <select
                 value={form.toTable}
                 onChange={(e) => setForm((p) => ({ ...p, toTable: e.target.value, toColumn: '' }))}
                 className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
               >
-                <option value="">선택</option>
+                <option value="">{t('relationship.select')}</option>
                 {tables.map((t) => (
                   <option key={t.name} value={t.name}>{t.name}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="text-[10px] text-foreground/40 font-mono">To 컬럼</label>
+              <label className="text-[10px] text-foreground/40 font-mono">{t('relationship.toColumn')}</label>
               <select
                 value={form.toColumn}
                 onChange={(e) => setForm((p) => ({ ...p, toColumn: e.target.value }))}
                 className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono"
                 disabled={!form.toTable}
               >
-                <option value="">선택</option>
+                <option value="">{t('relationship.select')}</option>
                 {toColumns.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -235,12 +237,12 @@ export function RelationshipManager({
 
           {/* 설명 */}
           <div>
-            <label className="text-[10px] text-foreground/40 font-mono">설명 (선택)</label>
+            <label className="text-[10px] text-foreground/40 font-mono">{t('relationship.descriptionOptional')}</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-              placeholder="관계 설명..."
+              placeholder={t('relationship.descriptionPlaceholder')}
               className="w-full h-7 px-2 text-[11px] border border-border rounded bg-card font-mono outline-none focus:border-blue-300"
             />
           </div>
@@ -253,7 +255,7 @@ export function RelationshipManager({
               disabled={!form.fromTable || !form.fromColumn || !form.toTable || !form.toColumn}
               className="h-7 text-[11px]"
             >
-              추가
+              {t('common.add')}
             </Button>
             <Button
               variant="ghost"
@@ -261,7 +263,7 @@ export function RelationshipManager({
               onClick={() => { setForm(EMPTY_FORM); setShowForm(false); }}
               className="h-7 text-[11px]"
             >
-              취소
+              {t('common.cancel')}
             </Button>
           </div>
         </div>
@@ -279,6 +281,7 @@ interface RelationshipRowProps {
 }
 
 function RelationshipRow({ relationship, isInferred, onRemove }: RelationshipRowProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -311,7 +314,7 @@ function RelationshipRow({ relationship, isInferred, onRemove }: RelationshipRow
           type="button"
           onClick={onRemove}
           className="ml-auto p-0.5 rounded hover:bg-red-100 text-foreground/30 hover:text-red-500 transition-colors shrink-0"
-          aria-label="관계 삭제"
+          aria-label={t('relationship.deleteRelation')}
         >
           <Trash2 className="h-3 w-3" />
         </button>

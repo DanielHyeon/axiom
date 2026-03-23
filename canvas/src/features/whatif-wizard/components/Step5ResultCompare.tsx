@@ -78,7 +78,7 @@ function KpiDeltaCard({ summary }: { summary: KpiDeltaSummary }) {
 
       {/* 베이스라인 */}
       <p className="text-[10px] text-muted-foreground mt-1">
-        기준: {summary.baseline.toFixed(2)}
+        {t('whatifWizard.step5.baselineLabel')}: {summary.baseline.toFixed(2)}
       </p>
     </div>
   );
@@ -173,7 +173,7 @@ export function Step5ResultCompare() {
 
         {/* 시뮬레이션 모드 표시 */}
         <Badge variant="outline" className="text-xs">
-          {simulationMode === 'dag' ? 'DAG 전파' : 'Event Fork'}
+          {simulationMode === 'dag' ? t('whatifWizard.mode.dagPropagation') : t('whatifWizard.mode.eventFork')}
         </Badge>
       </div>
 

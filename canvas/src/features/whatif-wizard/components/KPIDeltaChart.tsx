@@ -17,6 +17,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { KpiDeltaSummary } from '../types/whatifWizard.types';
 
 interface KPIDeltaChartProps {
@@ -41,6 +42,7 @@ function CustomTooltip({
   active?: boolean;
   payload?: Array<{ payload: KpiDeltaSummary }>;
 }) {
+  const { t } = useTranslation();
   if (!active || !payload?.length) return null;
 
   const d = payload[0].payload;
@@ -49,15 +51,15 @@ function CustomTooltip({
       <p className="font-semibold mb-1">{d.name}</p>
       <div className="space-y-0.5 text-xs">
         <p>
-          <span className="text-muted-foreground">베이스라인:</span>{' '}
+          <span className="text-muted-foreground">{t('whatifWizard.step5.baselineLabel')}:</span>{' '}
           <span className="font-mono">{d.baseline.toFixed(2)}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">결과값:</span>{' '}
+          <span className="text-muted-foreground">{t('whatifWizard.step5.resultLabel', '결과값')}:</span>{' '}
           <span className="font-mono">{d.result.toFixed(2)}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">변화량:</span>{' '}
+          <span className="text-muted-foreground">{t('whatifWizard.step5.deltaLabel', '변화량')}:</span>{' '}
           <span
             className="font-mono"
             style={{ color: deltaColor(d.pctChange) }}
@@ -72,7 +74,9 @@ function CustomTooltip({
   );
 }
 
-export function KPIDeltaChart({ data, title = 'KPI 변화량' }: KPIDeltaChartProps) {
+export function KPIDeltaChart({ data, title }: KPIDeltaChartProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('whatifWizard.step5.kpiDelta');
   if (data.length === 0) return null;
 
   // 차트 데이터: 변화율(%) 기준으로 표시
@@ -86,7 +90,7 @@ export function KPIDeltaChart({ data, title = 'KPI 변화량' }: KPIDeltaChartPr
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2">
           <BarChart3 className="w-4 h-4" />
-          {title}
+          {resolvedTitle}
         </CardTitle>
       </CardHeader>
       <CardContent>

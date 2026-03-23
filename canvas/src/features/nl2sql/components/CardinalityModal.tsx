@@ -5,6 +5,7 @@
  * 복수 컬럼 매핑(column_pairs), 설명 입력을 제공한다.
  */
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -35,11 +36,11 @@ interface PairInput {
 /** Cardinality 옵션 */
 type Cardinality = 'many-to-one' | 'one-to-one' | 'one-to-many' | 'many-to-many';
 
-const CARDINALITY_OPTIONS: { value: Cardinality; label: string }[] = [
-  { value: 'many-to-one', label: 'N:1 (다대일)' },
-  { value: 'one-to-one', label: '1:1 (일대일)' },
-  { value: 'one-to-many', label: '1:N (일대다)' },
-  { value: 'many-to-many', label: 'N:M (다대다)' },
+const CARDINALITY_KEYS: { value: Cardinality; labelKey: string }[] = [
+  { value: 'many-to-one', labelKey: 'cardinalityModal.manyToOne' },
+  { value: 'one-to-one', labelKey: 'cardinalityModal.oneToOne' },
+  { value: 'one-to-many', labelKey: 'cardinalityModal.oneToMany' },
+  { value: 'many-to-many', labelKey: 'cardinalityModal.manyToMany' },
 ];
 
 interface CardinalityModalProps {
@@ -76,6 +77,7 @@ export function CardinalityModal({
   onSave,
   initialData,
 }: CardinalityModalProps) {
+  const { t } = useTranslation();
   // 폼 상태
   const [sourceTable, setSourceTable] = useState('');
   const [targetTable, setTargetTable] = useState('');
@@ -162,7 +164,7 @@ export function CardinalityModal({
       <DialogContent className="sm:max-w-[520px]">
         <DialogHeader>
           <DialogTitle className="font-heading text-[15px]">
-            FK 관계 {initialData ? '편집' : '추가'}
+            {initialData ? t('cardinalityModal.editTitle') : t('cardinalityModal.addTitle')}
           </DialogTitle>
         </DialogHeader>
 
@@ -170,28 +172,28 @@ export function CardinalityModal({
           {/* 소스/타겟 테이블 선택 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label className="text-[11px] font-mono text-foreground/50">소스 테이블</Label>
+              <Label className="text-[11px] font-mono text-foreground/50">{t('cardinalityModal.sourceTable')}</Label>
               <select
                 value={sourceTable}
                 onChange={(e) => setSourceTable(e.target.value)}
                 className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
-                <option value="">선택...</option>
-                {tables.map((t) => (
-                  <option key={t.name} value={t.name}>{t.schema}.{t.name}</option>
+                <option value="">{t('cardinalityModal.selectPlaceholder')}</option>
+                {tables.map((tbl) => (
+                  <option key={tbl.name} value={tbl.name}>{tbl.schema}.{tbl.name}</option>
                 ))}
               </select>
             </div>
             <div className="space-y-1.5">
-              <Label className="text-[11px] font-mono text-foreground/50">타겟 테이블</Label>
+              <Label className="text-[11px] font-mono text-foreground/50">{t('cardinalityModal.targetTable')}</Label>
               <select
                 value={targetTable}
                 onChange={(e) => setTargetTable(e.target.value)}
                 className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
-                <option value="">선택...</option>
-                {tables.map((t) => (
-                  <option key={t.name} value={t.name}>{t.schema}.{t.name}</option>
+                <option value="">{t('cardinalityModal.selectPlaceholder')}</option>
+                {tables.map((tbl) => (
+                  <option key={tbl.name} value={tbl.name}>{tbl.schema}.{tbl.name}</option>
                 ))}
               </select>
             </div>
@@ -199,7 +201,7 @@ export function CardinalityModal({
 
           {/* 컬럼 매핑 */}
           <div className="space-y-2">
-            <Label className="text-[11px] font-mono text-foreground/50">컬럼 매핑</Label>
+            <Label className="text-[11px] font-mono text-foreground/50">{t('cardinalityModal.columnMapping')}</Label>
             {pairs.map((pair, idx) => (
               <div key={idx} className="flex items-center gap-2">
                 <select
@@ -208,7 +210,7 @@ export function CardinalityModal({
                   className="flex-1 rounded border border-border bg-card px-2 py-1 text-[11px] font-mono"
                   disabled={!sourceTable}
                 >
-                  <option value="">소스 컬럼</option>
+                  <option value="">{t('cardinalityModal.sourceColumn')}</option>
                   {sourceColumns.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -220,7 +222,7 @@ export function CardinalityModal({
                   className="flex-1 rounded border border-border bg-card px-2 py-1 text-[11px] font-mono"
                   disabled={!targetTable}
                 >
-                  <option value="">타겟 컬럼</option>
+                  <option value="">{t('cardinalityModal.targetColumn')}</option>
                   {targetColumns.map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -237,15 +239,15 @@ export function CardinalityModal({
               onClick={addPair}
               className="flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-600 font-mono"
             >
-              <Plus className="h-3 w-3" /> 매핑 추가
+              <Plus className="h-3 w-3" /> {t('cardinalityModal.addMapping')}
             </button>
           </div>
 
           {/* Cardinality 관계 유형 선택 */}
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-mono text-foreground/50">관계 유형</Label>
+            <Label className="text-[11px] font-mono text-foreground/50">{t('cardinalityModal.relationType')}</Label>
             <div className="flex flex-wrap gap-2">
-              {CARDINALITY_OPTIONS.map((opt) => (
+              {CARDINALITY_KEYS.map((opt) => (
                 <button
                   key={opt.value}
                   type="button"
@@ -256,7 +258,7 @@ export function CardinalityModal({
                       : 'border-border text-foreground/40 hover:border-border'
                   }`}
                 >
-                  {opt.label}
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -264,11 +266,11 @@ export function CardinalityModal({
 
           {/* 설명 입력 (선택 사항) */}
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-mono text-foreground/50">설명 (선택)</Label>
+            <Label className="text-[11px] font-mono text-foreground/50">{t('cardinalityModal.descriptionOptional')}</Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="관계에 대한 설명..."
+              placeholder={t('cardinalityModal.descriptionPlaceholder')}
               className="text-[11px] font-mono"
             />
           </div>
@@ -276,10 +278,10 @@ export function CardinalityModal({
 
         <DialogFooter>
           <Button variant="outline" size="sm" onClick={onClose}>
-            취소
+            {t('common.cancel')}
           </Button>
           <Button size="sm" onClick={handleSave} disabled={!canSave}>
-            {initialData ? '수정' : '추가'}
+            {initialData ? t('common.edit') : t('common.add')}
           </Button>
         </DialogFooter>
       </DialogContent>

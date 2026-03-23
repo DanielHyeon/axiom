@@ -6,6 +6,7 @@
  */
 import { cn } from '@/lib/utils';
 import { GitBranch, Network } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { SimulationMode } from '../types/whatifWizard.types';
 
 interface SimulationModeToggleProps {
@@ -15,35 +16,28 @@ interface SimulationModeToggleProps {
   onChange: (mode: SimulationMode) => void;
 }
 
-/** 모드별 설명 및 아이콘 정보 */
-const MODE_INFO: Record<
-  SimulationMode,
-  { label: string; description: string; icon: typeof Network }
-> = {
-  dag: {
-    label: 'DAG 전파',
-    description:
-      '인과 DAG 그래프를 따라 개입 효과가 전파되는 과정을 시뮬레이션합니다. ' +
-      '학습된 예측 모델을 사용하여 연쇄 영향을 계산합니다.',
-    icon: Network,
-  },
-  'event-fork': {
-    label: 'Event Fork',
-    description:
-      '실제 이벤트 스트림을 복제하여 분기(fork)한 뒤 개입 값을 적용합니다. ' +
-      '타임라인 기반으로 KPI 변화를 추적합니다.',
-    icon: GitBranch,
-  },
+/** 모드별 아이콘 정보 */
+const MODE_ICON: Record<SimulationMode, typeof Network> = {
+  dag: Network,
+  'event-fork': GitBranch,
+};
+
+/** 모드별 i18n 키 */
+const MODE_KEYS: Record<SimulationMode, { labelKey: string; descKey: string }> = {
+  dag: { labelKey: 'whatifWizard.mode.dagPropagation', descKey: 'whatifWizard.mode.dagDesc' },
+  'event-fork': { labelKey: 'whatifWizard.mode.eventFork', descKey: 'whatifWizard.mode.eventDesc' },
 };
 
 export function SimulationModeToggle({ mode, onChange }: SimulationModeToggleProps) {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       <div className="grid grid-cols-2 gap-3">
-        {(Object.entries(MODE_INFO) as [SimulationMode, (typeof MODE_INFO)[SimulationMode]][]).map(
-          ([modeKey, info]) => {
+        {(Object.keys(MODE_KEYS) as SimulationMode[]).map(
+          (modeKey) => {
             const isSelected = mode === modeKey;
-            const Icon = info.icon;
+            const Icon = MODE_ICON[modeKey];
+            const keys = MODE_KEYS[modeKey];
 
             return (
               <button
@@ -73,13 +67,13 @@ export function SimulationModeToggle({ mode, onChange }: SimulationModeTogglePro
                       isSelected ? 'text-primary' : 'text-foreground',
                     )}
                   >
-                    {info.label}
+                    {t(keys.labelKey)}
                   </span>
                 </div>
 
                 {/* 설명 */}
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  {info.description}
+                  {t(keys.descKey)}
                 </p>
               </button>
             );

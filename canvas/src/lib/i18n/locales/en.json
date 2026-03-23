@@ -723,5 +723,594 @@
       "tablePermissions": "Table Permissions",
       "auditLogs": "Audit Logs"
     }
+  },
+  "watchAgent": {
+    "generateFailed": "Failed to generate rule. Please try again.",
+    "generateError": "Sorry, an error occurred while generating the rule.",
+    "ruleCreated": "Rule \"{{name}}\" has been created",
+    "ruleCreatedMsg": "Rule \"{{name}}\" has been successfully created.",
+    "confirmFailed": "Failed to confirm rule",
+    "cancelled": "Rule creation has been cancelled.",
+    "emptyHint": "Describe the monitoring condition in natural language",
+    "emptyExample": "e.g. \"Alert me when stock falls below 10\"",
+    "generating": "Generating rule...",
+    "confirmCreate": "Confirm & Create",
+    "placeholder": "Describe monitoring condition...",
+    "condition": "Condition",
+    "threshold": "Threshold"
+  },
+  "dmn": {
+    "hitPolicy": {
+      "ariaLabel": "Hit policy",
+      "first": "Apply only the first matching rule",
+      "collect": "Collect results of all matching rules",
+      "priority": "Apply the highest priority rule"
+    },
+    "saving": "Saving...",
+    "inputHeader": "Input",
+    "outputHeader": "Output",
+    "inputPlaceholder": "Condition...",
+    "outputPlaceholder": "Result...",
+    "deleteRule": "Delete rule {{index}}",
+    "addRule": "Add Rule",
+    "testRun": "Test Run",
+    "matchCount": "Matched",
+    "matchUnit": "rule(s)"
+  },
+  "schemaCanvas": {
+    "codeAnalysis": "Code Analysis",
+    "datasourceMode": "Datasource",
+    "contextIncluded": "in context",
+    "switchToPhysical": "Switch to physical names",
+    "switchToLogical": "Switch to logical names",
+    "physicalName": "Physical",
+    "logicalName": "Logical",
+    "addRelation": "Add Relation",
+    "addRelationTitle": "Add FK Relation",
+    "erdError": "Unable to generate ERD",
+    "excludeContext": "Exclude from NL2SQL context",
+    "includeContext": "Include in NL2SQL context",
+    "contextLabel": "{{name}} context {{action}}",
+    "dataPreview": "Data Preview",
+    "dataPreviewLabel": "{{name}} data preview",
+    "removeLabel": "Remove {{name}}",
+    "fkToggle": "{{label}} FK {{action}}"
+  },
+  "schemaEmpty": {
+    "roboTitle": "No analyzed code objects yet",
+    "roboDesc": "Analyze source code to automatically extract table structures",
+    "text2sqlTitle": "No connected datasource schema",
+    "text2sqlDesc": "Connect a datasource to display tables and relationships automatically",
+    "noneTitle": "No schemas to explore yet",
+    "noneDesc": "Connect a datasource or analyze source code to get started",
+    "connectDatasource": "Connect Datasource",
+    "viewDatasource": "View in datasource schema →",
+    "viewCode": "View in code analysis schema →"
+  },
+  "tableDetail": {
+    "close": "Close",
+    "columns": "columns",
+    "searchColumns": "Search columns...",
+    "noSearchResults": "No search results",
+    "noColumns": "No column information",
+    "copyColumn": "Copy {{name}}"
+  },
+  "schemaSearch": {
+    "placeholder": "Search tables/columns...",
+    "clearSearch": "Clear search",
+    "noResults": "No results"
+  },
+  "relationship": {
+    "title": "Relationship Manager",
+    "userAdded": "User Added",
+    "noUserRelations": "No user-added relationships.",
+    "inferred": "Auto-inferred",
+    "addRelation": "Add Relation",
+    "newRelation": "New Relation",
+    "fromTable": "From Table",
+    "fromColumn": "From Column",
+    "toTable": "To Table",
+    "toColumn": "To Column",
+    "select": "Select",
+    "descriptionOptional": "Description (optional)",
+    "descriptionPlaceholder": "Describe the relationship...",
+    "deleteRelation": "Delete relationship"
+  },
+  "reactSummary": {
+    "idle": "Idle",
+    "running": "Agent Running",
+    "needsInput": "Waiting for Input",
+    "completed": "Completed",
+    "error": "Error",
+    "remainingCalls": "Remaining calls",
+    "partialSql": "Current SQL Snapshot",
+    "finalSql": "Final SQL",
+    "validatedSql": "Validated SQL",
+    "warnings": "Warnings",
+    "copied": "Copied",
+    "copy": "Copy"
+  },
+  "hil": {
+    "agentRequest": "Agent is requesting additional information",
+    "yes": "Yes",
+    "no": "No",
+    "textPlaceholder": "Enter additional information...",
+    "abort": "Abort",
+    "sending": "Sending...",
+    "sendResponse": "Send Response"
+  },
+  "feedbackWidget": {
+    "saved": "Feedback saved.",
+    "saveFailed": "Failed to save feedback.",
+    "recorded": "Feedback recorded",
+    "rateResult": "Rate result:",
+    "accurateResult": "Accurate result",
+    "inaccurateResult": "Inaccurate result",
+    "correction": "Correct",
+    "sqlSuggestion": "Suggest SQL correction",
+    "enterCorrectSql": "Enter the correct SQL...",
+    "commentOptional": "Comment (optional)",
+    "submitCorrection": "Submit Corrected SQL"
+  },
+  "databaseTree": {
+    "header": "Data Assets",
+    "emptyHint": "Select a datasource to\ndisplay the schema tree.",
+    "loading": "Loading...",
+    "noColumns": "No columns",
+    "toggleColumns": "{{name}} columns {{action}}"
+  },
+  "dataPreview": {
+    "preview": "Preview",
+    "close": "Close",
+    "fetching": "Fetching data...",
+    "fetchFailed": "Failed to fetch data",
+    "topRows": "Top 10 rows / {{total}} total rows",
+    "rowCount": "{{count}} rows"
+  },
+  "conversation": {
+    "turnProgress": "Conversation: {{count}} turns",
+    "newConversation": "New Conversation"
+  },
+  "columnDetail": {
+    "dataType": "Data Type",
+    "fqn": "Fully Qualified Name (FQN)",
+    "primaryKey": "Primary Key",
+    "foreignKeyInferred": "Foreign Key (Inferred)",
+    "vectorIndex": "Vector Index",
+    "vectorEnabled": "Enabled",
+    "description": "Description",
+    "noDescription": "No description"
+  },
+  "cardinalityModal": {
+    "editTitle": "Edit FK Relationship",
+    "addTitle": "Add FK Relationship",
+    "sourceTable": "Source Table",
+    "targetTable": "Target Table",
+    "selectPlaceholder": "Select...",
+    "columnMapping": "Column Mapping",
+    "sourceColumn": "Source Column",
+    "targetColumn": "Target Column",
+    "addMapping": "Add Mapping",
+    "relationType": "Relationship Type",
+    "manyToOne": "N:1 (Many-to-One)",
+    "oneToOne": "1:1 (One-to-One)",
+    "oneToMany": "1:N (One-to-Many)",
+    "manyToMany": "N:M (Many-to-Many)",
+    "descriptionOptional": "Description (optional)",
+    "descriptionPlaceholder": "Describe the relationship..."
+  },
+  "cPipeline": {
+    "exploration": "Explore",
+    "convergence": "Converge",
+    "escape": "Escape",
+    "stepsCount": "{{count}} steps",
+    "score": "Score",
+    "count": "{{count}} items"
+  },
+  "qualityBadge": {
+    "trusted": "Trusted",
+    "caution": "Caution",
+    "referenceOnly": "Reference Only",
+    "blocked": "Blocked",
+    "semanticBased": "Semantic Contract",
+    "rawBased": "Raw Schema",
+    "synonymCount": "{{count}} synonyms",
+    "referenceMode": "Reference Only",
+    "safeMode": "Safe Mode",
+    "qualityWarnings": "{{count}} quality warning(s)",
+    "score": "{{score}} pts"
+  },
+  "whatifWizard": {
+    "prev": "Previous",
+    "next": "Next",
+    "complete": "Complete",
+    "resetWizard": "Reset",
+    "step1": {
+      "title": "Scenario Definition",
+      "description": "Set basic information and simulation mode for What-if analysis.",
+      "basicInfo": "Basic Info",
+      "nameLabel": "Scenario Name",
+      "namePlaceholder": "e.g. OEE impact when cost rises 20%",
+      "descLabel": "Description (optional)",
+      "descPlaceholder": "Describe the purpose and background of this scenario..."
+    },
+    "step2": {
+      "title": "Data/Node Selection",
+      "description": "Select ontology nodes for analysis.",
+      "all": "All",
+      "searchPlaceholder": "Search nodes...",
+      "selectedNodes": "Selected Nodes",
+      "noSelection": "No nodes selected yet",
+      "nodeCount": "{{count}} nodes selected"
+    },
+    "step3": {
+      "title": "Causal Discovery",
+      "description": "Analyze causal relationships between selected nodes.",
+      "discover": "Run Causal Discovery",
+      "discovering": "Discovering...",
+      "confidenceThreshold": "Confidence Threshold",
+      "relations": "Relations",
+      "source": "Source",
+      "target": "Target",
+      "weight": "Weight",
+      "lag": "Lag (days)",
+      "confidence": "Confidence",
+      "direction": "Direction",
+      "positive": "Positive (+)",
+      "negative": "Negative (-)",
+      "skipEventFork": "Skip in Event Fork mode",
+      "noRelations": "No causal relationships found"
+    },
+    "step4": {
+      "title": "Intervention Setup",
+      "description": "Configure parameter changes for simulation.",
+      "addIntervention": "Add Intervention",
+      "selectNode": "Select Node",
+      "selectField": "Select Field",
+      "value": "Intervention Value",
+      "baseline": "Baseline",
+      "descriptionLabel": "Description",
+      "noInterventions": "Please add an intervention"
+    },
+    "step5": {
+      "title": "Result Comparison",
+      "description": "Compare simulation results with baseline.",
+      "runSimulation": "Run Simulation",
+      "running": "Running simulation...",
+      "kpiDelta": "KPI Delta Summary",
+      "baselineLabel": "Baseline",
+      "eventTimeline": "Event Timeline",
+      "noResults": "Run the simulation to see results"
+    },
+    "mode": {
+      "dagPropagation": "DAG Propagation",
+      "dagDesc": "Propagate impact through causal graph",
+      "eventFork": "Event Fork",
+      "eventDesc": "Fork scenarios based on events"
+    }
+  },
+  "ingestion": {
+    "dropZoneText": "Drag files to upload or click to select",
+    "dropZoneActive": "Drop files here",
+    "filePreview": "File Preview",
+    "uploadProgress": "Upload Progress",
+    "pipelineSteps": "Pipeline Steps",
+    "connectionTest": "Connection Test",
+    "testing": "Testing...",
+    "testSuccess": "Connection successful",
+    "testFailed": "Connection failed",
+    "datasourceManager": "Datasource Manager"
+  },
+  "objectExplorer": {
+    "title": "Object Explorer",
+    "selectType": "Select object type",
+    "searchInstances": "Search instances...",
+    "noInstances": "No instances found",
+    "properties": "Properties",
+    "relations": "Relations",
+    "instanceDetail": "Instance Detail",
+    "noSelection": "Select an instance to view details"
+  },
+  "security": {
+    "userManagement": {
+      "title": "User Management",
+      "addUser": "Add User",
+      "editUser": "Edit User",
+      "deleteUser": "Delete User",
+      "confirmDelete": "Delete user \"{{name}}\"?",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "active": "Active",
+      "inactive": "Inactive",
+      "lastLogin": "Last Login",
+      "actions": "Actions"
+    },
+    "roles": {
+      "title": "Role Management",
+      "admin": "Admin",
+      "manager": "Manager",
+      "analyst": "Analyst",
+      "engineer": "Engineer",
+      "viewer": "Viewer"
+    },
+    "tablePermissions": {
+      "title": "Table Permissions",
+      "tableName": "Table Name",
+      "readAccess": "Read",
+      "writeAccess": "Write",
+      "manageAccess": "Manage"
+    },
+    "auditLogs": {
+      "title": "Audit Logs",
+      "timestamp": "Timestamp",
+      "user": "User",
+      "action": "Action",
+      "resource": "Resource",
+      "details": "Details"
+    },
+    "policies": {
+      "title": "Security Policies",
+      "passwordPolicy": "Password Policy",
+      "sessionTimeout": "Session Timeout",
+      "ipWhitelist": "IP Whitelist"
+    }
+  },
+  "processDesignerExtended": {
+    "treeView": {
+      "processes": "Processes",
+      "noProcesses": "No processes found",
+      "searchProcess": "Search processes..."
+    },
+    "mining": {
+      "title": "Process Mining",
+      "conformance": "Conformance Analysis",
+      "discover": "Discover Process",
+      "analyzing": "Analyzing..."
+    },
+    "aiDiscover": {
+      "title": "AI Process Discovery",
+      "description": "AI automatically discovers processes from event logs",
+      "start": "Start Discovery",
+      "running": "AI analyzing..."
+    },
+    "keyboardShortcuts": {
+      "title": "Keyboard Shortcuts",
+      "undo": "Undo",
+      "redo": "Redo",
+      "deleteNode": "Delete Node",
+      "selectAll": "Select All",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitView": "Fit View"
+    },
+    "properties": {
+      "temporal": "Temporal Properties",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "duration": "Duration",
+      "measureBinding": "Measure Binding",
+      "selectMeasure": "Select measure...",
+      "eventLogBinding": "Event Log Binding",
+      "selectEventLog": "Select event log..."
+    },
+    "canvas": {
+      "ariaLabel": "Process canvas",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fitView": "Fit view",
+      "resetView": "Reset view"
+    }
+  },
+  "olapStudio": {
+    "title": "OLAP Studio",
+    "datasources": {
+      "title": "Datasource Management",
+      "addDatasource": "Add Datasource",
+      "noDatasources": "No datasources registered",
+      "connectionInfo": "Connection Info"
+    },
+    "cubes": {
+      "title": "Cube Management",
+      "addCube": "Add Cube",
+      "noCubes": "No cubes registered",
+      "publish": "Publish",
+      "validate": "Validate",
+      "dimensions": "Dimensions",
+      "measures": "Measures",
+      "status": "Status"
+    },
+    "etl": {
+      "title": "ETL Pipelines",
+      "addPipeline": "Add Pipeline",
+      "noPipelines": "No pipelines registered",
+      "runPipeline": "Run",
+      "lastRun": "Last Run",
+      "schedule": "Schedule"
+    },
+    "pivot": {
+      "title": "Pivot Analysis",
+      "rows": "Rows",
+      "columns": "Columns",
+      "values": "Values",
+      "filters": "Filters",
+      "dragHint": "Drag dimensions or measures here",
+      "runPivot": "Run Pivot",
+      "exportCsv": "Export CSV",
+      "sqlPreview": "SQL Preview"
+    },
+    "lineage": {
+      "title": "Data Lineage",
+      "noLineage": "No lineage data available",
+      "viewGraph": "View Graph"
+    },
+    "mondrian": {
+      "title": "Mondrian XML Editor",
+      "validate": "Validate XML",
+      "validationSuccess": "Validation successful",
+      "validationFailed": "Validation failed",
+      "format": "Format",
+      "copy": "Copy"
+    }
+  },
+  "semanticCatalog": {
+    "summary": {
+      "entities": "Entities",
+      "measures": "Measures",
+      "dimensions": "Dimensions",
+      "joins": "Joins",
+      "concepts": "Concepts",
+      "snapshots": "Snapshots"
+    },
+    "entity": {
+      "title": "Semantic Entities",
+      "name": "Entity Name",
+      "table": "Source Table",
+      "status": "Status",
+      "domain": "Domain",
+      "description": "Description",
+      "noEntities": "No entities registered"
+    },
+    "measure": {
+      "title": "Measures",
+      "name": "Measure Name",
+      "type": "Type",
+      "expression": "SQL Expression",
+      "additive": "Additive Type",
+      "noMeasures": "No measures registered"
+    },
+    "runtime": {
+      "title": "Runtime Snapshots",
+      "version": "Version",
+      "status": "Status",
+      "activatedAt": "Activated At",
+      "build": "Build",
+      "activate": "Activate",
+      "invalidate": "Invalidate",
+      "noSnapshots": "No snapshots available"
+    },
+    "relation": {
+      "title": "Ontology Relations",
+      "subject": "Subject",
+      "predicate": "Predicate",
+      "object": "Object",
+      "weight": "Weight",
+      "confidence": "Confidence",
+      "noRelations": "No relations registered"
+    },
+    "rulePolicy": {
+      "title": "Rules & Policies",
+      "rules": "Rules",
+      "policies": "Policies",
+      "addRule": "Add Rule",
+      "addPolicy": "Add Policy",
+      "noRules": "No rules registered",
+      "noPolicies": "No policies registered"
+    },
+    "alias": {
+      "title": "Alias Management",
+      "groups": "Alias Groups",
+      "rules": "Expansion Rules",
+      "addGroup": "Add Group",
+      "addRule": "Add Rule",
+      "noGroups": "No alias groups registered",
+      "noRules": "No expansion rules registered"
+    },
+    "l2Extended": {
+      "title": "L2 Extended",
+      "segments": "Segments",
+      "timeContracts": "Time Contracts",
+      "accessPolicies": "Access Policies",
+      "noSegments": "No segments registered",
+      "noTimeContracts": "No time contracts registered",
+      "noAccessPolicies": "No access policies registered"
+    }
+  },
+  "behavior": {
+    "execution": {
+      "title": "Behavior Execution",
+      "run": "Run",
+      "running": "Running...",
+      "success": "Execution successful",
+      "failed": "Execution failed",
+      "result": "Execution Result",
+      "autoFixed": "Auto-fixed"
+    },
+    "codeViewer": {
+      "title": "Generated Code",
+      "copy": "Copy",
+      "copied": "Copied",
+      "language": "Language"
+    }
+  },
+  "domain": {
+    "objectType": {
+      "title": "Object Types",
+      "list": "Object Type List",
+      "create": "Create Object Type",
+      "name": "Name",
+      "layer": "Layer",
+      "fieldCount": "Fields",
+      "noTypes": "No object types found",
+      "searchPlaceholder": "Search types..."
+    },
+    "field": {
+      "title": "Field Editor",
+      "name": "Field Name",
+      "type": "Data Type",
+      "required": "Required",
+      "description": "Description",
+      "addField": "Add Field"
+    },
+    "relation": {
+      "title": "Relation Editor",
+      "source": "Source",
+      "target": "Target",
+      "type": "Relation Type",
+      "addRelation": "Add Relation"
+    },
+    "graph": {
+      "title": "Domain Graph",
+      "noData": "No graph data",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitView": "Fit View"
+    },
+    "chart": {
+      "title": "Chart Configuration",
+      "chartType": "Chart Type",
+      "xAxis": "X Axis",
+      "yAxis": "Y Axis"
+    },
+    "behaviorEditor": {
+      "title": "Behavior Editor",
+      "code": "Code",
+      "test": "Test"
+    }
+  },
+  "cep": {
+    "title": "CEP Rules",
+    "addRule": "Add Rule",
+    "noRules": "No CEP rules registered",
+    "name": "Rule Name",
+    "pattern": "Pattern",
+    "action": "Action",
+    "status": "Status"
+  },
+  "materializedView": {
+    "title": "Materialized View Management",
+    "addView": "Add View",
+    "noViews": "No materialized views found",
+    "refresh": "Refresh",
+    "lastRefreshed": "Last Refreshed",
+    "definition": "Definition",
+    "status": "Status"
+  },
+  "instancePreview": {
+    "title": "Data Preview",
+    "noData": "No data available",
+    "rowCount": "{{count}} rows",
+    "loading": "Loading data..."
   }
 }

@@ -9,6 +9,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Send, Check, X, Loader2, Bot, User, Sparkles } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -38,6 +39,7 @@ const severityVariant = (s: string): 'destructive' | 'default' | 'secondary' => 
 // ─── 컴포넌트 ────────────────────────────────────────────
 
 export function WatchAgentPanel() {
+  const { t } = useTranslation();
   // 대화 이력
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -73,10 +75,10 @@ export function WatchAgentPanel() {
       ]);
       setPendingProposal(proposal);
     } catch {
-      toast.error('규칙 생성에 실패했습니다. 다시 시도해 주세요.');
+      toast.error(t('watchAgent.generateFailed'));
       setMessages((prev) => [
         ...prev,
-        { role: 'agent', content: '죄송합니다. 규칙 생성 중 오류가 발생했습니다.' },
+        { role: 'agent', content: t('watchAgent.generateError') },
       ]);
     } finally {
       setGenerating(false);
@@ -91,14 +93,14 @@ export function WatchAgentPanel() {
 
     try {
       const result = await confirmRule(pendingProposal);
-      toast.success(`규칙 "${result.name}"이(가) 생성되었습니다`);
+      toast.success(t('watchAgent.ruleCreated', { name: result.name }));
       setMessages((prev) => [
         ...prev,
-        { role: 'agent', content: `규칙 "${result.name}"이(가) 성공적으로 생성되었습니다.` },
+        { role: 'agent', content: t('watchAgent.ruleCreatedMsg', { name: result.name }) },
       ]);
       setPendingProposal(null);
     } catch {
-      toast.error('규칙 확인에 실패했습니다');
+      toast.error(t('watchAgent.confirmFailed'));
     } finally {
       setConfirming(false);
     }
@@ -108,7 +110,7 @@ export function WatchAgentPanel() {
 
   const handleCancel = () => {
     setPendingProposal(null);
-    setMessages((prev) => [...prev, { role: 'agent', content: '규칙 생성이 취소되었습니다.' }]);
+    setMessages((prev) => [...prev, { role: 'agent', content: t('watchAgent.cancelled') }]);
   };
 
   // ─── Enter 키 전송 ────────────────────────────────────
@@ -135,9 +137,9 @@ export function WatchAgentPanel() {
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/30 text-sm gap-2">
             <Bot className="h-8 w-8" />
-            <p>모니터링하고 싶은 조건을 자연어로 설명하세요</p>
+            <p>{t('watchAgent.emptyHint')}</p>
             <p className="text-xs text-foreground/20">
-              예: "재고가 10개 미만이면 경고해줘"
+              {t('watchAgent.emptyExample')}
             </p>
           </div>
         )}
@@ -182,8 +184,8 @@ export function WatchAgentPanel() {
 
                     {/* 조건 + 임계값 */}
                     <div className="flex gap-4 text-foreground/60">
-                      <span>조건: {msg.proposal.condition_type}</span>
-                      <span>임계값: {msg.proposal.threshold}</span>
+                      <span>{t('watchAgent.condition')}: {msg.proposal.condition_type}</span>
+                      <span>{t('watchAgent.threshold')}: {msg.proposal.threshold}</span>
                     </div>
                   </div>
                 </Card>
@@ -207,7 +209,7 @@ export function WatchAgentPanel() {
             </div>
             <div className="bg-muted rounded-lg px-4 py-3 text-sm text-foreground/50 flex items-center gap-2">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              규칙을 생성하고 있습니다...
+              {t('watchAgent.generating')}
             </div>
           </div>
         )}
@@ -222,11 +224,11 @@ export function WatchAgentPanel() {
             ) : (
               <Check className="h-4 w-4" />
             )}
-            확인 및 생성
+            {t('watchAgent.confirmCreate')}
           </Button>
           <Button variant="outline" onClick={handleCancel} disabled={confirming} className="gap-1.5">
             <X className="h-4 w-4" />
-            취소
+            {t('common.cancel')}
           </Button>
         </div>
       )}
@@ -237,7 +239,7 @@ export function WatchAgentPanel() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="모니터링 조건을 설명하세요..."
+          placeholder={t('watchAgent.placeholder')}
           rows={2}
           disabled={generating}
           className="flex-1 resize-none text-sm"

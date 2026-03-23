@@ -16,6 +16,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Columns3 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import type { ScenarioComparisonResult } from '../types/whatifWizard.types';
 
 interface ScenarioComparisonTableProps {
@@ -27,20 +28,22 @@ interface ScenarioComparisonTableProps {
 
 export function ScenarioComparisonTable({
   data,
-  title = '시나리오 비교',
+  title,
 }: ScenarioComparisonTableProps) {
+  const { t } = useTranslation();
+  const resolvedTitle = title ?? t('whatifWizard.step5.scenarioComparison', '시나리오 비교');
   if (!data || data.scenarios.length === 0 || data.metrics.length === 0) {
     return (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Columns3 className="w-4 h-4" />
-            {title}
+            {resolvedTitle}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground text-center py-6">
-            비교할 시나리오 데이터가 없습니다.
+            {t('whatifWizard.step5.noResults')}
           </p>
         </CardContent>
       </Card>
@@ -53,7 +56,7 @@ export function ScenarioComparisonTable({
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm flex items-center gap-2">
             <Columns3 className="w-4 h-4" />
-            {title}
+            {resolvedTitle}
           </CardTitle>
           <Badge variant="secondary" className="text-xs">
             {data.scenarios.length}개 시나리오 x {data.metrics.length}개 지표
@@ -67,7 +70,7 @@ export function ScenarioComparisonTable({
               <TableRow>
                 {/* 빈 셀 (행 제목 열) */}
                 <TableHead className="text-xs font-semibold min-w-[140px] sticky left-0 bg-card z-10">
-                  지표
+                  {t('semanticCatalog.summary.measures', '지표')}
                 </TableHead>
                 {/* 시나리오 열 헤더 */}
                 {data.scenarios.map((scenario) => (

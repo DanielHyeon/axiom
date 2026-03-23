@@ -5,6 +5,7 @@
  * KAIR ColumnDetailPanel.vue를 React+Tailwind 패턴으로 이식.
  */
 
+import { useTranslation } from 'react-i18next';
 import {
   X,
   Key,
@@ -36,6 +37,7 @@ export function ColumnDetailPanel({
   column,
   onClose,
 }: ColumnDetailPanelProps) {
+  const { t } = useTranslation();
   // FK 추론: _id 접미사
   const isInferredFk = column.name.endsWith('_id') && !column.is_primary_key;
 
@@ -54,7 +56,7 @@ export function ColumnDetailPanel({
             type="button"
             onClick={onClose}
             className="p-1 rounded hover:bg-muted transition-colors"
-            aria-label="닫기"
+            aria-label={t('common.close')}
           >
             <X className="h-3.5 w-3.5 text-foreground/40" />
           </button>
@@ -73,7 +75,7 @@ export function ColumnDetailPanel({
         {/* 데이터 타입 */}
         <PropertyRow
           icon={<Type className="h-3.5 w-3.5 text-purple-400" />}
-          label="데이터 타입"
+          label={t('columnDetail.dataType')}
           value={column.data_type}
         />
 
@@ -81,7 +83,7 @@ export function ColumnDetailPanel({
         {column.fqn && (
           <PropertyRow
             icon={<Hash className="h-3.5 w-3.5 text-foreground/30" />}
-            label="정규화 이름 (FQN)"
+            label={t('columnDetail.fqn')}
             value={column.fqn}
           />
         )}
@@ -90,7 +92,7 @@ export function ColumnDetailPanel({
         {column.is_primary_key && (
           <PropertyRow
             icon={<Key className="h-3.5 w-3.5 text-amber-400" />}
-            label="기본 키"
+            label={t('columnDetail.primaryKey')}
           >
             <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 bg-amber-50">
               PRIMARY KEY
@@ -102,7 +104,7 @@ export function ColumnDetailPanel({
         {isInferredFk && (
           <PropertyRow
             icon={<Link className="h-3.5 w-3.5 text-blue-400" />}
-            label="외래 키 (추론)"
+            label={t('columnDetail.foreignKeyInferred')}
           >
             <Badge variant="outline" className="text-[10px] border-blue-300 text-blue-600 bg-blue-50">
               FOREIGN KEY (추론)
@@ -121,16 +123,16 @@ export function ColumnDetailPanel({
         {column.has_vector && (
           <PropertyRow
             icon={<Hash className="h-3.5 w-3.5 text-green-400" />}
-            label="벡터 인덱스"
-            value="활성화"
+            label={t('columnDetail.vectorIndex')}
+            value={t('columnDetail.vectorEnabled')}
           />
         )}
 
         {/* 설명 */}
         <PropertyRow
           icon={<FileText className="h-3.5 w-3.5 text-foreground/30" />}
-          label="설명"
-          value={column.description || '설명 없음'}
+          label={t('columnDetail.description')}
+          value={column.description || t('columnDetail.noDescription')}
         />
       </div>
     </div>
