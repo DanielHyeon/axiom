@@ -117,9 +117,10 @@ class GovernanceService:
         return workspace
 
     async def get_workspaces(
-        self, tenant_id: str, page: int = 1, page_size: int = 50,
+        self, tenant_id: str, user_id: str, page: int = 1, page_size: int = 50,
     ) -> tuple[list[Workspace], int]:
-        return await self.ws_repo.find_all_by_tenant(tenant_id, page, page_size)
+        """사용자가 접근 가능한 워크스페이스 목록 (멤버십 기반 필터링)."""
+        return await self.ws_repo.find_accessible_by_user(tenant_id, user_id, page, page_size)
 
     async def get_workspace(self, tenant_id: str, workspace_id: UUID) -> Workspace:
         ws = await self.ws_repo.find_by_id(tenant_id, workspace_id)

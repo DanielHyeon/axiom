@@ -69,20 +69,42 @@ class WorkspaceRepository:
         )
         return result.scalar_one_or_none()
 
-    async def find_all_by_tenant(
-        self, tenant_id: str, page: int = 1, page_size: int = 50,
+    async def find_accessible_by_user(
+        self, tenant_id: str, user_id: str, page: int = 1, page_size: int = 50,
     ) -> tuple[list[Workspace], int]:
-        # 건수 조회
-        count_q = select(func.count()).select_from(Workspace).where(
-            Workspace.tenant_id == tenant_id,
-            Workspace.is_deleted == False,
+        """사용자가 접근 가능한 워크스페이스 목록 반환.
+
+        접근 가능 조건:
+        - 해당 workspace에 활성 멤버십이 존재하거나
+        - visibility_policy가 TENANT_SHARED
+        """
+        accessible_q = (
+            select(Workspace)
+            .outerjoin(
+                Membership,
+                (Membership.workspace_id == Workspace.id)
+                & (Membership.tenant_id == tenant_id)
+                & (Membership.user_id == user_id)
+                & (Membership.is_deleted == False)
+                & (Membership.status == "ACTIVE"),
+            )
+            .where(
+                Workspace.tenant_id == tenant_id,
+                Workspace.is_deleted == False,
+            )
+            .where(
+                (Membership.id.isnot(None)) | (Workspace.visibility_policy == "TENANT_SHARED")
+            )
+            .distinct()
         )
+
+        # 건수
+        count_q = select(func.count()).select_from(accessible_q.subquery())
         total = (await self.session.execute(count_q)).scalar_one()
 
-        # 데이터 조회
+        # 데이터
         data_q = (
-            select(Workspace)
-            .where(Workspace.tenant_id == tenant_id, Workspace.is_deleted == False)
+            accessible_q
             .order_by(Workspace.created_at.desc())
             .offset((page - 1) * page_size)
             .limit(page_size)

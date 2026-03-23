@@ -13,6 +13,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_session
+from app.core.security import get_current_user
 from app.models.twin_models import (
     ProcessInstance, StepInstance, TwinEvent, TwinSnapshot, TwinState,
 )
@@ -30,11 +31,12 @@ router = APIRouter(prefix="/api/v1/twin", tags=["twin"])
 @router.post("/instances", response_model=InstanceResponse, status_code=201)
 async def create_instance(
     body: StartInstanceRequest,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """프로세스 인스턴스 생성."""
     instance = ProcessInstance(
-        tenant_id="default",  # TODO: Phase 1 통합 후 JWT에서 추출
+        tenant_id=user["tenant_id"],
         workspace_id=body.workspace_id,
         process_definition_id=body.process_definition_id,
         process_version_id=body.process_version_id,
@@ -55,6 +57,7 @@ async def create_instance(
 @router.get("/instances/{instance_id}", response_model=InstanceResponse)
 async def get_instance(
     instance_id: UUID,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     r = await session.execute(
@@ -75,6 +78,7 @@ async def list_instances(
     status: str | None = None,
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     base = select(ProcessInstance).where(
@@ -96,6 +100,7 @@ async def list_instances(
 @router.post("/events", status_code=201)
 async def publish_event(
     body: PublishEventRequest,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """트윈 이벤트 발행 (멱등성 보장 — aggregate 스코프)."""
@@ -104,7 +109,7 @@ async def publish_event(
     from sqlalchemy.dialects.postgresql import insert as pg_insert
 
     seq_stmt = pg_insert(AggregateSequence).values(
-        tenant_id="default",
+        tenant_id=user["tenant_id"],
         aggregate_type=body.aggregate_type,
         aggregate_id=body.aggregate_id,
         last_seq=1,
@@ -117,7 +122,7 @@ async def publish_event(
     aggregate_seq = seq_result.scalar_one()
 
     event = TwinEvent(
-        tenant_id="default",
+        tenant_id=user["tenant_id"],
         workspace_id=body.workspace_id,
         event_type=body.event_type,
         aggregate_type=body.aggregate_type,
@@ -142,6 +147,7 @@ async def publish_event(
 async def get_state(
     entity_type: str,
     entity_id: UUID,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     r = await session.execute(
@@ -162,6 +168,7 @@ async def get_state(
 @router.get("/dashboard/workspaces/{workspace_id}", response_model=DashboardSummary)
 async def get_dashboard(
     workspace_id: UUID,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """워크스페이스 운영 요약 — 단일 쿼리 집계."""
@@ -206,6 +213,7 @@ async def get_dashboard(
 @router.get("/dashboard/workspaces/{workspace_id}/processes")
 async def get_process_health(
     workspace_id: UUID,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """프로세스별 건강도 목록."""
@@ -225,11 +233,12 @@ async def get_process_health(
 @router.post("/snapshots", response_model=SnapshotResponse, status_code=201)
 async def capture_snapshot(
     body: CaptureSnapshotRequest,
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     """수동 스냅샷 캡처."""
     snapshot = TwinSnapshot(
-        tenant_id="default",
+        tenant_id=user["tenant_id"],
         workspace_id=body.workspace_id,
         snapshot_type="MANUAL",
         entity_scope_type=body.entity_scope_type,
@@ -248,6 +257,7 @@ async def list_snapshots(
     workspace_id: UUID = Query(...),
     page: int = Query(1, ge=1),
     page_size: int = Query(50, ge=1, le=200),
+    user: dict = Depends(get_current_user),
     session: AsyncSession = Depends(get_session),
 ):
     base = select(TwinSnapshot).where(

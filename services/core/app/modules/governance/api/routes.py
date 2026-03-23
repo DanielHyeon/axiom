@@ -127,7 +127,7 @@ async def list_workspaces(
 ):
     """접근 가능 워크스페이스 목록."""
     svc = GovernanceService(session)
-    items, total = await svc.get_workspaces(user["tenant_id"], page, page_size)
+    items, total = await svc.get_workspaces(user["tenant_id"], user["user_id"], page, page_size)
     return {
         "success": True,
         "data": {
