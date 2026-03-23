@@ -16,6 +16,17 @@ from app.api.object_explorer import router as object_explorer_router
 from app.api.instance_fetcher import router as instance_fetcher_router
 from app.api.materialized_views import router as materialized_views_router
 from app.api.quality import router as quality_router
+from app.api.jobs import router as jobs_router
+from app.api.connectors import router as connectors_router
+from app.api.direct_sql import router as direct_sql_router
+from app.api.profiling import router as profiling_router
+from app.api.related_tables import router as related_tables_router
+from app.api.code_upload import router as code_upload_router
+from app.api.mv_management import router as mv_management_router
+from app.api.quality_rules import router as quality_rules_router
+from app.api.drift import router as drift_router
+from app.api.schema_coverage import router as schema_coverage_router
+from app.api.ai_description import router as ai_description_router
 from app.core.config import settings
 from app.core.error_codes import public_error_message
 from app.core.insight_errors import InsightError, insight_error_handler
@@ -54,6 +65,23 @@ app.include_router(object_explorer_router)
 app.include_router(instance_fetcher_router)
 app.include_router(materialized_views_router)
 app.include_router(quality_router)
+# Phase 0: 운영 공통 기반
+app.include_router(jobs_router)
+app.include_router(connectors_router)
+# Phase 1 Sprint 3: Direct SQL + 프로파일링 + 관련 테이블
+app.include_router(direct_sql_router)
+app.include_router(profiling_router)
+app.include_router(related_tables_router)
+# Phase 2 Sprint 5: 소스코드 업로드 + DDL 파서 + 파일 타입 감지
+app.include_router(code_upload_router)
+# Phase 3 Sprint 10: MV 관리 + 스키마 커버리지 + AI 설명
+app.include_router(mv_management_router)
+# Phase 4 Sprint 13: DQ Rule CRUD + Test Execution
+app.include_router(quality_rules_router)
+# Phase 4 Sprint 14: SSDD 드리프트 탐지
+app.include_router(drift_router)
+app.include_router(schema_coverage_router)
+app.include_router(ai_description_router)
 
 # ── DDD-P3-01: Weaver Outbox Relay ── #
 _relay_task: asyncio.Task | None = None
