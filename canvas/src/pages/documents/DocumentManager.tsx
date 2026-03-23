@@ -8,19 +8,19 @@ export const DocumentManager: React.FC = () => {
  ]);
 
  return (
- <div className="bg-white rounded shadow p-6 h-full">
+ <div className="bg-card rounded shadow p-6 h-full">
  <div className="flex justify-between items-center mb-6">
  <div>
  <h1 className="text-2xl font-bold text-gray-800">Document Management</h1>
  <p className="text-muted-foreground text-sm">Upload unstructured files into the Synapse Ontology engine.</p>
  </div>
- <button className="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-4 rounded">
+ <button className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-4 rounded">
  Upload Document
  </button>
  </div>
 
  <div className="overflow-x-auto">
- <table className="min-w-full bg-white border border-border">
+ <table className="min-w-full bg-card border border-border">
  <thead>
  <tr className="bg-accent">
  <th className="py-2 px-4 border-b text-left text-sm font-semibold text-muted-foreground">File Name</th>

@@ -56,7 +56,7 @@ export function LineageNodeDetail() {
         <div className="flex gap-3 min-w-0">
           {/* 타입 아이콘 */}
           <span
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm text-white"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-sm text-primary-foreground"
             style={{ background: style.color }}
           >
             {selectedNode.type[0].toUpperCase()}

@@ -21,6 +21,11 @@ from app.api.behavior_execution import router as behavior_execution_router
 from app.api.ontology_feedback import router as ontology_feedback_router
 from app.api.multi_layer_generation import router as multi_layer_generation_router
 from app.api.semantic_contract import router as semantic_contract_router
+from app.api.process_graph import router as process_graph_router
+from app.api.ontology_generation import router as ontology_generation_router
+from app.api.dmn_editor import router as dmn_editor_router
+from app.api.standards_import import router as standards_import_router
+from app.api.ontology_history import router as ontology_history_router
 from app.events.consumer import run_ontology_ingest_consumer
 from app.events.outbox import SynapseRelayWorker, ensure_outbox_table
 import structlog
@@ -177,6 +182,13 @@ app.include_router(behavior_execution_router)
 app.include_router(ontology_feedback_router)
 app.include_router(multi_layer_generation_router)
 app.include_router(semantic_contract_router)
+app.include_router(process_graph_router)
+# Phase 3 Sprint 9: AI 온톨로지 생성 + DMN 에디터
+app.include_router(ontology_generation_router)
+app.include_router(dmn_editor_router)
+app.include_router(standards_import_router)
+# Phase 3 Sprint 11: 온톨로지 Undo/Redo + 컨텍스트 메뉴
+app.include_router(ontology_history_router)
 
 @app.get("/health/live")
 async def health_live():

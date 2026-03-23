@@ -28,7 +28,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm font-semibold font-[Sora]">{t('feedback.trend.title')}</CardTitle>
+        <CardTitle className="text-sm font-semibold font-heading">{t('feedback.trend.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (

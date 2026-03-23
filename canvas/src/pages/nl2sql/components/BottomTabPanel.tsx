@@ -52,21 +52,21 @@ export function BottomTabPanel({
   return (
     <>
       {/* 탭 전환 바 */}
-      <div className="flex items-center gap-1 border-b border-[#E5E5E5]">
+      <div className="flex items-center gap-1 border-b border-border">
         <button
           type="button"
           onClick={() => setBottomTab('results')}
           className={cn(
-            'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-[Sora] border-b-2 transition-colors',
+            'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-heading border-b-2 transition-colors',
             bottomTab === 'results'
-              ? 'border-black text-black'
+              ? 'border-black text-foreground'
               : 'border-transparent text-foreground/40 hover:text-foreground/60',
           )}
         >
           <Table2 className="h-3.5 w-3.5" />
           {t('nl2sql.queryResult')}
           {resultData?.result?.row_count != null && (
-            <span className="ml-1 bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] text-[#5E5E5E] font-[IBM_Plex_Mono] rounded">
+            <span className="ml-1 bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono rounded">
               {resultData.result.row_count}
             </span>
           )}
@@ -75,16 +75,16 @@ export function BottomTabPanel({
           type="button"
           onClick={() => setBottomTab('schema')}
           className={cn(
-            'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-[Sora] border-b-2 transition-colors',
+            'flex items-center gap-1.5 px-4 py-2 text-[12px] font-medium font-heading border-b-2 transition-colors',
             bottomTab === 'schema'
-              ? 'border-black text-black'
+              ? 'border-black text-foreground'
               : 'border-transparent text-foreground/40 hover:text-foreground/60',
           )}
         >
           <LayoutGrid className="h-3.5 w-3.5" />
           Schema Canvas
           {canvasTables.length > 0 && (
-            <span className="ml-1 bg-[#F5F5F5] px-1.5 py-0.5 text-[10px] text-[#5E5E5E] font-[IBM_Plex_Mono] rounded">
+            <span className="ml-1 bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground font-mono rounded">
               {canvasTables.length}
             </span>
           )}
@@ -96,14 +96,14 @@ export function BottomTabPanel({
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <h2 className="text-[14px] font-semibold text-black font-[Sora]">{t('nl2sql.queryResult')}</h2>
-              <span className="bg-[#F5F5F5] px-2.5 py-0.5 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+              <h2 className="text-[14px] font-semibold text-foreground font-heading">{t('nl2sql.queryResult')}</h2>
+              <span className="bg-muted px-2.5 py-0.5 text-[11px] text-muted-foreground font-mono">
                 {resultData.result?.row_count ?? 0} rows
               </span>
             </div>
             <button
               type="button"
-              className="flex items-center gap-2 px-4 py-2.5 text-[12px] font-medium text-black border border-[#E5E5E5] rounded hover:bg-[#F5F5F5] transition-colors font-[Sora]"
+              className="flex items-center gap-2 px-4 py-2.5 text-[12px] font-medium text-foreground border border-border rounded hover:bg-muted transition-colors font-heading"
             >
               <Download className="h-3.5 w-3.5" />
               {t('nl2sql.export')}
@@ -128,7 +128,7 @@ export function BottomTabPanel({
 
       {/* Schema Canvas 탭 — ERD 시각화 */}
       {bottomTab === 'schema' && (
-        <div className="border border-[#E5E5E5] rounded overflow-hidden" style={{ minHeight: 400 }}>
+        <div className="border border-border rounded overflow-hidden" style={{ minHeight: 400 }}>
           <SchemaCanvas
             tables={canvasTables}
             onToggleContext={onToggleContext}

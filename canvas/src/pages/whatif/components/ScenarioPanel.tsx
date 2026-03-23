@@ -45,7 +45,7 @@ export function ScenarioPanel({ scenarioId, onRunAnalysis }: ScenarioPanelProps)
  ))}
  </div>
 
- <div className="p-4 border-t border-border bg-[#121212] flex flex-col gap-2">
+ <div className="p-4 border-t border-border bg-background flex flex-col gap-2">
  <div className="flex gap-2">
  <Button variant="outline" size="sm" className="flex-1" onClick={handleReset} disabled={isComputing}>
  <RotateCcw size={14} className="mr-1.5" /> <span>초기화</span>

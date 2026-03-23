@@ -27,10 +27,10 @@ function KpiCard({ icon, label, value, subtext, color }: KpiCardProps) {
       <CardContent className="p-5">
         <div className="flex items-start justify-between">
           <div className="space-y-2">
-            <p className="text-xs text-muted-foreground font-[IBM_Plex_Mono] uppercase tracking-wide">
+            <p className="text-xs text-muted-foreground font-mono uppercase tracking-wide">
               {label}
             </p>
-            <p className="text-2xl font-semibold text-foreground font-[Sora]">{value}</p>
+            <p className="text-2xl font-semibold text-foreground font-heading">{value}</p>
             {subtext && (
               <p className="text-xs text-muted-foreground">{subtext}</p>
             )}

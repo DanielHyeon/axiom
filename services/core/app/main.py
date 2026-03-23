@@ -20,8 +20,16 @@ from app.modules.case.api.routes import router as cases_router
 from app.api.admin.event_routes import router as admin_events_router
 from app.modules.watch.cep_api import router as cep_router
 from app.modules.watch.watch_agent_api import router as watch_agent_router
+from app.modules.governance.api.routes import router as governance_router
+from app.modules.process_model.api.definition_routes import router as pm_definition_router
+from app.modules.process_model.api.relation_routes import router as pm_relation_router
+from app.modules.process_model.api.transition_routes import router as pm_transition_router
 from app.core.security import get_current_user
 from fastapi import Depends
+from app.api.security_policies import router as security_policies_router
+from app.api.audit import router as audit_router
+from app.api.alert_dag import router as alert_dag_router
+from app.api.event_detection import router as event_detection_router
 
 app = FastAPI(title="Axiom Core", version="1.0.0")
 
@@ -36,7 +44,7 @@ app.add_middleware(
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allow_headers=["Authorization", "Content-Type", "X-Tenant-Id", "X-Request-Id"],
+    allow_headers=["Authorization", "Content-Type", "X-Tenant-Id", "X-Request-Id", "X-Axiom-Workspace-Id"],
     expose_headers=["X-Request-Id", "X-Response-Time"],
 )
 
@@ -56,6 +64,16 @@ app.include_router(events_router, prefix="/api/v1", dependencies=[Depends(get_cu
 app.include_router(admin_events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(cep_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(watch_agent_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(governance_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(pm_definition_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(pm_relation_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+app.include_router(pm_transition_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+# Phase 4 Sprint 12: 보안 정책 + 감사 로그
+app.include_router(security_policies_router)
+app.include_router(audit_router)
+# Phase 5 Sprint 15: DAG 알림 + 이벤트 탐지
+app.include_router(alert_dag_router)
+app.include_router(event_detection_router)
 
 
 @app.on_event("startup")

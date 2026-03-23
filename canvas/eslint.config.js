@@ -23,6 +23,14 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
+      // Phase 0: 하드코딩 색상/폰트 방지 — 디자인 토큰 사용 강제
+      'no-restricted-syntax': [
+        'warn',
+        {
+          selector: 'Literal[value=/^#[0-9A-Fa-f]{3,8}$/]',
+          message: 'Hex 색상값 하드코딩 금지. 디자인 토큰(bg-muted, text-foreground 등)을 사용하세요.',
+        },
+      ],
     },
   },
   // Feature Boundary Rules (apply only to features)

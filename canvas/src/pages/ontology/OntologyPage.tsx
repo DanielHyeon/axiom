@@ -97,27 +97,27 @@ export function OntologyPage() {
  {/* Title Row */}
  <div className="flex items-start justify-between">
  <div className="space-y-1.5">
- <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">{t('ontology.title')}</h1>
- <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+ <h1 className="text-[48px] font-semibold tracking-[-2px] text-foreground font-heading">{t('ontology.title')}</h1>
+ <p className="text-[13px] text-muted-foreground font-mono">
  {t('ontology.subtitle')}
  </p>
  </div>
  <div className="flex items-center gap-3">
- <div className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E5E5] rounded">
+ <div className="flex items-center gap-2 px-4 py-2.5 border border-border rounded">
  <Search className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-[13px] text-foreground/60 font-[IBM_Plex_Mono]">{t('ontology.searchNode')}</span>
+ <span className="text-[13px] text-foreground/60 font-mono">{t('ontology.searchNode')}</span>
  </div>
  <button
  type="button"
  onClick={openWizard}
- className="flex items-center gap-2 px-4 py-2.5 border border-[#E5E5E5] text-[12px] font-medium font-[Sora] rounded hover:bg-[#F5F5F5] transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5 border border-border text-[12px] font-medium font-heading rounded hover:bg-muted transition-colors"
  >
  <Wand2 className="h-3.5 w-3.5" />
  위자드
  </button>
  <button
  type="button"
- className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded hover:bg-red-700 transition-colors"
  >
  <Plus className="h-3.5 w-3.5" />
  {t('ontology.addNode')}
@@ -127,15 +127,15 @@ export function OntologyPage() {
 
  {/* Filter Tabs */}
  <div className="flex items-center gap-2.5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">{t('ontology.filter')}</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('ontology.filter')}</span>
  {LAYER_TABS.map((tab) => (
  <button
  key={tab}
  type="button"
  onClick={() => setActiveLayerTab(tab)}
- className={`px-4 py-2.5 text-[12px] font-[Sora] transition-colors ${
+ className={`px-4 py-2.5 text-[12px] font-heading transition-colors ${
  activeLayerTab === tab
- ? 'text-black font-semibold border-b-2 border-red-600'
+ ? 'text-foreground font-semibold border-b-2 border-red-600'
  : 'text-foreground/60 hover:text-muted-foreground'
  }`}
  >
@@ -149,7 +149,7 @@ export function OntologyPage() {
  type="button"
  onClick={() => { setShowQuality(!showQuality); setShowHITL(false); }}
  className={`p-2 rounded transition-colors ${
- showQuality ? 'bg-[#F5F5F5] text-black' : 'text-foreground/60 hover:text-muted-foreground'
+ showQuality ? 'bg-muted text-foreground' : 'text-foreground/60 hover:text-muted-foreground'
  }`}
  title={t('ontology.dataQuality')}
  >
@@ -159,7 +159,7 @@ export function OntologyPage() {
  type="button"
  onClick={() => { setShowHITL(!showHITL); setShowQuality(false); }}
  className={`p-2 rounded transition-colors ${
- showHITL ? 'bg-[#F5F5F5] text-black' : 'text-foreground/60 hover:text-muted-foreground'
+ showHITL ? 'bg-muted text-foreground' : 'text-foreground/60 hover:text-muted-foreground'
  }`}
  title={t('ontology.reviewQueue')}
  >
@@ -173,17 +173,17 @@ export function OntologyPage() {
  >
  <Download size={16} />
  </button>
- <div className="absolute right-0 top-full mt-1 hidden group-hover:block bg-white border border-[#E5E5E5] rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
+ <div className="absolute right-0 top-full mt-1 hidden group-hover:block bg-card border border-border rounded-lg shadow-lg py-1 z-50 min-w-[140px]">
  <button
  type="button"
- className="w-full text-left px-3 py-1.5 text-xs text-[#333] hover:bg-[#F5F5F5]"
+ className="w-full text-left px-3 py-1.5 text-xs text-foreground hover:bg-muted"
  onClick={() => handleExport('turtle')}
  >
  Turtle (.ttl)
  </button>
  <button
  type="button"
- className="w-full text-left px-3 py-1.5 text-xs text-[#333] hover:bg-[#F5F5F5]"
+ className="w-full text-left px-3 py-1.5 text-xs text-foreground hover:bg-muted"
  onClick={() => handleExport('jsonld')}
  >
  JSON-LD (.jsonld)
@@ -202,7 +202,7 @@ export function OntologyPage() {
  )}
 
  {/* Main Content Area: Graph + Detail panel */}
- <div className="flex-1 flex overflow-hidden rounded border border-[#E5E5E5]">
+ <div className="flex-1 flex overflow-hidden rounded border border-border">
  {isLoading ? (
  <div className="flex-1 flex items-center justify-center text-foreground/60 text-sm">
  {t('ontology.loadingData')}
@@ -222,7 +222,7 @@ export function OntologyPage() {
 
  {/* Right panel: Node detail or Impact analysis */}
  {viewMode === 'graph' && !impactNodeId && (
- <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white overflow-y-auto flex flex-col">
+ <div className="w-80 shrink-0 border-l border-border bg-card overflow-y-auto flex flex-col">
  <NodeDetail
  onFindPath={handleFindPath}
  onImpactAnalysis={(nodeId) => setImpactNodeId(nodeId)}
@@ -230,7 +230,7 @@ export function OntologyPage() {
  </div>
  )}
  {viewMode === 'graph' && impactNodeId && caseId && (
- <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white overflow-y-auto flex flex-col">
+ <div className="w-80 shrink-0 border-l border-border bg-card overflow-y-auto flex flex-col">
  <ImpactAnalysisPanel
  nodeId={impactNodeId}
  caseId={caseId}
@@ -240,12 +240,12 @@ export function OntologyPage() {
  )}
 
  {showQuality && caseId && (
- <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white overflow-y-auto flex flex-col">
+ <div className="w-80 shrink-0 border-l border-border bg-card overflow-y-auto flex flex-col">
  <QualityDashboard caseId={caseId} onClose={() => setShowQuality(false)} />
  </div>
  )}
  {showHITL && caseId && (
- <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white overflow-y-auto flex flex-col">
+ <div className="w-80 shrink-0 border-l border-border bg-card overflow-y-auto flex flex-col">
  <HITLReviewQueue caseId={caseId} onClose={() => setShowHITL(false)} />
  </div>
  )}
@@ -267,7 +267,7 @@ function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
  <Share2 size={32} className="opacity-20" />
  <p className="text-sm font-medium text-muted-foreground">{t('ontology.caseSelector.title')}</p>
  {isLoading ? (
- <div className="h-8 w-48 animate-pulse rounded bg-[#F5F5F5]" />
+ <div className="h-8 w-48 animate-pulse rounded bg-muted" />
  ) : cases && cases.length > 0 ? (
  <div className="flex flex-col gap-2 w-full max-w-sm">
  {cases.map((c) => (
@@ -275,9 +275,9 @@ function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
  key={c.id}
  type="button"
  onClick={() => onSelect(c.id)}
- className="flex items-center justify-between px-4 py-3 rounded-lg border border-[#E5E5E5] bg-white hover:bg-[#F5F5F5] hover:border-[#CCC] transition-colors text-left"
+ className="flex items-center justify-between px-4 py-3 rounded-lg border border-border bg-card hover:bg-muted hover:border-border transition-colors text-left"
  >
- <span className="text-sm text-black truncate">{c.title}</span>
+ <span className="text-sm text-foreground truncate">{c.title}</span>
  <span className="text-xs text-foreground/60 shrink-0 ml-2">{c.status}</span>
  </button>
  ))}

@@ -53,7 +53,7 @@ export function AlertFeed() {
  key={alert.id}
  onClick={() => !alert.isRead && markAsRead(alert.id)}
  className={`p-4 rounded-lg border transition-all ${!alert.isRead
- ? 'bg-[#1e1e1e] border-border cursor-pointer hover:border-border'
+ ? 'bg-card border-border cursor-pointer hover:border-border'
  : 'bg-card border-border/50 opacity-70'
  }`}
  >

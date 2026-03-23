@@ -111,7 +111,7 @@ export const DatasourcePage: React.FC = () => {
  if (loading) {
  return (
  <div className="px-12 py-8 space-y-6">
- <h1 className="text-5xl font-semibold tracking-tight text-black font-[Sora]">데이터리소스</h1>
+ <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
  <ListSkeleton rows={6} className="max-w-2xl" />
  </div>
  );
@@ -119,7 +119,7 @@ export const DatasourcePage: React.FC = () => {
  if (error) {
  return (
  <div className="px-12 py-8 space-y-6">
- <h1 className="text-5xl font-semibold tracking-tight text-black font-[Sora]">데이터리소스</h1>
+ <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
  <ErrorState message={`목록을 불러올 수 없습니다. ${error.message}`} onRetry={refetch} />
  </div>
  );
@@ -130,14 +130,14 @@ export const DatasourcePage: React.FC = () => {
  {/* Title Row */}
  <div className="flex items-start justify-between">
  <div className="space-y-1.5">
- <h1 className="text-5xl font-semibold tracking-tight text-black font-[Sora]">데이터리소스</h1>
- <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+ <h1 className="text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <p className="text-[13px] text-muted-foreground font-mono">
  데이터베이스 연결을 설정하고 스키마를 관리합니다
  </p>
  </div>
  <button
  type="button"
- className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded hover:bg-red-700 transition-colors"
  onClick={() => document.getElementById('ds-form')?.scrollIntoView({ behavior: 'smooth' })}
  >
  <Plus className="h-3.5 w-3.5" />
@@ -154,19 +154,19 @@ export const DatasourcePage: React.FC = () => {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
  {/* Left column — 주요 정보 */}
  <div className="space-y-5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">주요 정보</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">주요 정보</span>
  <FormField label="이름" error={errors.name?.message}>
  <Input
  {...register('name')}
  placeholder="DynamoDB_db"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
  <FormField label="엔진">
  <select
  aria-label="엔진"
  {...register('engine')}
- className="h-9 w-full rounded border border-[#E5E5E5] bg-white px-3 text-[13px] text-black font-[IBM_Plex_Mono]"
+ className="h-9 w-full rounded border border-border bg-card px-3 text-[13px] text-foreground font-mono"
  >
  {engineTypes.length ? engineTypes.map((t) => <option key={t.engine} value={t.engine}>{t.engine}</option>) : <option value="postgres">postgres</option>}
  </select>
@@ -176,14 +176,14 @@ export const DatasourcePage: React.FC = () => {
  <Input
  {...register('host')}
  placeholder="localhost"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
  <FormField label="포트" error={errors.port?.message}>
  <Input
  {...register('port')}
  placeholder="5432"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
  </div>
@@ -191,12 +191,12 @@ export const DatasourcePage: React.FC = () => {
 
  {/* Right column — 연결 */}
  <div className="space-y-5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">연결</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">연결</span>
  <FormField label="사용자명" error={errors.user?.message}>
  <Input
  {...register('user')}
  placeholder="user"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
  <FormField label="비밀번호" error={errors.password?.message}>
@@ -204,7 +204,7 @@ export const DatasourcePage: React.FC = () => {
  type="password"
  {...register('password')}
  placeholder="••••••••"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px]"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
  </div>
@@ -216,13 +216,13 @@ export const DatasourcePage: React.FC = () => {
  <Input
  {...register('database')}
  placeholder="$INSTANCE_db"
- className="bg-white border-[#E5E5E5] text-black placeholder:text-foreground/60 font-[IBM_Plex_Mono] text-[13px] max-w-md"
+ className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px] max-w-md"
  />
  </FormField>
  <button
  type="submit"
  disabled={isSubmitting}
- className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors disabled:opacity-50"
+ className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded hover:bg-red-700 transition-colors disabled:opacity-50"
  >
  <Plus className="h-3.5 w-3.5" />
  생성
@@ -233,10 +233,10 @@ export const DatasourcePage: React.FC = () => {
  {/* Datasource List Table */}
  <div className="space-y-4">
  <div className="flex items-center justify-between">
- <h2 className="text-sm font-semibold text-black font-[Sora]">데이터리소스 목록</h2>
+ <h2 className="text-sm font-semibold text-foreground font-heading">데이터리소스 목록</h2>
  <button
  type="button"
- className="flex items-center gap-2 px-3 py-1.5 text-[12px] text-[#5E5E5E] border border-[#E5E5E5] rounded hover:bg-[#F5F5F5] transition-colors"
+ className="flex items-center gap-2 px-3 py-1.5 text-[12px] text-muted-foreground border border-border rounded hover:bg-muted transition-colors"
  >
  <TestTubeDiagonal className="h-3.5 w-3.5" />
  테스트
@@ -250,15 +250,15 @@ export const DatasourcePage: React.FC = () => {
  description="위 폼에서 연결 정보를 입력한 뒤 추가하면 스키마 탐색과 동기화를 사용할 수 있습니다."
  />
  ) : (
- <div className="border border-[#E5E5E5] rounded overflow-hidden">
+ <div className="border border-border rounded overflow-hidden">
  {/* Table header */}
- <div className="grid grid-cols-[1fr_100px_100px_100px_80px_100px] bg-[#F5F5F5] px-5 py-3">
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Name</span>
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Type</span>
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Status</span>
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Tables</span>
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Test</span>
- <span className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">Actions</span>
+ <div className="grid grid-cols-[1fr_100px_100px_100px_80px_100px] bg-muted px-5 py-3">
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Name</span>
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Type</span>
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Status</span>
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Tables</span>
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Test</span>
+ <span className="text-[11px] font-medium text-foreground/60 font-mono uppercase">Actions</span>
  </div>
 
  {/* Table rows */}
@@ -269,22 +269,22 @@ export const DatasourcePage: React.FC = () => {
  return (
  <div
  key={ds.name}
- className={`grid grid-cols-[1fr_100px_100px_100px_80px_100px] items-center px-5 py-3 border-t border-[#E5E5E5] transition-colors ${
+ className={`grid grid-cols-[1fr_100px_100px_100px_80px_100px] items-center px-5 py-3 border-t border-border transition-colors ${
  isSelected ? 'bg-red-50' : 'hover:bg-background'
  }`}
  >
  <button
  type="button"
  onClick={() => setSelectedDsName((prev) => (prev === ds.name ? null : ds.name))}
- className="text-[13px] font-medium text-black font-[Sora] text-left truncate hover:text-destructive transition-colors"
+ className="text-[13px] font-medium text-foreground font-heading text-left truncate hover:text-destructive transition-colors"
  >
  {ds.name}
  </button>
- <span className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">{ds.engine}</span>
+ <span className="text-[13px] text-muted-foreground font-mono">{ds.engine}</span>
  <span className={`text-[11px] font-medium ${statusOk ? 'text-green-600' : 'text-destructive'}`}>
  {ds.status ?? 'unknown'}
  </span>
- <span className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">—</span>
+ <span className="text-[13px] text-muted-foreground font-mono">—</span>
  <div>
  {testResult && (
  <span className={`flex items-center gap-1 text-xs ${testResult.status === 'ok' ? 'text-green-600' : 'text-destructive'}`}>
@@ -296,7 +296,7 @@ export const DatasourcePage: React.FC = () => {
  <button
  type="button"
  onClick={() => handleTest(ds.name)}
- className="text-[11px] text-[#5E5E5E] hover:text-black transition-colors underline"
+ className="text-[11px] text-muted-foreground hover:text-foreground transition-colors underline"
  >
  test
  </button>
@@ -319,13 +319,13 @@ export const DatasourcePage: React.FC = () => {
  {/* Bottom section: 탭 (스키마 | ERD) + Sync */}
  <div className="space-y-4 pb-8">
  {/* 탭 헤더 */}
- <div className="flex items-center gap-1 border-b border-[#E5E5E5]">
+ <div className="flex items-center gap-1 border-b border-border">
   <button
    type="button"
    onClick={() => setBottomTab('schema')}
-   className={`px-4 py-2.5 text-[12px] font-[Sora] transition-colors ${
+   className={`px-4 py-2.5 text-[12px] font-heading transition-colors ${
     bottomTab === 'schema'
-     ? 'text-black font-semibold border-b-2 border-red-600'
+     ? 'text-foreground font-semibold border-b-2 border-red-600'
      : 'text-foreground/60 hover:text-muted-foreground'
    }`}
   >
@@ -334,9 +334,9 @@ export const DatasourcePage: React.FC = () => {
   <button
    type="button"
    onClick={() => setBottomTab('erd')}
-   className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-[Sora] transition-colors ${
+   className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading transition-colors ${
     bottomTab === 'erd'
-     ? 'text-black font-semibold border-b-2 border-red-600'
+     ? 'text-foreground font-semibold border-b-2 border-red-600'
      : 'text-foreground/60 hover:text-muted-foreground'
    }`}
   >
@@ -349,7 +349,7 @@ export const DatasourcePage: React.FC = () => {
  {bottomTab === 'schema' ? (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
    <div className="space-y-3">
-    <h3 className="text-sm font-semibold text-black font-[Sora]">데이터매핑 관리</h3>
+    <h3 className="text-sm font-semibold text-foreground font-heading">데이터매핑 관리</h3>
     <SchemaExplorer
      selectedDsName={selectedDsName}
      onSelectDs={(name) => setSelectedDsName(name || null)}
@@ -357,12 +357,12 @@ export const DatasourcePage: React.FC = () => {
     />
    </div>
    <div className="space-y-3">
-    <h3 className="text-sm font-semibold text-black font-[Sora]">스키마 관리</h3>
+    <h3 className="text-sm font-semibold text-foreground font-heading">스키마 관리</h3>
     <SyncProgress selectedDsName={selectedDsName} onComplete={refetch} />
    </div>
   </div>
  ) : (
-  <div className="border border-[#E5E5E5] rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
+  <div className="border border-border rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
    {selectedDsName ? (
     <ERDiagramPanel datasourceId={selectedDsName} />
    ) : (
@@ -394,7 +394,7 @@ function FormField({
 }) {
  return (
  <div className="space-y-1.5">
- <label className="text-[11px] font-medium text-foreground/60 font-[IBM_Plex_Mono] uppercase">{label}</label>
+ <label className="text-[11px] font-medium text-foreground/60 font-mono uppercase">{label}</label>
  {children}
  {error && <span className="text-[11px] text-destructive">{error}</span>}
  </div>

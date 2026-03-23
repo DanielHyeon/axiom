@@ -80,18 +80,18 @@ export function MondrianXmlEditor({
   }, [value]);
 
   return (
-    <div className="flex flex-col h-full border border-[#E5E5E5] rounded-lg overflow-hidden">
+    <div className="flex flex-col h-full border border-border rounded-lg overflow-hidden">
       {/* ─── 툴바 ─────────────────────────────────────── */}
-      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#F5F5F5] border-b border-[#E5E5E5] shrink-0">
+      <div className="flex items-center gap-2 px-3 py-1.5 bg-muted border-b border-border shrink-0">
         {/* 편집 / 미리보기 모드 토글 */}
         <div className="flex items-center gap-0.5">
           <button
             type="button"
             onClick={() => setMode('edit')}
             className={cn(
-              'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-[IBM_Plex_Mono] transition-colors',
+              'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono transition-colors',
               mode === 'edit'
-                ? 'bg-white shadow-sm text-foreground/70'
+                ? 'bg-card shadow-sm text-foreground/70'
                 : 'text-foreground/30',
             )}
           >
@@ -101,9 +101,9 @@ export function MondrianXmlEditor({
             type="button"
             onClick={() => setMode('preview')}
             className={cn(
-              'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-[IBM_Plex_Mono] transition-colors',
+              'flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono transition-colors',
               mode === 'preview'
-                ? 'bg-white shadow-sm text-foreground/70'
+                ? 'bg-card shadow-sm text-foreground/70'
                 : 'text-foreground/30',
             )}
           >
@@ -163,19 +163,19 @@ export function MondrianXmlEditor({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             readOnly={readOnly}
-            className="w-full h-full resize-none p-3 text-[11px] font-[IBM_Plex_Mono] leading-relaxed bg-[#1E1E1E] text-[#D4D4D4] focus:outline-none"
+            className="w-full h-full resize-none p-3 text-[11px] font-mono leading-relaxed bg-card text-muted-foreground focus:outline-none"
             placeholder="Mondrian XML을 입력하거나 파일을 업로드하세요..."
             spellCheck={false}
           />
         ) : (
-          <pre className="w-full h-full overflow-auto p-3 text-[11px] font-[IBM_Plex_Mono] leading-relaxed bg-[#1E1E1E] text-[#D4D4D4]">
+          <pre className="w-full h-full overflow-auto p-3 text-[11px] font-mono leading-relaxed bg-card text-muted-foreground">
             {value || '내용이 없습니다'}
           </pre>
         )}
       </div>
 
       {/* ─── 상태 바 ──────────────────────────────────── */}
-      <div className="flex items-center gap-4 px-3 py-1 bg-[#2D2D2D] text-[9px] text-[#888] font-[IBM_Plex_Mono] shrink-0">
+      <div className="flex items-center gap-4 px-3 py-1 bg-muted text-[9px] text-muted-foreground font-mono shrink-0">
         <span>{value.length.toLocaleString()} 문자</span>
         <span>{value.split('\n').length} 줄</span>
         <span>XML</span>

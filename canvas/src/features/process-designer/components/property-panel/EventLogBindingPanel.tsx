@@ -31,7 +31,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  type="text"
  value={b.sourceTable ?? ''}
  onChange={(e) => update('sourceTable', e.target.value)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="Weaver 메타데이터 연동 예정"
  />
  </div>
@@ -42,7 +42,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  type="text"
  value={b.timestampColumn ?? ''}
  onChange={(e) => update('timestampColumn', e.target.value)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="timestamp"
  />
  </div>
@@ -53,7 +53,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  type="text"
  value={b.caseIdColumn ?? ''}
  onChange={(e) => update('caseIdColumn', e.target.value)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="case_id"
  />
  </div>
@@ -64,7 +64,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  type="text"
  value={b.activityColumn ?? ''}
  onChange={(e) => update('activityColumn', e.target.value || undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="activity"
  />
  </div>
@@ -75,7 +75,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  type="text"
  value={b.filter ?? ''}
  onChange={(e) => update('filter', e.target.value || undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="status = 'completed'"
  />
  </div>

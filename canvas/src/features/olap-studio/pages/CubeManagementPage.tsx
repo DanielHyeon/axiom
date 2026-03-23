@@ -114,11 +114,11 @@ export function CubeManagementPage() {
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-6 h-12 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+      <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <Box className="h-4 w-4 text-amber-500" />
-          <h1 className="text-[14px] font-semibold font-[Sora]">큐브 관리</h1>
-          <span className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+          <h1 className="text-[14px] font-semibold font-heading">큐브 관리</h1>
+          <span className="text-[11px] text-foreground/40 font-mono">
             {cubeList.length}개
           </span>
         </div>
@@ -129,24 +129,24 @@ export function CubeManagementPage() {
 
       {/* 생성 폼 */}
       {showForm && (
-        <div className="px-6 py-4 bg-amber-50/30 border-b border-[#E5E5E5] space-y-3">
+        <div className="px-6 py-4 bg-amber-50/30 border-b border-border space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">이름</Label>
+              <Label className="text-[11px] font-mono">이름</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="큐브 이름"
-                className="text-[12px] font-[IBM_Plex_Mono]"
+                className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">설명</Label>
+              <Label className="text-[11px] font-mono">설명</Label>
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
                 placeholder="설명 (선택)"
-                className="text-[12px] font-[IBM_Plex_Mono]"
+                className="text-[12px] font-mono"
               />
             </div>
             <div className="flex items-end gap-2 pb-0.5">
@@ -155,9 +155,9 @@ export function CubeManagementPage() {
                   type="checkbox"
                   checked={formAi}
                   onChange={(e) => setFormAi(e.target.checked)}
-                  className="rounded border-[#E5E5E5]"
+                  className="rounded border-border"
                 />
-                <span className="text-[11px] font-[IBM_Plex_Mono] text-foreground/60">
+                <span className="text-[11px] font-mono text-foreground/60">
                   AI 자동생성
                 </span>
               </label>
@@ -197,7 +197,7 @@ export function CubeManagementPage() {
         {!isLoading && cubeList.length === 0 && (
           <div className="text-center py-12">
             <Box className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
-            <p className="text-[12px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <p className="text-[12px] text-foreground/40 font-mono">
               등록된 큐브가 없습니다
             </p>
           </div>
@@ -248,7 +248,7 @@ function CubeCard({
 
   return (
     <div
-      className="border border-[#E5E5E5] rounded-lg p-4 bg-white hover:shadow-sm transition-shadow cursor-pointer"
+      className="border border-border rounded-lg p-4 bg-card hover:shadow-sm transition-shadow cursor-pointer"
       onClick={onSelect}
       role="button"
       tabIndex={0}
@@ -259,13 +259,13 @@ function CubeCard({
       <div className="flex items-start justify-between mb-2">
         <div className="flex items-center gap-2">
           <Box className="h-4 w-4 text-amber-400" />
-          <span className="text-[13px] font-semibold font-[Sora]">
+          <span className="text-[13px] font-semibold font-heading">
             {cube.name}
           </span>
         </div>
         <span
           className={cn(
-            'text-[9px] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono] shrink-0',
+            'text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0',
             statusStyle,
           )}
         >
@@ -275,34 +275,34 @@ function CubeCard({
 
       {/* 설명 */}
       {cube.description && (
-        <p className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] mb-2 line-clamp-2">
+        <p className="text-[10px] text-foreground/40 font-mono mb-2 line-clamp-2">
           {cube.description}
         </p>
       )}
 
       {/* AI 생성 표시 */}
       {cube.ai_generated && (
-        <div className="flex items-center gap-1 text-[9px] text-purple-500 font-[IBM_Plex_Mono] mb-2">
+        <div className="flex items-center gap-1 text-[9px] text-purple-500 font-mono mb-2">
           <Sparkles className="h-2.5 w-2.5" /> AI 자동생성
         </div>
       )}
 
       {/* 검증 에러 표시 */}
       {validationErrors && validationErrors.length > 0 && (
-        <div className="flex items-start gap-1 text-[9px] text-red-400 font-[IBM_Plex_Mono] mb-2">
+        <div className="flex items-start gap-1 text-[9px] text-red-400 font-mono mb-2">
           <AlertTriangle className="h-2.5 w-2.5 mt-0.5 shrink-0" />
           <span>{validationErrors.length}개 검증 오류</span>
         </div>
       )}
 
       {/* 메타 정보 */}
-      <div className="text-[9px] text-foreground/30 font-[IBM_Plex_Mono] mb-3">
+      <div className="text-[9px] text-foreground/30 font-mono mb-3">
         v{cube.version_no} | {new Date(cube.created_at).toLocaleDateString('ko-KR')}
       </div>
 
       {/* 액션 버튼 */}
       <div
-        className="flex items-center gap-2 pt-2 border-t border-[#F0F0F0]"
+        className="flex items-center gap-2 pt-2 border-t border-border"
         onClick={(e) => e.stopPropagation()}
       >
         {/* 검증 버튼 — DRAFT 상태에서 활성 */}
@@ -310,7 +310,7 @@ function CubeCard({
           onClick={onValidate}
           disabled={isValidating || cube.cube_status === 'PUBLISHED'}
           className={cn(
-            'flex items-center gap-1 text-[10px] font-[IBM_Plex_Mono] transition-colors',
+            'flex items-center gap-1 text-[10px] font-mono transition-colors',
             cube.cube_status === 'PUBLISHED'
               ? 'text-foreground/20 cursor-not-allowed'
               : 'text-blue-500 hover:text-blue-600',
@@ -329,7 +329,7 @@ function CubeCard({
           onClick={onPublish}
           disabled={isPublishing || cube.cube_status !== 'VALIDATED'}
           className={cn(
-            'flex items-center gap-1 text-[10px] font-[IBM_Plex_Mono] ml-auto transition-colors',
+            'flex items-center gap-1 text-[10px] font-mono ml-auto transition-colors',
             cube.cube_status === 'VALIDATED'
               ? 'text-green-500 hover:text-green-600'
               : 'text-foreground/20 cursor-not-allowed',
@@ -374,7 +374,7 @@ function CubeDetailView({
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
-      <div className="flex items-center gap-3 px-6 h-12 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+      <div className="flex items-center gap-3 px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <button
           onClick={onBack}
           className="text-foreground/40 hover:text-foreground/70 transition-colors"
@@ -383,12 +383,12 @@ function CubeDetailView({
           <ArrowLeft className="h-4 w-4" />
         </button>
         <Box className="h-4 w-4 text-amber-500" />
-        <h1 className="text-[14px] font-semibold font-[Sora]">{cube.name}</h1>
-        <span className={cn('text-[9px] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]', statusStyle)}>
+        <h1 className="text-[14px] font-semibold font-heading">{cube.name}</h1>
+        <span className={cn('text-[9px] px-1.5 py-0.5 rounded font-mono', statusStyle)}>
           {cube.cube_status}
         </span>
         {cube.ai_generated && (
-          <span className="text-[9px] text-purple-500 font-[IBM_Plex_Mono] flex items-center gap-1">
+          <span className="text-[9px] text-purple-500 font-mono flex items-center gap-1">
             <Sparkles className="h-2.5 w-2.5" /> AI
           </span>
         )}
@@ -419,7 +419,7 @@ function CubeDetailView({
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
         {/* 설명 */}
         {cube.description && (
-          <p className="text-[12px] text-foreground/60 font-[IBM_Plex_Mono]">
+          <p className="text-[12px] text-foreground/60 font-mono">
             {cube.description}
           </p>
         )}
@@ -427,11 +427,11 @@ function CubeDetailView({
         {/* 검증 에러 */}
         {validationErrors.length > 0 && (
           <div className="border border-red-200 rounded-lg p-3 bg-red-50/50 space-y-1">
-            <p className="text-[11px] font-semibold text-red-600 font-[Sora] flex items-center gap-1">
+            <p className="text-[11px] font-semibold text-red-600 font-heading flex items-center gap-1">
               <AlertTriangle className="h-3 w-3" /> 검증 오류
             </p>
             {validationErrors.map((err, i) => (
-              <p key={i} className="text-[10px] text-red-500 font-[IBM_Plex_Mono]">
+              <p key={i} className="text-[10px] text-red-500 font-mono">
                 - {err}
               </p>
             ))}
@@ -440,18 +440,18 @@ function CubeDetailView({
 
         {/* 차원 목록 */}
         <section>
-          <h2 className="text-[12px] font-semibold font-[Sora] mb-2 text-foreground/70">
+          <h2 className="text-[12px] font-semibold font-heading mb-2 text-foreground/70">
             차원 ({cube.dimensions.length})
           </h2>
           {cube.dimensions.length === 0 ? (
-            <p className="text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+            <p className="text-[10px] text-foreground/30 font-mono">
               정의된 차원이 없습니다
             </p>
           ) : (
-            <div className="border border-[#E5E5E5] rounded-lg overflow-hidden">
-              <table className="w-full text-[11px] font-[IBM_Plex_Mono]">
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full text-[11px] font-mono">
                 <thead>
-                  <tr className="bg-[#FAFAFA] text-foreground/50">
+                  <tr className="bg-muted/50 text-foreground/50">
                     <th className="text-left px-3 py-1.5 font-medium">이름</th>
                     <th className="text-left px-3 py-1.5 font-medium">소스 컬럼</th>
                     <th className="text-left px-3 py-1.5 font-medium">계층</th>
@@ -459,7 +459,7 @@ function CubeDetailView({
                 </thead>
                 <tbody>
                   {cube.dimensions.map((dim) => (
-                    <tr key={dim.id} className="border-t border-[#F0F0F0]">
+                    <tr key={dim.id} className="border-t border-border">
                       <td className="px-3 py-1.5 text-foreground/70">{dim.name}</td>
                       <td className="px-3 py-1.5 text-foreground/40">{dim.source_column}</td>
                       <td className="px-3 py-1.5 text-foreground/40">Lv.{dim.hierarchy_level}</td>
@@ -473,18 +473,18 @@ function CubeDetailView({
 
         {/* 측정값 목록 */}
         <section>
-          <h2 className="text-[12px] font-semibold font-[Sora] mb-2 text-foreground/70">
+          <h2 className="text-[12px] font-semibold font-heading mb-2 text-foreground/70">
             측정값 ({cube.measures.length})
           </h2>
           {cube.measures.length === 0 ? (
-            <p className="text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+            <p className="text-[10px] text-foreground/30 font-mono">
               정의된 측정값이 없습니다
             </p>
           ) : (
-            <div className="border border-[#E5E5E5] rounded-lg overflow-hidden">
-              <table className="w-full text-[11px] font-[IBM_Plex_Mono]">
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full text-[11px] font-mono">
                 <thead>
-                  <tr className="bg-[#FAFAFA] text-foreground/50">
+                  <tr className="bg-muted/50 text-foreground/50">
                     <th className="text-left px-3 py-1.5 font-medium">이름</th>
                     <th className="text-left px-3 py-1.5 font-medium">표현식</th>
                     <th className="text-left px-3 py-1.5 font-medium">집계</th>
@@ -492,7 +492,7 @@ function CubeDetailView({
                 </thead>
                 <tbody>
                   {cube.measures.map((m) => (
-                    <tr key={m.id} className="border-t border-[#F0F0F0]">
+                    <tr key={m.id} className="border-t border-border">
                       <td className="px-3 py-1.5 text-foreground/70">{m.name}</td>
                       <td className="px-3 py-1.5 text-foreground/40 font-mono text-[10px]">{m.expression}</td>
                       <td className="px-3 py-1.5 text-foreground/40">{m.aggregation_type}</td>

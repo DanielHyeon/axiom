@@ -6,7 +6,7 @@ export const OlapPivot: React.FC = () => {
  const [selectedDim, setSelectedDim] = useState("Region");
 
  return (
- <div className="bg-white rounded shadow p-6 h-full flex flex-col">
+ <div className="bg-card rounded shadow p-6 h-full flex flex-col">
  <div className="border-b pb-4 mb-4">
  <h1 className="text-2xl font-bold text-gray-800">Advanced Analytics Pivot</h1>
  <p className="text-muted-foreground text-sm">Multidimensional schema exploration powered by Vision.</p>
@@ -20,7 +20,7 @@ export const OlapPivot: React.FC = () => {
  <button
  key={d}
  onClick={() => setSelectedDim(d)}
- className={`px-3 py-1 rounded border text-sm ${selectedDim === d ? 'bg-primary text-white border-blue-600' : 'bg-white text-muted-foreground border-border hover:bg-accent'}`}
+ className={`px-3 py-1 rounded border text-sm ${selectedDim === d ? 'bg-primary text-primary-foreground border-blue-600' : 'bg-card text-muted-foreground border-border hover:bg-accent'}`}
  >
  {d}
  </button>

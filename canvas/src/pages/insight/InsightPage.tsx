@@ -130,14 +130,14 @@ export function InsightPage() {
 
  {/* KPI filter tabs */}
  <div className="flex items-center gap-2.5">
- <span className="text-[11px] font-semibold text-foreground/60 font-[IBM_Plex_Mono] uppercase tracking-wider">{t('insight.selectedKpi')}</span>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('insight.selectedKpi')}</span>
  {KPI_FILTERS.map((tab, i) => (
  <button
  key={tab}
  type="button"
- className={`px-4 py-2.5 text-[12px] font-[Sora] transition-colors ${
+ className={`px-4 py-2.5 text-[12px] font-heading transition-colors ${
  i === 0
- ? 'text-black font-semibold border-b-2 border-red-600'
+ ? 'text-foreground font-semibold border-b-2 border-red-600'
  : 'text-foreground/60 hover:text-muted-foreground'
  }`}
  >
@@ -172,12 +172,12 @@ export function InsightPage() {
  {/* Impact Driver Ranking */}
  <div className="space-y-4">
  <div className="flex items-center justify-between">
- <h2 className="text-sm font-semibold text-black font-[Sora]">{t('insight.impactDriverRanking')}</h2>
+ <h2 className="text-sm font-semibold text-foreground font-heading">{t('insight.impactDriverRanking')}</h2>
  <div className="flex items-center gap-2">
  <button type="button" title="Grid view" className="p-1.5 rounded text-foreground/60 hover:text-muted-foreground transition-colors">
  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="8" y="1" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="1" y="8" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /><rect x="8" y="8" width="5" height="5" stroke="currentColor" strokeWidth="1.5" /></svg>
  </button>
- <button type="button" title="List view" className="p-1.5 rounded bg-[#F5F5F5] text-black transition-colors">
+ <button type="button" title="List view" className="p-1.5 rounded bg-muted text-foreground transition-colors">
  <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><line x1="1" y1="3" x2="13" y2="3" stroke="currentColor" strokeWidth="1.5" /><line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.5" /><line x1="1" y1="11" x2="13" y2="11" stroke="currentColor" strokeWidth="1.5" /></svg>
  </button>
  </div>
@@ -197,7 +197,7 @@ export function InsightPage() {
 
  {/* Bottom: Path comparison + Meta bar */}
  {impactPaths.length > 0 && (
- <div className="border border-[#E5E5E5] rounded p-3">
+ <div className="border border-border rounded p-3">
  <PathComparisonPanel
  paths={impactPaths}
  nodeLabels={nodeLabels}
@@ -213,13 +213,13 @@ export function InsightPage() {
 
  {/* Right: Driver Detail panel */}
  {nodeDetailOpen && (
- <div className="w-80 shrink-0 border-l border-[#E5E5E5] bg-white flex flex-col">
- <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5]">
- <span className="text-[13px] font-semibold text-black font-[Sora]">{t('insight.driverDetail')}</span>
+ <div className="w-80 shrink-0 border-l border-border bg-card flex flex-col">
+ <div className="flex items-center justify-between h-[52px] px-6 border-b border-border">
+ <span className="text-[13px] font-semibold text-foreground font-heading">{t('insight.driverDetail')}</span>
  <button
  type="button"
  onClick={() => selectDriver(null)}
- className="text-foreground/60 hover:text-black text-lg"
+ className="text-foreground/60 hover:text-foreground text-lg"
  >
  ×
  </button>
@@ -259,18 +259,18 @@ function KpiCard({
  showBar?: boolean;
 }) {
  return (
- <div className="flex-1 border border-[#E5E5E5] rounded py-5 px-6 space-y-2">
- <p className="text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono] font-medium">{label}</p>
+ <div className="flex-1 border border-border rounded py-5 px-6 space-y-2">
+ <p className="text-[11px] text-muted-foreground font-mono font-medium">{label}</p>
  <div className="flex items-end gap-3">
- <span className="text-[28px] font-semibold tracking-[-1px] text-black font-[Sora]">{value}</span>
+ <span className="text-[28px] font-semibold tracking-[-1px] text-foreground font-heading">{value}</span>
  {change && (
- <span className={`flex items-center gap-1 text-[12px] font-medium font-[IBM_Plex_Mono] ${positive ? 'text-success' : 'text-destructive'}`}>
+ <span className={`flex items-center gap-1 text-[12px] font-medium font-mono ${positive ? 'text-success' : 'text-destructive'}`}>
  {positive && <ArrowUpRight className="h-3 w-3" />}
  {change}
  </span>
  )}
  {sublabel && (
- <span className="text-[12px] text-foreground/60 font-[IBM_Plex_Mono]">{sublabel}</span>
+ <span className="text-[12px] text-foreground/60 font-mono">{sublabel}</span>
  )}
  </div>
  {showBar && <div className="h-[3px] w-full bg-destructive rounded-sm" />}
@@ -286,7 +286,7 @@ type MetaType = NonNullable<ReturnType<typeof useInsightStore.getState>['impactG
 
 function MetaBar({ meta }: { meta: MetaType }) {
  return (
- <div className="flex items-center gap-4 px-4 py-1.5 bg-[#F5F5F5] rounded text-[10px] text-foreground/60">
+ <div className="flex items-center gap-4 px-4 py-1.5 bg-muted rounded text-[10px] text-foreground/60">
  <div className="flex items-center gap-1">
  <Info className="h-3 w-3" />
  <span>
@@ -315,7 +315,7 @@ function MetaBar({ meta }: { meta: MetaType }) {
  )}
 
  {meta.trace_id && (
- <span className="ml-auto font-[IBM_Plex_Mono]">trace: {meta.trace_id}</span>
+ <span className="ml-auto font-mono">trace: {meta.trace_id}</span>
  )}
  </div>
  );

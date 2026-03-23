@@ -70,10 +70,10 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-blue-500" />
-          <h3 className="text-sm font-semibold text-gray-900 font-[Sora]">
+          <h3 className="text-sm font-semibold text-gray-900 font-heading">
             수집 이력
           </h3>
-          <span className="text-xs text-gray-400 font-[IBM_Plex_Mono]">
+          <span className="text-xs text-gray-400 font-mono">
             {records.length}건
           </span>
         </div>
@@ -107,25 +107,25 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
 
       {/* 테이블 */}
       {!loading && records.length > 0 && (
-        <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+        <div className="rounded-xl border border-gray-200 bg-card overflow-hidden">
           {/* 헤더 행 */}
           <div className="grid grid-cols-[40px_1fr_120px_100px_100px_80px] px-4 py-2.5 bg-gray-50 border-b border-gray-200">
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               #
             </span>
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               파이프라인
             </span>
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               시작 시각
             </span>
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               처리 행
             </span>
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               소요 시간
             </span>
-            <span className="text-[10px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
               상태
             </span>
           </div>
@@ -137,11 +137,11 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
                 key={record.id}
                 className="grid grid-cols-[40px_1fr_120px_100px_100px_80px] items-center px-4 py-2.5 hover:bg-gray-50/50 transition-colors"
               >
-                <span className="text-[11px] text-gray-400 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] text-gray-400 font-mono">
                   {idx + 1}
                 </span>
                 <div className="min-w-0">
-                  <span className="text-[13px] text-gray-900 font-[Sora] truncate block">
+                  <span className="text-[13px] text-gray-900 font-heading truncate block">
                     {record.pipelineName || record.pipelineId || record.datasource}
                   </span>
                   {record.error && (
@@ -150,13 +150,13 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
                     </p>
                   )}
                 </div>
-                <span className="text-[11px] text-gray-500 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] text-gray-500 font-mono">
                   {formatDateTime(record.startedAt)}
                 </span>
-                <span className="text-[11px] text-gray-700 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] text-gray-700 font-mono">
                   {record.rowsProcessed.toLocaleString()}
                 </span>
-                <span className="text-[11px] text-gray-500 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] text-gray-500 font-mono">
                   {formatDuration(record.duration)}
                 </span>
                 <RecordStatusIcon status={record.status} />

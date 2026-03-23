@@ -11,6 +11,7 @@ from passlib.context import CryptContext
 
 from app.core.config import settings
 from app.core.middleware import get_current_tenant_id
+from app.core.tenant_context import TenantContext, set_tenant_context, parse_workspace_id, get_workspace_id_header
 
 # bcrypt 72-byte limit: truncate_error=False so passlib truncates instead of raising (Docker/env 호환)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto", bcrypt__truncate_error=False)
@@ -96,18 +97,49 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials | None = De
     header_tenant = get_current_tenant_id()
     if header_tenant and header_tenant != "default" and header_tenant != tenant_id:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Tenant mismatch")
+
+    # JWT v1/v2 호환: role(단수 str) ↔ roles(복수 list) 양쪽 지원
+    # v1 토큰: {"role": "admin"}  → roles = ["admin"]
+    # v2 토큰: {"roles": ["TENANT_ADMIN", "PROCESS_ARCHITECT"]}
+    raw_roles = payload.get("roles")
+    if isinstance(raw_roles, list):
+        roles = raw_roles
+    else:
+        roles = [payload.get("role", "viewer")]
+    primary_role = roles[0] if roles else "viewer"
+
+    # workspace_id: v2 토큰의 active_workspace_id 추출 (v1은 None)
+    active_workspace_id = payload.get("active_workspace_id")
+
+    # TenantContext 조립 — audit_logged 데코레이터 등에서 사용
+    ctx = TenantContext(
+        tenant_id=tenant_id,
+        user_id=payload["sub"],
+        workspace_id=parse_workspace_id(active_workspace_id or get_workspace_id_header()),
+        role_codes=frozenset(roles),
+        permission_codes=frozenset(payload.get("permissions", [])),
+    )
+    set_tenant_context(ctx)
+
     return {
         "user_id": payload["sub"],
         "email": payload.get("email"),
         "tenant_id": tenant_id,
-        "role": payload.get("role", "viewer"),
+        "role": primary_role,           # 기존 호환: 단수 문자열
+        "roles": roles,                 # v2: 복수 역할 리스트
         "permissions": payload.get("permissions", []),
         "case_roles": payload.get("case_roles", {}),
+        "active_workspace_id": active_workspace_id,
     }
 
 
 def require_permission(permission: str):
-    """경로별 권한 검사용 (A7 선택 시 사용)."""
+    """경로별 권한 검사용 (v1 legacy 전용).
+
+    NOTE: v2 multi-role 및 process graph permissions는 Phase 1에서
+    has_process_graph_permission()과 통합 예정. 현재는 user["role"]
+    (primary_role)만 검사한다.
+    """
     async def _check(user: dict = Depends(get_current_user)) -> dict:
         if user["role"] == "admin":
             return user

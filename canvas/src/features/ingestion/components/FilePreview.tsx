@@ -25,20 +25,20 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   const displayRows = useMemo(() => data.rows.slice(0, 20), [data.rows]);
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-gray-200 bg-card overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <Table2 className="h-4 w-4 text-blue-500" />
-          <span className="text-sm font-semibold text-gray-900 font-[Sora]">
+          <span className="text-sm font-semibold text-gray-900 font-heading">
             미리보기
           </span>
-          <span className="text-xs text-gray-500 font-[IBM_Plex_Mono]">
+          <span className="text-xs text-gray-500 font-mono">
             {fileName}
           </span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] text-gray-400 font-[IBM_Plex_Mono]">
+          <span className="text-[11px] text-gray-400 font-mono">
             {data.columns.length}개 컬럼 / {data.totalRows.toLocaleString()}개 행
           </span>
           {onClose && (
@@ -60,13 +60,13 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
           <table className="w-full text-left">
             <thead className="sticky top-0 bg-gray-50 z-10">
               <tr>
-                <th className="px-3 py-2 text-[11px] font-medium text-gray-500 font-[IBM_Plex_Mono] border-b border-gray-200 w-10">
+                <th className="px-3 py-2 text-[11px] font-medium text-gray-500 font-mono border-b border-gray-200 w-10">
                   #
                 </th>
                 {data.columns.map((col) => (
                   <th
                     key={col}
-                    className="px-3 py-2 text-[11px] font-medium text-gray-500 font-[IBM_Plex_Mono] uppercase border-b border-gray-200 whitespace-nowrap"
+                    className="px-3 py-2 text-[11px] font-medium text-gray-500 font-mono uppercase border-b border-gray-200 whitespace-nowrap"
                   >
                     {col}
                   </th>
@@ -76,13 +76,13 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
             <tbody className="divide-y divide-gray-100">
               {displayRows.map((row, rowIdx) => (
                 <tr key={rowIdx} className="hover:bg-blue-50/30 transition-colors">
-                  <td className="px-3 py-1.5 text-[11px] text-gray-400 font-[IBM_Plex_Mono]">
+                  <td className="px-3 py-1.5 text-[11px] text-gray-400 font-mono">
                     {rowIdx + 1}
                   </td>
                   {data.columns.map((col) => (
                     <td
                       key={col}
-                      className="px-3 py-1.5 text-[13px] text-gray-700 font-[IBM_Plex_Mono] whitespace-nowrap max-w-[200px] truncate"
+                      className="px-3 py-1.5 text-[13px] text-gray-700 font-mono whitespace-nowrap max-w-[200px] truncate"
                       title={String(row[col] ?? '')}
                     >
                       {row[col] == null ? (

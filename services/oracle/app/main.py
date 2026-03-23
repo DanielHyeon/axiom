@@ -15,6 +15,7 @@ from app.api.meta import router as meta_router
 from app.api.events import router as events_router, watch_agent_router
 from app.api.cache import router as cache_router
 from app.api.validity import router as validity_router
+from app.api.domain_mode import router as domain_mode_router
 from app.core.rate_limit import RateLimitExceeded
 from app.core.config import settings
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
@@ -422,6 +423,8 @@ app.include_router(events_router)
 app.include_router(watch_agent_router)
 app.include_router(cache_router)
 app.include_router(validity_router)
+# Phase 3 Sprint 10: 도메인 NL2SQL 모드
+app.include_router(domain_mode_router)
 
 @app.get("/health/live")
 async def health_live():

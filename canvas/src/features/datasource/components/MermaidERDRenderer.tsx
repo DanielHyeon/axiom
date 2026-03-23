@@ -124,7 +124,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 overflow-hidden bg-white"
+      className="relative flex-1 overflow-hidden bg-card"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
@@ -134,7 +134,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
     >
       {/* 렌더링 상태 표시 */}
       {isRendering && (
-        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+        <div className="absolute inset-0 flex items-center justify-center bg-card/80 z-10">
           <div className="flex items-center gap-2 text-sm text-foreground/60">
             <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
             ERD 렌더링 중...
@@ -160,23 +160,23 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
       />
 
       {/* 줌 컨트롤 */}
-      <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-white border border-[#E5E5E5] rounded shadow-sm z-10">
+      <div className="absolute bottom-4 right-4 flex items-center gap-1 bg-card border border-border rounded shadow-sm z-10">
         <button
           type="button"
           onClick={() => setScale((s) => Math.min(s + 0.2, 4))}
-          className="px-2 py-1 text-xs text-foreground/60 hover:text-black transition-colors"
+          className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
           title="확대"
           aria-label="확대"
         >
           +
         </button>
-        <span className="px-2 py-1 text-[10px] text-foreground/60 font-[IBM_Plex_Mono] min-w-[40px] text-center">
+        <span className="px-2 py-1 text-[10px] text-foreground/60 font-mono min-w-[40px] text-center">
           {Math.round(scale * 100)}%
         </span>
         <button
           type="button"
           onClick={() => setScale((s) => Math.max(s - 0.2, 0.2))}
-          className="px-2 py-1 text-xs text-foreground/60 hover:text-black transition-colors"
+          className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
           title="축소"
           aria-label="축소"
         >
@@ -185,7 +185,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
         <button
           type="button"
           onClick={handleResetZoom}
-          className="px-2 py-1 text-[10px] text-foreground/60 hover:text-black transition-colors border-l border-[#E5E5E5]"
+          className="px-2 py-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors border-l border-border"
           title="줌 초기화"
           aria-label="원래 크기"
         >

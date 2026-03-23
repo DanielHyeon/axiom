@@ -73,7 +73,7 @@ export const UserTable: React.FC<UserTableProps> = ({
               {/* 사용자 정보: 아바타 + 이름 + 이메일 */}
               <TableCell>
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-indigo-500 text-white flex items-center justify-center text-sm font-semibold shrink-0">
+                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-primary to-indigo-500 text-primary-foreground flex items-center justify-center text-sm font-semibold shrink-0">
                     {getInitial(user)}
                   </div>
                   <div className="flex flex-col">

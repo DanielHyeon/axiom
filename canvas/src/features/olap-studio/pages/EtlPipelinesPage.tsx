@@ -97,13 +97,13 @@ export function EtlPipelinesPage() {
   return (
     <div className="flex flex-col h-full">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-6 h-12 border-b border-[#E5E5E5] bg-[#FAFAFA] shrink-0">
+      <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <GitBranch className="h-4 w-4 text-purple-500" />
-          <h1 className="text-[14px] font-semibold font-[Sora]">
+          <h1 className="text-[14px] font-semibold font-heading">
             ETL 파이프라인
           </h1>
-          <span className="text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+          <span className="text-[11px] text-foreground/40 font-mono">
             {pipelines.length}개
           </span>
         </div>
@@ -114,23 +114,23 @@ export function EtlPipelinesPage() {
 
       {/* 생성 폼 */}
       {showForm && (
-        <div className="px-6 py-4 bg-purple-50/30 border-b border-[#E5E5E5] space-y-3">
+        <div className="px-6 py-4 bg-purple-50/30 border-b border-border space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">이름</Label>
+              <Label className="text-[11px] font-mono">이름</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
                 placeholder="파이프라인 이름"
-                className="text-[12px] font-[IBM_Plex_Mono]"
+                className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">유형</Label>
+              <Label className="text-[11px] font-mono">유형</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
-                className="w-full rounded border border-[#E5E5E5] bg-white px-2 py-1.5 text-[12px] font-[IBM_Plex_Mono]"
+                className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
                 <option value="FULL">전체 적재</option>
                 <option value="INCREMENTAL">증분 적재</option>
@@ -138,12 +138,12 @@ export function EtlPipelinesPage() {
               </select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-[IBM_Plex_Mono]">설명</Label>
+              <Label className="text-[11px] font-mono">설명</Label>
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
                 placeholder="설명 (선택)"
-                className="text-[12px] font-[IBM_Plex_Mono]"
+                className="text-[12px] font-mono"
               />
             </div>
           </div>
@@ -181,7 +181,7 @@ export function EtlPipelinesPage() {
         {!isLoading && pipelines.length === 0 && (
           <div className="text-center py-12">
             <GitBranch className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
-            <p className="text-[12px] text-foreground/40 font-[IBM_Plex_Mono]">
+            <p className="text-[12px] text-foreground/40 font-mono">
               등록된 파이프라인이 없습니다
             </p>
           </div>
@@ -228,7 +228,7 @@ function PipelineRow({
     PIPELINE_STATUS_STYLE[pipeline.status] ?? 'bg-gray-100 text-gray-500';
 
   return (
-    <div className="border border-[#E5E5E5] rounded-lg bg-white">
+    <div className="border border-border rounded-lg bg-card">
       {/* 메인 행 */}
       <div className="flex items-center gap-3 px-4 py-3">
         {/* 확장 토글 */}
@@ -247,12 +247,12 @@ function PipelineRow({
         {/* 파이프라인 정보 */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold font-[Sora] truncate">
+            <span className="text-[13px] font-semibold font-heading truncate">
               {pipeline.name}
             </span>
             <span
               className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono] shrink-0',
+                'text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0',
                 statusStyle,
               )}
             >
@@ -260,14 +260,14 @@ function PipelineRow({
             </span>
           </div>
           {pipeline.description && (
-            <p className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] truncate mt-0.5">
+            <p className="text-[10px] text-foreground/40 font-mono truncate mt-0.5">
               {pipeline.description}
             </p>
           )}
         </div>
 
         {/* 유형 */}
-        <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] shrink-0">
+        <span className="text-[10px] text-foreground/40 font-mono shrink-0">
           {pipeline.pipeline_type}
         </span>
 
@@ -294,14 +294,14 @@ function PipelineRow({
 
       {/* 확장: 실행 이력 */}
       {isExpanded && (
-        <div className="border-t border-[#F0F0F0] px-4 py-3 bg-[#FAFAFA]/50">
+        <div className="border-t border-border px-4 py-3 bg-muted/50/50">
           {runs.length === 0 ? (
-            <p className="text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+            <p className="text-[10px] text-foreground/30 font-mono">
               실행 이력 없음
             </p>
           ) : (
             <div className="space-y-1.5">
-              <p className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono] font-medium mb-2">
+              <p className="text-[10px] text-foreground/40 font-mono font-medium mb-2">
                 최근 실행 이력
               </p>
               {runs.map((run) => (
@@ -322,7 +322,7 @@ function RunItem({ run }: { run: ETLRun }) {
     RUN_STATUS_STYLE[run.run_status] ?? 'bg-gray-100 text-gray-500';
 
   return (
-    <div className="flex items-center gap-3 text-[10px] font-[IBM_Plex_Mono]">
+    <div className="flex items-center gap-3 text-[10px] font-mono">
       {/* 상태 배지 */}
       <span
         className={cn(

@@ -64,7 +64,7 @@ export function QueryToolbar({
           'p-2 rounded transition-colors',
           schemaTreeOpen
             ? 'bg-blue-50 text-blue-600'
-            : 'text-foreground/40 hover:text-foreground/60 hover:bg-[#F5F5F5]',
+            : 'text-foreground/40 hover:text-foreground/60 hover:bg-muted',
         )}
         title={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
         aria-label={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
@@ -85,9 +85,9 @@ export function QueryToolbar({
           type="button"
           onClick={() => onModeChange('react')}
           className={cn(
-            'px-3 py-1 text-[11px] font-medium font-[IBM_Plex_Mono] rounded transition-colors',
+            'px-3 py-1 text-[11px] font-medium font-mono rounded transition-colors',
             mode === 'react'
-              ? 'bg-[#F5F5F5] text-black'
+              ? 'bg-muted text-foreground'
               : 'text-foreground/60 hover:text-muted-foreground',
           )}
         >
@@ -97,9 +97,9 @@ export function QueryToolbar({
           type="button"
           onClick={() => onModeChange('ask')}
           className={cn(
-            'px-3 py-1 text-[11px] font-medium font-[IBM_Plex_Mono] rounded transition-colors',
+            'px-3 py-1 text-[11px] font-medium font-mono rounded transition-colors',
             mode === 'ask'
-              ? 'bg-[#F5F5F5] text-black'
+              ? 'bg-muted text-foreground'
               : 'text-foreground/60 hover:text-muted-foreground',
           )}
         >
@@ -109,7 +109,7 @@ export function QueryToolbar({
 
       {/* 행 제한 선택기 */}
       <Select value={String(rowLimit)} onValueChange={(v) => onRowLimitChange(Number(v))}>
-        <SelectTrigger className="h-7 w-20 border-[#E5E5E5] bg-white text-xs text-[#5E5E5E]">
+        <SelectTrigger className="h-7 w-20 border-border bg-card text-xs text-muted-foreground">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>

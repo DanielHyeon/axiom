@@ -92,7 +92,7 @@ export function DocumentReviewPage() {
 
  return (
  <div className="space-y-4 p-6">
- <h1 className="text-xl font-semibold text-white">문서 리뷰</h1>
+ <h1 className="text-xl font-semibold text-primary-foreground">문서 리뷰</h1>
  <p className="text-sm text-foreground0">
  케이스: {caseId} / 문서: {docId}
  </p>

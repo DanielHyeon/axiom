@@ -122,8 +122,8 @@ export function NL2SQLPage() {
         <div className="flex-1 overflow-auto p-12 space-y-10">
           {/* 제목 */}
           <div className="space-y-2">
-            <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">{t('nl2sql.title')}</h1>
-            <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">{t('nl2sql.subtitle')}</p>
+            <h1 className="text-[48px] font-semibold tracking-[-2px] text-foreground font-heading">{t('nl2sql.title')}</h1>
+            <p className="text-[13px] text-muted-foreground font-mono">{t('nl2sql.subtitle')}</p>
           </div>
 
           {/* 쿼리 영역 */}
@@ -164,7 +164,7 @@ export function NL2SQLPage() {
                     key={q}
                     type="button"
                     onClick={() => setPromptRef.current?.(q)}
-                    className="rounded-full border border-[#E5E5E5] bg-white px-3 py-1.5 text-xs text-muted-foreground hover:text-black hover:border-[#999] transition-colors"
+                    className="rounded-full border border-border bg-card px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground hover:border-border transition-colors"
                   >
                     {q}
                   </button>
@@ -239,10 +239,10 @@ export function NL2SQLPage() {
 
       {/* 우측 사이드바: 쿼리 히스토리 */}
       {historyOpen && (
-        <div className="w-80 shrink-0 border-l border-[#E5E5E5] flex flex-col">
-          <div className="flex items-center justify-between h-[52px] px-6 border-b border-[#E5E5E5]">
-            <span className="text-[13px] font-semibold text-black font-[Sora]">{t('nl2sql.queryHistory')}</span>
-            <span className="bg-[#F5F5F5] px-2.5 py-1 text-[11px] text-[#5E5E5E] font-[IBM_Plex_Mono] font-medium rounded">12</span>
+        <div className="w-80 shrink-0 border-l border-border flex flex-col">
+          <div className="flex items-center justify-between h-[52px] px-6 border-b border-border">
+            <span className="text-[13px] font-semibold text-foreground font-heading">{t('nl2sql.queryHistory')}</span>
+            <span className="bg-muted px-2.5 py-1 text-[11px] text-muted-foreground font-mono font-medium rounded">12</span>
           </div>
           <div className="flex-1 overflow-auto">
             <QueryHistoryPanel datasourceId={datasourceId} onSelect={(item) => setPromptRef.current?.(item.question)} />

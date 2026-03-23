@@ -24,7 +24,7 @@ export const WhatIfBuilder: React.FC = () => {
  };
 
  return (
- <div className="bg-white rounded shadow p-6 h-full">
+ <div className="bg-card rounded shadow p-6 h-full">
  <div className="border-b pb-4 mb-6">
  <h1 className="text-2xl font-bold text-gray-800">What-If Scenario Engine</h1>
  <p className="text-muted-foreground text-sm">Calculate deep impact regressions securely through Vision.</p>
@@ -44,7 +44,7 @@ export const WhatIfBuilder: React.FC = () => {
  <button
  onClick={handleSimulate}
  disabled={loading || !modifier}
- className="bg-primary hover:bg-primary/90 text-white font-bold py-2 px-6 rounded disabled:opacity-50"
+ className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-2 px-6 rounded disabled:opacity-50"
  >
  {loading ? "Running Regression..." : "Execute Simulation"}
  </button>

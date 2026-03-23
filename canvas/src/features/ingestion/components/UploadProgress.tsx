@@ -81,14 +81,14 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
   const total = files.length;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white overflow-hidden">
+    <div className="rounded-xl border border-gray-200 bg-card overflow-hidden">
       {/* 헤더 */}
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2">
-          <span className="text-sm font-semibold text-gray-900 font-[Sora]">
+          <span className="text-sm font-semibold text-gray-900 font-heading">
             업로드 파일
           </span>
-          <span className="text-xs text-gray-500 font-[IBM_Plex_Mono]">
+          <span className="text-xs text-gray-500 font-mono">
             {completed}/{total} 완료
             {failed > 0 && <span className="text-red-500 ml-1">({failed} 실패)</span>}
           </span>
@@ -114,10 +114,10 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
             {/* 파일 정보 */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
-                <span className="text-[13px] font-medium text-gray-900 truncate font-[Sora]">
+                <span className="text-[13px] font-medium text-gray-900 truncate font-heading">
                   {file.name}
                 </span>
-                <span className="text-[11px] text-gray-400 shrink-0 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] text-gray-400 shrink-0 font-mono">
                   {formatFileSize(file.size)}
                 </span>
               </div>
@@ -141,7 +141,7 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
             {/* 상태 라벨 + 진행률 */}
             <div className="flex items-center gap-2 shrink-0">
               {file.status === 'uploading' && (
-                <span className="text-[11px] font-medium text-blue-600 font-[IBM_Plex_Mono]">
+                <span className="text-[11px] font-medium text-blue-600 font-mono">
                   {file.progress}%
                 </span>
               )}

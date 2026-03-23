@@ -14,7 +14,7 @@ export const OntologyBrowser: React.FC = () => {
  const highlightIds = pathParam ? pathParam.split(',').map((s) => s.trim()).filter(Boolean) : [];
 
  return (
- <div className="flex flex-col h-full bg-white rounded shadow p-6">
+ <div className="flex flex-col h-full bg-card rounded shadow p-6">
  <div className="border-b pb-4 mb-4 flex justify-between items-start">
  <div>
  <h1 className="text-2xl font-bold text-gray-800">Ontology Map</h1>
@@ -37,7 +37,7 @@ export const OntologyBrowser: React.FC = () => {
  <div
  key={node.id}
  data-path-node={node.id}
- className={`inline-block text-white font-bold px-6 py-4 rounded-full shadow-lg border-4 mb-8 mx-auto rotate-3 ${node.className} ${ring ? 'ring-4 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+ className={`inline-block text-primary-foreground font-bold px-6 py-4 rounded-full shadow-lg border-4 mb-8 mx-auto rotate-3 ${node.className} ${ring ? 'ring-4 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
  >
  {node.label}
  </div>
@@ -50,7 +50,7 @@ export const OntologyBrowser: React.FC = () => {
  <div
  key={node.id}
  data-path-node={node.id}
- className={`${node.className} text-white font-semibold px-4 py-2 rounded shadow-md border-4 ${ring ? 'ring-4 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
+ className={`${node.className} text-primary-foreground font-semibold px-4 py-2 rounded shadow-md border-4 ${ring ? 'ring-4 ring-white ring-offset-2 ring-offset-slate-900' : ''}`}
  >
  {node.label}
  </div>

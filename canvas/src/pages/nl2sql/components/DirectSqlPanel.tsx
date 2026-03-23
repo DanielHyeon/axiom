@@ -75,8 +75,8 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  >
  <div className="flex items-center gap-2">
  <ShieldAlert className="h-4 w-4 text-amber-600" />
- <span className="text-sm font-medium text-amber-700 font-[Sora]">Direct SQL (Admin)</span>
- <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 font-[IBM_Plex_Mono]">
+ <span className="text-sm font-medium text-amber-700 font-heading">Direct SQL (Admin)</span>
+ <Badge variant="outline" className="text-[10px] border-amber-300 text-amber-600 font-mono">
  ADMIN ONLY
  </Badge>
  </div>
@@ -91,7 +91,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  {expanded && (
  <div className="px-3 pb-3 space-y-3">
  {/* SQL Editor */}
- <div className="border border-[#E5E5E5] rounded-md overflow-hidden bg-[#1e1e1e]">
+ <div className="border border-border rounded-md overflow-hidden bg-card">
  <MonacoEditor
  language="sql"
  theme="vs-dark"
@@ -120,7 +120,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  <Button
  onClick={handleExecute}
  disabled={loading || !sql.trim() || !datasourceId}
- className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-white"
+ className="gap-1.5 bg-amber-600 hover:bg-amber-700 text-primary-foreground"
  size="sm"
  >
  {loading ? (
@@ -131,7 +131,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  {loading ? '실행 중...' : 'SQL 실행'}
  </Button>
  {!datasourceId && (
- <span className="text-xs text-foreground/60 font-[IBM_Plex_Mono]">
+ <span className="text-xs text-foreground/60 font-mono">
  데이터소스를 먼저 선택하세요.
  </span>
  )}
@@ -159,7 +159,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
 
  {/* Empty result */}
  {result && normalizedColumns.length === 0 && (
- <div className="text-sm text-foreground/60 py-2 font-[IBM_Plex_Mono]">
+ <div className="text-sm text-foreground/60 py-2 font-mono">
  실행 완료 (결과 없음, {result.result.row_count} rows affected)
  </div>
  )}

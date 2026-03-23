@@ -11,16 +11,16 @@ interface EmptyStateProps {
 
 export function EmptyState({ icon: Icon, title, description, actionLabel, onAction }: EmptyStateProps) {
  return (
- <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center border border-[#E5E5E5] border-dashed rounded-lg">
- <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-[#F5F5F5] border border-[#E5E5E5] text-foreground/60">
+ <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center border border-border border-dashed rounded-lg">
+ <div className="flex items-center justify-center w-12 h-12 mb-4 rounded-full bg-muted border border-border text-foreground/60">
  <Icon size={24} />
  </div>
- <h3 className="mb-2 text-lg font-semibold text-black font-[Sora]">{title}</h3>
- <p className="max-w-sm mb-6 text-sm text-foreground/60 font-[IBM_Plex_Mono]">
+ <h3 className="mb-2 text-lg font-semibold text-foreground font-heading">{title}</h3>
+ <p className="max-w-sm mb-6 text-sm text-foreground/60 font-mono">
  {description}
  </p>
  {actionLabel && onAction && (
- <Button onClick={onAction} variant="outline" className="border-[#E5E5E5] text-[#5E5E5E] hover:text-black hover:bg-[#F5F5F5] font-[Sora]">
+ <Button onClick={onAction} variant="outline" className="border-border text-muted-foreground hover:text-foreground hover:bg-muted font-heading">
  {actionLabel}
  </Button>
  )}

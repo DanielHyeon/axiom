@@ -62,7 +62,7 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
  };
 
  return (
- <div className="border border-border rounded-lg bg-white overflow-hidden">
+ <div className="border border-border rounded-lg bg-card overflow-hidden">
  <div className="p-3 border-b border-border bg-background font-medium text-sm">메타데이터 트리</div>
  <div className="p-2 max-h-80 overflow-y-auto">
  {datasourceNames.length === 0 && (

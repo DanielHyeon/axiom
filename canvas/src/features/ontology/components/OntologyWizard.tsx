@@ -64,7 +64,7 @@ export function OntologyWizard() {
                   <div
                     className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-colors ${
                       isCompleted
-                        ? 'bg-green-500 text-white'
+                        ? 'bg-green-500 text-primary-foreground'
                         : isActive
                           ? 'bg-primary text-primary-foreground'
                           : 'bg-muted text-muted-foreground'

@@ -47,7 +47,7 @@ export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) 
  };
 
  return (
- <div className="border border-border rounded-lg bg-white overflow-hidden">
+ <div className="border border-border rounded-lg bg-card overflow-hidden">
  <div className="p-3 border-b border-border bg-background font-medium text-sm">스키마 동기화</div>
  <div className="p-3 space-y-2">
  <button

@@ -84,7 +84,7 @@ export function HumanInTheLoopInput({
 
         {/* 컨텍스트 (있는 경우) */}
         {request.context && (
-          <div className="rounded bg-amber-100/50 px-3 py-2 text-xs text-amber-700 font-[IBM_Plex_Mono]">
+          <div className="rounded bg-amber-100/50 px-3 py-2 text-xs text-amber-700 font-mono">
             {request.context}
           </div>
         )}
@@ -99,7 +99,7 @@ export function HumanInTheLoopInput({
                   'flex items-start gap-3 rounded-md border px-3 py-2.5 cursor-pointer transition-colors',
                   selectedValue === opt.value
                     ? 'border-amber-500 bg-amber-100/70'
-                    : 'border-amber-200 bg-white hover:border-amber-300',
+                    : 'border-amber-200 bg-card hover:border-amber-300',
                 )}
               >
                 <input
@@ -128,7 +128,7 @@ export function HumanInTheLoopInput({
               size="sm"
               onClick={() => setSelectedValue('yes')}
               className={cn(
-                selectedValue === 'yes' && 'bg-amber-600 hover:bg-amber-700 text-white',
+                selectedValue === 'yes' && 'bg-amber-600 hover:bg-amber-700 text-primary-foreground',
               )}
             >
               예
@@ -138,7 +138,7 @@ export function HumanInTheLoopInput({
               size="sm"
               onClick={() => setSelectedValue('no')}
               className={cn(
-                selectedValue === 'no' && 'bg-amber-600 hover:bg-amber-700 text-white',
+                selectedValue === 'no' && 'bg-amber-600 hover:bg-amber-700 text-primary-foreground',
               )}
             >
               아니오
@@ -174,7 +174,7 @@ export function HumanInTheLoopInput({
             size="sm"
             onClick={handleSubmit}
             disabled={isDisabled}
-            className="bg-amber-600 hover:bg-amber-700 text-white"
+            className="bg-amber-600 hover:bg-amber-700 text-primary-foreground"
           >
             <Send className="h-3.5 w-3.5 mr-1" />
             {isSubmitting ? '전송 중...' : '답변 전송'}

@@ -92,7 +92,7 @@ function extractLatestToolName(steps: ReactStreamStep[]): string | null {
 // ─── 상태 설정 맵 ─────────────────────────────────────────
 
 const STATUS_CONFIG: Record<AgentStatus, { label: string; icon: React.ElementType; className: string }> = {
-  idle: { label: '대기', icon: Clock, className: 'bg-[#F0F0F0] text-foreground/50' },
+  idle: { label: '대기', icon: Clock, className: 'bg-muted text-foreground/50' },
   running: { label: '에이전트 실행 중', icon: Zap, className: 'bg-blue-50 text-blue-600 animate-pulse' },
   needs_user_input: { label: '추가 입력 대기 중', icon: MessageSquare, className: 'bg-amber-50 text-amber-600' },
   completed: { label: '완료', icon: CheckCircle2, className: 'bg-green-50 text-green-600' },
@@ -118,13 +118,13 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="rounded border border-[#E5E5E5] space-y-3 p-3">
+    <div className="rounded border border-border space-y-3 p-3">
       {/* 상태 배너 */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
           <span
             className={cn(
-              'flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-semibold font-[IBM_Plex_Mono]',
+              'flex items-center gap-1.5 px-3 py-1.5 rounded text-[12px] font-semibold font-mono',
               statusConfig.className
             )}
           >
@@ -132,14 +132,14 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
             {statusConfig.label}
           </span>
           {currentStep > 0 && (
-            <span className="px-2 py-1 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-semibold text-blue-600 font-[IBM_Plex_Mono]">
+            <span className="px-2 py-1 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-semibold text-blue-600 font-mono">
               Step {currentStep}
             </span>
           )}
         </div>
 
         {/* 메타 정보 */}
-        <div className="flex items-center gap-3 text-[11px] text-foreground/40 font-[IBM_Plex_Mono]">
+        <div className="flex items-center gap-3 text-[11px] text-foreground/40 font-mono">
           <span>남은 호출: <strong className="text-foreground/60">{Math.max(0, remainingCalls)}</strong></span>
           {latestToolName && (
             <span className="flex items-center gap-1">
@@ -168,13 +168,13 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
       {/* 경고 */}
       {warnings.length > 0 && (
         <div className="bg-amber-50/50 border-l-2 border-amber-400 p-3 rounded-r">
-          <div className="flex items-center gap-1.5 text-[12px] text-amber-600 font-semibold font-[IBM_Plex_Mono] mb-1">
+          <div className="flex items-center gap-1.5 text-[12px] text-amber-600 font-semibold font-mono mb-1">
             <AlertTriangle className="h-3.5 w-3.5" />
             경고 ({warnings.length})
           </div>
           <ul className="space-y-0.5">
             {warnings.map((w, i) => (
-              <li key={i} className="text-[11px] text-foreground/60 font-[IBM_Plex_Mono] pl-5">
+              <li key={i} className="text-[11px] text-foreground/60 font-mono pl-5">
                 {w}
               </li>
             ))}
@@ -194,7 +194,7 @@ interface SqlSectionProps {
 }
 
 const VARIANT_STYLES = {
-  default: 'bg-[#F5F5F5] border-foreground/10',
+  default: 'bg-muted border-foreground/10',
   success: 'bg-green-50/50 border-green-200',
   info: 'bg-blue-50/50 border-blue-200',
 };
@@ -217,7 +217,7 @@ function SqlSection({ title, sql, variant }: SqlSectionProps) {
   return (
     <div className={cn('rounded border overflow-hidden', VARIANT_STYLES[variant])}>
       <div className="flex items-center justify-between px-3 py-1.5">
-        <span className={cn('text-[11px] font-semibold font-[IBM_Plex_Mono]', HEADER_STYLES[variant])}>
+        <span className={cn('text-[11px] font-semibold font-mono', HEADER_STYLES[variant])}>
           {title}
         </span>
         <button
@@ -230,7 +230,7 @@ function SqlSection({ title, sql, variant }: SqlSectionProps) {
         </button>
       </div>
       <div className="px-3 pb-2 max-h-[200px] overflow-auto">
-        <pre className="text-[11px] text-foreground/70 font-[IBM_Plex_Mono] whitespace-pre-wrap break-words">
+        <pre className="text-[11px] text-foreground/70 font-mono whitespace-pre-wrap break-words">
           {sql}
         </pre>
       </div>

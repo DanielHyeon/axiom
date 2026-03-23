@@ -8,7 +8,7 @@ export const WatchAlerts: React.FC = () => {
  ]);
 
  return (
- <div className="bg-white rounded shadow p-6 h-full">
+ <div className="bg-card rounded shadow p-6 h-full">
  <div className="border-b pb-4 mb-6 flex justify-between items-center">
  <div>
  <h1 className="text-2xl font-bold text-gray-800">Watch Agent Center</h1>

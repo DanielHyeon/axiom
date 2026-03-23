@@ -120,7 +120,7 @@ export function DQTestRunner() {
                     </p>
                     {level === lv && (
                       <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-white text-xs">&#10003;</span>
+                        <span className="text-primary-foreground text-xs">&#10003;</span>
                       </div>
                     )}
                   </button>

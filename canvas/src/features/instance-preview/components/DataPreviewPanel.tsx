@@ -114,9 +114,9 @@ export function DataPreviewPanel({
   // ─── 렌더링 ───────────────────────────────────────────────
 
   return (
-    <div className="flex flex-col h-full border-l border-[#E5E5E5] bg-white w-[480px] shrink-0">
+    <div className="flex flex-col h-full border-l border-border bg-card w-[480px] shrink-0">
       {/* 헤더 */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-[#E5E5E5] shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-b border-border shrink-0">
         <div className="flex items-center gap-2 min-w-0">
           <Database className="h-4 w-4 text-foreground/40 shrink-0" />
           <span className="text-sm font-semibold truncate">{nodeName}</span>
@@ -207,7 +207,7 @@ export function DataPreviewPanel({
 
             {/* "더 보기" 버튼 */}
             {hasMore && (
-              <div className="flex justify-center py-3 border-t border-[#F0F0F0]">
+              <div className="flex justify-center py-3 border-t border-border">
                 <Button
                   variant="ghost"
                   size="sm"

@@ -25,7 +25,7 @@ export function MeasureBindingPanel({ binding, onUpdate }: MeasureBindingPanelPr
  type="text"
  value={b.kpiId ?? ''}
  onChange={(e) => update('kpiId', e.target.value || undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  placeholder="KPI 연동 예정"
  />
  </div>
@@ -36,7 +36,7 @@ export function MeasureBindingPanel({ binding, onUpdate }: MeasureBindingPanelPr
  type="text"
  value={b.formula ?? ''}
  onChange={(e) => update('formula', e.target.value || undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white font-mono"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
  placeholder="예: count(완료) / count(요청)"
  />
  </div>
@@ -47,7 +47,7 @@ export function MeasureBindingPanel({ binding, onUpdate }: MeasureBindingPanelPr
  type="text"
  value={b.unit ?? ''}
  onChange={(e) => update('unit', e.target.value || undefined)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  placeholder="%, 건, 시간"
  />
  </div>

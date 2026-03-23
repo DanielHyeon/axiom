@@ -7,8 +7,7 @@ import { useDashboardConfig } from '@/features/case-dashboard/hooks/useDashboard
 import { StatsCard } from '@/features/case-dashboard/components/StatsCard';
 import { RoleGreeting } from '@/features/case-dashboard/components/RoleGreeting';
 import { QuickActionsPanel } from '@/features/case-dashboard/components/QuickActionsPanel';
-import { MyWorkitemsPanel } from '@/features/case-dashboard/components/MyWorkitemsPanel';
-import { ApprovalQueuePanel } from '@/features/case-dashboard/components/ApprovalQueuePanel';
+import { DashboardComposer } from '@/features/case-dashboard/components/DashboardComposer';
 import { CaseTable } from '@/features/case-dashboard/components/CaseTable';
 import { CaseFilters, type CaseStatusFilter, type CaseTypeFilter } from '@/features/case-dashboard/components/CaseFilters';
 import { CaseTimeline } from '@/features/case-dashboard/components/CaseTimeline';
@@ -43,8 +42,6 @@ export function CaseDashboardPage() {
  const userEmail = useAuthStore((s) => s.user?.email);
  const role = useAuthStore((s) => s.user?.role);
  const panels = useDashboardConfig(role);
- const showMyWorkitems = panels.includes('myWorkitems');
- const showApprovalQueue = panels.includes('approvalQueue');
  const navigate = useNavigate();
 
  if (error) {
@@ -91,13 +88,11 @@ export function CaseDashboardPage() {
  <QuickActionsPanel />
  </div>
 
+ {/* 역할별 패널 — DashboardComposer가 useDashboardConfig 기반으로 조합 */}
  <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
- {(showMyWorkitems || showApprovalQueue) && (
- <div className="space-y-4 lg:col-span-2">
- {showMyWorkitems && <MyWorkitemsPanel />}
- {showApprovalQueue && <ApprovalQueuePanel />}
+ <div className="lg:col-span-2">
+  <DashboardComposer panels={panels} />
  </div>
- )}
  <div className="space-y-4">
  <CaseTimeline items={activities} />
  <CaseDistributionChart cases={filteredCases} />

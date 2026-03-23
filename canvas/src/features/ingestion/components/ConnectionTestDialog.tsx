@@ -69,12 +69,12 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
       aria-modal="true"
       aria-label="연결 테스트"
     >
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+      <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-2">
             <TestTubeDiagonal className="h-5 w-5 text-blue-500" />
-            <h2 className="text-base font-semibold text-gray-900 font-[Sora]">
+            <h2 className="text-base font-semibold text-gray-900 font-heading">
               연결 테스트
             </h2>
           </div>
@@ -92,10 +92,10 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
         <div className="px-6 py-5 space-y-4">
           {/* 대상 정보 */}
           <div className="px-4 py-3 bg-gray-50 rounded-lg">
-            <span className="text-[11px] text-gray-400 font-[IBM_Plex_Mono] uppercase">
+            <span className="text-[11px] text-gray-400 font-mono uppercase">
               대상 데이터소스
             </span>
-            <p className="text-sm font-semibold text-gray-900 mt-0.5 font-[Sora]">
+            <p className="text-sm font-semibold text-gray-900 mt-0.5 font-heading">
               {datasourceName}
             </p>
           </div>
@@ -134,7 +134,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 text-[13px] text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-[Sora]"
+            className="px-4 py-2 text-[13px] text-gray-600 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-heading"
           >
             닫기
           </button>
@@ -142,7 +142,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
             type="button"
             onClick={handleTest}
             disabled={testing}
-            className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-[Sora]"
+            className="flex items-center gap-1.5 px-4 py-2 text-[13px] font-medium text-primary-foreground bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors font-heading"
           >
             {testing ? (
               <>

@@ -123,7 +123,7 @@ export function LoginPage() {
  <div className="glass-card relative w-full max-w-sm rounded-2xl p-8">
  <div className="mb-8 text-center">
  <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-400 shadow-lg shadow-primary/25">
- <span className="text-lg font-bold text-white">A</span>
+ <span className="text-lg font-bold text-primary-foreground">A</span>
  </div>
  <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Axiom Canvas</h1>
  <p className="text-sm text-muted-foreground">시스템에 접속하려면 로그인하세요</p>

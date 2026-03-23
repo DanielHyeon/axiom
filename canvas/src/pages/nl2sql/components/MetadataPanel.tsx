@@ -34,7 +34,7 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  if (!metadata) return null;
 
  const guardInfo = GUARD_VARIANT[metadata.guard_status ?? ''] ?? {
- className: 'border-[#E5E5E5] text-foreground/60',
+ className: 'border-border text-foreground/60',
  label: metadata.guard_status ?? 'N/A',
  };
 
@@ -88,19 +88,19 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  if (summaryItems.length === 0) return null;
 
  return (
- <div className="border-t border-[#E5E5E5]">
+ <div className="border-t border-border">
  {/* Collapsed summary row */}
  <button
  type="button"
  onClick={() => setExpanded((prev) => !prev)}
- className="flex w-full items-center justify-between px-3 py-2 hover:bg-[#F5F5F5] transition-colors"
+ className="flex w-full items-center justify-between px-3 py-2 hover:bg-muted transition-colors"
  >
  <div className="flex flex-wrap items-center gap-2">
  {summaryItems.map((item, i) => (
  <Badge
  key={i}
  variant="outline"
- className="gap-1 text-foreground/60 border-[#E5E5E5] font-normal font-[IBM_Plex_Mono]"
+ className="gap-1 text-foreground/60 border-border font-normal font-mono"
  >
  {item.icon}
  {item.text}
@@ -120,8 +120,8 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.execution_time_ms != null && (
  <div className="flex items-center gap-2">
  <Clock className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Execution Time:</span>
- <span className="text-black font-[IBM_Plex_Mono]">
+ <span className="text-foreground/60 font-mono">Execution Time:</span>
+ <span className="text-foreground font-mono">
  {metadata.execution_time_ms >= 1000
  ? `${(metadata.execution_time_ms / 1000).toFixed(2)}s`
  : `${metadata.execution_time_ms}ms`}
@@ -132,8 +132,8 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.guard_status && (
  <div className="flex items-center gap-2">
  <ShieldCheck className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Guard Status:</span>
- <Badge variant="outline" className={cn('font-[IBM_Plex_Mono]', guardInfo.className)}>
+ <span className="text-foreground/60 font-mono">Guard Status:</span>
+ <Badge variant="outline" className={cn('font-mono', guardInfo.className)}>
  {guardInfo.label}
  </Badge>
  </div>
@@ -143,11 +143,11 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  <div>
  <div className="flex items-center gap-2 mb-1">
  <ShieldCheck className="h-3.5 w-3.5 text-warning" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Guard Fixes:</span>
+ <span className="text-foreground/60 font-mono">Guard Fixes:</span>
  </div>
  <ul className="ml-6 space-y-0.5">
  {metadata.guard_fixes.map((fix, i) => (
- <li key={i} className="text-xs text-amber-600 font-[IBM_Plex_Mono]">
+ <li key={i} className="text-xs text-amber-600 font-mono">
  - {fix}
  </li>
  ))}
@@ -159,11 +159,11 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  <div>
  <div className="flex items-center gap-2 mb-1">
  <Table2 className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Tables Used:</span>
+ <span className="text-foreground/60 font-mono">Tables Used:</span>
  </div>
  <div className="ml-6 flex flex-wrap gap-1">
  {metadata.tables_used.map((table) => (
- <Badge key={table} variant="secondary" className="text-xs font-[IBM_Plex_Mono]">
+ <Badge key={table} variant="secondary" className="text-xs font-mono">
  {table}
  </Badge>
  ))}
@@ -174,22 +174,22 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.schema_source && (
  <div className="flex items-center gap-2">
  <Search className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Schema Source:</span>
- <span className="text-black font-[IBM_Plex_Mono]">{metadata.schema_source}</span>
+ <span className="text-foreground/60 font-mono">Schema Source:</span>
+ <span className="text-foreground font-mono">{metadata.schema_source}</span>
  </div>
  )}
 
  {metadata.cache_hit != null && (
  <div className="flex items-center gap-2">
  <Zap className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Cache:</span>
+ <span className="text-foreground/60 font-mono">Cache:</span>
  <Badge
  variant="outline"
  className={cn(
- 'font-normal font-[IBM_Plex_Mono]',
+ 'font-normal font-mono',
  metadata.cache_hit
  ? 'border-green-300 text-green-600'
- : 'border-[#E5E5E5] text-foreground/60'
+ : 'border-border text-foreground/60'
  )}
  >
  {metadata.cache_hit ? 'HIT' : 'MISS'}
@@ -200,8 +200,8 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.snapshot_version && (
  <div className="flex items-center gap-2">
  <GitBranch className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Snapshot:</span>
- <code className="text-xs text-[#5E5E5E] bg-[#F5F5F5] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]">
+ <span className="text-foreground/60 font-mono">Snapshot:</span>
+ <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
  {metadata.snapshot_version}
  </code>
  </div>
@@ -210,11 +210,11 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.semantic_guard_mode && (
  <div className="flex items-center gap-2">
  <ShieldCheck className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Semantic Guard:</span>
- <Badge variant="outline" className={cn('font-[IBM_Plex_Mono]',
+ <span className="text-foreground/60 font-mono">Semantic Guard:</span>
+ <Badge variant="outline" className={cn('font-mono',
    metadata.semantic_guard_mode === 'enforce' ? 'border-red-300 text-red-600' :
    metadata.semantic_guard_mode === 'warn' ? 'border-amber-300 text-amber-600' :
-   'border-[#E5E5E5] text-foreground/60'
+   'border-border text-foreground/60'
  )}>
  {metadata.semantic_guard_mode}
  </Badge>
@@ -225,11 +225,11 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  <div>
  <div className="flex items-center gap-2 mb-1">
  <ShieldCheck className="h-3.5 w-3.5 text-red-500" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Contract Violations:</span>
+ <span className="text-foreground/60 font-mono">Contract Violations:</span>
  </div>
  <ul className="ml-6 space-y-0.5">
  {metadata.contract_violations.map((v, i) => (
-   <li key={i} className="text-xs text-red-600 font-[IBM_Plex_Mono]">
+   <li key={i} className="text-xs text-red-600 font-mono">
    - [{v.code}] {v.message}
    </li>
  ))}
@@ -240,8 +240,8 @@ export function MetadataPanel({ metadata }: MetadataPanelProps) {
  {metadata.query_id && (
  <div className="flex items-center gap-2">
  <Hash className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-foreground/60 font-[IBM_Plex_Mono]">Query ID:</span>
- <code className="text-xs text-[#5E5E5E] bg-[#F5F5F5] px-1.5 py-0.5 rounded font-[IBM_Plex_Mono]">
+ <span className="text-foreground/60 font-mono">Query ID:</span>
+ <code className="text-xs text-muted-foreground bg-muted px-1.5 py-0.5 rounded font-mono">
  {metadata.query_id}
  </code>
  <Button

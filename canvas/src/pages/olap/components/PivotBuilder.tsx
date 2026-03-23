@@ -22,7 +22,7 @@ export function PivotBuilder({ onRunQuery, isQuerying }: PivotBuilderProps) {
  const hasRequiredFields = measures.length > 0 && (rows.length > 0 || columns.length > 0);
 
  return (
- <div className="bg-[#121212] flex-1 border-r border-border p-6 flex flex-col">
+ <div className="bg-background flex-1 border-r border-border p-6 flex flex-col">
  <div className="flex justify-between items-center mb-6">
  <h2 className="text-sm font-semibold text-foreground">피벗 빌더 (Drag & Drop)</h2>
  <div className="flex gap-2">

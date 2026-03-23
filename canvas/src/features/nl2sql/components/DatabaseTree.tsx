@@ -92,7 +92,7 @@ export function DatabaseTree({
   // 로딩 상태
   if (isLoading) {
     return (
-      <div className="flex flex-col h-full bg-white">
+      <div className="flex flex-col h-full bg-card">
         <TreeHeader />
         <div className="flex-1 flex items-center justify-center">
           <Loader2 className="h-4 w-4 animate-spin text-foreground/40" />
@@ -104,10 +104,10 @@ export function DatabaseTree({
   // 빈 상태
   if (schemaGroups.length === 0) {
     return (
-      <div className="flex flex-col h-full bg-white">
+      <div className="flex flex-col h-full bg-card">
         <TreeHeader />
         <div className="flex-1 flex items-center justify-center px-4">
-          <p className="text-xs text-foreground/40 font-[IBM_Plex_Mono] text-center">
+          <p className="text-xs text-foreground/40 font-mono text-center">
             데이터소스를 선택하면<br />스키마 트리가 표시됩니다.
           </p>
         </div>
@@ -116,7 +116,7 @@ export function DatabaseTree({
   }
 
   return (
-    <div className="flex flex-col h-full bg-white">
+    <div className="flex flex-col h-full bg-card">
       <TreeHeader />
 
       {/* 트리 컨텐츠 */}
@@ -146,8 +146,8 @@ export function DatabaseTree({
 /** 트리 헤더 */
 function TreeHeader() {
   return (
-    <div className="flex items-center h-10 px-4 border-b border-[#E5E5E5] shrink-0">
-      <span className="text-[11px] font-semibold text-foreground/50 font-[IBM_Plex_Mono] uppercase tracking-[1px]">
+    <div className="flex items-center h-10 px-4 border-b border-border shrink-0">
+      <span className="text-[11px] font-semibold text-foreground/50 font-mono uppercase tracking-[1px]">
         데이터 자산
       </span>
     </div>
@@ -189,21 +189,21 @@ function SchemaNode({
       <button
         type="button"
         onClick={onToggle}
-        className="flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-[#F5F5F5] transition-colors"
+        className="flex items-center gap-2 w-full text-left px-3 py-1.5 hover:bg-muted transition-colors"
       >
         <ChevronIcon className="h-3 w-3 text-foreground/40 shrink-0" />
         <Database className="h-3.5 w-3.5 text-amber-500 shrink-0" />
-        <span className="text-[12px] font-medium text-foreground/80 font-[IBM_Plex_Mono] truncate">
+        <span className="text-[12px] font-medium text-foreground/80 font-mono truncate">
           {schema}
         </span>
-        <span className="ml-auto text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+        <span className="ml-auto text-[10px] text-foreground/30 font-mono">
           {tables.length}
         </span>
       </button>
 
       {/* 테이블 목록 */}
       {isExpanded && (
-        <div className="ml-3 border-l border-[#E5E5E5]">
+        <div className="ml-3 border-l border-border">
           {tables.map((table) => {
             const isSelected =
               selection?.type === 'table' &&
@@ -221,7 +221,7 @@ function SchemaNode({
                     'flex items-center gap-1.5 w-full text-left pl-3 pr-3 py-1 transition-colors cursor-pointer',
                     isSelected
                       ? 'bg-blue-50 text-blue-700'
-                      : 'hover:bg-[#F5F5F5] text-foreground/70'
+                      : 'hover:bg-muted text-foreground/70'
                   )}
                 >
                   {/* Chevron (컬럼 펼치기) */}
@@ -248,24 +248,24 @@ function SchemaNode({
                     className="flex items-center gap-1.5 flex-1 min-w-0 text-left"
                   >
                     <Table2 className="h-3 w-3 text-blue-400 shrink-0" />
-                    <span className="text-[11px] font-[IBM_Plex_Mono] truncate">
+                    <span className="text-[11px] font-mono truncate">
                       {table.name}
                     </span>
                   </button>
 
                   {/* 컬럼 수 뱃지 */}
-                  <span className="text-[9px] text-foreground/30 font-[IBM_Plex_Mono] shrink-0">
+                  <span className="text-[9px] text-foreground/30 font-mono shrink-0">
                     {table.column_count}
                   </span>
                 </div>
 
                 {/* 컬럼 목록 (펼쳐진 경우) */}
                 {isTableExpanded && (
-                  <div className="ml-6 border-l border-[#E5E5E5]">
+                  <div className="ml-6 border-l border-border">
                     {isColumnLoading && (
                       <div className="flex items-center gap-1.5 px-3 py-1">
                         <Loader2 className="h-2.5 w-2.5 animate-spin text-foreground/30" />
-                        <span className="text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+                        <span className="text-[10px] text-foreground/30 font-mono">
                           로딩 중...
                         </span>
                       </div>
@@ -275,7 +275,7 @@ function SchemaNode({
                     ))}
                     {!isColumnLoading && columns && columns.length === 0 && (
                       <div className="px-3 py-1">
-                        <span className="text-[10px] text-foreground/30 font-[IBM_Plex_Mono]">
+                        <span className="text-[10px] text-foreground/30 font-mono">
                           컬럼 없음
                         </span>
                       </div>
@@ -299,16 +299,16 @@ interface ColumnRowProps {
 
 function ColumnRow({ column }: ColumnRowProps) {
   return (
-    <div className="flex items-center gap-1.5 px-3 py-0.5 text-foreground/50 hover:bg-[#F5F5F5] transition-colors">
+    <div className="flex items-center gap-1.5 px-3 py-0.5 text-foreground/50 hover:bg-muted transition-colors">
       {column.is_primary_key ? (
         <Key className="h-2.5 w-2.5 text-amber-400 shrink-0" />
       ) : (
         <Columns3 className="h-2.5 w-2.5 text-foreground/25 shrink-0" />
       )}
-      <span className="text-[10px] font-[IBM_Plex_Mono] truncate flex-1">
+      <span className="text-[10px] font-mono truncate flex-1">
         {column.name}
       </span>
-      <span className="text-[9px] text-foreground/25 font-[IBM_Plex_Mono] shrink-0">
+      <span className="text-[9px] text-foreground/25 font-mono shrink-0">
         {normalizeTypeDisplay(column.data_type)}
       </span>
     </div>

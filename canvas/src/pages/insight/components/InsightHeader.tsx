@@ -21,19 +21,19 @@ export function InsightHeader({
  return (
  <div className="flex items-center justify-between">
  <div className="space-y-1.5">
- <h1 className="text-[48px] font-semibold tracking-[-2px] text-black font-[Sora]">{t('insight.title')}</h1>
- <p className="text-[13px] text-[#5E5E5E] font-[IBM_Plex_Mono]">
+ <h1 className="text-[48px] font-semibold tracking-[-2px] text-foreground font-heading">{t('insight.title')}</h1>
+ <p className="text-[13px] text-muted-foreground font-mono">
  {t('insight.subtitle')}
  </p>
  </div>
  <div className="flex items-center gap-3">
- <div className="flex items-center gap-2 w-[220px] px-4 py-2.5 border border-[#E5E5E5] rounded">
+ <div className="flex items-center gap-2 w-[220px] px-4 py-2.5 border border-border rounded">
  <Search className="h-3.5 w-3.5 text-foreground/60" />
- <span className="text-[13px] text-foreground/60 font-[IBM_Plex_Mono]">{t('insight.searchKpi')}</span>
+ <span className="text-[13px] text-foreground/60 font-mono">{t('insight.searchKpi')}</span>
  </div>
  <button
  type="button"
- className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-white text-[12px] font-medium font-[Sora] rounded hover:bg-red-700 transition-colors"
+ className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded hover:bg-red-700 transition-colors"
  >
  <Zap className="h-3.5 w-3.5" />
  {t('common.analyze')}

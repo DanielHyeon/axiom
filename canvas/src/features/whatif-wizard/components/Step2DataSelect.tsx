@@ -156,7 +156,7 @@ export function Step2DataSelect() {
                   <button
                     type="button"
                     onClick={() => removeNode(node.id)}
-                    className="ml-0.5 p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+                    className="ml-0.5 p-0.5 rounded hover:bg-black/10 dark:hover:bg-card/10 transition-colors"
                     aria-label={`${node.name} 제거`}
                   >
                     <X className="w-3 h-3" />

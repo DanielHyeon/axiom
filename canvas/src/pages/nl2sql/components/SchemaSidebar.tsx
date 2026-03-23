@@ -82,7 +82,7 @@ export function SchemaSidebar({
   return (
     <>
       {/* 좌측 사이드바: 데이터베이스 트리 */}
-      <div className="w-64 shrink-0 border-r border-[#E5E5E5] flex flex-col bg-white">
+      <div className="w-64 shrink-0 border-r border-border flex flex-col bg-card">
         {/* 검색 바 */}
         <SchemaSearchBar
           value={schemaTree.searchQuery}

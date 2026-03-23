@@ -28,7 +28,7 @@ export function FkVisibilityToolbar({ visibility, onToggle }: FkVisibilityToolba
             type="button"
             onClick={() => onToggle(source)}
             className={cn(
-              'flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-[IBM_Plex_Mono] transition-all',
+              'flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono transition-all',
               active
                 ? 'opacity-100'
                 : 'opacity-30 line-through'

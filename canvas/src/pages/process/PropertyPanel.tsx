@@ -37,7 +37,7 @@ export function PropertyPanel({ selectedNode, onUpdateLabel }: PropertyPanelProp
  type="text"
  value={selectedNode.label}
  onChange={(e) => onUpdateLabel(selectedNode.id, e.target.value)}
- className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-white"
+ className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  aria-label="노드 라벨"
  />
  </div>

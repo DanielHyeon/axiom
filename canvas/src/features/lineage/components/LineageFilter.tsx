@@ -92,7 +92,7 @@ export function LineageFilter() {
               title={style.label}
               className={`flex items-center gap-1 rounded-md px-2 py-1 text-[10px] font-semibold uppercase transition-colors border ${
                 active
-                  ? 'text-white border-transparent'
+                  ? 'text-primary-foreground border-transparent'
                   : 'text-muted-foreground border-border bg-muted/30 opacity-50 hover:opacity-80'
               }`}
               style={active ? { background: style.color, borderColor: style.borderColor } : undefined}

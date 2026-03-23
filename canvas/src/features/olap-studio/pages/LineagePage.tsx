@@ -79,14 +79,14 @@ export function LineagePage() {
   return (
     <div className="flex h-full">
       {/* ─── 좌측: 엔티티 목록 사이드바 ────────────────── */}
-      <div className="w-[220px] border-r border-[#E5E5E5] flex flex-col shrink-0 bg-white overflow-y-auto">
+      <div className="w-[220px] border-r border-border flex flex-col shrink-0 bg-card overflow-y-auto">
         {/* 헤더 */}
-        <div className="px-3 py-3 border-b border-[#E5E5E5]">
+        <div className="px-3 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <GitBranch className="h-4 w-4 text-blue-500" />
-            <h2 className="text-[13px] font-semibold font-[Sora]">데이터 리니지</h2>
+            <h2 className="text-[13px] font-semibold font-heading">데이터 리니지</h2>
           </div>
-          <span className="text-[10px] text-foreground/40 font-[IBM_Plex_Mono]">
+          <span className="text-[10px] text-foreground/40 font-mono">
             {graph?.entities?.length ?? 0}개 엔티티
           </span>
         </div>
@@ -95,7 +95,7 @@ export function LineagePage() {
         {Object.entries(grouped).map(([type, entities]) => (
           <div key={type}>
             {/* 그룹 헤더 */}
-            <div className="px-3 py-1.5 text-[9px] text-foreground/40 font-[IBM_Plex_Mono] font-medium bg-[#FAFAFA] border-b border-[#F0F0F0]">
+            <div className="px-3 py-1.5 text-[9px] text-foreground/40 font-mono font-medium bg-muted/50 border-b border-border">
               {TYPE_LABELS[type] || type} ({entities.length})
             </div>
             {/* 개별 엔티티 항목 */}
@@ -105,7 +105,7 @@ export function LineagePage() {
                 type="button"
                 onClick={() => setSelectedEntityId(e.id)}
                 className={cn(
-                  'flex items-center gap-1.5 w-full text-left px-3 py-1.5 text-[11px] font-[IBM_Plex_Mono] hover:bg-[#F5F5F5] transition-colors',
+                  'flex items-center gap-1.5 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors',
                   selectedEntityId === e.id && 'bg-blue-50 text-blue-700',
                 )}
               >
@@ -133,16 +133,16 @@ export function LineagePage() {
 
       {/* ─── 우측: 영향 분석 패널 (선택 시에만 표시) ──── */}
       {selectedEntityId && impact && (
-        <div className="w-[200px] border-l border-[#E5E5E5] bg-white overflow-y-auto p-3 shrink-0">
-          <h3 className="text-[11px] font-semibold font-[Sora] mb-2">영향 분석</h3>
+        <div className="w-[200px] border-l border-border bg-card overflow-y-auto p-3 shrink-0">
+          <h3 className="text-[11px] font-semibold font-heading mb-2">영향 분석</h3>
 
           {/* Upstream 목록 */}
           <div className="mb-3">
-            <div className="text-[9px] text-foreground/40 font-[IBM_Plex_Mono] mb-1">
+            <div className="text-[9px] text-foreground/40 font-mono mb-1">
               Upstream ({impact.upstream?.length ?? 0})
             </div>
             {(impact.upstream ?? []).map((u) => (
-              <div key={u.id} className="text-[10px] text-foreground/60 font-[IBM_Plex_Mono] py-0.5">
+              <div key={u.id} className="text-[10px] text-foreground/60 font-mono py-0.5">
                 {u.display_name}
                 <span className="text-foreground/30 ml-1">{u.edge_type}</span>
               </div>
@@ -151,11 +151,11 @@ export function LineagePage() {
 
           {/* Downstream 목록 */}
           <div>
-            <div className="text-[9px] text-foreground/40 font-[IBM_Plex_Mono] mb-1">
+            <div className="text-[9px] text-foreground/40 font-mono mb-1">
               Downstream ({impact.downstream?.length ?? 0})
             </div>
             {(impact.downstream ?? []).map((d) => (
-              <div key={d.id} className="text-[10px] text-foreground/60 font-[IBM_Plex_Mono] py-0.5">
+              <div key={d.id} className="text-[10px] text-foreground/60 font-mono py-0.5">
                 {d.display_name}
                 <span className="text-foreground/30 ml-1">{d.edge_type}</span>
               </div>

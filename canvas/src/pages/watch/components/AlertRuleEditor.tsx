@@ -114,7 +114,7 @@ export function AlertRuleEditor() {
  {rules.map((rule) => (
  <li
  key={rule.rule_id}
- className="flex items-center justify-between p-3 border border-border rounded-lg bg-[#1e1e1e]"
+ className="flex items-center justify-between p-3 border border-border rounded-lg bg-card"
  >
  <div className="flex flex-col gap-0.5">
  <span className="text-sm font-medium text-foreground">{rule.name}</span>

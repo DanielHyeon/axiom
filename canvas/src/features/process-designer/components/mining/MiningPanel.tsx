@@ -39,7 +39,7 @@ export function MiningPanel({
  onClick={onToggleOverlay}
  className={`text-xs px-2 py-0.5 rounded ${
  overlayVisible
- ? 'bg-primary text-white'
+ ? 'bg-primary text-primary-foreground'
  : 'bg-muted text-muted-foreground hover:text-foreground'
  }`}
  >

@@ -110,7 +110,7 @@ export function WhatIfPage() {
  {/* Main Content: Results & Charts */}
  <div className="flex-1 flex flex-col overflow-hidden relative">
  {/* Header */}
- <div className="h-14 border-b border-border bg-[#121212] px-6 flex items-center justify-between shrink-0">
+ <div className="h-14 border-b border-border bg-background px-6 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-4">
  <h1 className="font-semibold flex items-center gap-2 text-lg">
  <span className="text-xl">✨</span> What-if 시나리오 빌더
@@ -139,7 +139,7 @@ export function WhatIfPage() {
  <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
  <Activity className="text-primary" size={24} />
  </div>
- <h3 className="text-lg font-semibold text-white mb-2">시나리오 계산 중...</h3>
+ <h3 className="text-lg font-semibold text-primary-foreground mb-2">시나리오 계산 중...</h3>
  <p className="text-sm text-muted-foreground max-w-sm text-center">
  수십만 건의 경로 데이터를 기반으로 변경된 매개변수에 대한 결괏값을 시뮬레이션하고 있습니다.
  </p>
@@ -168,7 +168,7 @@ export function WhatIfPage() {
  <TrendingDown className="text-success" size={16} />
  </CardHeader>
  <CardContent>
- <div className="text-3xl font-bold text-white mb-1">
+ <div className="text-3xl font-bold text-primary-foreground mb-1">
  {activeScenario.result.totalSavings.toLocaleString()} <span className="text-lg text-foreground0 font-normal">억원</span>
  </div>
  <p className="text-xs text-success flex items-center font-medium">
@@ -183,7 +183,7 @@ export function WhatIfPage() {
  <TrendingUp className="text-primary" size={16} />
  </CardHeader>
  <CardContent>
- <div className="text-3xl font-bold text-white mb-1">
+ <div className="text-3xl font-bold text-primary-foreground mb-1">
  {activeScenario.result.satisfactionScore} <span className="text-lg text-foreground0 font-normal">점</span>
  </div>
  <p className="text-xs text-primary flex items-center font-medium">
@@ -198,7 +198,7 @@ export function WhatIfPage() {
  <Clock className="text-primary" size={16} />
  </CardHeader>
  <CardContent>
- <div className="text-3xl font-bold text-white mb-1">
+ <div className="text-3xl font-bold text-primary-foreground mb-1">
  {activeScenario.result.durationYears} <span className="text-lg text-foreground0 font-normal">년</span>
  </div>
  <p className="text-xs text-foreground0 flex items-center">

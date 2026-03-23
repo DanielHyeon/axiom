@@ -5,7 +5,7 @@ export const DashboardLayout = () => {
  const location = useLocation();
 
  return (
- <div className="min-h-screen bg-background text-white flex">
+ <div className="min-h-screen bg-background text-primary-foreground flex">
  {/* Sidebar Placeholder */}
  <aside className="w-64 bg-card border-r border-border flex flex-col">
  <div className="p-4 border-b border-border font-bold text-xl">

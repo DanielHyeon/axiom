@@ -11,19 +11,19 @@ export function MessageBubble({ role, children }: MessageBubbleProps) {
  const isAi = role === 'ai';
 
  return (
- <div className={cn("flex w-full py-6", isAi ? "bg-[#F5F5F5]" : "")}>
+ <div className={cn("flex w-full py-6", isAi ? "bg-muted" : "")}>
  <div className="container mx-auto max-w-4xl flex gap-6 px-4">
 
  {/* Avatar */}
  <div className={cn(
  "w-8 h-8 rounded-sm mx-0 flex items-center justify-center shrink-0",
- isAi ? "bg-red-50 text-destructive border border-red-200" : "bg-[#E5E5E5] text-[#5E5E5E]"
+ isAi ? "bg-red-50 text-destructive border border-red-200" : "bg-border text-muted-foreground"
  )}>
  {isAi ? <Sparkles size={16} /> : <User size={16} />}
  </div>
 
  {/* Content */}
- <div className="flex-1 w-full overflow-hidden text-sm md:text-base text-[#5E5E5E] leading-relaxed font-sans mt-1">
+ <div className="flex-1 w-full overflow-hidden text-sm md:text-base text-muted-foreground leading-relaxed font-sans mt-1">
  {children}
  </div>
 

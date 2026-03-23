@@ -67,7 +67,7 @@ export function DocumentEditorPage() {
 
  <div className="flex-1 flex gap-4 overflow-hidden">
  {/* Editor Pane */}
- <div className="flex-1 border border-border rounded-md overflow-hidden bg-[#1e1e1e] flex flex-col">
+ <div className="flex-1 border border-border rounded-md overflow-hidden bg-card flex flex-col">
  <div className="p-2 bg-card border-b border-border flex justify-end space-x-2">
  <Button variant="ghost" size="sm">되돌리기</Button>
  <Button variant="secondary" size="sm">저장</Button>

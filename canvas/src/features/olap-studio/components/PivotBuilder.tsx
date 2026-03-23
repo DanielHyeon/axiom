@@ -124,7 +124,7 @@ function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
       {/* 영역 라벨 */}
       <div
         className={cn(
-          'flex items-center gap-1.5 mb-2 text-[10px] font-[IBM_Plex_Mono] font-medium',
+          'flex items-center gap-1.5 mb-2 text-[10px] font-mono font-medium',
           c.text,
         )}
       >
@@ -135,7 +135,7 @@ function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
 
       {/* 빈 상태 또는 필드 칩 목록 */}
       {items.length === 0 ? (
-        <p className="text-[10px] text-foreground/20 font-[IBM_Plex_Mono] text-center py-2">
+        <p className="text-[10px] text-foreground/20 font-mono text-center py-2">
           필드를 추가하세요
         </p>
       ) : (
@@ -144,7 +144,7 @@ function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
             <span
               key={`${item}-${idx}`}
               className={cn(
-                'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-[IBM_Plex_Mono]',
+                'inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-mono',
                 c.chip,
               )}
             >

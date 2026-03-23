@@ -43,7 +43,7 @@ export const SettingsSecurityPage: React.FC = () => {
       {/* 페이지 헤더 */}
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-primary to-indigo-500 flex items-center justify-center shadow-md">
-          <Shield className="h-6 w-6 text-white" />
+          <Shield className="h-6 w-6 text-primary-foreground" />
         </div>
         <div>
           <h1 className="text-xl font-bold text-foreground">보안 관리</h1>

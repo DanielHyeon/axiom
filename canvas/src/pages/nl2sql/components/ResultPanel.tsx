@@ -80,7 +80,7 @@ export function ResultPanel({
  accessorFn: (row: unknown[]) => row[colIdx],
  header: ({ column }) => (
  <button
- className="flex items-center gap-1 hover:text-black"
+ className="flex items-center gap-1 hover:text-foreground"
  onClick={() => column.toggleSorting()}
  >
  {col.name}
@@ -118,9 +118,9 @@ export function ResultPanel({
  };
 
  return (
- <div className="rounded border border-[#E5E5E5] overflow-hidden">
+ <div className="rounded border border-border overflow-hidden">
  {/* Tab bar */}
- <div className="flex items-center justify-between border-b border-[#E5E5E5] px-3 py-1.5">
+ <div className="flex items-center justify-between border-b border-border px-3 py-1.5">
  <div className="flex gap-1">
  {tabs.map((tab) => (
  <button
@@ -128,9 +128,9 @@ export function ResultPanel({
  disabled={tab.disabled}
  onClick={() => !tab.disabled && setActiveTab(tab.id)}
  className={cn(
- 'flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-[Sora] transition-colors',
+ 'flex items-center gap-1.5 rounded px-2.5 py-1 text-xs font-heading transition-colors',
  activeTab === tab.id
- ? 'bg-[#F5F5F5] text-black font-medium'
+ ? 'bg-muted text-foreground font-medium'
  : 'text-foreground/60 hover:text-muted-foreground',
  tab.disabled && 'opacity-30 cursor-not-allowed'
  )}
@@ -143,7 +143,7 @@ export function ResultPanel({
  <Button
  variant="ghost"
  size="sm"
- className="h-7 gap-1.5 text-xs text-[#5E5E5E] hover:text-black font-[Sora]"
+ className="h-7 gap-1.5 text-xs text-muted-foreground hover:text-foreground font-heading"
  onClick={handleExport}
  >
  <Download className="h-3.5 w-3.5" />
@@ -161,13 +161,13 @@ export function ResultPanel({
  {/* Table tab */}
  {activeTab === 'table' && (
  <div>
- <div className="overflow-auto max-h-[500px] rounded border border-[#E5E5E5]">
+ <div className="overflow-auto max-h-[500px] rounded border border-border">
  <Table>
  <TableHeader>
  {table.getHeaderGroups().map((hg) => (
  <TableRow key={hg.id}>
  {hg.headers.map((header) => (
- <TableHead key={header.id} className="text-xs whitespace-nowrap font-[IBM_Plex_Mono]">
+ <TableHead key={header.id} className="text-xs whitespace-nowrap font-mono">
  {header.isPlaceholder
  ? null
  : flexRender(header.column.columnDef.header, header.getContext())}
@@ -181,7 +181,7 @@ export function ResultPanel({
  table.getRowModel().rows.map((row) => (
  <TableRow key={row.id}>
  {row.getVisibleCells().map((cell) => (
- <TableCell key={cell.id} className="text-xs text-[#5E5E5E] whitespace-nowrap font-[IBM_Plex_Mono]">
+ <TableCell key={cell.id} className="text-xs text-muted-foreground whitespace-nowrap font-mono">
  {flexRender(cell.column.columnDef.cell, cell.getContext())}
  </TableCell>
  ))}
@@ -199,7 +199,7 @@ export function ResultPanel({
  </div>
  {/* Pagination */}
  {table.getPageCount() > 1 && (
- <div className="flex items-center justify-between pt-2 text-xs text-foreground/60 font-[IBM_Plex_Mono]">
+ <div className="flex items-center justify-between pt-2 text-xs text-foreground/60 font-mono">
  <span>
  {rowCount} rows | Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
  </span>
@@ -237,12 +237,12 @@ export function ResultPanel({
 
  {/* Summary */}
  {summary && (
- <div className="border-t border-[#E5E5E5] px-3 py-2 flex items-start gap-2">
+ <div className="border-t border-border px-3 py-2 flex items-start gap-2">
  <Badge variant="ai" className="shrink-0 mt-0.5">
  <Sparkles className="h-3 w-3 mr-1" />
  AI
  </Badge>
- <p className="text-sm text-[#5E5E5E] font-[IBM_Plex_Mono]">{summary}</p>
+ <p className="text-sm text-muted-foreground font-mono">{summary}</p>
  </div>
  )}
 

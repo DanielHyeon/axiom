@@ -48,7 +48,7 @@ export function ChartSwitcher({ viewType, onViewChange, headers, data, tableComp
  type="button"
  onClick={() => onViewChange(view)}
  className={`rounded px-2 py-1 text-sm ${
- viewType === view ? 'bg-primary text-white' : 'bg-muted text-muted-foreground hover:text-foreground'
+ viewType === view ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
  }`}
  >
  {view === 'table' ? '테이블' : view === 'bar' ? '막대' : view === 'line' ? '선' : '파이'}
