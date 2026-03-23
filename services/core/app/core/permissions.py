@@ -137,7 +137,8 @@ def has_process_graph_permission(role_codes: set[str] | frozenset[str], required
 
     PLATFORM_ADMIN은 모든 권한을 통과한다.
     """
-    if "PLATFORM_ADMIN" in role_codes:
+    # 기존 admin(소문자) + 신규 PLATFORM_ADMIN 모두 superuser
+    if "PLATFORM_ADMIN" in role_codes or "admin" in role_codes:
         return True
     perm_def = PROCESS_GRAPH_PERMISSIONS.get(required)
     if perm_def is None:
