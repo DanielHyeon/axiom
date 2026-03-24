@@ -31,7 +31,7 @@ function getContentRect(nodes: CanvasItem[]) {
 }
 
 export function Minimap({
-  const { t } = useTranslation(); nodes, stageSize, stageView, onViewportClick }: MinimapProps) {
+  nodes, stageSize, stageView, onViewportClick }: MinimapProps) {
  const content = getContentRect(nodes);
  const scale = Math.min(
  MINIMAP_WIDTH / content.width,

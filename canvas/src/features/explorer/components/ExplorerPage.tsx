@@ -15,8 +15,8 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import {
 import { useTranslation } from 'react-i18next';
+import {
   Search,
   ChevronRight,
   Home,

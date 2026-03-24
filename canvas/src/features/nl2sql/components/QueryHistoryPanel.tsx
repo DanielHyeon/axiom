@@ -9,7 +9,7 @@ interface QueryHistoryPanelProps {
 }
 
 export function QueryHistoryPanel({
-  const { t } = useTranslation(); datasourceId, onSelect }: QueryHistoryPanelProps) {
+  datasourceId, onSelect }: QueryHistoryPanelProps) {
  const { data, isLoading, error } = useQuery({
  queryKey: ['nl2sql', 'history', datasourceId, 1, 20],
  queryFn: () => getHistory({ datasource_id: datasourceId, page: 1, page_size: 20 }),

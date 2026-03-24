@@ -12,7 +12,7 @@ interface ScenarioComparisonProps {
 
 /** 복수 시나리오 열 비교 테이블. NPV·실현가능성 등 지표를 시나리오별로 나란히 표시. */
 export function ScenarioComparison({
-  const { t } = useTranslation(); items }: ScenarioComparisonProps) {
+  items }: ScenarioComparisonProps) {
  if (items.length === 0) return null;
 
  return (

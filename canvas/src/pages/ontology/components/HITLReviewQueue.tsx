@@ -4,8 +4,8 @@ import { getHITLItems, approveHITL, rejectHITL } from '@/features/ontology/api/o
 import type { HITLItem } from '@/features/ontology/types/ontology';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  CheckCircle,
  XCircle,
  MessageSquare,
@@ -29,7 +29,7 @@ const LAYER_BADGE: Record<string, string> = {
 };
 
 export function HITLReviewQueue({
-  const { t } = useTranslation(); caseId, onClose }: HITLReviewQueueProps) {
+  caseId, onClose }: HITLReviewQueueProps) {
  const [items, setItems] = useState<HITLItem[]>([]);
  const [total, setTotal] = useState(0);
  const [loading, setLoading] = useState(true);

@@ -23,7 +23,7 @@ const priorityVariant = (p: Case['priority']) =>
  p === 'CRITICAL' || p === 'HIGH' ? 'destructive' : 'secondary';
 
 export function CaseTable({
-  const { t } = useTranslation(); data, onRowClick }: CaseTableProps) {
+  data, onRowClick }: CaseTableProps) {
  const navigate = useNavigate();
 
  const columns: ColumnDef<Case>[] = [

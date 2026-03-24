@@ -19,7 +19,7 @@ interface TornadoChartProps {
 }
 
 export function TornadoChart({
-  const { t } = useTranslation(); data, title }: TornadoChartProps) {
+  data, title }: TornadoChartProps) {
   // 절대값 기준 정렬 (가장 영향 큰 것이 위)
   const sorted = [...data].sort(
     (a, b) => Math.abs(b.positiveImpact) + Math.abs(b.negativeImpact)

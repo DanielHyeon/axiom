@@ -67,7 +67,6 @@ interface BehaviorExecutionPanelProps {
 // ──────────────────────────────────────
 
 export function BehaviorExecutionPanel({
-  const { t } = useTranslation();
   behaviorId,
   behaviorName,
   className,

@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
  LineChart, Line, PieChart, Pie, Cell,
  ScatterChart, Scatter
@@ -16,7 +16,7 @@ interface ChartRecommenderProps {
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
 
 export function ChartRecommender({
-  const { t } = useTranslation(); data, config }: ChartRecommenderProps) {
+  data, config }: ChartRecommenderProps) {
  const chartData = useMemo(() => {
  // Convert 'row' array structure from useNl2sqlMock into array of objects for Recharts
  // If the data is already array of objects, this just passes it through

@@ -7,7 +7,7 @@ interface EventTimelineProps {
 }
 
 export function EventTimeline({
-  const { t } = useTranslation(); events, onMarkAsRead }: EventTimelineProps) {
+  events, onMarkAsRead }: EventTimelineProps) {
  const sorted = [...events].sort(
  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
  );

@@ -6,8 +6,8 @@ import { ResultPanel } from './ResultPanel';
 import { postDirectSql, type DirectSqlResponse } from '@/features/nl2sql/api/oracleNl2sqlApi';
 import type { ExecutionMetadata } from '@/features/nl2sql/types/nl2sql';
 import { AppError } from '@/lib/api/errors';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  Play,
  ChevronDown,
  ChevronUp,
@@ -20,7 +20,7 @@ interface DirectSqlPanelProps {
 }
 
 export function DirectSqlPanel({
-  const { t } = useTranslation(); datasourceId }: DirectSqlPanelProps) {
+  datasourceId }: DirectSqlPanelProps) {
  const [expanded, setExpanded] = useState(false);
  const [sql, setSql] = useState('');
  const [loading, setLoading] = useState(false);

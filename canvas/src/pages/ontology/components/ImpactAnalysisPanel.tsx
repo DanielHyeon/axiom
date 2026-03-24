@@ -103,7 +103,7 @@ function ImpactNodeRow({ node }: { node: ImpactNode }) {
 }
 
 export function ImpactAnalysisPanel({
-  const { t } = useTranslation(); nodeId, caseId, onClose }: ImpactAnalysisPanelProps) {
+  nodeId, caseId, onClose }: ImpactAnalysisPanelProps) {
  const [maxDepth, setMaxDepth] = useState(3);
 
  const { data, isLoading, isError } = useQuery({

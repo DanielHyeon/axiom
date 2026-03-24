@@ -11,7 +11,7 @@ interface DimensionPaletteProps {
 }
 
 export function DimensionPalette({
-  const { t } = useTranslation(); cube }: DimensionPaletteProps) {
+  cube }: DimensionPaletteProps) {
  const { rows, columns, measures, filters } = usePivotConfig();
 
  if (!cube) {

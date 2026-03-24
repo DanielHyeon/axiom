@@ -1,5 +1,5 @@
-import {
 import { useTranslation } from 'react-i18next';
+import {
  Select,
  SelectContent,
  SelectItem,
@@ -38,7 +38,6 @@ const TYPE_OPTIONS: { value: CaseTypeFilter; label: string }[] = [
 ];
 
 export function CaseFilters({
-  const { t } = useTranslation();
  status,
  onStatusChange,
  type = 'ALL',

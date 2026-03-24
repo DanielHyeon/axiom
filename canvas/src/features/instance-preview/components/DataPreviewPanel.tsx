@@ -13,8 +13,8 @@ import { X, ChevronDown, Database, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
 import { useTranslation } from 'react-i18next';
+import {
   Table,
   TableHeader,
   TableBody,
@@ -59,7 +59,6 @@ interface DataPreviewPanelProps {
 // ─── 컴포넌트 ────────────────────────────────────────────
 
 export function DataPreviewPanel({
-  const { t } = useTranslation();
   nodeId,
   nodeName,
   schema,

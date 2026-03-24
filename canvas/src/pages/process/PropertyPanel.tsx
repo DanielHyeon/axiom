@@ -8,7 +8,7 @@ interface PropertyPanelProps {
 }
 
 export function PropertyPanel({
-  const { t } = useTranslation(); selectedNode, onUpdateLabel }: PropertyPanelProps) {
+  selectedNode, onUpdateLabel }: PropertyPanelProps) {
  return (
  <div className="w-80 border-l border-border bg-card flex flex-col">
  <div className="p-4 border-b border-border font-bold text-sm text-foreground/80">

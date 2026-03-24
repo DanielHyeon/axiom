@@ -193,7 +193,6 @@ const BIPARTITE_STYLE: cytoscape.Stylesheet[] = [
 ];
 
 export function BipartiteGraphView({
-  const { t } = useTranslation();
  mappings,
  ontologyNodes,
  tables,

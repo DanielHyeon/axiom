@@ -16,7 +16,7 @@ interface DroppableZoneProps {
 }
 
 export function DroppableZone({
-  const { t } = useTranslation(); id, title, items, accepts, onRemove }: DroppableZoneProps) {
+  id, title, items, accepts, onRemove }: DroppableZoneProps) {
  const { isOver, setNodeRef } = useDroppable({
  id,
  data: { accepts }

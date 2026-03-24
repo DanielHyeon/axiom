@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  useReactTable,
  getCoreRowModel,
  getSortedRowModel,
@@ -51,7 +51,6 @@ interface ResultPanelProps {
 }
 
 export function ResultPanel({
-  const { t } = useTranslation();
  sql,
  columns,
  rows,

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  getConceptMappings,
  createConceptMapping,
  deleteConceptMapping,
@@ -17,7 +17,7 @@ interface ConceptMapViewProps {
 }
 
 export function ConceptMapView({
-  const { t } = useTranslation(); caseId }: ConceptMapViewProps) {
+  caseId }: ConceptMapViewProps) {
  const queryClient = useQueryClient();
 
  // Existing mappings

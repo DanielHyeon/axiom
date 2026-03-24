@@ -7,7 +7,7 @@ import { useTranslation } from 'react-i18next';
 const COLORS = ['#3b82f6', '#eab308', '#22c55e', '#ef4444'];
 
 export function CaseDistributionChart({
-  const { t } = useTranslation(); cases }: { cases: Case[] }) {
+  cases }: { cases: Case[] }) {
  const byStatus = useMemo(() => {
  const map: Record<string, number> = {};
  for (const c of cases) {

@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDatasources } from '@/features/nl2sql/api/oracleNl2sqlApi';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  Select,
  SelectContent,
  SelectItem,
@@ -17,7 +17,7 @@ interface DatasourceSelectorProps {
 }
 
 export function DatasourceSelector({
-  const { t } = useTranslation(); value, onChange }: DatasourceSelectorProps) {
+  value, onChange }: DatasourceSelectorProps) {
  const { data: datasources = [], isLoading } = useQuery({
  queryKey: ['nl2sql', 'datasources'],
  queryFn: getDatasources,

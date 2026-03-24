@@ -13,7 +13,7 @@ interface ScenarioPanelProps {
 }
 
 export function ScenarioPanel({
-  const { t } = useTranslation(); scenarioId, onRunAnalysis }: ScenarioPanelProps) {
+  scenarioId, onRunAnalysis }: ScenarioPanelProps) {
  const { parameters, scenarios, updateParameter, updateScenarioStatus } = useWhatIfStore();
  const { runAnalysis: mockRunAnalysis } = useWhatIfMock();
  const runAnalysis = onRunAnalysis ?? mockRunAnalysis;

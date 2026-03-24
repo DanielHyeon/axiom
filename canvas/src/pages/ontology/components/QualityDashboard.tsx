@@ -4,8 +4,8 @@ import { getQualityReport } from '@/features/ontology/api/ontologyApi';
 import type { QualityReport } from '@/features/ontology/types/ontology';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  AlertTriangle,
  CheckCircle,
  FileQuestion,
@@ -28,7 +28,7 @@ const LAYER_COLORS: Record<string, string> = {
 };
 
 export function QualityDashboard({
-  const { t } = useTranslation(); caseId, onClose }: QualityDashboardProps) {
+  caseId, onClose }: QualityDashboardProps) {
  const [report, setReport] = useState<QualityReport | null>(null);
  const [loading, setLoading] = useState(true);
  const [error, setError] = useState<string | null>(null);

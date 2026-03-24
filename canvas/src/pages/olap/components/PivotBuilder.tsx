@@ -12,7 +12,7 @@ interface PivotBuilderProps {
 }
 
 export function PivotBuilder({
-  const { t } = useTranslation(); onRunQuery, isQuerying }: PivotBuilderProps) {
+  onRunQuery, isQuerying }: PivotBuilderProps) {
  const { rows, columns, measures, filters, removeFieldFromZone, setRows, setColumns } = usePivotConfig();
 
  const handleSwap = () => {

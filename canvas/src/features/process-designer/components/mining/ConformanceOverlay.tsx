@@ -48,7 +48,6 @@ function findItemByActivity(items: CanvasItem[], activityName: string): CanvasIt
 }
 
 export function ConformanceOverlay({
-  const { t } = useTranslation();
  items,
  bottlenecks,
  conformance,

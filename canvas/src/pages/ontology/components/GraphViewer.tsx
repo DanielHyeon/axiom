@@ -130,7 +130,7 @@ interface GraphViewerProps {
 }
 
 export function GraphViewer({
-  const { t } = useTranslation(); data, shortestPathIds }: GraphViewerProps) {
+  data, shortestPathIds }: GraphViewerProps) {
  const cyRef = useRef<cytoscape.Core | null>(null);
  const containerRef = useRef<HTMLDivElement>(null);
  const { selectedNodeId, hoveredNodeId, selectNode, setHoveredNode } = useOntologyStore();

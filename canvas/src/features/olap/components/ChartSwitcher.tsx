@@ -1,5 +1,5 @@
-import {
 import { useTranslation } from 'react-i18next';
+import {
  BarChart,
  Bar,
  XAxis,
@@ -29,7 +29,7 @@ interface ChartSwitcherProps {
 
 /** Table/Bar/Line/Pie 전환, 데이터 유지 */
 export function ChartSwitcher({
-  const { t } = useTranslation(); viewType, onViewChange, headers, data, tableComponent }: ChartSwitcherProps) {
+  viewType, onViewChange, headers, data, tableComponent }: ChartSwitcherProps) {
  const chartData = data.map((row) => {
  const obj: Record<string, unknown> = {};
  headers.forEach((h, i) => {

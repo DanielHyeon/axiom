@@ -1,8 +1,8 @@
 // src/pages/whatif/components/TornadoChart.tsx
 
 import type { SensitivityData } from '@/features/whatif/types/whatif';
-import {
 import { useTranslation } from 'react-i18next';
+import {
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
 
@@ -12,7 +12,7 @@ interface TornadoChartProps {
 }
 
 export function TornadoChart({
-  const { t } = useTranslation(); data, baseValue }: TornadoChartProps) {
+  data, baseValue }: TornadoChartProps) {
  // To draw a tornado chart with Recharts, we plot the deviations from the base.
  // We need two bars for each parameter: one for decrease impact, one for increase impact.
  // Recharts stacked bars can work if we separate negative and positive values relative to 0.

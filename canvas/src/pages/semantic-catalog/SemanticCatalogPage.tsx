@@ -8,8 +8,8 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Loader2, BookOpen } from 'lucide-react';
-import {
 import { useTranslation } from 'react-i18next';
+import {
   useSemanticCatalog,
   useConcepts,
   useEntities,

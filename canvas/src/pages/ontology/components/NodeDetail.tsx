@@ -20,7 +20,7 @@ interface NodeDetailProps {
 }
 
 export function NodeDetail({
-  const { t } = useTranslation(); onFindPath, onImpactAnalysis }: NodeDetailProps) {
+  onFindPath, onImpactAnalysis }: NodeDetailProps) {
  const { selectedNodeId, caseId } = useOntologyStore();
  const { graphData } = useOntologyData(caseId);
 

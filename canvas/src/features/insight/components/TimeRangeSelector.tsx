@@ -17,7 +17,7 @@ const OPTIONS: { value: TimeRange; label: string }[] = [
 ];
 
 export function TimeRangeSelector({
-  const { t } = useTranslation(); value, onChange }: TimeRangeSelectorProps) {
+  value, onChange }: TimeRangeSelectorProps) {
  return (
  <div className="inline-flex rounded-lg border border-border bg-muted/50 p-0.5">
  {OPTIONS.map((opt) => (

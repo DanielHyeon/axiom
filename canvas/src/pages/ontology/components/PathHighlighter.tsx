@@ -12,7 +12,7 @@ interface PathHighlighterProps {
 
 /** 2노드 선택 시 최단 경로 하이라이트 배너. 경로 탐색 모드 안내 및 결과 요약. */
 export function PathHighlighter({
-  const { t } = useTranslation(); pathNodeIds, pathModeSource, onClear }: PathHighlighterProps) {
+  pathNodeIds, pathModeSource, onClear }: PathHighlighterProps) {
  if (pathNodeIds.length === 0) return null;
 
  return (

@@ -18,7 +18,7 @@ interface RoleGreetingProps {
 }
 
 export function RoleGreeting({
-  const { t } = useTranslation(); userName, role, workCount = 0 }: RoleGreetingProps) {
+  userName, role, workCount = 0 }: RoleGreetingProps) {
  const name = userName ?? t('caseDashboardExt.defaultUser');
  const roleText = role ? ROLE_LABEL[role] : '';
  return (

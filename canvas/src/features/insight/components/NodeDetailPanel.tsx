@@ -51,7 +51,6 @@ function NodeTypeIcon({ type }: { type: string }) {
 }
 
 export function NodeDetailPanel({
-  const { t } = useTranslation();
  nodeId,
  graphNode,
  evidence,

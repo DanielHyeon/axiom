@@ -10,7 +10,7 @@ interface SqlPreviewProps {
 }
 
 export function SqlPreview({
-  const { t } = useTranslation(); sql, onRun }: SqlPreviewProps) {
+  sql, onRun }: SqlPreviewProps) {
  const [copied, setCopied] = useState(false);
 
  const handleCopy = () => {
