@@ -51,7 +51,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.restoreAllMocks();
-  window.location = originalLocation;
+  Object.defineProperty(window, 'location', { value: originalLocation, writable: true });
 });
 
 // 매 테스트마다 스토어를 fresh하게 임포트하기 위해 dynamic import 사용

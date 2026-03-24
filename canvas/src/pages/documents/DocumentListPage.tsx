@@ -1,3 +1,4 @@
+import { FileText } from 'lucide-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { DataTable } from '@/components/shared/DataTable';
 import { Button } from '@/components/ui/button';
@@ -56,7 +57,7 @@ export function DocumentListPage() {
   ];
 
   if (isLoading) return <LoadingSpinner size="lg" label="문서 목록 로딩 중" />;
-  if (error) return <EmptyState title="문서를 불러올 수 없습니다" message={String(error)} />;
+  if (error) return <EmptyState icon={FileText} title="문서를 불러올 수 없습니다" description={String(error)} />;
 
   const documents = data?.items ?? [];
 
@@ -74,7 +75,7 @@ export function DocumentListPage() {
       </div>
 
       {documents.length === 0 ? (
-        <EmptyState title="문서가 없습니다" message="새 문서를 만들거나 AI에게 초안 생성을 요청하세요" />
+        <EmptyState icon={FileText} title="문서가 없습니다" description="새 문서를 만들거나 AI에게 초안 생성을 요청하세요" />
       ) : (
         <div className="bg-card border border-border rounded-lg p-4">
           <DataTable

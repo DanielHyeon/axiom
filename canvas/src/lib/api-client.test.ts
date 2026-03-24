@@ -8,16 +8,20 @@
  * - /auth/ 경로에는 자동 갱신 시도하지 않아야 함 (무한 루프 방지)
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import axios from 'axios';
-import type { AxiosRequestConfig, InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── AuthStore 모킹 ──
 // api-client.ts가 useAuthStore.getState()를 직접 호출하므로 모킹 필수
 
-const mockAuthState = {
-  accessToken: null as string | null,
-  user: null as { tenantId: string } | null,
+interface MockUser { tenantId: string }
+interface MockAuthState {
+  accessToken: string | null;
+  user: MockUser | null;
+  refreshAccessToken: ReturnType<typeof vi.fn>;
+}
+const mockAuthState: MockAuthState = {
+  accessToken: null,
+  user: null,
   refreshAccessToken: vi.fn(),
 };
 
@@ -49,7 +53,7 @@ describe('API Client — 요청 인터셉터 (테넌트 헤더 + JWT)', () => {
     if (mockAuthState.accessToken) {
       headers['Authorization'] = `Bearer ${mockAuthState.accessToken}`;
     }
-    headers['X-Tenant-Id'] = mockAuthState.user?.tenantId || '12345678-1234-5678-1234-567812345678';
+    headers['X-Tenant-Id'] = (mockAuthState.user as { tenantId: string } | null)?.tenantId || '12345678-1234-5678-1234-567812345678';
 
     expect(headers['Authorization']).toBe('Bearer test-jwt-token');
   });
@@ -71,7 +75,7 @@ describe('API Client — 요청 인터셉터 (테넌트 헤더 + JWT)', () => {
     mockAuthState.user = { tenantId: 'tenant-xyz-789' };
 
     const headers: Record<string, string> = {};
-    headers['X-Tenant-Id'] = mockAuthState.user?.tenantId || '12345678-1234-5678-1234-567812345678';
+    headers['X-Tenant-Id'] = (mockAuthState.user as { tenantId: string } | null)?.tenantId || '12345678-1234-5678-1234-567812345678';
 
     expect(headers['X-Tenant-Id']).toBe('tenant-xyz-789');
   });
@@ -80,7 +84,7 @@ describe('API Client — 요청 인터셉터 (테넌트 헤더 + JWT)', () => {
     mockAuthState.user = null;
 
     const headers: Record<string, string> = {};
-    headers['X-Tenant-Id'] = mockAuthState.user?.tenantId || '12345678-1234-5678-1234-567812345678';
+    headers['X-Tenant-Id'] = (mockAuthState.user as { tenantId: string } | null)?.tenantId || '12345678-1234-5678-1234-567812345678';
 
     expect(headers['X-Tenant-Id']).toBe('12345678-1234-5678-1234-567812345678');
   });
@@ -132,8 +136,8 @@ describe('API Client — createApiClient 인터셉터', () => {
     if (mockAuthState.accessToken) {
       headers['Authorization'] = `Bearer ${mockAuthState.accessToken}`;
     }
-    if (mockAuthState.user?.tenantId) {
-      headers['X-Tenant-Id'] = mockAuthState.user.tenantId;
+    if ((mockAuthState.user as { tenantId: string } | null)?.tenantId) {
+      headers['X-Tenant-Id'] = mockAuthState.user!.tenantId;
     }
 
     expect(headers['Authorization']).toBe('Bearer token-123');
@@ -149,8 +153,8 @@ describe('API Client — createApiClient 인터셉터', () => {
     if (mockAuthState.accessToken) {
       headers['Authorization'] = `Bearer ${mockAuthState.accessToken}`;
     }
-    if (mockAuthState.user?.tenantId) {
-      headers['X-Tenant-Id'] = mockAuthState.user.tenantId;
+    if ((mockAuthState.user as { tenantId: string } | null)?.tenantId) {
+      headers['X-Tenant-Id'] = mockAuthState.user!.tenantId;
     }
 
     expect(headers['Authorization']).toBe('Bearer token-456');
@@ -220,7 +224,7 @@ describe('API Client — 401 응답 인터셉터 (자동 토큰 갱신)', () => 
     const errorStatus = 403;
 
     let refreshAttempted = false;
-    if (errorStatus === 401) {
+    if ((errorStatus as number) === 401) {
       refreshAttempted = true;
     }
 
@@ -252,10 +256,11 @@ describe('API Client — streamManager 테넌트 헤더', () => {
     mockAuthState.accessToken = null;
     mockAuthState.user = null;
 
+    const state = mockAuthState; // TS control-flow narrowing 회피
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      ...(mockAuthState.accessToken ? { Authorization: `Bearer ${mockAuthState.accessToken}` } : {}),
-      ...(mockAuthState.user?.tenantId ? { 'X-Tenant-Id': mockAuthState.user.tenantId } : {}),
+      ...(state.accessToken ? { Authorization: `Bearer ${state.accessToken}` } : {}),
+      ...(state.user?.tenantId ? { 'X-Tenant-Id': state.user.tenantId } : {}),
     };
 
     expect(headers['Authorization']).toBeUndefined();
