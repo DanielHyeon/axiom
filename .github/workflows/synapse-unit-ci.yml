@@ -5,12 +5,14 @@ on:
   pull_request:
     paths:
       - "services/synapse/**"
+      - "services/shared/**"
       - ".github/workflows/synapse-unit-ci.yml"
   push:
     branches:
       - main
     paths:
       - "services/synapse/**"
+      - "services/shared/**"
       - ".github/workflows/synapse-unit-ci.yml"
 
 jobs:
