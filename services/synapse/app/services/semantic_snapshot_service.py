@@ -75,6 +75,127 @@ def _compute_content_hash(data: Any) -> str:
     return hashlib.md5(serialized.encode("utf-8")).hexdigest()
 
 
+# ── 스냅샷 변경 비교 설정 ──
+# 각 아티팩트 유형별로 비교 대상 컬렉션과 식별 키를 정의한다.
+# 예: CONTRACT_INDEX 아티팩트의 "entities" 컬렉션은 "id" 필드로 개별 항목을 식별.
+DIFF_CONFIG: dict[str, dict[str, str]] = {
+    ARTIFACT_CONTRACT_INDEX: {
+        "entities": "id",
+        "measures": "name",
+        "dimensions": "name",
+        "quality_contracts": "id",
+    },
+    ARTIFACT_JOIN_GRAPH: {
+        "allowed_joins": "id",
+        "banned_joins": "id",
+    },
+    ARTIFACT_CONTEXT_PACKS: {
+        "packs": "intent_type",
+    },
+    ARTIFACT_SYNONYM_MAP: {
+        "alias_groups": "id",
+    },
+}
+
+
+def _canonical_sort(items: list[dict], key_field: str) -> list[dict]:
+    """리스트를 식별 키 기준으로 정렬한다 — 순서 변경을 변경으로 오탐하지 않기 위해."""
+    return sorted(items, key=lambda x: str(x.get(key_field, "")))
+
+
+def _diff_fields(prev_item: dict, curr_item: dict) -> list[str]:
+    """두 딕셔너리를 비교하여 값이 다른 필드 이름 목록을 반환한다."""
+    all_keys = set(prev_item.keys()) | set(curr_item.keys())
+    changed: list[str] = []
+    for k in sorted(all_keys):
+        # JSON 직렬화로 비교 — datetime 등 타입 차이에 안전
+        prev_val = json.dumps(prev_item.get(k), sort_keys=True, default=str)
+        curr_val = json.dumps(curr_item.get(k), sort_keys=True, default=str)
+        if prev_val != curr_val:
+            changed.append(k)
+    return changed
+
+
+def _compute_snapshot_changes(
+    prev_artifacts: dict[str, dict],
+    curr_artifacts: dict[str, dict],
+) -> list[dict]:
+    """두 스냅샷의 아티팩트를 비교하여 변경 목록을 생성한다.
+
+    각 아티팩트 유형 안의 컬렉션별로 개별 항목을 식별 키로 매칭하여
+    Add / Change / Delete 를 판별한다.
+
+    Args:
+        prev_artifacts: 이전 스냅샷의 아티팩트 {artifact_type: artifact_json, ...}
+        curr_artifacts: 현재 스냅샷의 아티팩트 {artifact_type: artifact_json, ...}
+
+    Returns:
+        [{"type": "Add|Change|Delete", "artifact": "CONTRACT_INDEX",
+          "collection": "entities", "name": "...", "changed_fields": ["sql_expression"]}]
+    """
+    changes: list[dict] = []
+
+    for artifact_type, collections in DIFF_CONFIG.items():
+        prev_data = prev_artifacts.get(artifact_type, {})
+        curr_data = curr_artifacts.get(artifact_type, {})
+
+        for collection_name, id_field in collections.items():
+            # 컬렉션 꺼내기 (없으면 빈 리스트)
+            prev_items = prev_data.get(collection_name, [])
+            curr_items = curr_data.get(collection_name, [])
+
+            # dict가 아닌 리스트만 비교 대상 — dict인 경우(synonym_map 등) 리스트로 변환
+            if isinstance(prev_items, dict):
+                prev_items = list(prev_items.values()) if prev_items else []
+            if isinstance(curr_items, dict):
+                curr_items = list(curr_items.values()) if curr_items else []
+
+            # 정렬하여 순서 변경을 무시
+            prev_sorted = _canonical_sort(prev_items, id_field)
+            curr_sorted = _canonical_sort(curr_items, id_field)
+
+            # 식별 키로 인덱싱
+            prev_map = {str(item.get(id_field, "")): item for item in prev_sorted}
+            curr_map = {str(item.get(id_field, "")): item for item in curr_sorted}
+
+            prev_keys = set(prev_map.keys())
+            curr_keys = set(curr_map.keys())
+
+            # 삭제된 항목
+            for key in sorted(prev_keys - curr_keys):
+                changes.append({
+                    "type": "Delete",
+                    "artifact": artifact_type,
+                    "collection": collection_name,
+                    "name": key,
+                    "changed_fields": [],
+                })
+
+            # 추가된 항목
+            for key in sorted(curr_keys - prev_keys):
+                changes.append({
+                    "type": "Add",
+                    "artifact": artifact_type,
+                    "collection": collection_name,
+                    "name": key,
+                    "changed_fields": [],
+                })
+
+            # 변경된 항목 (양쪽에 모두 존재하는 키)
+            for key in sorted(prev_keys & curr_keys):
+                changed_fields = _diff_fields(prev_map[key], curr_map[key])
+                if changed_fields:
+                    changes.append({
+                        "type": "Change",
+                        "artifact": artifact_type,
+                        "collection": collection_name,
+                        "name": key,
+                        "changed_fields": changed_fields,
+                    })
+
+    return changes
+
+
 class SnapshotBuilder:
     """릴리스 기반 스냅샷을 빌드한다 — 계약/온톨로지/품질/AI 컨텍스트 통합"""
 
@@ -693,3 +814,64 @@ class SnapshotRegistry:
         finally:
             cur.close()
             conn.close()
+
+    # ── 스냅샷 비교 ──
+
+    def compare_snapshots(
+        self, base_version: str, target_version: str
+    ) -> dict[str, Any]:
+        """두 스냅샷의 아티팩트를 비교하여 변경 목록을 반환한다.
+
+        Args:
+            base_version: 기준 스냅샷 버전 (이전)
+            target_version: 대상 스냅샷 버전 (이후)
+
+        Returns:
+            {"base_version": ..., "target_version": ..., "changes": [...], "summary": {...}}
+        """
+        self.ensure_schema()
+
+        # 두 스냅샷의 아티팩트를 각각 조회
+        base_snap = self.get_snapshot(base_version)
+        if not base_snap:
+            raise KeyError(f"base_version '{base_version}'를 찾을 수 없습니다")
+
+        target_snap = self.get_snapshot(target_version)
+        if not target_snap:
+            raise KeyError(f"target_version '{target_version}'를 찾을 수 없습니다")
+
+        # 아티팩트를 {artifact_type: artifact_json} 딕셔너리로 변환
+        def _artifacts_to_dict(snap: dict) -> dict[str, dict]:
+            result: dict[str, dict] = {}
+            for art in snap.get("artifacts", []):
+                art_type = art.get("artifact_type", "")
+                art_json = art.get("artifact_json", {})
+                # DB에서 문자열로 저장된 경우 파싱
+                if isinstance(art_json, str):
+                    art_json = json.loads(art_json)
+                result[art_type] = art_json
+            return result
+
+        base_arts = _artifacts_to_dict(base_snap)
+        target_arts = _artifacts_to_dict(target_snap)
+
+        # 변경 목록 계산
+        changes = _compute_snapshot_changes(base_arts, target_arts)
+
+        # 요약 통계 — 추가/변경/삭제 건수
+        summary = {"added": 0, "changed": 0, "deleted": 0}
+        for c in changes:
+            if c["type"] == "Add":
+                summary["added"] += 1
+            elif c["type"] == "Change":
+                summary["changed"] += 1
+            elif c["type"] == "Delete":
+                summary["deleted"] += 1
+
+        return {
+            "base_version": base_version,
+            "target_version": target_version,
+            "changes": changes,
+            "summary": summary,
+            "content_hash_match": base_snap.get("content_hash") == target_snap.get("content_hash"),
+        }
