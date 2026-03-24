@@ -31,6 +31,7 @@ from app.api.security_policies import router as security_policies_router
 from app.api.audit import router as audit_router
 from app.api.alert_dag import router as alert_dag_router
 from app.api.event_detection import router as event_detection_router
+from app.api.admin_audit import router as admin_audit_router
 
 # 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
 _is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
@@ -91,6 +92,8 @@ app.include_router(audit_router)
 # Phase 5 Sprint 15: DAG 알림 + 이벤트 탐지
 app.include_router(alert_dag_router)
 app.include_router(event_detection_router)
+# Sprint 3: 관리자용 감사 로그 + AI 사용량 API
+app.include_router(admin_audit_router)
 
 
 @app.on_event("startup")

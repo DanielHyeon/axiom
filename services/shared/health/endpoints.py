@@ -110,3 +110,69 @@ def create_health_router(
         )
 
     return router
+
+
+def create_metrics_endpoint(
+    app,
+    collectors: list | None = None,
+    extra_renderers: list | None = None,
+) -> None:
+    """공통 /metrics 엔드포인트를 FastAPI 앱에 등록한다.
+
+    기존 서비스별 /metrics가 이미 있는 경우, 이 함수를 사용하지 않고
+    기존 엔드포인트에서 collector.to_prometheus_text()를 병합해도 된다.
+
+    새 서비스이거나 /metrics가 아직 없는 경우 이 헬퍼로 한 번에 등록한다.
+
+    Args:
+        app: FastAPI 인스턴스
+        collectors: SimpleMetricsCollector 리스트 — to_prometheus_text() 호출
+        extra_renderers: render_prometheus() 메서드를 가진 기존 메트릭 객체 리스트
+            (예: MetricsRegistry, MetricsService, OperationalMetricsCollector)
+
+    사용법:
+        from shared.health import create_metrics_endpoint
+        from shared.middleware.prometheus import setup_prometheus
+
+        collector = setup_prometheus(app, service_name="my-service")
+        create_metrics_endpoint(app, collectors=[collector])
+
+        # 기존 서비스별 메트릭도 함께 노출:
+        create_metrics_endpoint(
+            app,
+            collectors=[collector],
+            extra_renderers=[metrics_registry],
+        )
+    """
+    from fastapi.responses import PlainTextResponse
+
+    _collectors = collectors or []
+    _renderers = extra_renderers or []
+
+    @app.get("/metrics", response_class=PlainTextResponse)
+    async def metrics():
+        """통합 Prometheus 메트릭 엔드포인트.
+
+        공통 HTTP 요청 메트릭 + 서비스별 커스텀 메트릭을 합산하여 반환한다.
+        """
+        parts: list[str] = []
+
+        # 기존 서비스별 메트릭 (render_prometheus 인터페이스)
+        for renderer in _renderers:
+            try:
+                text = renderer.render_prometheus()
+                if text:
+                    parts.append(text)
+            except Exception:
+                pass
+
+        # 공통 HTTP 요청 메트릭 (SimpleMetricsCollector)
+        for collector in _collectors:
+            try:
+                text = collector.to_prometheus_text()
+                if text:
+                    parts.append(text)
+            except Exception:
+                pass
+
+        return "\n".join(parts)
