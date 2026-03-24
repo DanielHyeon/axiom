@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useRoles } from '../hooks/useSecurity';
 import type { Permission, PermissionAction } from '../types/security';
+import { useTranslation } from 'react-i18next';
 
 // ---------------------------------------------------------------------------
 // 리소스 그룹 라벨 (한글)
@@ -52,6 +53,7 @@ const ALL_ACTIONS: PermissionAction[] = ['read', 'write', 'delete', 'admin'];
 // ---------------------------------------------------------------------------
 
 export const RoleManagementPanel: React.FC = () => {
+  const { t } = useTranslation();
   const { data: roles = [], isLoading, isError, error, refetch } = useRoles();
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
 
@@ -74,9 +76,9 @@ export const RoleManagementPanel: React.FC = () => {
       {/* 툴바 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">역할 관리</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('securityExt.roleManagement')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            RBAC 역할 정의 및 리소스별 권한 매트릭스를 관리합니다
+            {t('securityExt.roleManagementDesc')}
           </p>
         </div>
         <Button
@@ -86,7 +88,7 @@ export const RoleManagementPanel: React.FC = () => {
           disabled={isLoading}
         >
           <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          새로고침
+          {t('securityExt.refreshBtn')}
         </Button>
       </div>
 
@@ -94,7 +96,7 @@ export const RoleManagementPanel: React.FC = () => {
       {isError && (
         <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>역할 데이터를 불러오는 데 실패했습니다. {(error as Error)?.message}</span>
+          <span>{t('securityExt.loadFailed', { message: (error as Error)?.message })}</span>
         </div>
       )}
 
@@ -102,7 +104,7 @@ export const RoleManagementPanel: React.FC = () => {
       {isLoading && !isError && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">역할 데이터 로딩 중...</span>
+          <span className="text-sm">{t('securityExt.loadingRoles')}</span>
         </div>
       )}
 
@@ -110,7 +112,7 @@ export const RoleManagementPanel: React.FC = () => {
       {!isLoading && !isError && roles.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <ShieldCheck className="h-10 w-10" />
-          <p className="font-medium">등록된 역할이 없습니다</p>
+          <p className="font-medium">{t('securityExt.noRoles')}</p>
         </div>
       )}
 
@@ -141,7 +143,7 @@ export const RoleManagementPanel: React.FC = () => {
                         <h3 className="font-semibold text-foreground">{role.name}</h3>
                         {role.is_system && (
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                            시스템
+                            {t('securityExt.system')}
                           </Badge>
                         )}
                       </div>
@@ -174,7 +176,7 @@ export const RoleManagementPanel: React.FC = () => {
                 {isExpanded && (
                   <div className="border-t border-border px-5 py-4 bg-muted/20">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                      권한 매트릭스
+                      {t('securityExt.permissionMatrix')}
                     </h4>
                     {/* 매트릭스 테이블 */}
                     <div className="overflow-x-auto">
@@ -182,7 +184,7 @@ export const RoleManagementPanel: React.FC = () => {
                         <thead>
                           <tr className="border-b border-border">
                             <th className="text-left py-2 pr-4 text-xs font-medium text-muted-foreground">
-                              리소스
+                              {t('securityExt.resourceCol')}
                             </th>
                             {ALL_ACTIONS.map((action) => (
                               <th
@@ -217,7 +219,7 @@ export const RoleManagementPanel: React.FC = () => {
                                 colSpan={ALL_ACTIONS.length + 1}
                                 className="py-4 text-center text-muted-foreground text-xs"
                               >
-                                설정된 권한이 없습니다
+                                {t('securityExt.noPermissions')}
                               </td>
                             </tr>
                           )}

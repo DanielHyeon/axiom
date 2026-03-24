@@ -187,9 +187,9 @@ export function Step4Intervention() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">설정된 개입</CardTitle>
+              <CardTitle className="text-sm">{t('whatifWizard.step4.configuredInterventions')}</CardTitle>
               <Badge variant="secondary" className="text-xs">
-                {interventions.length}개
+                {t('whatifWizard.step4.interventionCount', { count: interventions.length })}
               </Badge>
             </div>
           </CardHeader>
@@ -222,7 +222,7 @@ export function Step4Intervention() {
                       size="sm"
                       className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                       onClick={() => removeIntervention(idx)}
-                      aria-label="개입 삭제"
+                      aria-label={t('whatifWizard.step4.deleteIntervention')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -281,7 +281,7 @@ export function Step4Intervention() {
 
                   {/* 설명 */}
                   <Input
-                    placeholder="개입 설명..."
+                    placeholder={t('whatifWizard.step4.descriptionPlaceholder')}
                     value={iv.description}
                     onChange={(e) =>
                       updateIntervention(idx, { description: e.target.value })
@@ -300,17 +300,17 @@ export function Step4Intervention() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            개입 추가
+            {t('whatifWizard.step4.addIntervention')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 노드 선택 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-xs">대상 노드</Label>
+              <Label className="text-xs">{t('whatifWizard.step4.selectNode')}</Label>
               <Select value={newNodeId} onValueChange={handleNodeChange}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="노드 선택" />
+                  <SelectValue placeholder={t('whatifWizard.step4.selectNode')} />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedNodes.map((node) => (
@@ -324,14 +324,14 @@ export function Step4Intervention() {
 
             {/* 필드 선택 */}
             <div className="space-y-2">
-              <Label className="text-xs">대상 필드</Label>
+              <Label className="text-xs">{t('whatifWizard.step4.selectField')}</Label>
               <Select
                 value={newField}
                 onValueChange={handleFieldChange}
                 disabled={!newNodeId}
               >
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="필드 선택" />
+                  <SelectValue placeholder={t('whatifWizard.step4.selectField')} />
                 </SelectTrigger>
                 <SelectContent>
                   {newNodeId &&
@@ -348,7 +348,7 @@ export function Step4Intervention() {
           {/* 값 입력 */}
           {newNodeId && newField && (
             <div className="space-y-2">
-              <Label className="text-xs">변경 값</Label>
+              <Label className="text-xs">{t('whatifWizard.step4.value')}</Label>
               <Input
                 type="number"
                 step="any"
@@ -361,9 +361,9 @@ export function Step4Intervention() {
 
           {/* 설명 입력 */}
           <div className="space-y-2">
-            <Label className="text-xs">설명 (선택)</Label>
+            <Label className="text-xs">{t('whatifWizard.step4.descriptionLabel')}</Label>
             <Input
-              placeholder="이 개입의 목적을 설명하세요..."
+              placeholder={t('whatifWizard.step4.descriptionPlaceholder')}
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               className="h-8 text-xs"
@@ -379,7 +379,7 @@ export function Step4Intervention() {
             size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
-            개입 추가
+            {t('whatifWizard.step4.addIntervention')}
           </Button>
         </CardContent>
       </Card>

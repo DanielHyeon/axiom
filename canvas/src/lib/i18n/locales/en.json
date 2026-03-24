@@ -944,8 +944,13 @@
       "all": "All",
       "searchPlaceholder": "Search nodes...",
       "selectedNodes": "Selected Nodes",
-      "noSelection": "No nodes selected yet",
-      "nodeCount": "{{count}} nodes selected"
+      "selectedTitle": "Selected Nodes",
+      "noSelection": "Search and add nodes below.",
+      "nodeCount": "{{count}} selected",
+      "searchTitle": "Node Search",
+      "noSearchResults": "No search results.",
+      "noAvailableNodes": "No available nodes.",
+      "nodeDisplayCount": "{{count}} nodes displayed"
     },
     "step3": {
       "title": "Causal Discovery",
@@ -962,7 +967,13 @@
       "direction": "Direction",
       "positive": "Positive (+)",
       "negative": "Negative (-)",
-      "skipEventFork": "Skip in Event Fork mode",
+      "skipEventFork": "Skip",
+      "eventForkHint": "Causal analysis is not required in Event Fork mode. You can skip analysis and proceed directly to intervention settings.",
+      "causalAnalysis": "Causal Analysis",
+      "targetNodeCount": "{{count}} nodes targeted",
+      "thresholdHint": "Only relations with confidence above the threshold are shown.",
+      "discoveredRelations": "Discovered Causal Relations",
+      "method": "Method",
       "noRelations": "No causal relationships found"
     },
     "step4": {
@@ -973,7 +984,11 @@
       "selectField": "Select Field",
       "value": "Intervention Value",
       "baseline": "Baseline",
-      "descriptionLabel": "Description",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "Intervention description...",
+      "configuredInterventions": "Configured Interventions",
+      "interventionCount": "{{count}}",
+      "deleteIntervention": "Delete intervention",
       "noInterventions": "Please add an intervention"
     },
     "step5": {
@@ -1574,6 +1589,10 @@
   },
   "securityExt": {
     "roleManagement": "Role Management",
+    "roleManagementDesc": "Manage RBAC role definitions and resource permission matrix",
+    "system": "System",
+    "permissionMatrix": "Permission Matrix",
+    "noPermissions": "No permissions configured",
     "resource": {
       "users": "Users",
       "roles": "Roles",
@@ -1596,6 +1615,13 @@
     "loadingRoles": "Loading role data...",
     "noRoles": "No roles registered",
     "securityPolicies": "Security Policies",
+    "securityPoliciesDesc": "Manage security policies applied to SQL queries",
+    "policyBanner": "Security policies are automatically applied by Oracle service's SQL Guard during query execution. Provided as UI preview until backend API integration.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "policyRulesJson": "Policy Rules (JSON)",
+    "cancel": "Cancel",
+    "save": "Save",
     "policyType": {
       "query_limit": "Query Limit",
       "column_mask": "Column Masking",
@@ -1613,6 +1639,7 @@
     "editPolicy": "Edit policy",
     "priority": "Priority: {{value}}",
     "auditLog": "Audit Logs",
+    "auditLogDesc": "View system activity history and monitor security events",
     "decision": {
       "allowed": "Allowed",
       "denied": "Denied",
@@ -1641,6 +1668,12 @@
     "rewrittenSql": "Rewritten SQL",
     "executionTime": "Execution Time",
     "tablePermissions": "Table Permissions",
+    "tablePermissionsDesc": "Manage role access permissions per schema/table. Use checkboxes to control read/write access.",
+    "schemaTable": "Schema / Table",
+    "noSearchResults": "No search results",
+    "legendRead": "R = Read",
+    "legendWrite": "W = Write",
+    "legendWriteHint": "* Enabling write automatically enables read",
     "tablePermLoadFailed": "Failed to load table permissions. {{message}}",
     "loadingTablePerms": "Loading table permissions...",
     "noTablePerms": "No table permissions registered",

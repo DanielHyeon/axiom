@@ -17,6 +17,7 @@ import { ZoomIn, ZoomOut, RotateCcw, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { ObjectInstance } from '../types/object-explorer';
+import { useTranslation } from 'react-i18next';
 
 // ──────────────────────────────────────
 // 색상 팔레트 (ObjectType별 동적 할당)
@@ -64,6 +65,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
   onToggleCollapse,
   className,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
 
@@ -242,7 +244,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
           size="icon"
           className="h-7 w-7"
           onClick={onToggleCollapse}
-          title="그래프 패널 열기"
+          title={t('objectExplorerExt.openGraphPanel')}
         >
           <Maximize2 className="h-3.5 w-3.5" />
         </Button>
@@ -260,7 +262,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
         )}
         style={{ minHeight: 200 }}
       >
-        인스턴스를 선택하면 관계 그래프가 표시됩니다
+        {t('objectExplorerExt.selectInstanceForGraph')}
       </div>
     );
   }
@@ -275,7 +277,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
         )}
         style={{ minHeight: 200 }}
       >
-        관련 인스턴스가 없습니다
+        {t('objectExplorerExt.noRelatedInstances')}
       </div>
     );
   }
@@ -300,20 +302,20 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
       {/* 툴바 */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border">
         <span className="text-[11px] font-semibold text-foreground">
-          관계 그래프
+          {t('objectExplorerExt.relationGraph')}
         </span>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title="확대">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title={t('objectExplorerExt.zoomIn')}>
             <ZoomIn className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title="축소">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title={t('objectExplorerExt.zoomOut')}>
             <ZoomOut className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title="전체 보기">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title={t('objectExplorerExt.viewAll')}>
             <RotateCcw className="h-3 w-3" />
           </Button>
           {onToggleCollapse && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title="접기">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title={t('objectExplorerExt.collapsePanel')}>
               <Minimize2 className="h-3 w-3" />
             </Button>
           )}

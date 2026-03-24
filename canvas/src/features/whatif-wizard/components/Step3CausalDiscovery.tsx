@@ -87,7 +87,7 @@ export function Step3CausalDiscovery() {
         {isEventForkMode && (
           <Button variant="outline" size="sm" onClick={nextStep} className="gap-1.5">
             <SkipForward className="w-4 h-4" />
-            건너뛰기
+            {t('whatifWizard.step3.skipEventFork')}
           </Button>
         )}
       </div>
@@ -95,8 +95,7 @@ export function Step3CausalDiscovery() {
       {/* Event Fork 모드 안내 */}
       {isEventForkMode && (
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm">
-          Event Fork 모드에서는 인과 관계 분석이 필수가 아닙니다. 분석을 건너뛰고 바로
-          개입 설정으로 이동할 수 있습니다.
+          {t('whatifWizard.step3.eventForkHint')}
         </div>
       )}
 
@@ -106,10 +105,10 @@ export function Step3CausalDiscovery() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              인과 분석
+              {t('whatifWizard.step3.causalAnalysis')}
             </CardTitle>
             <Badge variant="outline" className="text-xs">
-              {selectedNodeIds.length}개 노드 대상
+              {t('whatifWizard.step3.targetNodeCount', { count: selectedNodeIds.length })}
             </Badge>
           </div>
         </CardHeader>
@@ -117,7 +116,7 @@ export function Step3CausalDiscovery() {
           {/* 신뢰도 임계값 슬라이더 */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs">신뢰도 임계값</Label>
+              <Label className="text-xs">{t('whatifWizard.step3.confidenceThreshold')}</Label>
               <span className="text-xs font-mono text-muted-foreground">
                 {(confidenceThreshold * 100).toFixed(0)}%
               </span>
@@ -131,7 +130,7 @@ export function Step3CausalDiscovery() {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              임계값 이상의 신뢰도를 가진 관계만 표시합니다.
+              {t('whatifWizard.step3.thresholdHint')}
             </p>
           </div>
 
@@ -144,12 +143,12 @@ export function Step3CausalDiscovery() {
             {isDiscovering ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                분석 중...
+                {t('whatifWizard.step3.discovering')}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                인과 관계 분석 실행
+                {t('whatifWizard.step3.discover')}
               </>
             )}
           </Button>
@@ -168,7 +167,7 @@ export function Step3CausalDiscovery() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">발견된 인과관계</CardTitle>
+              <CardTitle className="text-sm">{t('whatifWizard.step3.discoveredRelations')}</CardTitle>
               <div className="flex gap-2">
                 <Badge variant="secondary" className="text-xs">
                   총 {causalRelations.length}개
@@ -185,14 +184,14 @@ export function Step3CausalDiscovery() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">소스</TableHead>
+                    <TableHead className="text-xs">{t('whatifWizard.step3.source')}</TableHead>
                     <TableHead className="text-xs w-8" />
-                    <TableHead className="text-xs">타겟</TableHead>
-                    <TableHead className="text-xs text-right">가중치</TableHead>
-                    <TableHead className="text-xs text-right">시차(일)</TableHead>
-                    <TableHead className="text-xs text-right">신뢰도</TableHead>
-                    <TableHead className="text-xs text-center">방향</TableHead>
-                    <TableHead className="text-xs text-center">방법</TableHead>
+                    <TableHead className="text-xs">{t('whatifWizard.step3.target')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('whatifWizard.step3.weight')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('whatifWizard.step3.lag')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('whatifWizard.step3.confidence')}</TableHead>
+                    <TableHead className="text-xs text-center">{t('whatifWizard.step3.direction')}</TableHead>
+                    <TableHead className="text-xs text-center">{t('whatifWizard.step3.method')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

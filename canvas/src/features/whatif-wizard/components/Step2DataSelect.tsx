@@ -131,14 +131,14 @@ export function Step2DataSelect() {
               {t('whatifWizard.step2.selectedTitle', '선택된 노드')}
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {selectedNodes.length}개 선택됨
+              {t('whatifWizard.step2.nodeCount', { count: selectedNodes.length })}
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           {selectedNodes.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
-              아래에서 노드를 검색하고 추가하세요.
+              {t('whatifWizard.step2.noSelection')}
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -209,8 +209,8 @@ export function Step2DataSelect() {
             {filteredNodes.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 {localQuery.trim()
-                  ? '검색 결과가 없습니다.'
-                  : '선택 가능한 노드가 없습니다.'}
+                  ? t('whatifWizard.step2.noSearchResults')
+                  : t('whatifWizard.step2.noAvailableNodes')}
               </p>
             ) : (
               filteredNodes.map((node) => (
@@ -250,7 +250,7 @@ export function Step2DataSelect() {
 
           {/* 검색 결과 수 */}
           <p className="text-xs text-muted-foreground text-right">
-            {filteredNodes.length}개 노드 표시 중
+            {t('whatifWizard.step2.nodeDisplayCount', { count: filteredNodes.length })}
           </p>
         </CardContent>
       </Card>

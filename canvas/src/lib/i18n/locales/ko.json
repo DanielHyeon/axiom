@@ -944,8 +944,13 @@
       "all": "전체",
       "searchPlaceholder": "노드 검색...",
       "selectedNodes": "선택된 노드",
-      "noSelection": "아직 노드를 선택하지 않았습니다",
-      "nodeCount": "{{count}}개 노드 선택"
+      "selectedTitle": "선택된 노드",
+      "noSelection": "아래에서 노드를 검색하고 추가하세요.",
+      "nodeCount": "{{count}}개 선택됨",
+      "searchTitle": "노드 검색",
+      "noSearchResults": "검색 결과가 없습니다.",
+      "noAvailableNodes": "선택 가능한 노드가 없습니다.",
+      "nodeDisplayCount": "{{count}}개 노드 표시 중"
     },
     "step3": {
       "title": "인과 관계 발견",
@@ -962,7 +967,13 @@
       "direction": "방향",
       "positive": "양(+)",
       "negative": "음(-)",
-      "skipEventFork": "Event Fork 모드에서 건너뛰기",
+      "skipEventFork": "건너뛰기",
+      "eventForkHint": "Event Fork 모드에서는 인과 관계 분석이 필수가 아닙니다. 분석을 건너뛰고 바로 개입 설정으로 이동할 수 있습니다.",
+      "causalAnalysis": "인과 분석",
+      "targetNodeCount": "{{count}}개 노드 대상",
+      "thresholdHint": "임계값 이상의 신뢰도를 가진 관계만 표시합니다.",
+      "discoveredRelations": "발견된 인과관계",
+      "method": "방법",
       "noRelations": "발견된 인과 관계가 없습니다"
     },
     "step4": {
@@ -973,7 +984,11 @@
       "selectField": "필드 선택",
       "value": "개입 값",
       "baseline": "기준값",
-      "descriptionLabel": "개입 설명",
+      "descriptionLabel": "설명 (선택)",
+      "descriptionPlaceholder": "개입 설명...",
+      "configuredInterventions": "설정된 개입",
+      "interventionCount": "{{count}}개",
+      "deleteIntervention": "개입 삭제",
       "noInterventions": "개입을 추가해주세요"
     },
     "step5": {
@@ -1574,6 +1589,10 @@
   },
   "securityExt": {
     "roleManagement": "역할 관리",
+    "roleManagementDesc": "RBAC 역할 정의 및 리소스별 권한 매트릭스를 관리합니다",
+    "system": "시스템",
+    "permissionMatrix": "권한 매트릭스",
+    "noPermissions": "설정된 권한이 없습니다",
     "resource": {
       "users": "사용자",
       "roles": "역할",
@@ -1596,6 +1615,13 @@
     "loadingRoles": "역할 데이터 로딩 중...",
     "noRoles": "등록된 역할이 없습니다",
     "securityPolicies": "보안 정책",
+    "securityPoliciesDesc": "SQL 쿼리에 적용되는 보안 정책을 관리합니다",
+    "policyBanner": "보안 정책은 Oracle 서비스의 SQL Guard에 의해 쿼리 실행 시 자동 적용됩니다. 백엔드 API 연동 전까지 UI 미리보기로 제공됩니다.",
+    "active": "활성",
+    "inactive": "비활성",
+    "policyRulesJson": "정책 규칙 (JSON)",
+    "cancel": "취소",
+    "save": "저장",
     "policyType": {
       "query_limit": "쿼리 제한",
       "column_mask": "컬럼 마스킹",
@@ -1613,6 +1639,7 @@
     "editPolicy": "정책 수정",
     "priority": "우선순위: {{value}}",
     "auditLog": "감사 로그",
+    "auditLogDesc": "시스템 활동 이력을 조회하고 보안 이벤트를 모니터링합니다",
     "decision": {
       "allowed": "허용",
       "denied": "거부",
@@ -1641,6 +1668,12 @@
     "rewrittenSql": "변환된 SQL",
     "executionTime": "실행 시간",
     "tablePermissions": "테이블 권한",
+    "tablePermissionsDesc": "스키마/테이블별 역할 접근 권한을 관리합니다. 체크박스로 읽기/쓰기 권한을 제어합니다.",
+    "schemaTable": "스키마 / 테이블",
+    "noSearchResults": "검색 결과가 없습니다",
+    "legendRead": "R = 읽기 (Read)",
+    "legendWrite": "W = 쓰기 (Write)",
+    "legendWriteHint": "* 쓰기 활성화 시 읽기가 자동으로 활성화됩니다",
     "tablePermLoadFailed": "테이블 권한 데이터를 불러오는 데 실패했습니다. {{message}}",
     "loadingTablePerms": "테이블 권한 로딩 중...",
     "noTablePerms": "등록된 테이블 권한이 없습니다",
