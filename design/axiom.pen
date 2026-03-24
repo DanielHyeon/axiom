@@ -1,11 +1,11 @@
 {
-  "version": "2.8",
+  "version": "2.9",
   "children": [
     {
       "type": "frame",
       "id": "b717S",
-      "x": 9042,
-      "y": -2612,
+      "x": 8889,
+      "y": -3274,
       "name": "NL2SQL — Redesign",
       "clip": true,
       "width": 1440,
@@ -326,7 +326,8 @@
                               "fill": "$--text-placeholder",
                               "content": "OLAP Pivot",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -347,7 +348,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Insight",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -368,7 +370,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Ontology",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -443,7 +446,8 @@
                           "fill": "$--text-secondary",
                           "content": "자연어를 SQL로 변환하여 데이터베이스를 쉽게 조회하세요",
                           "fontFamily": "IBM Plex Mono",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -561,7 +565,8 @@
                                       "fill": "$--text-primary",
                                       "content": "최근 3개월간 매출이 가장 높은 상위 10개 제품을 조회해줘",
                                       "fontFamily": "IBM Plex Mono",
-                                      "fontSize": 13
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -643,7 +648,8 @@
                                   "width": "fill_container",
                                   "content": "SELECT p.name, SUM(s.amount) as total FROM products p JOIN sales s ON p.id = s.product_id WHERE s.date >= NOW() - INTERVAL '3 months' GROUP BY p.name ORDER BY total DESC LIMIT 10;",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 12
+                                  "fontSize": 12,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -888,7 +894,8 @@
                                       "fill": "$--text-placeholder",
                                       "content": "01",
                                       "fontFamily": "IBM Plex Mono",
-                                      "fontSize": 13
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -923,7 +930,8 @@
                                       "fill": "$--text-primary",
                                       "content": "₩284,500,000",
                                       "fontFamily": "IBM Plex Mono",
-                                      "fontSize": 13
+                                      "fontSize": 13,
+                                      "fontWeight": "normal"
                                     }
                                   ]
                                 },
@@ -1548,7 +1556,8 @@
                           "width": "fill_container",
                           "content": "지역별 월간 매출 추이 비교",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1612,7 +1621,8 @@
                           "width": "fill_container",
                           "content": "고객 세그먼트별 평균 구매액",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1676,7 +1686,8 @@
                           "width": "fill_container",
                           "content": "재고 부족 예상 품목 리스트",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1740,7 +1751,8 @@
                           "width": "fill_container",
                           "content": "이번 달 신규 가입 고객 수",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1804,7 +1816,8 @@
                           "width": "fill_container",
                           "content": "카테고리별 반품률 분석",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -1858,8 +1871,8 @@
     {
       "type": "frame",
       "id": "JbhA4",
-      "x": 10582,
-      "y": -2612,
+      "x": 10429,
+      "y": -3274,
       "name": "Ontology — Redesign",
       "clip": true,
       "width": 1440,
@@ -2151,7 +2164,8 @@
                               "fill": "$--text-placeholder",
                               "content": "NL2SQL",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2172,7 +2186,8 @@
                               "fill": "$--text-placeholder",
                               "content": "OLAP Pivot",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2193,7 +2208,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Insight",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2353,7 +2369,8 @@
                                   "fill": "$--text-placeholder",
                                   "content": "노드 검색...",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -2460,7 +2477,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Metrics",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2481,7 +2499,8 @@
                               "fill": "$--text-placeholder",
                               "content": "KPI",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2502,7 +2521,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Measure",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -2523,7 +2543,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Resource",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -2849,7 +2870,8 @@
                                   "fill": "$--text-secondary",
                                   "content": "Downtime",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -2877,7 +2899,8 @@
                                   "fill": "$--text-secondary",
                                   "content": "Availability",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -2905,7 +2928,8 @@
                                   "fill": "$--text-secondary",
                                   "content": "Cycle Time",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 10
+                                  "fontSize": 10,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -3819,8 +3843,8 @@
     {
       "type": "frame",
       "id": "rrtP4",
-      "x": 12122,
-      "y": -2612,
+      "x": 11969,
+      "y": -3274,
       "name": "Insight — Redesign",
       "clip": true,
       "width": 1440,
@@ -4112,7 +4136,8 @@
                               "fill": "$--text-placeholder",
                               "content": "NL2SQL",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -4133,7 +4158,8 @@
                               "fill": "$--text-placeholder",
                               "content": "OLAP Pivot",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -4183,7 +4209,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Ontology",
                               "fontFamily": "Sora",
-                              "fontSize": 13
+                              "fontSize": 13,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -4314,7 +4341,8 @@
                                   "fill": "$--text-placeholder",
                                   "content": "KPI 검색...",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -4421,7 +4449,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Revenue Total",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -4442,7 +4471,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Product Count",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         },
@@ -4463,7 +4493,8 @@
                               "fill": "$--text-placeholder",
                               "content": "Churn Rate",
                               "fontFamily": "Sora",
-                              "fontSize": 12
+                              "fontSize": 12,
+                              "fontWeight": "normal"
                             }
                           ]
                         }
@@ -5643,8 +5674,8 @@
     {
       "type": "frame",
       "id": "LDCTp",
-      "x": 13662,
-      "y": -2612,
+      "x": 13509,
+      "y": -3274,
       "name": "Data — Redesign",
       "clip": true,
       "width": 1440,
@@ -5929,7 +5960,8 @@
                           "fill": "$--text-placeholder",
                           "content": "NL2SQL",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -5950,7 +5982,8 @@
                           "fill": "$--text-placeholder",
                           "content": "OLAP Pivot",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -5971,7 +6004,8 @@
                           "fill": "$--text-placeholder",
                           "content": "Insight",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -5992,7 +6026,8 @@
                           "fill": "$--text-placeholder",
                           "content": "Ontology",
                           "fontFamily": "Sora",
-                          "fontSize": 13
+                          "fontSize": 13,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -6222,7 +6257,8 @@
                                   "fill": "$--text-primary",
                                   "content": "InsurQuery_pg",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -6270,7 +6306,8 @@
                                   "fill": "$--text-primary",
                                   "content": "PostgreSQL",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 },
                                 {
                                   "type": "icon_font",
@@ -6326,7 +6363,8 @@
                                   "fill": "$--text-primary",
                                   "content": "보험 데이터 분석용 DB",
                                   "fontFamily": "IBM Plex Mono",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
