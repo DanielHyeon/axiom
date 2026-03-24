@@ -24,6 +24,7 @@ import {
 
 import { getSampleData } from '../api/instanceApi';
 import type { SampleDataResponse, ColumnType } from '../types/instance';
+import { useTranslation } from 'react-i18next';
 
 // ─── 상수 ──────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ export function DataPreviewPanel({
   table,
   onClose,
 }: DataPreviewPanelProps) {
+  const { t } = useTranslation();
   // 데이터 상태
   const [data, setData] = useState<SampleDataResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -80,7 +82,7 @@ export function DataPreviewPanel({
         const result = await getSampleData(nodeId, requestLimit, schema, table);
         setData(result);
       } catch {
-        toast.error('데이터 프리뷰를 불러오지 못했습니다');
+        toast.error(t('instancePreview.previewError'));
         setData(null);
       }
     },
@@ -102,7 +104,7 @@ export function DataPreviewPanel({
       await fetchData(newLimit);
       setLimit(newLimit);
     } catch {
-      toast.error('추가 데이터 로드에 실패했습니다.');
+      toast.error(t('instancePreview.loadMoreError'));
     } finally {
       setLoadingMore(false);
     }
@@ -122,14 +124,14 @@ export function DataPreviewPanel({
           <span className="text-sm font-semibold truncate">{nodeName}</span>
           {data && (
             <Badge variant="secondary" className="text-[10px] shrink-0">
-              {data.total_count.toLocaleString()}건
+              {t('instancePreview.recordCount', { num: data.total_count.toLocaleString() })}
             </Badge>
           )}
         </div>
         <button
           onClick={onClose}
           className="text-foreground/40 hover:text-foreground shrink-0 ml-2"
-          aria-label="패널 닫기"
+          aria-label={t('instancePreview.panelClose')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -148,8 +150,8 @@ export function DataPreviewPanel({
         {!loading && !data && (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/30 gap-2">
             <Database className="h-8 w-8" />
-            <p className="text-sm">바인딩된 데이터가 없습니다</p>
-            <p className="text-xs text-foreground/20">이 노드에 데이터소스를 연결하세요</p>
+            <p className="text-sm">{t('instancePreview.noBinding')}</p>
+            <p className="text-xs text-foreground/20">{t('instancePreview.connectDatasource')}</p>
           </div>
         )}
 
@@ -157,7 +159,7 @@ export function DataPreviewPanel({
         {!loading && data && data.preview.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/30 gap-2">
             <Database className="h-8 w-8" />
-            <p className="text-sm">테이블에 데이터가 없습니다</p>
+            <p className="text-sm">{t('instancePreview.noTableData')}</p>
           </div>
         )}
 
@@ -220,7 +222,7 @@ export function DataPreviewPanel({
                   ) : (
                     <ChevronDown className="h-3 w-3" />
                   )}
-                  더 보기
+                  {t('instancePreview.loadMore')}
                 </Button>
               </div>
             )}

@@ -14,6 +14,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import type { PipelineStep } from '../types/ingestion';
+import { useTranslation } from 'react-i18next';
 
 interface PipelineStepViewerProps {
   /** 파이프라인 단계 목록 */
@@ -70,10 +71,11 @@ function formatDuration(ms?: number): string {
 export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
   steps,
 }) => {
+  const { t } = useTranslation();
   if (steps.length === 0) {
     return (
       <p className="text-sm text-gray-400 text-center py-4">
-        파이프라인 단계 정보가 없습니다
+        {t('ingestionExt.noStepInfo')}
       </p>
     );
   }
@@ -102,7 +104,7 @@ export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
                 </span>
                 {step.status === 'running' && (
                   <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded">
-                    진행 중
+                    {t('ingestionExt.inProgress')}
                   </span>
                 )}
               </div>
