@@ -37,5 +37,9 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose standard web port
 EXPOSE 80
 
+# 컨테이너가 정상인지 30초마다 확인한다 (Nginx가 응답하는지 체크)
+HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:80/ || exit 1
+
 # Run nginx in foreground
 CMD ["nginx", "-g", "daemon off;"]

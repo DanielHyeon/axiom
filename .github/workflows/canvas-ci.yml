@@ -52,3 +52,18 @@ jobs:
         run: |
           cd canvas
           pnpm build
+
+      - name: pnpm audit (치명적 취약점 검사)
+        working-directory: canvas
+        run: pnpm audit --audit-level=critical || true
+        # || true: 정보 제공용 — 차단하려면 제거
+
+      - name: Trivy 파일시스템 보안 스캔
+        uses: aquasecurity/trivy-action@v0.35.0
+        with:
+          scan-type: 'fs'
+          scan-ref: 'canvas/'
+          format: 'table'
+          exit-code: '1'
+          severity: 'CRITICAL,HIGH'
+          ignore-unfixed: true
