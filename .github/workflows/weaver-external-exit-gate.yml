@@ -5,12 +5,14 @@ on:
   pull_request:
     paths:
       - "services/weaver/**"
+      - "services/shared/**"
       - ".github/workflows/weaver-external-exit-gate.yml"
   push:
     branches:
       - main
     paths:
       - "services/weaver/**"
+      - "services/shared/**"
       - ".github/workflows/weaver-external-exit-gate.yml"
 
 jobs:
