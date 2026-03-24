@@ -1,4 +1,5 @@
 import asyncio
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -31,7 +32,16 @@ from app.api.audit import router as audit_router
 from app.api.alert_dag import router as alert_dag_router
 from app.api.event_detection import router as event_detection_router
 
-app = FastAPI(title="Axiom Core", version="1.0.0")
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
+
+app = FastAPI(
+    title="Axiom Core",
+    version="1.0.0",
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +61,13 @@ app.add_middleware(
 app.add_middleware(RequestIdMiddleware)
 app.add_middleware(TenantMiddleware)
 app.add_middleware(RateLimitMiddleware)
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(
+    SecurityHeadersMiddleware,
+    allowed_connect_src="'self' http://localhost:9001 http://localhost:9002 http://localhost:9003 http://localhost:9004 http://localhost:9005 http://localhost:9100",
+)
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")

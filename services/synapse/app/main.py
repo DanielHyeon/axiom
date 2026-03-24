@@ -1,5 +1,6 @@
 from contextlib import asynccontextmanager
 import asyncio
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.neo4j_client import neo4j_client
@@ -152,7 +153,17 @@ async def lifespan(app: FastAPI):
     await close_redis()
     await neo4j_client.close()
 
-app = FastAPI(title="Axiom Synapse", version="2.0.0", lifespan=lifespan)
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
+
+app = FastAPI(
+    title="Axiom Synapse",
+    version="2.0.0",
+    lifespan=lifespan,
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
+)
 # Middleware order: last added = first executed
 # TenantMiddleware must run AFTER CORSMiddleware so CORS preflight isn't blocked
 app.add_middleware(TenantMiddleware)
@@ -167,6 +178,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self'")
+
 app.include_router(graph_router)
 app.include_router(event_logs_router)
 app.include_router(extraction_router)

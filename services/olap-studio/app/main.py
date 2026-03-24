@@ -1,6 +1,7 @@
 """OLAP Studio — Axiom OLAP/ETL/큐브 마이크로서비스."""
 from contextlib import asynccontextmanager
 import asyncio
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -69,11 +70,17 @@ async def lifespan(app: FastAPI):
     await close_pool()
 
 
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
+
 app = FastAPI(
     title="Axiom OLAP Studio",
     version="1.0.0",
     description="스타 스키마 OLAP 피벗 · 큐브 관리 · ETL · 리니지",
     lifespan=lifespan,
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
 )
 
 # 전역 예외 핸들러 등록 — 모든 에러를 Axiom 표준 포맷으로 변환
@@ -93,6 +100,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self'")
 
 # 라우터 등록
 app.include_router(datasource_router)

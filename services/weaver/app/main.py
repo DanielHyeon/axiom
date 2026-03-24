@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import os
 import uuid
 
 from fastapi import FastAPI, Request, status
@@ -42,7 +43,16 @@ logger = logging.getLogger("axiom.weaver")
 
 configure_secret_redaction()
 
-app = FastAPI(title="Axiom Weaver", version="1.0.0")
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
+
+app = FastAPI(
+    title="Axiom Weaver",
+    version="1.0.0",
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -51,6 +61,10 @@ app.add_middleware(
     allow_methods=settings.weaver_cors_allowed_methods,
     allow_headers=settings.weaver_cors_allowed_headers,
 )
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self'")
 
 app.add_exception_handler(InsightError, insight_error_handler)
 

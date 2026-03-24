@@ -3,6 +3,9 @@ import logging
 import os
 
 from fastapi import FastAPI
+
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 from app.api.analytics import router as analytics_router
@@ -63,7 +66,13 @@ def _seed_demo_cubes() -> None:
             logger.info("demo_cube_seeded: %s", cube_def["name"])
 
 
-app = FastAPI(title="Axiom Vision", version="1.0.0")
+app = FastAPI(
+    title="Axiom Vision",
+    version="1.0.0",
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
+)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -75,6 +84,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self'")
 
 # 기존 /analytics* 엔드포인트(테스트·내부 용도)와
 # /api/v3/analytics* 풀스펙 엔드포인트를 모두 제공한다.

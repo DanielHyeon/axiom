@@ -19,6 +19,7 @@ from app.api.domain_mode import router as domain_mode_router
 from app.core.rate_limit import RateLimitExceeded
 from app.core.config import settings
 from app.infrastructure.acl.synapse_acl import oracle_synapse_acl
+import os
 import structlog
 
 logger = structlog.get_logger()
@@ -394,7 +395,17 @@ async def lifespan(app: FastAPI):
         logger.info("oracle_redis_closed")
 
 
-app = FastAPI(title="Axiom Oracle", version="2.0.0", lifespan=lifespan)
+# 프로덕션 환경에서는 API 문서(Swagger, ReDoc)를 비활성화한다
+_is_prod = os.getenv("ENVIRONMENT", "dev") == "production"
+
+app = FastAPI(
+    title="Axiom Oracle",
+    version="2.0.0",
+    lifespan=lifespan,
+    docs_url=None if _is_prod else "/docs",
+    redoc_url=None if _is_prod else "/redoc",
+    openapi_url=None if _is_prod else "/openapi.json",
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -403,6 +414,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 보안 헤더 — CSP Report-Only (Phase 1)
+from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
+app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self'")
 
 
 @app.exception_handler(RateLimitExceeded)
