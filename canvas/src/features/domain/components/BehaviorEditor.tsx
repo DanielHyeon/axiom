@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import type { Behavior, BehaviorType, BehaviorTrigger } from '../types/domain';
+import { useTranslation } from 'react-i18next';
 
 // ──────────────────────────────────────
 // Props
@@ -179,6 +180,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
     });
   }, [name, description, type, trigger, code, endpoint, httpMethod, enabled, onTest]);
 
+  const { t } = useTranslation();
   const isEdit = !!initialBehavior;
 
   if (!open) return null;
@@ -193,7 +195,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
               {isEdit ? 'Behavior 편집' : 'Behavior 추가'}
             </h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              ObjectType에 연결할 행동(Behavior)을 정의합니다.
+              {t('domainExt.behaviorFormDesc')}
             </p>
           </div>
           <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-lg leading-none p-1">
@@ -206,7 +208,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
           {/* 이름 + 설명 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">이름 *</label>
+              <label className="text-xs text-muted-foreground">{t('domainExt.behaviorNameLabel')}</label>
               <Input
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -215,11 +217,11 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
               />
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">설명</label>
+              <label className="text-xs text-muted-foreground">{t('domainExt.behaviorDescLabel')}</label>
               <Input
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="이 행동의 설명..."
+                placeholder={t('domainExt.behaviorDescPlaceholder')}
                 className="h-8 text-sm"
               />
             </div>
@@ -228,30 +230,30 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
           {/* 타입 + 트리거 */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">유형</label>
+              <label className="text-xs text-muted-foreground">{t('domainExt.behaviorTypeLabel')}</label>
               <Select value={type} onValueChange={(v) => handleTypeChange(v as BehaviorType)}>
                 <SelectTrigger className="h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="rest">REST API 호출</SelectItem>
-                  <SelectItem value="javascript">JavaScript 코드</SelectItem>
-                  <SelectItem value="python">Python 코드</SelectItem>
-                  <SelectItem value="dmn">DMN 규칙</SelectItem>
+                  <SelectItem value="rest">{t('domainExt.restApiCall')}</SelectItem>
+                  <SelectItem value="javascript">{t('domainExt.jsCode')}</SelectItem>
+                  <SelectItem value="python">{t('domainExt.pyCode')}</SelectItem>
+                  <SelectItem value="dmn">{t('domainExt.dmnRules')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">트리거</label>
+              <label className="text-xs text-muted-foreground">{t('domainExt.behaviorTriggerLabel')}</label>
               <Select value={trigger} onValueChange={(v) => setTrigger(v as BehaviorTrigger)}>
                 <SelectTrigger className="h-8 text-sm">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="manual">수동 실행</SelectItem>
-                  <SelectItem value="on_create">생성 시 실행</SelectItem>
-                  <SelectItem value="on_update">수정 시 실행</SelectItem>
-                  <SelectItem value="scheduled">스케줄 실행</SelectItem>
+                  <SelectItem value="manual">{t('domainExt.triggerManual')}</SelectItem>
+                  <SelectItem value="on_create">{t('domainExt.triggerOnCreate')}</SelectItem>
+                  <SelectItem value="on_update">{t('domainExt.triggerOnUpdate')}</SelectItem>
+                  <SelectItem value="scheduled">{t('domainExt.triggerScheduled')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -261,7 +263,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
           {type === 'rest' && (
             <div className="grid grid-cols-4 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground">HTTP 메서드</label>
+                <label className="text-xs text-muted-foreground">{t('domainExt.httpMethod')}</label>
                 <Select value={httpMethod} onValueChange={setHttpMethod}>
                   <SelectTrigger className="h-8 text-sm">
                     <SelectValue />
@@ -276,7 +278,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
                 </Select>
               </div>
               <div className="col-span-3 space-y-1.5">
-                <label className="text-xs text-muted-foreground">엔드포인트 URL</label>
+                <label className="text-xs text-muted-foreground">{t('domainExt.endpointUrl')}</label>
                 <Input
                   value={endpoint}
                   onChange={(e) => setEndpoint(e.target.value)}
@@ -290,7 +292,7 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
           {/* 코드 편집기 (JS / Python / DMN) */}
           {type !== 'rest' && (
             <div className="space-y-1.5">
-              <label className="text-xs text-muted-foreground">코드</label>
+              <label className="text-xs text-muted-foreground">{t('domainExt.codeLabel')}</label>
               <div className="border border-border rounded-lg overflow-hidden">
                 <MonacoEditor
                   height="300"
@@ -318,11 +320,11 @@ export const BehaviorEditor: React.FC<BehaviorEditorProps> = ({
           {onTest && (
             <Button variant="outline" size="sm" onClick={handleTest} disabled={!name.trim()}>
               <Play className="h-3.5 w-3.5 mr-1" />
-              테스트 실행
+              {t('domainExt.testBtn')}
             </Button>
           )}
           <Button variant="ghost" size="sm" onClick={onClose}>
-            취소
+            {t('domainExt.cancelBtn')}
           </Button>
           <Button size="sm" onClick={handleSave} disabled={!name.trim() || isSaving}>
             {isSaving ? (

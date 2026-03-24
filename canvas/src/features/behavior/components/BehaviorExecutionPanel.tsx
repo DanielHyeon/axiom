@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import { useBehaviorExecution } from '../hooks/useBehaviorExecution';
 import { CodeViewer } from './CodeViewer';
 
@@ -31,10 +32,10 @@ interface TabDef {
   icon: React.ReactNode;
 }
 
-const TABS: TabDef[] = [
-  { key: 'execute', label: '실행', icon: <Play className="h-3.5 w-3.5" /> },
-  { key: 'generate', label: '코드 생성', icon: <Sparkles className="h-3.5 w-3.5" /> },
-  { key: 'save', label: '결과 저장', icon: <Save className="h-3.5 w-3.5" /> },
+const TABS: (Omit<TabDef, 'label'> & { labelKey: string })[] = [
+  { key: 'execute', labelKey: 'behaviorExt.tabs.execute', icon: <Play className="h-3.5 w-3.5" /> },
+  { key: 'generate', labelKey: 'behaviorExt.tabs.generate', icon: <Sparkles className="h-3.5 w-3.5" /> },
+  { key: 'save', labelKey: 'behaviorExt.tabs.save', icon: <Save className="h-3.5 w-3.5" /> },
 ];
 
 // ──────────────────────────────────────
@@ -70,6 +71,7 @@ export function BehaviorExecutionPanel({
   behaviorName,
   className,
 }: BehaviorExecutionPanelProps) {
+  const { t } = useTranslation();
   // 탭 상태
   const [activeTab, setActiveTab] = useState<TabKey>('execute');
 
@@ -112,7 +114,7 @@ export function BehaviorExecutionPanel({
       parsed = JSON.parse(instanceJson);
       setJsonError(null);
     } catch {
-      setJsonError('유효한 JSON 형식이 아닙니다.');
+      setJsonError(t('behaviorExt.invalidJson'));
       return;
     }
 
@@ -142,11 +144,11 @@ export function BehaviorExecutionPanel({
 
     // 테이블/스키마 이름 검증 — SQL injection 방지
     if (!TABLE_NAME_RE.test(tableName)) {
-      toast.error('테이블 이름은 영문, 숫자, 밑줄만 허용됩니다.');
+      toast.error(t('behaviorExt.tableNameError'));
       return;
     }
     if (schemaName && !TABLE_NAME_RE.test(schemaName)) {
-      toast.error('스키마 이름은 영문, 숫자, 밑줄만 허용됩니다.');
+      toast.error(t('behaviorExt.schemaNameError'));
       return;
     }
 
@@ -184,7 +186,7 @@ export function BehaviorExecutionPanel({
               )}
             >
               {tab.icon}
-              {tab.label}
+              {t(tab.labelKey)}
             </button>
           ))}
         </div>
@@ -216,7 +218,7 @@ export function BehaviorExecutionPanel({
                 htmlFor="instance-data"
                 className="text-sm font-medium text-foreground"
               >
-                인스턴스 데이터 (JSON)
+                {t('behaviorExt.instanceDataLabel')}
               </label>
               <Textarea
                 id="instance-data"
@@ -242,12 +244,12 @@ export function BehaviorExecutionPanel({
               {isExecuting ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  실행 중...
+                  {t('behaviorExt.executing')}
                 </>
               ) : (
                 <>
                   <Play className="h-4 w-4 mr-2" />
-                  실행
+                  {t('behaviorExt.executeBtn')}
                 </>
               )}
             </Button>
@@ -259,8 +261,7 @@ export function BehaviorExecutionPanel({
                 {lastResult.autoFixed && (
                   <div className="flex items-center gap-2 p-2 rounded-md bg-amber-500/10 text-amber-500 text-xs">
                     <Wrench className="h-3.5 w-3.5 shrink-0" />
-                    코드가 자동 수정되었습니다. ({lastResult.attempts ?? 1}회
-                    시도)
+                    {t('behaviorExt.autoFixNotice', { count: lastResult.attempts ?? 1 })}
                   </div>
                 )}
 
@@ -287,7 +288,7 @@ export function BehaviorExecutionPanel({
                 {lastResult.code && (
                   <div className="space-y-1">
                     <p className="text-xs font-medium text-muted-foreground">
-                      실행된 코드:
+                      {t('behaviorExt.executedCode')}
                     </p>
                     <CodeViewer code={lastResult.code} language="python" />
                   </div>
@@ -306,13 +307,13 @@ export function BehaviorExecutionPanel({
                 htmlFor="code-prompt"
                 className="text-sm font-medium text-foreground"
               >
-                프롬프트
+                {t('behaviorExt.promptLabel')}
               </label>
               <Textarea
                 id="code-prompt"
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="생성하고 싶은 코드를 설명하세요..."
+                placeholder={t('behaviorExt.promptPlaceholder')}
                 className="min-h-[120px] resize-y"
               />
             </div>
@@ -323,7 +324,7 @@ export function BehaviorExecutionPanel({
                 htmlFor="code-language"
                 className="text-sm font-medium text-foreground"
               >
-                언어
+                {t('behaviorExt.languageLabel')}
               </label>
               <select
                 id="code-language"
@@ -348,12 +349,12 @@ export function BehaviorExecutionPanel({
               {isGenerating ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                  생성 중...
+                  {t('behaviorExt.generating')}
                 </>
               ) : (
                 <>
                   <Sparkles className="h-4 w-4 mr-2" />
-                  코드 생성
+                  {t('behaviorExt.generateBtn')}
                 </>
               )}
             </Button>
@@ -371,7 +372,7 @@ export function BehaviorExecutionPanel({
             {/* 저장 가능 여부 확인 */}
             {!lastResult ? (
               <div className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
-                먼저 실행 탭에서 Behavior를 실행하세요.
+                {t('behaviorExt.saveRunFirst')}
               </div>
             ) : (
               <>
@@ -381,13 +382,13 @@ export function BehaviorExecutionPanel({
                     htmlFor="table-name"
                     className="text-sm font-medium text-foreground"
                   >
-                    테이블 이름 *
+                    {t('behaviorExt.tableNameLabel')}
                   </label>
                   <Input
                     id="table-name"
                     value={tableName}
                     onChange={(e) => setTableName(e.target.value)}
-                    placeholder="예: behavior_results"
+                    placeholder={t('behaviorExt.tableExample')}
                     className="font-mono"
                   />
                 </div>
@@ -398,13 +399,13 @@ export function BehaviorExecutionPanel({
                     htmlFor="schema-name"
                     className="text-sm font-medium text-foreground"
                   >
-                    스키마 이름 (선택)
+                    {t('behaviorExt.schemaNameLabel')}
                   </label>
                   <Input
                     id="schema-name"
                     value={schemaName}
                     onChange={(e) => setSchemaName(e.target.value)}
-                    placeholder="예: public"
+                    placeholder={t('behaviorExt.schemaExample')}
                     className="font-mono"
                   />
                 </div>
@@ -412,7 +413,7 @@ export function BehaviorExecutionPanel({
                 {/* 데이터 프리뷰 */}
                 <div className="space-y-1">
                   <p className="text-sm font-medium text-foreground">
-                    데이터 프리뷰
+                    {t('behaviorExt.dataPreview')}
                   </p>
                   <CodeViewer
                     code={JSON.stringify(lastResult.result, null, 2)}
@@ -430,12 +431,12 @@ export function BehaviorExecutionPanel({
                   {isSaving ? (
                     <>
                       <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      저장 중...
+                      {t('behaviorExt.saving')}
                     </>
                   ) : (
                     <>
                       <Save className="h-4 w-4 mr-2" />
-                      결과 저장
+                      {t('behaviorExt.saveBtn')}
                     </>
                   )}
                 </Button>

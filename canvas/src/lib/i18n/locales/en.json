@@ -2185,7 +2185,8 @@
     "ontologyNotLinkedHint": "Map to ontology to leverage graph analysis and impact analysis.",
     "ontologyLink": "Link Ontology Node",
     "xAxisLabel": "X-Axis (Category)",
-    "yAxisLabel": "Y-Axis (Value)"
+    "yAxisLabel": "Y-Axis (Value)",
+    "cancelBtn": "Cancel"
   },
   "ingestionExt": {
     "previewClose": "Close preview",
@@ -2309,7 +2310,11 @@
       }
     },
     "myWork": "My Work",
-    "noWorkitems": "No assigned workitems."
+    "noWorkitems": "No assigned workitems.",
+    "nl2sqlLabel": "NL2SQL",
+    "healthySummary": "{{count}}/{{total}} Healthy",
+    "greeting": "Hello, {{name}}.",
+    "roleWorkCount": "{{role}} · {{count}} pending tasks"
   },
   "dataQualityExt": {
     "totalTests": "Total Tests",
@@ -2596,7 +2601,22 @@
     "failure": "Failed",
     "promptPlaceholder": "Describe the code you want to generate...",
     "tableExample": "e.g. behavior_results",
-    "schemaExample": "e.g. public"
+    "schemaExample": "e.g. public",
+    "instanceDataLabel": "Instance Data (JSON)",
+    "executing": "Executing...",
+    "executeBtn": "Execute",
+    "autoFixNotice": "Code auto-fixed. ({{count}} attempts)",
+    "executedCode": "Executed code:",
+    "promptLabel": "Prompt",
+    "languageLabel": "Language",
+    "generating": "Generating...",
+    "generateBtn": "Generate Code",
+    "saveRunFirst": "Run a Behavior in the Execute tab first.",
+    "tableNameLabel": "Table Name *",
+    "schemaNameLabel": "Schema Name (optional)",
+    "dataPreview": "Data Preview",
+    "saving": "Saving...",
+    "saveBtn": "Save Result"
   },
   "explorerExt": {
     "properties": "Properties",

@@ -12,6 +12,7 @@ import { Maximize2, Minimize2, ZoomIn, ZoomOut, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { DomainGraphData } from '../types/domain';
+import { useTranslation } from 'react-i18next';
 
 // ──────────────────────────────────────
 // Props
@@ -47,6 +48,7 @@ export const DomainGraphViewer: React.FC<DomainGraphViewerProps> = ({
   onToggleCollapse,
   className,
 }) => {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
 
@@ -206,7 +208,7 @@ export const DomainGraphViewer: React.FC<DomainGraphViewerProps> = ({
           size="icon"
           className="h-8 w-8"
           onClick={onToggleCollapse}
-          title="그래프 패널 열기"
+          title={t('domainExt.graphPanel')}
         >
           <Maximize2 className="h-4 w-4" />
         </Button>
@@ -218,19 +220,19 @@ export const DomainGraphViewer: React.FC<DomainGraphViewerProps> = ({
     <div className={cn('flex flex-col h-full border-l border-border bg-card', className)}>
       {/* 툴바 */}
       <div className="flex items-center justify-between px-3 py-2 border-b border-border">
-        <span className="text-xs font-semibold text-foreground">도메인 그래프</span>
+        <span className="text-xs font-semibold text-foreground">{t('domainExt.domainGraph')}</span>
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title="확대">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title={t('domainExt.zoomIn')}>
             <ZoomIn className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title="축소">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title={t('domainExt.zoomOut')}>
             <ZoomOut className="h-3.5 w-3.5" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title="전체 보기">
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title={t('domainExt.viewAll')}>
             <RotateCcw className="h-3.5 w-3.5" />
           </Button>
           {onToggleCollapse && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title="접기">
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title={t('domainExt.collapse')}>
               <Minimize2 className="h-3.5 w-3.5" />
             </Button>
           )}

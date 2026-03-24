@@ -2185,7 +2185,8 @@
     "ontologyNotLinkedHint": "온톨로지에 매핑하면 그래프 분석과 영향도 분석에 활용됩니다.",
     "ontologyLink": "온톨로지 노드 연결",
     "xAxisLabel": "X축 (카테고리)",
-    "yAxisLabel": "Y축 (값)"
+    "yAxisLabel": "Y축 (값)",
+    "cancelBtn": "취소"
   },
   "ingestionExt": {
     "previewClose": "미리보기 닫기",
@@ -2309,7 +2310,11 @@
       }
     },
     "myWork": "내 할당 업무",
-    "noWorkitems": "할당된 워크아이템이 없습니다."
+    "noWorkitems": "할당된 워크아이템이 없습니다.",
+    "nl2sqlLabel": "NL2SQL",
+    "healthySummary": "{{count}}/{{total}} 정상",
+    "greeting": "안녕하세요, {{name}}님.",
+    "roleWorkCount": "{{role}} · 대기 업무 {{count}}건"
   },
   "dataQualityExt": {
     "totalTests": "전체 테스트",
@@ -2596,7 +2601,22 @@
     "failure": "실패",
     "promptPlaceholder": "생성하고 싶은 코드를 설명하세요...",
     "tableExample": "예: behavior_results",
-    "schemaExample": "예: public"
+    "schemaExample": "예: public",
+    "instanceDataLabel": "인스턴스 데이터 (JSON)",
+    "executing": "실행 중...",
+    "executeBtn": "실행",
+    "autoFixNotice": "코드가 자동 수정되었습니다. ({{count}}회 시도)",
+    "executedCode": "실행된 코드:",
+    "promptLabel": "프롬프트",
+    "languageLabel": "언어",
+    "generating": "생성 중...",
+    "generateBtn": "코드 생성",
+    "saveRunFirst": "먼저 실행 탭에서 Behavior를 실행하세요.",
+    "tableNameLabel": "테이블 이름 *",
+    "schemaNameLabel": "스키마 이름 (선택)",
+    "dataPreview": "데이터 프리뷰",
+    "saving": "저장 중...",
+    "saveBtn": "결과 저장"
   },
   "explorerExt": {
     "properties": "속성",
