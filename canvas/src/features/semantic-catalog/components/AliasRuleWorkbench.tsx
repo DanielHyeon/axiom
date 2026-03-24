@@ -5,6 +5,7 @@
  * 왼쪽: 별칭 그룹 목록, 오른쪽: 선택된 그룹의 확장 규칙, 하단: 생성 폼
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   BookOpen,
   ChevronDown,
@@ -40,6 +41,7 @@ const RULE_TYPE_STYLE: Record<string, string> = {
 
 /** 규칙 상태 배지 */
 function RuleStatusBadge({ status }: { status: string }) {
+  const { t } = useTranslation();
   const isActive = status === 'ACTIVE';
   return (
     <span
@@ -47,7 +49,7 @@ function RuleStatusBadge({ status }: { status: string }) {
         isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-500'
       }`}
     >
-      {isActive ? '활성' : '비활성'}
+      {isActive ? t('semanticCatalogExt.active') : t('semanticCatalogExt.inactive')}
     </span>
   );
 }
@@ -64,6 +66,7 @@ const RULE_TYPES: ExpansionRuleType[] = [
 ];
 
 export function AliasRuleWorkbench() {
+  const { t } = useTranslation();
   // 선택된 별칭 그룹
   const [selectedGroupId, setSelectedGroupId] = useState<string | null>(null);
   // 생성 폼 열기/닫기
@@ -133,7 +136,7 @@ export function AliasRuleWorkbench() {
       {/* 헤더 */}
       <div className="flex items-center gap-2">
         <BookOpen className="h-5 w-5 text-indigo-600" />
-        <h2 className="text-lg font-semibold">별칭 규칙 워크벤치</h2>
+        <h2 className="text-lg font-semibold">{t('semanticCatalogExt.aliasRuleWorkbench')}</h2>
       </div>
 
       {/* 2열 레이아웃: 그룹 목록(40%) + 규칙 목록(60%) */}
@@ -141,14 +144,14 @@ export function AliasRuleWorkbench() {
         {/* ── 왼쪽: 별칭 그룹 목록 ── */}
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">
-            <h3 className="font-medium text-sm text-muted-foreground">별칭 그룹</h3>
+            <h3 className="font-medium text-sm text-muted-foreground">{t('semanticCatalogExt.aliasGroups')}</h3>
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowGroupForm((v) => !v)}
             >
               <Plus className="h-3.5 w-3.5 mr-1" />
-              그룹 추가
+              {t('semanticCatalogExt.addGroup')}
             </Button>
           </div>
 
@@ -157,20 +160,20 @@ export function AliasRuleWorkbench() {
             {groupsLoading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                로딩 중...
+                {t('common.loading')}
               </div>
             ) : aliasGroups.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground text-sm">
-                등록된 별칭 그룹이 없습니다
+                {t('semanticCatalog.alias.noGroups')}
               </div>
             ) : (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-3 py-2 text-left font-medium">그룹명</th>
-                    <th className="px-3 py-2 text-left font-medium">정규 용어</th>
-                    <th className="px-3 py-2 text-left font-medium">도메인</th>
-                    <th className="px-3 py-2 text-center font-medium">상태</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.groupName')}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.canonicalTerm')}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.domain')}</th>
+                    <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -216,31 +219,31 @@ export function AliasRuleWorkbench() {
           {/* 그룹 생성 폼 (접이식) */}
           {showGroupForm && (
             <div className="rounded-lg border p-4 bg-muted/20 space-y-3">
-              <h4 className="text-sm font-medium">새 별칭 그룹</h4>
+              <h4 className="text-sm font-medium">{t('semanticCatalogExt.newAliasGroup')}</h4>
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  placeholder="그룹명"
+                  placeholder={t('semanticCatalogExt.groupName')}
                   value={newGroup.group_name}
                   onChange={(e) =>
                     setNewGroup((v) => ({ ...v, group_name: e.target.value }))
                   }
                 />
                 <Input
-                  placeholder="정규 용어 ID"
+                  placeholder={t('semanticCatalogExt.canonicalTermId')}
                   value={newGroup.canonical_term_id}
                   onChange={(e) =>
                     setNewGroup((v) => ({ ...v, canonical_term_id: e.target.value }))
                   }
                 />
                 <Input
-                  placeholder="도메인 ID"
+                  placeholder={t('semanticCatalogExt.domainId')}
                   value={newGroup.domain_id}
                   onChange={(e) =>
                     setNewGroup((v) => ({ ...v, domain_id: e.target.value }))
                   }
                 />
                 <Input
-                  placeholder="언어 코드 (ko)"
+                  placeholder={t('semanticCatalogExt.languageCode')}
                   value={newGroup.language_code}
                   onChange={(e) =>
                     setNewGroup((v) => ({ ...v, language_code: e.target.value }))
@@ -254,14 +257,14 @@ export function AliasRuleWorkbench() {
                   disabled={createGroup.isPending || !newGroup.group_name}
                 >
                   {createGroup.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />}
-                  등록
+                  {t('semanticCatalogExt.register')}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowGroupForm(false)}
                 >
-                  취소
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -274,11 +277,11 @@ export function AliasRuleWorkbench() {
             <h3 className="font-medium text-sm text-muted-foreground">
               {selectedGroup ? (
                 <>
-                  확장 규칙 —{' '}
+                  {t('semanticCatalogExt.expansionRules')} —{' '}
                   <span className="text-foreground">{selectedGroup.group_name}</span>
                 </>
               ) : (
-                '확장 규칙 (그룹을 선택하세요)'
+                t('semanticCatalogExt.expansionRulesSelectGroup')
               )}
             </h3>
             {selectedGroupId && (
@@ -288,7 +291,7 @@ export function AliasRuleWorkbench() {
                 onClick={() => setShowRuleForm((v) => !v)}
               >
                 <Plus className="h-3.5 w-3.5 mr-1" />
-                규칙 추가
+                {t('semanticCatalogExt.addRule')}
               </Button>
             )}
           </div>
@@ -297,27 +300,27 @@ export function AliasRuleWorkbench() {
           <div className="rounded-lg border">
             {!selectedGroupId ? (
               <div className="py-12 text-center text-muted-foreground text-sm">
-                왼쪽에서 별칭 그룹을 선택하면 확장 규칙이 표시됩니다
+                {t('semanticCatalogExt.selectGroupHint')}
               </div>
             ) : rulesLoading ? (
               <div className="flex items-center justify-center py-8 text-muted-foreground">
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                로딩 중...
+                {t('common.loading')}
               </div>
             ) : expansionRules.length === 0 ? (
               <div className="py-8 text-center text-muted-foreground text-sm">
-                등록된 확장 규칙이 없습니다
+                {t('semanticCatalog.alias.noRules')}
               </div>
             ) : (
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b bg-muted/50">
-                    <th className="px-3 py-2 text-left font-medium">매치 패턴</th>
-                    <th className="px-3 py-2 text-left font-medium">규칙 타입</th>
-                    <th className="px-3 py-2 text-center font-medium">부스트</th>
-                    <th className="px-3 py-2 text-center font-medium">우선순위</th>
-                    <th className="px-3 py-2 text-center font-medium">상태</th>
-                    <th className="px-3 py-2 text-center font-medium">액션</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.matchPattern')}</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.ruleType')}</th>
+                    <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.boost')}</th>
+                    <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.priority')}</th>
+                    <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
+                    <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.action')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -351,7 +354,7 @@ export function AliasRuleWorkbench() {
                           {rule.status === 'DEPRECATED' && (
                             <button
                               className="p-1 rounded hover:bg-green-50"
-                              title="활성화"
+                              title={t('semanticCatalogExt.activate')}
                               onClick={() => activateRule.mutate(rule.id)}
                               disabled={activateRule.isPending}
                             >
@@ -361,7 +364,7 @@ export function AliasRuleWorkbench() {
                           {rule.status === 'ACTIVE' && (
                             <button
                               className="p-1 rounded hover:bg-red-50"
-                              title="비활성화"
+                              title={t('semanticCatalogExt.deactivate')}
                               onClick={() => deprecateRule.mutate(rule.id)}
                               disabled={deprecateRule.isPending}
                             >
@@ -380,10 +383,10 @@ export function AliasRuleWorkbench() {
           {/* 규칙 생성 폼 (접이식) */}
           {showRuleForm && selectedGroupId && (
             <div className="rounded-lg border p-4 bg-muted/20 space-y-3">
-              <h4 className="text-sm font-medium">새 확장 규칙</h4>
+              <h4 className="text-sm font-medium">{t('semanticCatalogExt.newExpansionRule')}</h4>
               <div className="grid grid-cols-2 gap-2">
                 <Input
-                  placeholder="매치 패턴"
+                  placeholder={t('semanticCatalogExt.matchPattern')}
                   value={newRule.match_pattern}
                   onChange={(e) =>
                     setNewRule((v) => ({ ...v, match_pattern: e.target.value }))
@@ -408,7 +411,7 @@ export function AliasRuleWorkbench() {
                 <Input
                   type="number"
                   step="0.1"
-                  placeholder="부스트 (1.0)"
+                  placeholder={`${t('semanticCatalogExt.boost')} (1.0)`}
                   value={newRule.boost}
                   onChange={(e) =>
                     setNewRule((v) => ({ ...v, boost: parseFloat(e.target.value) || 1.0 }))
@@ -416,7 +419,7 @@ export function AliasRuleWorkbench() {
                 />
                 <Input
                   type="number"
-                  placeholder="우선순위 (100)"
+                  placeholder={`${t('semanticCatalogExt.priority')} (100)`}
                   value={newRule.priority}
                   onChange={(e) =>
                     setNewRule((v) => ({
@@ -433,14 +436,14 @@ export function AliasRuleWorkbench() {
                   disabled={createRule.isPending || !newRule.match_pattern}
                 >
                   {createRule.isPending && <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />}
-                  등록
+                  {t('semanticCatalogExt.register')}
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setShowRuleForm(false)}
                 >
-                  취소
+                  {t('common.cancel')}
                 </Button>
               </div>
             </div>
@@ -449,9 +452,9 @@ export function AliasRuleWorkbench() {
           {/* 테스트 플레이스홀더 */}
           <div className="rounded-lg border border-dashed p-4 text-center text-muted-foreground">
             <Search className="h-5 w-5 mx-auto mb-2 opacity-50" />
-            <p className="text-sm">질문 테스트 기능 (예정)</p>
+            <p className="text-sm">{t('semanticCatalogExt.questionTestTitle')}</p>
             <p className="text-xs mt-1">
-              질문을 입력하면 현재 규칙에 따른 별칭 확장 결과를 미리 볼 수 있습니다
+              {t('semanticCatalogExt.questionTestDesc')}
             </p>
           </div>
         </div>

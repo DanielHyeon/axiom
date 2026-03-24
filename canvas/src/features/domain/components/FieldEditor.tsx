@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Eye,
   EyeOff,
@@ -80,6 +81,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
   onChange,
   readOnly = false,
 }) => {
+  const { t } = useTranslation();
   // 필드 값 변경
   const updateField = useCallback(
     (index: number, patch: Partial<ObjectTypeField>) => {
@@ -117,12 +119,12 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground">
-          필드 정의 ({fields.length})
+          {t('domainExt.fieldDefinition', { count: fields.length })}
         </h3>
         {!readOnly && (
           <Button variant="outline" size="sm" onClick={addField}>
             <Plus className="h-3.5 w-3.5 mr-1" />
-            필드 추가
+            {t('domainExt.addField')}
           </Button>
         )}
       </div>
@@ -130,7 +132,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
       {/* 테이블 */}
       {fields.length === 0 ? (
         <div className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
-          필드가 없습니다. &quot;필드 추가&quot; 버튼을 클릭하거나 테이블에서 자동 생성하세요.
+          {t('domainExt.noFields')}
         </div>
       ) : (
         <div className="border border-border rounded-lg overflow-hidden">
@@ -138,13 +140,13 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
             <TableHeader>
               <TableRow className="bg-muted/30">
                 {!readOnly && <TableHead className="w-8" />}
-                <TableHead className="text-xs">필드명</TableHead>
-                <TableHead className="text-xs">표시명</TableHead>
-                <TableHead className="text-xs">소스 컬럼</TableHead>
-                <TableHead className="text-xs w-28">타입</TableHead>
+                <TableHead className="text-xs">{t('domainExt.fieldEditor.fieldName')}</TableHead>
+                <TableHead className="text-xs">{t('domainExt.fieldEditor.displayName')}</TableHead>
+                <TableHead className="text-xs">{t('domainExt.fieldEditor.sourceColumn')}</TableHead>
+                <TableHead className="text-xs w-28">{t('domainExt.fieldEditor.type')}</TableHead>
                 <TableHead className="text-xs w-10 text-center">PK</TableHead>
                 <TableHead className="text-xs w-10 text-center">FK</TableHead>
-                <TableHead className="text-xs w-10 text-center">표시</TableHead>
+                <TableHead className="text-xs w-10 text-center">{t('domainExt.fieldEditor.visible')}</TableHead>
                 {!readOnly && <TableHead className="text-xs w-10" />}
               </TableRow>
             </TableHeader>
@@ -175,7 +177,7 @@ export const FieldEditor: React.FC<FieldEditorProps> = ({
                       value={field.displayName}
                       onChange={(e) => updateField(idx, { displayName: e.target.value })}
                       className="h-7 text-xs"
-                      placeholder="표시 이름"
+                      placeholder={t('domainExt.fieldEditor.displayNamePlaceholder')}
                       readOnly={readOnly}
                     />
                   </TableCell>

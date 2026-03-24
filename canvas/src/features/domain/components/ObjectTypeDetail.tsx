@@ -7,6 +7,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Database,
   Pencil,
@@ -43,12 +44,12 @@ interface ObjectTypeDetailProps {
 
 type DetailTab = 'fields' | 'relations' | 'behaviors' | 'chart' | 'ontology';
 
-const TAB_ITEMS: { key: DetailTab; label: (ot: ObjectType) => string }[] = [
-  { key: 'fields', label: (ot) => `필드 (${ot.fields.length})` },
-  { key: 'relations', label: (ot) => `관계 (${ot.relations.length})` },
-  { key: 'behaviors', label: (ot) => `Behaviors (${ot.behaviors.length})` },
-  { key: 'chart', label: () => '차트' },
-  { key: 'ontology', label: () => '온톨로지' },
+const TAB_ITEMS: { key: DetailTab; labelKey: string; countFn?: (ot: ObjectType) => number }[] = [
+  { key: 'fields', labelKey: 'domainExt.tabFields', countFn: (ot) => ot.fields.length },
+  { key: 'relations', labelKey: 'domainExt.tabRelations', countFn: (ot) => ot.relations.length },
+  { key: 'behaviors', labelKey: 'domainExt.tabBehaviors', countFn: (ot) => ot.behaviors.length },
+  { key: 'chart', labelKey: 'domainExt.chartTab' },
+  { key: 'ontology', labelKey: 'domainExt.ontologyTab' },
 ];
 
 // ──────────────────────────────────────
@@ -69,6 +70,7 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
   objectType,
   allObjectTypes,
 }) => {
+  const { t } = useTranslation();
   const { openBehaviorEditor, selectObjectType } = useDomainStore();
   const updateMutation = useUpdateObjectType();
   const deleteMutation = useDeleteObjectType();
@@ -166,7 +168,7 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
             <>
               <Button variant="ghost" size="sm" onClick={cancelEdit} disabled={isSaving}>
                 <X className="h-3.5 w-3.5 mr-1" />
-                취소
+                {t('common.cancel')}
               </Button>
               <Button size="sm" onClick={saveEdit} disabled={isSaving}>
                 {isSaving ? (
@@ -174,14 +176,14 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
                 ) : (
                   <Save className="h-3.5 w-3.5 mr-1" />
                 )}
-                저장
+                {t('common.save')}
               </Button>
             </>
           ) : (
             <>
               <Button variant="outline" size="sm" onClick={startEdit}>
                 <Pencil className="h-3.5 w-3.5 mr-1" />
-                편집
+                {t('domainExt.editBtn')}
               </Button>
               <Button
                 variant="outline"
@@ -195,7 +197,7 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
                 ) : (
                   <Trash2 className="h-3.5 w-3.5 mr-1" />
                 )}
-                삭제
+                {t('domainExt.deleteBtn')}
               </Button>
             </>
           )}
@@ -216,7 +218,7 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
                 : 'border-transparent text-muted-foreground hover:text-foreground',
             )}
           >
-            {tab.label(objectType)}
+            {tab.countFn ? `${t(tab.labelKey)} (${tab.countFn(objectType)})` : t(tab.labelKey)}
           </button>
         ))}
       </div>
@@ -272,19 +274,19 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
           <div className="bg-card border border-border rounded-lg w-[420px] shadow-xl">
             <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
               <AlertTriangle className="h-5 w-5 text-destructive" />
-              <h3 className="text-sm font-semibold text-foreground">ObjectType 삭제</h3>
+              <h3 className="text-sm font-semibold text-foreground">{t('domainExt.deleteObjectType')}</h3>
             </div>
             <div className="px-5 py-4">
               <p className="text-sm text-foreground">
-                <strong className="text-destructive">{objectType.displayName || objectType.name}</strong>을(를) 삭제하시겠습니까?
+                <strong className="text-destructive">{objectType.displayName || objectType.name}</strong> — {t('domainExt.deleteConfirm', { name: '' })}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                이 작업은 되돌릴 수 없습니다. 관련된 Materialized View와 Behavior도 함께 삭제됩니다.
+                {t('domainExt.deleteWarning')}
               </p>
             </div>
             <div className="flex justify-end gap-2 px-5 py-3 border-t border-border">
               <Button variant="ghost" size="sm" onClick={() => setShowDeleteConfirm(false)}>
-                취소
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="destructive"
@@ -293,7 +295,7 @@ export const ObjectTypeDetail: React.FC<ObjectTypeDetailProps> = ({
                 disabled={isDeleting}
               >
                 {isDeleting && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
-                삭제
+                {t('domainExt.deleteBtn')}
               </Button>
             </div>
           </div>

@@ -5,6 +5,7 @@
  * 인라인 폼으로 새 관계를 등록하고 행별 삭제를 지원한다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { GitFork, Plus, Trash2, ChevronUp } from 'lucide-react';
 import type { OntologyRelation, PredicateType } from '../types/semantic';
 
@@ -45,6 +46,7 @@ const EMPTY_FORM = {
 };
 
 export function RelationTable({ relations, onCreate, onDelete, isCreating, isDeleting }: Props) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_FORM });
 
@@ -73,7 +75,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
       <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
         <div className="flex items-center gap-2 text-sm font-medium">
           <GitFork className="h-4 w-4 text-violet-600" />
-          온톨로지 관계
+          {t('semanticCatalogExt.ontologyRelation')}
         </div>
         {onCreate && (
           <button
@@ -81,7 +83,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             onClick={() => setShowForm(!showForm)}
           >
             {showForm ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-            {showForm ? '닫기' : '관계 등록'}
+            {showForm ? t('common.close') : t('semanticCatalogExt.registerRelation')}
           </button>
         )}
       </div>
@@ -92,7 +94,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
             {/* 주체 개념 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">주체 개념 ID</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.subjectConceptId')}</label>
               <input
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
                 placeholder="concept_..."
@@ -102,7 +104,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 술어 타입 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">술어 타입</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.predicateType')}</label>
               <select
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
                 value={form.predicate_type}
@@ -115,7 +117,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 객체 개념 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">객체 개념 ID</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.objectConceptId')}</label>
               <input
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
                 placeholder="concept_..."
@@ -125,7 +127,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 카디널리티 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">카디널리티</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.cardinality')}</label>
               <select
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
                 value={form.cardinality}
@@ -141,7 +143,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
             {/* 가중치 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">가중치 (0~1)</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.weightRange')}</label>
               <input
                 type="number"
                 min={0}
@@ -154,7 +156,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 신뢰도 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">신뢰도 (0~1)</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.confidenceRange')}</label>
               <input
                 type="number"
                 min={0}
@@ -167,7 +169,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 유효 시작 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">유효 시작일</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.effectiveFrom')}</label>
               <input
                 type="date"
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
@@ -177,7 +179,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             </div>
             {/* 유효 종료 */}
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">유효 종료일</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.effectiveTo')}</label>
               <input
                 type="date"
                 className="w-full rounded-md border px-2 py-1.5 text-sm"
@@ -191,7 +193,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
             disabled={isCreating || !form.subject_concept_id || !form.object_concept_id}
             onClick={handleSubmit}
           >
-            {isCreating ? '등록 중...' : '등록'}
+            {isCreating ? t('semanticCatalogExt.registering') : t('semanticCatalogExt.register')}
           </button>
         </div>
       )}
@@ -200,12 +202,12 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-3 py-2 text-left font-medium">관계 ID</th>
-            <th className="px-3 py-2 text-left font-medium">주체 → 술어 → 객체</th>
-            <th className="px-3 py-2 text-center font-medium">카디널리티</th>
-            <th className="px-3 py-2 text-center font-medium">가중치</th>
-            <th className="px-3 py-2 text-center font-medium">신뢰도</th>
-            <th className="px-3 py-2 text-left font-medium">유효 기간</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.relationId')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.subjectPredicateObject')}</th>
+            <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.cardinality')}</th>
+            <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.weight')}</th>
+            <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.confidence')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.effectivePeriod')}</th>
             {onDelete && <th className="px-3 py-2 w-10" />}
           </tr>
         </thead>
@@ -243,14 +245,14 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
                   {r.effective_from || r.effective_to ? (
                     <span>{r.effective_from || '...'} ~ {r.effective_to || '...'}</span>
                   ) : (
-                    <span>무기한</span>
+                    <span>{t('semanticCatalogExt.indefinite')}</span>
                   )}
                 </td>
                 {onDelete && (
                   <td className="px-3 py-2">
                     <button
                       className="p-1 rounded hover:bg-red-50 text-red-500 hover:text-red-700"
-                      title="삭제"
+                      title={t('common.delete')}
                       disabled={isDeleting}
                       onClick={() => onDelete(r.relation_id)}
                     >
@@ -264,7 +266,7 @@ export function RelationTable({ relations, onCreate, onDelete, isCreating, isDel
         </tbody>
       </table>
       {relations.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground text-sm">등록된 관계가 없습니다</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.relation.noRelations')}</div>
       )}
     </div>
   );

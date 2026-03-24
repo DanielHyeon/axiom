@@ -1,6 +1,7 @@
 /**
  * 그레인 계약 테이블 — 엔티티별 행 단위 유일성 규칙
  */
+import { useTranslation } from 'react-i18next';
 import { Key, Clock, AlertTriangle } from 'lucide-react';
 import type { GrainContract } from '../types/semantic';
 
@@ -15,17 +16,18 @@ const RESOLUTION_LABELS: Record<string, { label: string; className: string }> = 
 };
 
 export function GrainTable({ grains }: Props) {
+  const { t } = useTranslation();
   return (
     <div className="rounded-lg border">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b bg-muted/50">
-            <th className="px-3 py-2 text-left font-medium">그레인 ID</th>
-            <th className="px-3 py-2 text-left font-medium">엔티티</th>
-            <th className="px-3 py-2 text-left font-medium">키 집합</th>
-            <th className="px-3 py-2 text-left font-medium">시간 단위</th>
-            <th className="px-3 py-2 text-left font-medium">중복 해결</th>
-            <th className="px-3 py-2 text-left font-medium">검증식</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.grainId')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entity')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.keySet')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.timeGrain')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.duplicateResolution')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.validationExpr')}</th>
             <th className="px-3 py-2 text-center font-medium">v</th>
           </tr>
         </thead>
@@ -64,7 +66,7 @@ export function GrainTable({ grains }: Props) {
                   ) : (
                     <div className="flex items-center gap-1 text-xs text-amber-600">
                       <AlertTriangle className="h-3 w-3" />
-                      미정의
+                      {t('semanticCatalogExt.undefined')}
                     </div>
                   )}
                 </td>
@@ -75,7 +77,7 @@ export function GrainTable({ grains }: Props) {
         </tbody>
       </table>
       {grains.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground text-sm">등록된 그레인 계약이 없습니다</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalogExt.noGrainContracts')}</div>
       )}
     </div>
   );

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Globe,
   Code2,
@@ -57,7 +58,7 @@ const TYPE_LABEL: Record<BehaviorType, string> = {
   rest: 'REST API',
   javascript: 'JavaScript',
   python: 'Python',
-  dmn: 'DMN 규칙',
+  dmn: 'DMN',
 };
 
 const TYPE_COLOR: Record<BehaviorType, string> = {
@@ -67,11 +68,11 @@ const TYPE_COLOR: Record<BehaviorType, string> = {
   dmn: 'text-violet-400 bg-violet-400/10',
 };
 
-const TRIGGER_LABEL: Record<BehaviorTrigger, string> = {
-  manual: '수동',
-  on_create: '생성 시',
-  on_update: '수정 시',
-  scheduled: '스케줄',
+const TRIGGER_LABEL_KEY: Record<BehaviorTrigger, string> = {
+  manual: 'domainExt.trigger.manual',
+  on_create: 'domainExt.trigger.on_create',
+  on_update: 'domainExt.trigger.on_update',
+  scheduled: 'domainExt.trigger.scheduled',
 };
 
 // ──────────────────────────────────────
@@ -86,6 +87,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
   onToggle,
   readOnly = false,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       {/* 헤더 */}
@@ -97,7 +99,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
         {!readOnly && (
           <Button variant="outline" size="sm" onClick={onAdd}>
             <Plus className="h-3.5 w-3.5 mr-1" />
-            추가
+            {t('common.add')}
           </Button>
         )}
       </div>
@@ -105,7 +107,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
       {/* 목록 */}
       {behaviors.length === 0 ? (
         <div className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
-          정의된 Behavior가 없습니다.
+          {t('domainExt.noBehaviors')}
         </div>
       ) : (
         <div className="space-y-2">
@@ -128,7 +130,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
                         {TYPE_LABEL[b.type]}
                       </Badge>
                       <Badge variant="outline" className="text-[10px] h-4 px-1">
-                        {TRIGGER_LABEL[b.trigger]}
+                        {t(TRIGGER_LABEL_KEY[b.trigger])}
                       </Badge>
                     </div>
                     {b.description && (
@@ -164,7 +166,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
                       size="icon"
                       className="h-7 w-7 opacity-0 group-hover:opacity-100"
                       onClick={() => onEdit(b)}
-                      title="편집"
+                      title={t('domainExt.editBtn')}
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </Button>
@@ -176,7 +178,7 @@ export const BehaviorPanel: React.FC<BehaviorPanelProps> = ({
                     size="icon"
                     className="h-7 w-7 text-emerald-400 opacity-0 group-hover:opacity-100"
                     onClick={() => onExecute(b)}
-                    title="실행 테스트"
+                    title={t('domainExt.testBtn')}
                     disabled={!b.enabled}
                   >
                     <Play className="h-3.5 w-3.5" />

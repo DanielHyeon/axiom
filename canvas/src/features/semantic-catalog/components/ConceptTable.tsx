@@ -2,6 +2,7 @@
  * 온톨로지 개념 테이블 — 개념 목록 + 상태 전이 + 용어 표시
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Tag, Shield } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import type { OntologyConcept, ConceptStatus } from '../types/semantic';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function ConceptTable({ concepts, onStatusChange, isStatusChanging }: Props) {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -21,13 +23,13 @@ export function ConceptTable({ concepts, onStatusChange, isStatusChanging }: Pro
         <thead>
           <tr className="border-b bg-muted/50">
             <th className="w-8 px-3 py-2" />
-            <th className="px-3 py-2 text-left font-medium">개념 ID</th>
-            <th className="px-3 py-2 text-left font-medium">이름 (한글)</th>
-            <th className="px-3 py-2 text-left font-medium">도메인</th>
-            <th className="px-3 py-2 text-left font-medium">책임팀</th>
-            <th className="px-3 py-2 text-left font-medium">상태</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.conceptId')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.conceptName')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.domain')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.ownerTeam')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.status')}</th>
             <th className="px-3 py-2 text-center font-medium">v</th>
-            <th className="px-3 py-2 text-left font-medium">감도</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.sensitivity')}</th>
           </tr>
         </thead>
         <tbody>
@@ -88,7 +90,7 @@ export function ConceptTable({ concepts, onStatusChange, isStatusChanging }: Pro
                             disabled={isStatusChanging}
                             onClick={(e) => { e.stopPropagation(); onStatusChange(c.concept_id, 'review'); }}
                           >
-                            Review 요청
+                            {t('semanticCatalogExt.requestReview')}
                           </button>
                         )}
                         {onStatusChange && c.status === 'review' && (
@@ -110,7 +112,7 @@ export function ConceptTable({ concepts, onStatusChange, isStatusChanging }: Pro
         </tbody>
       </table>
       {concepts.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground text-sm">등록된 개념이 없습니다</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalogExt.noConcepts')}</div>
       )}
     </div>
   );

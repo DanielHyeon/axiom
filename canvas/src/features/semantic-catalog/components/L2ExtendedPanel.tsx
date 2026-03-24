@@ -5,6 +5,7 @@
  * 서브탭 형태로 전환하며 각각 읽기 전용 테이블로 표시한다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Filter, Clock, Lock } from 'lucide-react';
 import type { SemanticSegment, TimeContract, AccessPolicyL2 } from '../types/semantic';
 
@@ -36,10 +37,10 @@ const ACCESS_POLICY_COLORS: Record<string, string> = {
   allow: 'bg-green-50 text-green-700',
 };
 
-const SUB_TABS: { key: SubTab; label: string; icon: typeof Filter }[] = [
-  { key: 'segments', label: '세그먼트', icon: Filter },
-  { key: 'time-contracts', label: '시간 계약', icon: Clock },
-  { key: 'access-policies', label: '접근 정책', icon: Lock },
+const SUB_TABS: { key: SubTab; labelKey: string; icon: typeof Filter }[] = [
+  { key: 'segments', labelKey: 'semanticCatalog.l2Extended.segments', icon: Filter },
+  { key: 'time-contracts', labelKey: 'semanticCatalog.l2Extended.timeContracts', icon: Clock },
+  { key: 'access-policies', labelKey: 'semanticCatalog.l2Extended.accessPolicies', icon: Lock },
 ];
 
 interface Props {
@@ -49,13 +50,14 @@ interface Props {
 }
 
 export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Props) {
+  const { t } = useTranslation();
   const [subTab, setSubTab] = useState<SubTab>('segments');
 
   return (
     <div className="rounded-lg border">
       {/* 서브탭 네비게이션 */}
       <div className="flex border-b bg-muted/30">
-        {SUB_TABS.map(({ key, label, icon: Icon }) => (
+        {SUB_TABS.map(({ key, labelKey, icon: Icon }) => (
           <button
             key={key}
             className={`
@@ -68,7 +70,7 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
             onClick={() => setSubTab(key)}
           >
             <Icon className="h-3.5 w-3.5" />
-            {label}
+            {t(labelKey)}
             {/* 카운트 배지 */}
             <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px] tabular-nums">
               {key === 'segments' ? segments.length : key === 'time-contracts' ? timeContracts.length : accessPolicies.length}
@@ -83,11 +85,11 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left font-medium">세그먼트 ID</th>
-                <th className="px-3 py-2 text-left font-medium">엔티티 ID</th>
-                <th className="px-3 py-2 text-left font-medium">이름</th>
-                <th className="px-3 py-2 text-left font-medium">필터 표현식</th>
-                <th className="px-3 py-2 text-center font-medium">타입</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.segmentId')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entityId')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.name')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.filterExpression')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.type')}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,7 +114,7 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
             </tbody>
           </table>
           {segments.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground text-sm">등록된 세그먼트가 없습니다</div>
+            <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.l2Extended.noSegments')}</div>
           )}
         </>
       )}
@@ -123,12 +125,12 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left font-medium">엔티티 ID</th>
-                <th className="px-3 py-2 text-left font-medium">시간 컬럼</th>
-                <th className="px-3 py-2 text-center font-medium">시간 단위</th>
-                <th className="px-3 py-2 text-center font-medium">타임존</th>
-                <th className="px-3 py-2 text-center font-medium">회계 오프셋</th>
-                <th className="px-3 py-2 text-center font-medium">룩백 (일)</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entityId')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.timeColumn')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.timeGrain')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.timezone')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.fiscalOffset')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.lookbackDays')}</th>
               </tr>
             </thead>
             <tbody>
@@ -145,10 +147,10 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
                     </td>
                     <td className="px-3 py-2 text-center text-xs text-muted-foreground">{tc.timezone}</td>
                     <td className="px-3 py-2 text-center tabular-nums text-xs">
-                      {tc.fiscal_calendar_offset === 0 ? '—' : `${tc.fiscal_calendar_offset}개월`}
+                      {tc.fiscal_calendar_offset === 0 ? '—' : `${tc.fiscal_calendar_offset}${t('semanticCatalogExt.months')}`}
                     </td>
                     <td className="px-3 py-2 text-center tabular-nums text-xs">
-                      {tc.default_lookback_days}일
+                      {tc.default_lookback_days}{t('semanticCatalogExt.days')}
                     </td>
                   </tr>
                 );
@@ -156,7 +158,7 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
             </tbody>
           </table>
           {timeContracts.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground text-sm">등록된 시간 계약이 없습니다</div>
+            <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.l2Extended.noTimeContracts')}</div>
           )}
         </>
       )}
@@ -167,11 +169,11 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left font-medium">엔티티 ID</th>
-                <th className="px-3 py-2 text-left font-medium">정책 타입</th>
-                <th className="px-3 py-2 text-left font-medium">조건</th>
-                <th className="px-3 py-2 text-left font-medium">대상 역할</th>
-                <th className="px-3 py-2 text-center font-medium">활성</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entityId')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.policyType')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.condition')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.targetRoles')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.activeCol')}</th>
               </tr>
             </thead>
             <tbody>
@@ -199,9 +201,9 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
                     </td>
                     <td className="px-3 py-2 text-center">
                       {ap.is_active ? (
-                        <span className="text-green-600 text-xs font-medium">활성</span>
+                        <span className="text-green-600 text-xs font-medium">{t('semanticCatalogExt.active')}</span>
                       ) : (
-                        <span className="text-red-600 text-xs">비활성</span>
+                        <span className="text-red-600 text-xs">{t('semanticCatalogExt.inactive')}</span>
                       )}
                     </td>
                   </tr>
@@ -210,7 +212,7 @@ export function L2ExtendedPanel({ segments, timeContracts, accessPolicies }: Pro
             </tbody>
           </table>
           {accessPolicies.length === 0 && (
-            <div className="py-8 text-center text-muted-foreground text-sm">등록된 접근 정책이 없습니다</div>
+            <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.l2Extended.noAccessPolicies')}</div>
           )}
         </>
       )}
