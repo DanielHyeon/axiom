@@ -466,7 +466,11 @@
     },
     "canvas": {
       "empty": "워크플로가 비어 있습니다",
-      "emptyHint": "도구 모음에서 노드를 추가하여 워크플로를 구성하세요"
+      "emptyHint": "도구 모음에서 노드를 추가하여 워크플로를 구성하세요",
+      "ariaLabel": "워크플로 캔버스",
+      "zoomIn": "확대",
+      "zoomOut": "축소",
+      "fitAll": "전체 보기"
     },
     "saved": "워크플로가 저장되었습니다.",
     "saveFailed": "저장에 실패했습니다."
@@ -999,7 +1003,10 @@
       "kpiDelta": "KPI 변화 요약",
       "baselineLabel": "기준",
       "eventTimeline": "이벤트 타임라인",
-      "noResults": "시뮬레이션을 실행하면 결과가 표시됩니다"
+      "noResults": "시뮬레이션을 실행하면 결과가 표시됩니다",
+      "kpiDeltaChart": "KPI 변화량 (%)",
+      "comparing": "비교 중...",
+      "compareScenarios": "{{count}}개 시나리오 비교"
     },
     "mode": {
       "dagPropagation": "DAG 전파",
@@ -3179,7 +3186,21 @@
     "m5839e1b5": ": (err as Error).message || 'SQL 실행에 실패했습니다.';",
     "directSqlHint": "SQL 쿼리를 직접 입력하세요",
     "executionDone": "실행 완료 (결과 없음, {{count}} rows affected)",
-    "waitingForInput": "사용자 입력 대기 중"
+    "waitingForInput": "사용자 입력 대기 중",
+    "unsupportedChartFormat": "차트 렌더링을 지원하지 않는 형식입니다.",
+    "noDatasource": "데이터소스 없음",
+    "selectDatasource": "데이터소스 선택",
+    "sqlExecFailed": "SQL 실행에 실패했습니다.",
+    "sqlExec": "SQL 실행",
+    "executing": "실행 중...",
+    "selectDatasourceFirst": "데이터소스를 먼저 선택하세요.",
+    "executionDoneNoResult": "실행 완료 (결과 없음, {{count}} rows affected)",
+    "queryExecuting": "쿼리 실행 중...",
+    "chartTab": "차트",
+    "tableTab": "테이블",
+    "noResult": "결과 없음",
+    "copySql": "복사",
+    "runSql": "실행"
   },
   "olapPage": {
     "msg064e0768": "에러 배너 닫기",
@@ -3189,7 +3210,11 @@
     "m07a52cff": "여기에 항목을 드롭하세요",
     "mddd664b2": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요.",
     "swapRowCol": "행↔열 전환",
-    "runAnalysis": "분석 실행"
+    "runAnalysis": "분석 실행",
+    "dimensions": "차원 (Dimensions)",
+    "measures": "측정값 (Measures)",
+    "pivotBuilder": "피벗 빌더 (Drag & Drop)",
+    "requiredFieldsHint": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요."
   },
   "ontologyPage": {
     "msg9a0c3deb": "하이라이트.",
@@ -3231,7 +3256,15 @@
     "pathExplore": "이 노드로 경로 탐색",
     "impactAnalysis": "영향 분석",
     "graphSummary": "전체: {{nodes}} nodes, {{relations}} relations",
-    "orphanCount": "고립: {{count}}"
+    "orphanCount": "고립: {{count}}",
+    "relationType": "관계 유형",
+    "addBtn": "추가",
+    "tableView": "테이블",
+    "layerHeader": "레이어",
+    "relationHeader": "관계",
+    "schemaHeader": "스키마",
+    "createdAtHeader": "생성일",
+    "loading": "로딩 중..."
   },
   "processDesignerPage2": {
     "msg6a50e378": "보드가 없습니다",

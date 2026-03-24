@@ -13,12 +13,14 @@ import {
  ShieldAlert,
  Loader2,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DirectSqlPanelProps {
  datasourceId: string;
 }
 
 export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
+ const { t } = useTranslation();
  const [expanded, setExpanded] = useState(false);
  const [sql, setSql] = useState('');
  const [loading, setLoading] = useState(false);
@@ -132,7 +134,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  </Button>
  {!datasourceId && (
  <span className="text-xs text-foreground/60 font-mono">
- 데이터소스를 먼저 선택하세요.
+ {t('nl2sqlPage.selectDatasourceFirst')}
  </span>
  )}
  </div>
@@ -160,7 +162,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  {/* Empty result */}
  {result && normalizedColumns.length === 0 && (
  <div className="text-sm text-foreground/60 py-2 font-mono">
- 실행 완료 (결과 없음, {result.result.row_count} rows affected)
+ {t('nl2sqlPage.executionDoneNoResult', { count: result.result.row_count })}
  </div>
  )}
  </div>

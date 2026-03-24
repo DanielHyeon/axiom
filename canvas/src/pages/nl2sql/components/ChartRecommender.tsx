@@ -5,6 +5,7 @@ import {
  ScatterChart, Scatter
 } from 'recharts';
 import type { ChartConfig } from '@/features/nl2sql/types/nl2sql';
+import { useTranslation } from 'react-i18next';
 
 interface ChartRecommenderProps {
  // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -15,6 +16,7 @@ interface ChartRecommenderProps {
 const COLORS = ['#6366f1', '#8b5cf6', '#ec4899', '#14b8a6', '#f59e0b'];
 
 export function ChartRecommender({ data, config }: ChartRecommenderProps) {
+ const { t } = useTranslation();
  const chartData = useMemo(() => {
  // Convert 'row' array structure from useNl2sqlMock into array of objects for Recharts
  // If the data is already array of objects, this just passes it through
@@ -96,7 +98,7 @@ export function ChartRecommender({ data, config }: ChartRecommenderProps) {
  </ScatterChart>
  ) : (
  <div className="flex items-center justify-center h-full text-foreground/60 text-sm font-mono">
- 차트 렌더링을 지원하지 않는 형식입니다.
+ {t('nl2sqlPage.unsupportedChartFormat')}
  </div>
  )}
  </ResponsiveContainer>

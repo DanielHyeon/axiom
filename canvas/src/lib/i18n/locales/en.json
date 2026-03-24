@@ -466,7 +466,11 @@
     },
     "canvas": {
       "empty": "Workflow is empty",
-      "emptyHint": "Add nodes from the toolbar to build your workflow"
+      "emptyHint": "Add nodes from the toolbar to build your workflow",
+      "ariaLabel": "Workflow Canvas",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitAll": "Fit All"
     },
     "saved": "Workflow saved.",
     "saveFailed": "Failed to save."
@@ -999,7 +1003,10 @@
       "kpiDelta": "KPI Delta Summary",
       "baselineLabel": "Baseline",
       "eventTimeline": "Event Timeline",
-      "noResults": "Run the simulation to see results"
+      "noResults": "Run the simulation to see results",
+      "kpiDeltaChart": "KPI Delta (%)",
+      "comparing": "Comparing...",
+      "compareScenarios": "Compare {{count}} scenarios"
     },
     "mode": {
       "dagPropagation": "DAG Propagation",
@@ -3179,7 +3186,21 @@
     "m5839e1b5": ": (err as Error).message || 'SQL 실행에 실패했습니다.';",
     "directSqlHint": "Enter SQL query directly",
     "executionDone": "Execution complete (no results, {{count}} rows affected)",
-    "waitingForInput": "Waiting for user input"
+    "waitingForInput": "Waiting for user input",
+    "unsupportedChartFormat": "Unsupported chart format.",
+    "noDatasource": "No datasource",
+    "selectDatasource": "Select datasource",
+    "sqlExecFailed": "SQL execution failed.",
+    "sqlExec": "Execute SQL",
+    "executing": "Executing...",
+    "selectDatasourceFirst": "Please select a datasource first.",
+    "executionDoneNoResult": "Execution complete (no results, {{count}} rows affected)",
+    "queryExecuting": "Executing query...",
+    "chartTab": "Chart",
+    "tableTab": "Table",
+    "noResult": "No results",
+    "copySql": "Copy",
+    "runSql": "Run"
   },
   "olapPage": {
     "msg064e0768": "에러 배너 닫기",
@@ -3189,7 +3210,11 @@
     "m07a52cff": "여기에 항목을 드롭하세요",
     "mddd664b2": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요.",
     "swapRowCol": "Swap Rows/Cols",
-    "runAnalysis": "Run Analysis"
+    "runAnalysis": "Run Analysis",
+    "dimensions": "Dimensions",
+    "measures": "Measures (Values)",
+    "pivotBuilder": "Pivot Builder (Drag & Drop)",
+    "requiredFieldsHint": "Place at least 1 measure and 1 row or column."
   },
   "ontologyPage": {
     "msg9a0c3deb": "하이라이트.",
@@ -3231,7 +3256,15 @@
     "pathExplore": "Explore path to this node",
     "impactAnalysis": "Impact Analysis",
     "graphSummary": "Total: {{nodes}} nodes, {{relations}} relations",
-    "orphanCount": "Orphaned: {{count}}"
+    "orphanCount": "Orphaned: {{count}}",
+    "relationType": "Relation Type",
+    "addBtn": "Add",
+    "tableView": "Table",
+    "layerHeader": "Layer",
+    "relationHeader": "Relation",
+    "schemaHeader": "Schema",
+    "createdAtHeader": "Created",
+    "loading": "Loading..."
   },
   "processDesignerPage2": {
     "msg6a50e378": "보드가 없습니다",
