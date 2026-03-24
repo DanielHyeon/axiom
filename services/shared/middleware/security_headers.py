@@ -27,6 +27,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     사용법:
         app.add_middleware(SecurityHeadersMiddleware, allowed_connect_src="'self' http://localhost:9001")
 
+    Feature Flag:
+        FF_CSP_ENFORCE=true → Content-Security-Policy (차단 모드)로 전환
+        FF_CSP_ENFORCE=false (기본값) → Content-Security-Policy-Report-Only 유지
+
     Args:
         app: FastAPI(또는 Starlette) 앱 인스턴스
         allowed_connect_src: CSP connect-src 값 — 서비스마다 허용할 URL이 다르므로 주입 가능
@@ -68,8 +72,14 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "camera=(), microphone=(), geolocation=(), payment=()"
         )
 
-        # ── 5) CSP — Phase 1에서는 Report-Only (차단하지 않고 위반만 보고) ──
-        response.headers["Content-Security-Policy-Report-Only"] = self._csp
+        # ── 5) CSP — Feature Flag(FF_CSP_ENFORCE)로 enforcing/report-only 전환 ──
+        from shared.utils.feature_flags import is_enabled  # 지연 임포트 (순환 방지)
+        if is_enabled("CSP_ENFORCE"):
+            # 차단 모드: 위반 시 리소스 로드를 차단한다
+            response.headers["Content-Security-Policy"] = self._csp
+        else:
+            # 보고 모드: 위반 시 차단하지 않고 보고만 한다 (Phase 1 기본값)
+            response.headers["Content-Security-Policy-Report-Only"] = self._csp
 
         # ── 6) HSTS — 리버스 프록시가 HTTPS를 알려줄 때만 설정 ──
         forwarded_proto = request.headers.get("X-Forwarded-Proto", "")

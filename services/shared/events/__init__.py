@@ -6,7 +6,7 @@ sign_event() / verify_event()로 HMAC-SHA256 무결성 서명/검증을 수행�
 """
 
 from .schema import EventEnvelope  # noqa: F401
-from .safe_publish import safe_publish  # noqa: F401
+from .safe_publish import safe_publish, publish_envelope  # noqa: F401
 from .integrity import sign_event, verify_event  # noqa: F401
 
-__all__ = ["EventEnvelope", "safe_publish", "sign_event", "verify_event"]
+__all__ = ["EventEnvelope", "safe_publish", "publish_envelope", "sign_event", "verify_event"]

@@ -63,12 +63,20 @@ app.add_middleware(RequestIdMiddleware)
 app.add_middleware(TenantMiddleware)
 app.add_middleware(RateLimitMiddleware)
 
-# 보안 헤더 — CSP Report-Only (Phase 1)
+# 보안 헤더 — CSP Report-Only (Phase 1), Feature Flag로 enforcing 전환 가능
 from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
 app.add_middleware(
     SecurityHeadersMiddleware,
     allowed_connect_src="'self' http://localhost:9001 http://localhost:9002 http://localhost:9003 http://localhost:9004 http://localhost:9005 http://localhost:9100",
 )
+
+# 구조화 액세스 로그 — 모든 HTTP 요청/응답을 JSON으로 기록한다
+from shared.middleware.access_log import AccessLogMiddleware  # noqa: E402
+app.add_middleware(AccessLogMiddleware, service_name="core")
+
+# Prometheus 자동 계측 — HTTP 요청 수/지연 메트릭을 수집한다
+from shared.middleware.prometheus import setup_prometheus  # noqa: E402
+_metrics_collector = setup_prometheus(app, service_name="core")
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")

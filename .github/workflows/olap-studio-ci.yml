@@ -7,10 +7,12 @@ on:
     branches: [main, develop]
     paths:
       - 'services/olap-studio/**'
+      - 'services/shared/**'
   pull_request:
     branches: [main]
     paths:
       - 'services/olap-studio/**'
+      - 'services/shared/**'
 
 env:
   PYTHON_VERSION: "3.12"

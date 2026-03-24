@@ -1227,7 +1227,16 @@ def compare_snapshots(
 
     base_version과 target_version 사이의 변경 사항(Add/Change/Delete)을
     아티팩트 유형 × 컬렉션 단위로 비교한다. 변경된 필드 목록도 포함.
+
+    Feature Flag: FF_SNAPSHOT_COMPARE_API=true 일 때만 사용 가능.
     """
+    # Feature Flag 가드 — 고위험 기능이므로 플래그가 꺼져 있으면 404를 반환한다
+    from shared.utils.feature_flags import is_enabled
+    if not is_enabled("SNAPSHOT_COMPARE_API"):
+        raise HTTPException(
+            status_code=404,
+            detail="스냅샷 비교 API가 비활성화 상태입니다 (FF_SNAPSHOT_COMPARE_API=false)",
+        )
     _tenant(request)  # 인증 확인
     try:
         data = _snapshot_registry.compare_snapshots(base_version, target_version)

@@ -100,3 +100,28 @@ async def safe_publish(
             topic,
         )
         return False
+
+
+async def publish_envelope(envelope: "EventEnvelope", timeout: float = 3.0) -> bool:
+    """EventEnvelope을 Redis에 발행한다 (safe_publish 래퍼).
+
+    EventEnvelope의 event_type을 토픽 이름으로 변환하고,
+    전체 봉투를 JSON으로 직렬화하여 발행한다.
+
+    토픽 변환 규칙: QUALITY_SCORE_UPDATED → quality-score-updated
+    (소문자 + 밑줄을 하이픈으로)
+
+    Args:
+        envelope: 발행할 EventEnvelope 인스턴스
+        timeout: Redis XADD 타임아웃 (초, 기본 3초)
+
+    Returns:
+        True면 발행 성공, False면 실패
+    """
+    from .schema import EventEnvelope as _Envelope  # noqa: F811 — 지연 임포트로 순환 방지
+
+    return await safe_publish(
+        topic=envelope.event_type.lower().replace("_", "-"),
+        event_data=envelope.model_dump(mode="json"),
+        timeout=timeout,
+    )
