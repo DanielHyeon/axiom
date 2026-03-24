@@ -169,7 +169,23 @@
       "noResults": "\"{{query}}\" 검색 결과 없음",
       "evidenceCount": "근거 {{count}}건"
     },
-    "impactPathTop": "영향 경로 Top {{count}}"
+    "impactPathTop": "영향 경로 Top {{count}}",
+    "rootCause": {
+      "title": "근본 원인 분석",
+      "analyzing": "근본 원인 분석 중...",
+      "selectDriverHint": "Driver를 선택하면 근본 원인이 표시됩니다",
+      "noResults": "분석된 근본 원인이 없습니다",
+      "count": "{{count}}건",
+      "depthDirect": "직접 원인",
+      "depthIndirect": "간접 원인",
+      "depthRoot": "근본 원인",
+      "category": {
+        "process": "프로세스",
+        "material": "자재",
+        "machine": "설비",
+        "human": "인적 요인"
+      }
+    }
   },
   "ontology": {
     "title": "Ontology",
@@ -3559,5 +3575,16 @@
     "guideStep1": "CSV, JSON, Excel 파일을 드래그하거나 클릭하여 업로드",
     "guideStep2": "대상 데이터소스를 선택하면 해당 DB로 자동 적재",
     "guideStep3": "ETL 파이프라인 탭에서 자동화된 수집 파이프라인 관리"
+  },
+  "snapshotBuilder": {
+    "currentSnapshot": "현재 활성 스냅샷",
+    "noActiveSnapshot": "활성 스냅샷이 없습니다. 새 스냅샷을 빌드해 주세요.",
+    "buildNew": "새 스냅샷 빌드",
+    "buildFailed": "스냅샷 빌드 실패",
+    "buildStarted": "빌드가 시작되었습니다",
+    "recentSnapshots": "최근 스냅샷",
+    "activate": "활성화",
+    "invalidate": "무효화",
+    "invalidateReasonPlaceholder": "무효화 사유를 입력하세요"
   }
 }

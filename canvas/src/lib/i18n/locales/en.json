@@ -169,7 +169,23 @@
       "noResults": "No results for \"{{query}}\"",
       "evidenceCount": "{{count}} evidence(s)"
     },
-    "impactPathTop": "Impact Path Top {{count}}"
+    "impactPathTop": "Impact Path Top {{count}}",
+    "rootCause": {
+      "title": "Root Cause Analysis",
+      "analyzing": "Analyzing root causes...",
+      "selectDriverHint": "Select a Driver to view root causes",
+      "noResults": "No root causes found",
+      "count": "{{count}} items",
+      "depthDirect": "Direct",
+      "depthIndirect": "Indirect",
+      "depthRoot": "Root",
+      "category": {
+        "process": "Process",
+        "material": "Material",
+        "machine": "Machine",
+        "human": "Human"
+      }
+    }
   },
   "ontology": {
     "title": "Ontology",
@@ -3559,5 +3575,16 @@
     "guideStep1": "Drag or click to upload CSV, JSON, or Excel files",
     "guideStep2": "Select a target datasource for automatic loading",
     "guideStep3": "Manage automated ingestion pipelines in the ETL tab"
+  },
+  "snapshotBuilder": {
+    "currentSnapshot": "Current Active Snapshot",
+    "noActiveSnapshot": "No active snapshot. Please build a new snapshot.",
+    "buildNew": "Build New Snapshot",
+    "buildFailed": "Snapshot build failed",
+    "buildStarted": "Build started",
+    "recentSnapshots": "Recent Snapshots",
+    "activate": "Activate",
+    "invalidate": "Invalidate",
+    "invalidateReasonPlaceholder": "Enter invalidation reason"
   }
 }
