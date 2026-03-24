@@ -1619,6 +1619,11 @@
       "targetType": "대상 타입",
       "targetId": "대상 ID",
       "reviewer": "검토자"
+    },
+    "releaseTimeline": {
+      "title": "릴리스 이력",
+      "empty": "릴리스 이력이 없습니다.",
+      "selectVersion": "버전 선택"
     }
   },
   "securityExt": {

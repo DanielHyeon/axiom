@@ -1619,6 +1619,11 @@
       "targetType": "Target Type",
       "targetId": "Target ID",
       "reviewer": "Reviewer"
+    },
+    "releaseTimeline": {
+      "title": "Release History",
+      "empty": "No release history available.",
+      "selectVersion": "Select version"
     }
   },
   "securityExt": {
