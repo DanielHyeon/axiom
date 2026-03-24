@@ -74,7 +74,9 @@
     "lineage": "리니지",
     "objectExplorer": "탐색기",
     "workflowEditor": "워크플로",
-    "semanticCatalog": "시멘틱 카탈로그"
+    "semanticCatalog": "시멘틱 카탈로그",
+    "open": "메뉴 열기",
+    "close": "메뉴 닫기"
   },
   "dashboard": {
     "title": "대시보드",
@@ -1355,6 +1357,9 @@
     "validate": "검증",
     "preview": "미리보기",
     "edit": "편집",
+    "upload": "업로드",
+    "download": "다운로드",
+    "xmlPlaceholder": "Mondrian XML을 입력하거나 파일을 업로드하세요...",
     "rowsLabel": "행 (Rows)",
     "colsLabel": "열 (Columns)",
     "measuresLabel": "측정값 (Measures)",

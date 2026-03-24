@@ -74,7 +74,9 @@
     "lineage": "Lineage",
     "objectExplorer": "Explorer",
     "workflowEditor": "Workflow",
-    "semanticCatalog": "Semantic Catalog"
+    "semanticCatalog": "Semantic Catalog",
+    "open": "Open menu",
+    "close": "Close menu"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1355,6 +1357,9 @@
     "validate": "Validate",
     "preview": "Preview",
     "edit": "Edit",
+    "upload": "Upload",
+    "download": "Download",
+    "xmlPlaceholder": "Enter Mondrian XML or upload a file...",
     "rowsLabel": "Rows",
     "colsLabel": "Columns",
     "measuresLabel": "Measures",
