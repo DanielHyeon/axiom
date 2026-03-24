@@ -6,6 +6,7 @@
 import { useState, useMemo } from 'react';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SearchPanelProps {
   nodes: Array<{ id: string; name: string; layer: string }>;
@@ -13,6 +14,7 @@ interface SearchPanelProps {
 }
 
 export function SearchPanel({ nodes, onSelect }: SearchPanelProps) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
 
   const results = useMemo(() => {
@@ -28,9 +30,9 @@ export function SearchPanel({ nodes, onSelect }: SearchPanelProps) {
         <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="노드 검색..."
+          placeholder={t('ontologyExt.nodeDetail.searchPlaceholder')}
           className="pl-8 h-8 text-sm"
-          aria-label="온톨로지 노드 검색"
+          aria-label={t('ontologyExt.nodeDetail.searchAria')}
         />
       </div>
       {results.length > 0 && (

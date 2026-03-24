@@ -1,6 +1,7 @@
 // features/process-designer/components/property-panel/EventLogBindingPanel.tsx
 // 이벤트 로그 바인딩 — eventLogBinding 노드 전용 (설계 §4.3)
 
+import { useTranslation } from 'react-i18next';
 import type { EventLogBindingData } from '../../types/processDesigner';
 
 interface EventLogBindingPanelProps {
@@ -9,6 +10,7 @@ interface EventLogBindingPanelProps {
 }
 
 export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanelProps) {
+ const { t } = useTranslation();
  const b: Partial<EventLogBindingData> = binding ?? {};
 
  const update = (field: keyof EventLogBindingData, value: string | undefined) => {
@@ -23,21 +25,21 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
 
  return (
  <section className="space-y-3">
- <h3 className="text-xs text-foreground0 uppercase tracking-wider">이벤트 로그 바인딩</h3>
+ <h3 className="text-xs text-foreground0 uppercase tracking-wider">{t('processDesignerExt.eventLog.title')}</h3>
 
  <div>
- <label className="text-xs text-foreground0 block mb-1">소스 테이블</label>
+ <label className="text-xs text-foreground0 block mb-1">{t('processDesignerExt.eventLog.sourceTable')}</label>
  <input
  type="text"
  value={b.sourceTable ?? ''}
  onChange={(e) => update('sourceTable', e.target.value)}
  className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground font-mono"
- placeholder="Weaver 메타데이터 연동 예정"
+ placeholder={t('processDesignerExt.eventLog.weaverPlaceholder')}
  />
  </div>
 
  <div>
- <label className="text-xs text-foreground0 block mb-1">타임스탬프 컬럼</label>
+ <label className="text-xs text-foreground0 block mb-1">{t('processDesignerExt.eventLog.timestampCol')}</label>
  <input
  type="text"
  value={b.timestampColumn ?? ''}
@@ -48,7 +50,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  </div>
 
  <div>
- <label className="text-xs text-foreground0 block mb-1">케이스 ID 컬럼</label>
+ <label className="text-xs text-foreground0 block mb-1">{t('processDesignerExt.eventLog.caseIdCol')}</label>
  <input
  type="text"
  value={b.caseIdColumn ?? ''}
@@ -59,7 +61,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  </div>
 
  <div>
- <label className="text-xs text-foreground0 block mb-1">활동명 컬럼 (선택)</label>
+ <label className="text-xs text-foreground0 block mb-1">{t('processDesignerExt.eventLog.activityCol')}</label>
  <input
  type="text"
  value={b.activityColumn ?? ''}
@@ -70,7 +72,7 @@ export function EventLogBindingPanel({ binding, onUpdate }: EventLogBindingPanel
  </div>
 
  <div>
- <label className="text-xs text-foreground0 block mb-1">필터 (SQL WHERE)</label>
+ <label className="text-xs text-foreground0 block mb-1">{t('processDesignerExt.eventLog.filterSql')}</label>
  <input
  type="text"
  value={b.filter ?? ''}

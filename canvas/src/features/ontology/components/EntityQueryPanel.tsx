@@ -5,6 +5,7 @@
  */
 import { useState } from 'react';
 import { Search, Play, ExternalLink, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { oracleApi } from '@/lib/api/clients';
 
 interface Props {
@@ -20,6 +21,7 @@ interface QueryResult {
 }
 
 export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
+  const { t } = useTranslation();
   const [query, setQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [result, setResult] = useState<QueryResult | null>(null);
@@ -52,10 +54,10 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
           rowCount: data.table.row_count || 0,
         });
       } else {
-        setError('쿼리 결과가 없습니다.');
+        setError(t('ontologyExt.entityQuery.noResults'));
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : '쿼리 실행 실패');
+      setError(err instanceof Error ? err.message : t('ontologyExt.entityQuery.queryFailed'));
       // Mock 결과 (백엔드 미연결 시 데모용)
       setResult({
         sql: `SELECT * FROM ${nodeName.toLowerCase()} LIMIT 100`,
@@ -80,12 +82,12 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Search size={14} className="text-muted-foreground" />
-          <span className="text-sm font-semibold text-foreground">{nodeName} 인스턴스 검색</span>
+          <span className="text-sm font-semibold text-foreground">{t('ontologyExt.entityQuery.instanceSearch', { name: nodeName })}</span>
         </div>
         <button
           type="button"
           className="p-1.5 rounded border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors"
-          title="전체 화면"
+          title={t('ontologyExt.entityQuery.fullScreen')}
         >
           <ExternalLink size={12} />
         </button>
@@ -112,7 +114,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
             className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 text-primary-foreground text-xs font-medium rounded-md hover:bg-green-700 disabled:opacity-50 transition-colors"
           >
             {isLoading ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
-            {isLoading ? '검색 중...' : '검색'}
+            {isLoading ? t('ontologyExt.entityQuery.searching') : t('ontologyExt.entityQuery.search')}
           </button>
         </div>
       </div>
@@ -127,7 +129,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
       {/* 생성된 SQL */}
       {result?.sql && (
         <div className="space-y-1">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">생성된 SQL</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{t('ontologyExt.entityQuery.generatedSql')}</p>
           <pre className="px-3 py-2 bg-card rounded-md text-[11px] text-muted-foreground font-mono overflow-x-auto whitespace-pre-wrap max-h-20">
             {result.sql}
           </pre>
@@ -138,7 +140,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
       {result && result.rows.length > 0 && (
         <div className="space-y-1">
           <p className="text-[10px] text-muted-foreground">
-            결과: {result.rowCount}건
+            {t('ontologyExt.entityQuery.resultCount', { count: result.rowCount })}
           </p>
           <div className="overflow-auto border border-border rounded-md max-h-48">
             <table className="w-full border-collapse text-xs">

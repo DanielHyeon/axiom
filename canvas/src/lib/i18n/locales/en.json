@@ -1576,7 +1576,15 @@
       "cancelMode": "Cancel mode / Deselect",
       "addNode": "Add Node",
       "title": "Keyboard Shortcuts",
-      "closeBtn": "Close"
+      "closeBtn": "Close",
+      "actionNode": "Action",
+      "eventNode": "Event",
+      "entityNode": "Entity",
+      "ruleNode": "Rule",
+      "stakeholderNode": "Stakeholder",
+      "reportNode": "Report",
+      "measureNode": "Measure (KPI)",
+      "domainNode": "Domain"
     },
     "mining": {
       "analyzing": "Analyzing...",
@@ -1589,7 +1597,10 @@
       "title": "Process Mining",
       "overlayOn": "Overlay ON",
       "overlayOff": "Overlay OFF",
-      "bottlenecks": "Bottleneck Points"
+      "bottlenecks": "Bottleneck Points",
+      "noVariants": "No variant data. Please bind an event log.",
+      "variantList": "Variants ({{count}})",
+      "noData": "No mining data"
     },
     "temporal": {
       "title": "Temporal Properties",
@@ -1633,7 +1644,11 @@
       "emptyReadOnly": "Canvas is empty",
       "emptyEditable": "Drag nodes from the toolbox to place them",
       "shortcutHint": "Or use shortcuts B, E, N, R, S, T, M, D to add nodes",
-      "connectionMode": "Connection mode (ESC to cancel)"
+      "connectionMode": "Connection mode (ESC to cancel)",
+      "addMode": "{{type}} add mode — click on the canvas",
+      "wsDisconnected": "Real-time sync connection lost. Reconnecting...",
+      "collaborating": "{{count}} collaborating",
+      "ariaLabel": "Process Designer canvas. {{nodes}} nodes, {{connections}} connections{{readOnly}}"
     }
   },
   "ontologyExt": {
@@ -1662,7 +1677,14 @@
       "causalInference": "Auto Causal Inference",
       "causalInferenceDesc": "Automatically generate causal relationships by analyzing FK relations and layer structure",
       "generationComplete": "Ontology generation complete",
-      "generationFailed": "Ontology generation failed"
+      "generationFailed": "Ontology generation failed",
+      "generationSummary": "{{tables}} tables processed, {{nodes}} nodes and {{relations}} relationships created.",
+      "createNew": "Create New Ontology",
+      "mappingPreview": "Mapping Preview",
+      "generating": "Generating...",
+      "generate": "Generate Ontology",
+      "schemaSelect": "Schema Selection",
+      "noDatasources": "No datasources registered."
     },
     "layerDesc": {
       "kpi": "Key Performance Indicator",
@@ -1678,12 +1700,16 @@
       "fullScreen": "Full Screen",
       "searching": "Searching...",
       "search": "Search",
-      "generatedSql": "Generated SQL"
+      "generatedSql": "Generated SQL",
+      "resultCount": "Results: {{count}} rows"
     },
     "nodeDetail": {
       "close": "Close",
       "properties": "Properties",
-      "connections": "Connections ({{count}})"
+      "connections": "Connections ({{count}})",
+      "viewInDesigner": "View in Process Designer",
+      "searchPlaceholder": "Search nodes...",
+      "searchAria": "Search ontology nodes"
     },
     "generator": {
       "generationComplete": "Ontology generation complete",
@@ -1699,7 +1725,10 @@
       "domainHint": "Domain Hint (optional)",
       "domainHintPlaceholder": "e.g. Manufacturing, Supply Chain...",
       "causalInference": "Auto Causal Inference",
-      "generationFailed": "Generation failed"
+      "generationFailed": "Generation failed",
+      "generationStats": "{{tables}} tables processed, {{nodes}} nodes created",
+      "generating": "Generating...",
+      "autoGenerate": "Auto Generate"
     }
   },
   "whatifExt": {
@@ -1735,12 +1764,26 @@
       "billion": "Billion",
       "year": "Years"
     },
-    "simulation": "Simulation",
+    "simulation": {
+      "title": "Run Simulation",
+      "description": "Change variable values to simulate cascading effects through model chains.",
+      "snapshotParams": "Snapshot Parameters",
+      "varsChanged": "{{count}} variables changed",
+      "adjustSliders": "Adjust sliders to change values.",
+      "running": "Running...",
+      "run": "Run Simulation"
+    },
     "dataSelect": {
       "startDate": "Start Date",
       "endDate": "End Date",
       "selectAll": "Select All",
-      "deselectAll": "Deselect All"
+      "deselectAll": "Deselect All",
+      "title": "Data Source & Period Selection",
+      "description": "Select the data range and ontology nodes for causal analysis.",
+      "analysisPeriod": "Analysis Period",
+      "dateHint": "If no period is specified, all data will be used. More data leads to more accurate causal analysis.",
+      "targetNodes": "Target Nodes",
+      "selected": "selected"
     },
     "snapshotLoading": "Loading snapshot...",
     "trainingStatus": {
@@ -1763,7 +1806,14 @@
       "descOpt": "Description (optional)",
       "descPlaceholder": "Describe the purpose and background of this scenario...",
       "selectCase": "Select a case to analyze",
-      "selectKpi": "Select target KPI for analysis"
+      "selectKpi": "Select target KPI for analysis",
+      "heading": "Define Scenario",
+      "headingDesc": "Set basic info for What-if analysis. Enter a scenario name and select a target KPI.",
+      "analysisTarget": "Analysis Target",
+      "caseLabel": "Case (Data Schema)",
+      "caseHint": "Analysis is based on data schemas registered in the ontology.",
+      "kpiLabel": "Target KPI (Optional)",
+      "kpiHint": "Specifying a KPI will limit causal analysis to related variables only."
     },
     "scenarioComparison": {
       "variable": "Variable",
@@ -1776,15 +1826,29 @@
       "strength": "Strength",
       "direction": "Direction",
       "positive": "+ Positive",
-      "negative": "- Negative"
+      "negative": "- Negative",
+      "discoveredCount": "Discovered Relations ({{count}})",
+      "selectedCount": "{{count}} selected",
+      "noRelations": "No causal relations found. Adjust parameters and try again."
     },
     "trainModels": {
       "buildingDag": "Building model graph...",
-      "startTraining": "Start Training"
+      "startTraining": "Start Training",
+      "title": "Model Training & Registration",
+      "description": "Train prediction models based on causal relations and register them in Neo4j ontology.",
+      "suggestedModels": "Suggested Models ({{count}})",
+      "input": "Input",
+      "rebuild": "Rebuild Models",
+      "retrain": "Retrain",
+      "allComplete": "All Complete",
+      "allCompleteMessage": "All models trained successfully. Run a simulation in the next step.",
+      "progress": "Training Progress: {{trained}}/{{total}}",
+      "failedMessage": "Model training failed. Please check the data."
     },
     "sweepChart": {
       "title": "Change Rate Comparison Chart",
-      "changeRate": "Change Rate"
+      "changeRate": "Change Rate",
+      "noChanges": "No changes detected in the simulation."
     },
     "simResult": {
       "propagationSteps": "Propagation Steps",
@@ -1795,7 +1859,9 @@
       "before": "Before",
       "after": "After",
       "delta": "Delta",
-      "changeRate": "Change Rate"
+      "changeRate": "Change Rate",
+      "executionLog": "Execution Log",
+      "dayImmediate": "Day 0 (Immediate)"
     },
     "demoScenarios": {
       "manufacturing": "Manufacturing OEE Analysis",
@@ -1816,6 +1882,27 @@
       "cycle_time": "Cycle Time",
       "defect_rate": "Defect Rate",
       "oee_score": "OEE Score"
+    },
+    "edgeDiscovery": {
+      "title": "Automatic Causal Discovery",
+      "description": "Automatically analyze correlations and Granger Causality from ontology node data.",
+      "maxLag": "Max Lag",
+      "minCorrelation": "Min Correlation",
+      "analyzing": "Analyzing...",
+      "noResults": "No relations found. Try lowering the minimum correlation (e.g., 0.3 to 0.1) or check the target nodes."
+    },
+    "dagViewer": {
+      "title": "Model DAG Visualization",
+      "inputVar": "Input Variable",
+      "predictionModel": "Prediction Model",
+      "outputVar": "Output Variable"
+    },
+    "demoKpis": {
+      "oee": "OEE (Overall Equipment Effectiveness)",
+      "throughputRate": "Throughput Rate",
+      "defectRate": "Defect Rate",
+      "downtime": "Downtime",
+      "mtbf": "MTBF (Mean Time Between Failures)"
     }
   },
   "insightExt": {

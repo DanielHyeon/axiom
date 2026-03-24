@@ -3,6 +3,7 @@
 // 캔버스 영역 — Stage + Layer + 노드/연결선 렌더링 + 인터랙션 (설계 §1-§3, §8, §10)
 
 import { useRef, useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Stage, Layer, Group, Rect } from 'react-konva';
 import { CanvasNode } from './CanvasNode';
 import { ContextBoxNode } from './ContextBoxNode';
@@ -40,6 +41,7 @@ export function ProcessCanvas({
  selectedVariant = null,
  readOnly = false,
 }: ProcessCanvasProps = {}) {
+ const { t } = useTranslation();
  const containerRef = useRef<HTMLDivElement>(null);
  const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
 
@@ -272,8 +274,8 @@ export function ProcessCanvas({
  onDrop={handleDrop}
  // ARIA: §10.3
  role="application"
- aria-label={`프로세스 디자이너 캔버스. 노드 ${items.length}개, 연결 ${connections.length}개${readOnly ? ' (읽기 전용)' : ''}`}
- aria-roledescription="프로세스 디자이너"
+ aria-label={t('processDesignerExt.canvas.ariaLabel', { nodes: items.length, connections: connections.length, readOnly: readOnly ? ` (${t('processDesignerExt.propertyPanel.readOnly')})` : '' })}
+ aria-roledescription={t('processDesignerExt.canvas.roleDescription')}
  >
  <Stage
  width={stageSize.width}
@@ -380,10 +382,10 @@ export function ProcessCanvas({
  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
  <div className="text-center text-foreground0">
  <p className="text-sm">
- {readOnly ? '캔버스가 비어 있습니다' : '도구 상자에서 노드를 드래그하여 배치하세요'}
+ {readOnly ? t('processDesignerExt.canvas.emptyReadOnly') : t('processDesignerExt.canvas.emptyEditable')}
  </p>
  {!readOnly && (
- <p className="text-xs mt-1 text-muted-foreground">또는 단축키 B, E, N, R, S, T, M, D 로 노드를 추가하세요</p>
+ <p className="text-xs mt-1 text-muted-foreground">{t('processDesignerExt.canvas.shortcutHint')}</p>
  )}
  </div>
  </div>
@@ -396,15 +398,15 @@ export function ProcessCanvas({
  {toolMode !== 'select' && (
  <div className="absolute top-3 left-3 bg-muted/90 text-foreground/80 px-3 py-1.5 rounded text-xs pointer-events-none">
  {toolMode === 'connect'
- ? '연결선 모드 (ESC로 취소)'
- : `${NODE_CONFIGS[toolMode]?.label ?? toolMode} 추가 모드 — 캔버스를 클릭하세요`}
+ ? t('processDesignerExt.canvas.connectionMode')
+ : t('processDesignerExt.canvas.addMode', { type: NODE_CONFIGS[toolMode]?.label ?? toolMode })}
  </div>
  )}
 
  {/* Read-only indicator */}
  {readOnly && (
  <div className="absolute bottom-3 left-3 bg-amber-900/80 text-amber-200 px-3 py-1.5 rounded text-xs pointer-events-none">
- 읽기 전용 모드
+ {t('processDesignerExt.propertyPanel.readOnly')}
  </div>
  )}
 

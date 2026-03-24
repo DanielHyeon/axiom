@@ -10,6 +10,7 @@ import { useEffect, useRef, useCallback, useMemo } from 'react';
 import cytoscape from 'cytoscape';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { GitBranch } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { ModelSpec, SimulationTrace } from '../types/wizard';
 
 interface ModelDagViewerProps {
@@ -20,6 +21,7 @@ interface ModelDagViewerProps {
 }
 
 export function ModelDagViewer({ modelSpecs, traces }: ModelDagViewerProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<cytoscape.Core | null>(null);
 
@@ -229,7 +231,7 @@ export function ModelDagViewer({ modelSpecs, traces }: ModelDagViewerProps) {
       <CardHeader className="pb-3">
         <CardTitle className="text-sm flex items-center gap-2">
           <GitBranch className="w-4 h-4" />
-          모델 DAG 시각화
+          {t('whatifExt.dagViewer.title')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -241,15 +243,15 @@ export function ModelDagViewer({ modelSpecs, traces }: ModelDagViewerProps) {
         <div className="flex items-center gap-4 mt-3 text-xs text-muted-foreground">
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-amber-500" />
-            입력 변수
+            {t('whatifExt.dagViewer.inputVar')}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-indigo-500" />
-            예측 모델
+            {t('whatifExt.dagViewer.predictionModel')}
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded bg-emerald-500" />
-            출력 변수
+            {t('whatifExt.dagViewer.outputVar')}
           </div>
         </div>
       </CardContent>

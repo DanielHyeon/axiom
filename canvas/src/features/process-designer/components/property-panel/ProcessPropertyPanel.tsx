@@ -2,6 +2,7 @@
 // 속성 패널 컨테이너 — 노드 타입별 조건부 서브 패널 (설계 §4, §12 RBAC)
 
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CanvasItem, TemporalData, MeasureBindingData, EventLogBindingData } from '../../types/processDesigner';
 import { useCanvasDataStore } from '../../store/canvasDataStore';
 import { BasicProperties } from './BasicProperties';
@@ -21,6 +22,7 @@ const TEMPORAL_TYPES = new Set(['businessEvent', 'businessAction']);
 const NOOP_UPDATE = () => {};
 
 export function ProcessPropertyPanel({ selectedItem, readOnly = false }: ProcessPropertyPanelProps) {
+ const { t } = useTranslation();
  const items = useCanvasDataStore((s) => s.items);
  const updateItem = useCanvasDataStore((s) => s.updateItem);
 
@@ -61,9 +63,9 @@ export function ProcessPropertyPanel({ selectedItem, readOnly = false }: Process
  return (
  <div className="w-80 border-l border-border bg-card flex flex-col">
  <div className="p-4 border-b border-border font-bold text-sm text-foreground/80 flex items-center justify-between">
- <span>속성 패널 (Property Panel)</span>
+ <span>{t('processDesignerExt.propertyPanel.title')}</span>
  {readOnly && (
- <span className="text-[10px] text-warning bg-amber-900/40 px-1.5 py-0.5 rounded">읽기 전용</span>
+ <span className="text-[10px] text-warning bg-amber-900/40 px-1.5 py-0.5 rounded">{t('processDesignerExt.propertyPanel.readOnly')}</span>
  )}
  </div>
  <div className="p-4 flex-1 overflow-auto">
@@ -102,7 +104,7 @@ export function ProcessPropertyPanel({ selectedItem, readOnly = false }: Process
  </div>
  ) : (
  <div className="h-full flex items-center justify-center text-sm text-foreground0 text-center">
- 캔버스에서 노드를 선택하여<br />속성을 확인하세요.
+ {t('processDesignerExt.propertyPanel.selectNodeHint')}
  </div>
  )}
  </div>

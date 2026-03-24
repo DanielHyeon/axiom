@@ -1576,7 +1576,15 @@
       "cancelMode": "모드 취소 / 선택 해제",
       "addNode": "노드 추가",
       "title": "키보드 단축키",
-      "closeBtn": "닫기"
+      "closeBtn": "닫기",
+      "actionNode": "Action (업무 행위)",
+      "eventNode": "Event (업무 사건)",
+      "entityNode": "Entity (업무 객체)",
+      "ruleNode": "Rule (업무 규칙)",
+      "stakeholderNode": "Stakeholder (이해관계자)",
+      "reportNode": "Report (업무 보고서)",
+      "measureNode": "Measure (KPI/측정값)",
+      "domainNode": "Domain (부서/사업부)"
     },
     "mining": {
       "analyzing": "분석 중...",
@@ -1589,7 +1597,10 @@
       "title": "프로세스 마이닝",
       "overlayOn": "오버레이 ON",
       "overlayOff": "오버레이 OFF",
-      "bottlenecks": "병목 지점"
+      "bottlenecks": "병목 지점",
+      "noVariants": "변형 데이터가 없습니다. 이벤트 로그를 바인딩하세요.",
+      "variantList": "변형 목록 ({{count}}개)",
+      "noData": "마이닝 데이터가 없습니다"
     },
     "temporal": {
       "title": "시간축 속성",
@@ -1633,7 +1644,11 @@
       "emptyReadOnly": "캔버스가 비어 있습니다",
       "emptyEditable": "도구 상자에서 노드를 드래그하여 배치하세요",
       "shortcutHint": "또는 단축키 B, E, N, R, S, T, M, D 로 노드를 추가하세요",
-      "connectionMode": "연결선 모드 (ESC로 취소)"
+      "connectionMode": "연결선 모드 (ESC로 취소)",
+      "addMode": "{{type}} 추가 모드 — 캔버스를 클릭하세요",
+      "wsDisconnected": "실시간 동기화 연결이 끊어졌습니다. 재연결 중...",
+      "collaborating": "{{count}}명 협업 중",
+      "ariaLabel": "프로세스 디자이너 캔버스. 노드 {{nodes}}개, 연결 {{connections}}개{{readOnly}}"
     }
   },
   "ontologyExt": {
@@ -1662,7 +1677,14 @@
       "causalInference": "인과관계 자동 추론",
       "causalInferenceDesc": "테이블 간 FK 관계와 레이어 구조를 분석하여 인과관계를 자동 생성합니다",
       "generationComplete": "온톨로지 생성 완료",
-      "generationFailed": "온톨로지 생성에 실패했습니다"
+      "generationFailed": "온톨로지 생성에 실패했습니다",
+      "generationSummary": "{{tables}}개 테이블에서 {{nodes}}개 노드, {{relations}}개 관계가 생성되었습니다.",
+      "createNew": "새 온톨로지 만들기",
+      "mappingPreview": "매핑 미리보기",
+      "generating": "생성 중...",
+      "generate": "온톨로지 생성",
+      "schemaSelect": "스키마 선택",
+      "noDatasources": "등록된 데이터소스가 없습니다."
     },
     "layerDesc": {
       "kpi": "핵심 성과 지표",
@@ -1678,12 +1700,16 @@
       "fullScreen": "전체 화면",
       "searching": "검색 중...",
       "search": "검색",
-      "generatedSql": "생성된 SQL"
+      "generatedSql": "생성된 SQL",
+      "resultCount": "결과: {{count}}건"
     },
     "nodeDetail": {
       "close": "닫기",
       "properties": "속성",
-      "connections": "연결 ({{count}})"
+      "connections": "연결 ({{count}})",
+      "viewInDesigner": "프로세스 디자이너에서 보기",
+      "searchPlaceholder": "노드 검색...",
+      "searchAria": "온톨로지 노드 검색"
     },
     "generator": {
       "generationComplete": "온톨로지 생성 완료",
@@ -1699,7 +1725,10 @@
       "domainHint": "도메인 힌트 (선택)",
       "domainHintPlaceholder": "예: 제조업, 공급망 관리...",
       "causalInference": "인과관계 자동 추론",
-      "generationFailed": "생성 실패"
+      "generationFailed": "생성 실패",
+      "generationStats": "{{tables}}개 테이블 처리, {{nodes}}개 노드 생성",
+      "generating": "생성 중...",
+      "autoGenerate": "자동 생성"
     }
   },
   "whatifExt": {
@@ -1735,12 +1764,26 @@
       "billion": "억원",
       "year": "년"
     },
-    "simulation": "시뮬레이션",
+    "simulation": {
+      "title": "시뮬레이션 실행",
+      "description": "변수 값을 변경하여 모델 체인을 통한 연쇄 영향을 시뮬레이션합니다.",
+      "snapshotParams": "스냅샷 파라미터",
+      "varsChanged": "{{count}}개 변수 변경됨",
+      "adjustSliders": "슬라이더를 조절하여 값을 변경하세요.",
+      "running": "실행 중...",
+      "run": "시뮬레이션 실행"
+    },
     "dataSelect": {
       "startDate": "시작일",
       "endDate": "종료일",
       "selectAll": "전체 선택",
-      "deselectAll": "전체 해제"
+      "deselectAll": "전체 해제",
+      "title": "데이터 소스 및 기간 선택",
+      "description": "인과 분석에 사용할 데이터 범위와 온톨로지 노드를 선택합니다.",
+      "analysisPeriod": "분석 기간",
+      "dateHint": "기간을 지정하지 않으면 전체 데이터를 사용합니다. 데이터가 많을수록 인과 분석의 정확도가 높아집니다.",
+      "targetNodes": "분석 대상 노드",
+      "selected": "선택"
     },
     "snapshotLoading": "스냅샷 로드 중...",
     "trainingStatus": {
@@ -1763,7 +1806,14 @@
       "descOpt": "설명 (선택)",
       "descPlaceholder": "이 시나리오의 목적과 배경을 설명하세요...",
       "selectCase": "분석할 케이스를 선택하세요",
-      "selectKpi": "분석 대상 KPI를 선택하세요"
+      "selectKpi": "분석 대상 KPI를 선택하세요",
+      "heading": "시나리오 정의",
+      "headingDesc": "What-if 분석의 기본 정보를 설정합니다. 시나리오 이름과 분석 대상 KPI를 선택하세요.",
+      "analysisTarget": "분석 대상",
+      "caseLabel": "케이스 (데이터 스키마)",
+      "caseHint": "온톨로지에 등록된 데이터 스키마 기준으로 분석합니다.",
+      "kpiLabel": "대상 KPI (선택)",
+      "kpiHint": "특정 KPI를 지정하면 해당 KPI와 관련된 변수만 인과 분석에 포함됩니다."
     },
     "scenarioComparison": {
       "variable": "변수",
@@ -1776,15 +1826,29 @@
       "strength": "강도",
       "direction": "방향",
       "positive": "+ 양",
-      "negative": "- 음"
+      "negative": "- 음",
+      "discoveredCount": "발견된 관계 ({{count}}개)",
+      "selectedCount": "{{count}}개 선택됨",
+      "noRelations": "발견된 인과 관계가 없습니다. 파라미터를 조정하고 다시 분석하세요."
     },
     "trainModels": {
       "buildingDag": "모델 그래프 구성 중...",
-      "startTraining": "모델 학습 시작"
+      "startTraining": "모델 학습 시작",
+      "title": "모델 학습 및 등록",
+      "description": "인과 관계를 기반으로 예측 모델을 학습하고 Neo4j 온톨로지에 등록합니다.",
+      "suggestedModels": "제안된 모델 ({{count}}개)",
+      "input": "입력",
+      "rebuild": "모델 재구성",
+      "retrain": "재학습",
+      "allComplete": "전체 완료",
+      "allCompleteMessage": "모든 모델의 학습이 완료되었습니다. 다음 단계에서 시뮬레이션을 실행하세요.",
+      "progress": "모델 학습 진행: {{trained}}/{{total}}",
+      "failedMessage": "모델 학습에 실패했습니다. 데이터를 확인해주세요."
     },
     "sweepChart": {
       "title": "변화율 비교 차트",
-      "changeRate": "변화율"
+      "changeRate": "변화율",
+      "noChanges": "시뮬레이션에서 변화가 감지되지 않았습니다."
     },
     "simResult": {
       "propagationSteps": "전파 단계",
@@ -1795,7 +1859,9 @@
       "before": "변경 전",
       "after": "변경 후",
       "delta": "변화량",
-      "changeRate": "변화율"
+      "changeRate": "변화율",
+      "executionLog": "실행 로그",
+      "dayImmediate": "Day 0 (즉시)"
     },
     "demoScenarios": {
       "manufacturing": "제조업 OEE 분석",
@@ -1816,6 +1882,27 @@
       "cycle_time": "사이클 타임",
       "defect_rate": "불량률",
       "oee_score": "OEE 점수"
+    },
+    "edgeDiscovery": {
+      "title": "인과 관계 자동 발견",
+      "description": "온톨로지 노드의 데이터에서 상관관계와 인과관계(Granger Causality)를 자동으로 분석합니다.",
+      "maxLag": "최대 시차 (Lag)",
+      "minCorrelation": "최소 상관계수",
+      "analyzing": "분석 중...",
+      "noResults": "발견된 관계가 없습니다. 최소 상관계수를 낮추거나(예: 0.3 → 0.1), 분석 대상 노드를 다시 확인해 주세요."
+    },
+    "dagViewer": {
+      "title": "모델 DAG 시각화",
+      "inputVar": "입력 변수",
+      "predictionModel": "예측 모델",
+      "outputVar": "출력 변수"
+    },
+    "demoKpis": {
+      "oee": "OEE (Overall Equipment Effectiveness)",
+      "throughputRate": "Throughput Rate (생산량)",
+      "defectRate": "Defect Rate (불량률)",
+      "downtime": "Downtime (가동 중단 시간)",
+      "mtbf": "MTBF (평균 고장 간격)"
     }
   },
   "insightExt": {

@@ -1,6 +1,7 @@
 // features/process-designer/components/canvas/CollaborationIndicator.tsx
 // 협업 참여자 아바타 + N명 협업 중 표시 (설계 §1 와이어프레임)
 
+import { useTranslation } from 'react-i18next';
 import type { Collaborator } from '../../store/canvasDataStore';
 
 interface CollaborationIndicatorProps {
@@ -9,6 +10,7 @@ interface CollaborationIndicatorProps {
 }
 
 export function CollaborationIndicator({ collaborators, connected }: CollaborationIndicatorProps) {
+ const { t } = useTranslation();
  if (!connected && collaborators.length === 0) return null;
 
  return (
@@ -24,7 +26,7 @@ export function CollaborationIndicator({ collaborators, connected }: Collaborati
  </div>
  ))}
  <span className="text-xs text-muted-foreground ml-1">
- {collaborators.length + 1}명 협업 중
+ {t('processDesignerExt.canvas.collaborating', { count: collaborators.length + 1 })}
  </span>
  </div>
  );

@@ -9,6 +9,7 @@ import { useEffect, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Cog, ArrowRight, RefreshCw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 import { useWhatIfWizard } from '../hooks/useWhatIfWizard';
 import { ModelTrainingProgress } from './ModelTrainingProgress';
@@ -44,6 +45,7 @@ export function StepTrainModels() {
     buildModelGraph();
   }, [buildModelGraph]);
 
+  const { t } = useTranslation();
   const hasTrainedModels = trainedModels.length > 0;
   const allTrained = trainedModels.length > 0 && trainedModels.every((m) => m.status === 'trained');
   const anyFailed = trainedModels.some((m) => m.status === 'failed');
@@ -54,10 +56,10 @@ export function StepTrainModels() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Cog className="w-5 h-5 text-primary" />
-          모델 학습 및 등록
+          {t('whatifExt.trainModels.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          인과 관계를 기반으로 예측 모델을 학습하고 Neo4j 온톨로지에 등록합니다.
+          {t('whatifExt.trainModels.description')}
         </p>
       </div>
 
@@ -65,7 +67,7 @@ export function StepTrainModels() {
       {isBuildingGraph && (
         <div className="flex flex-col items-center py-12 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">모델 그래프 구성 중...</p>
+          <p className="text-sm text-muted-foreground">{t('whatifExt.trainModels.buildingDag')}</p>
         </div>
       )}
 
@@ -81,7 +83,7 @@ export function StepTrainModels() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">
-              제안된 모델 ({modelSpecs.length}개)
+              {t('whatifExt.trainModels.suggestedModels', { count: modelSpecs.length })}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -99,7 +101,7 @@ export function StepTrainModels() {
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-medium">{spec.name}</div>
                   <div className="text-xs text-muted-foreground mt-0.5">
-                    입력: {spec.features.map((f) => f.field).join(', ')}
+                    {t('whatifExt.trainModels.input')}: {spec.features.map((f) => f.field).join(', ')}
                   </div>
                 </div>
 
@@ -118,15 +120,15 @@ export function StepTrainModels() {
                 {isTraining ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    학습 중...
+                    {t('whatifExt.trainingStatus.training')}...
                   </>
                 ) : (
-                  '모델 학습 시작'
+                  t('whatifExt.trainModels.startTraining')
                 )}
               </Button>
               <Button variant="outline" onClick={handleRebuild} disabled={isBuildingGraph}>
                 <RefreshCw className="w-4 h-4 mr-2" />
-                모델 재구성
+                {t('whatifExt.trainModels.rebuild')}
               </Button>
             </div>
           </CardContent>
@@ -141,7 +143,7 @@ export function StepTrainModels() {
       {/* 학습 완료 메시지 */}
       {allTrained && (
         <div className="p-4 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-sm">
-          모든 모델의 학습이 완료되었습니다. 다음 단계에서 시뮬레이션을 실행하세요.
+          {t('whatifExt.trainModels.allCompleteMessage')}
         </div>
       )}
 
@@ -149,7 +151,7 @@ export function StepTrainModels() {
       {anyFailed && !isTraining && (
         <Button onClick={handleTrain} variant="destructive" size="sm">
           <RefreshCw className="w-4 h-4 mr-2" />
-          재학습
+          {t('whatifExt.trainModels.retrain')}
         </Button>
       )}
     </div>

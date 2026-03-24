@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, TrendingDown, Minus, GitBranch } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { SimulationResult, SimulationTrace } from '../types/wizard';
 
 interface SimulationResultPanelProps {
@@ -40,6 +41,7 @@ function dedupeTraces(traces: SimulationTrace[]): SimulationTrace[] {
 }
 
 export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
+  const { t } = useTranslation();
   // 변화량 크기 순 정렬
   const sortedDeltas = Object.entries(result.deltas)
     .map(([key, delta]) => ({
@@ -69,7 +71,7 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
             <div className="text-2xl font-bold text-primary">
               {result.propagationWaves}
             </div>
-            <div className="text-xs text-muted-foreground">전파 단계</div>
+            <div className="text-xs text-muted-foreground">{t('whatifExt.simResult.propagationSteps')}</div>
           </CardContent>
         </Card>
         <Card className="bg-muted/30">
@@ -77,7 +79,7 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
             <div className="text-2xl font-bold text-primary">
               {impactTraces.length}
             </div>
-            <div className="text-xs text-muted-foreground">영향받은 모델</div>
+            <div className="text-xs text-muted-foreground">{t('whatifExt.simResult.affectedModels')}</div>
           </CardContent>
         </Card>
         <Card className="bg-muted/30">
@@ -85,7 +87,7 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
             <div className="text-2xl font-bold text-primary">
               {sortedDeltas.length}
             </div>
-            <div className="text-xs text-muted-foreground">변화 변수</div>
+            <div className="text-xs text-muted-foreground">{t('whatifExt.simResult.changedVariables')}</div>
           </CardContent>
         </Card>
       </div>
@@ -95,7 +97,7 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <GitBranch className="w-4 h-4" />
-            실행 로그
+            {t('whatifExt.simResult.executionLog')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -107,7 +109,7 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
               <div key={day} className="mb-4 last:mb-0">
                 {/* Day 헤더 */}
                 <div className="text-xs font-bold bg-muted/50 rounded px-2 py-1 mb-2">
-                  {day === 0 ? 'Day 0 (즉시)' : `Day +${day}`}
+                  {day === 0 ? t('whatifExt.simResult.dayImmediate') : `Day +${day}`}
                 </div>
 
                 {/* 트레이스 엔트리 */}
@@ -160,18 +162,18 @@ export function SimulationResultPanel({ result }: SimulationResultPanelProps) {
       {sortedDeltas.length > 0 && (
         <Card>
           <CardHeader className="pb-3">
-            <CardTitle className="text-sm">최종 변화 요약</CardTitle>
+            <CardTitle className="text-sm">{t('whatifExt.simResult.summaryTitle')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-lg border border-border">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-muted/50">
-                    <th className="px-3 py-2 text-left font-medium">항목</th>
-                    <th className="px-3 py-2 text-right font-medium">변경 전</th>
-                    <th className="px-3 py-2 text-right font-medium">변경 후</th>
-                    <th className="px-3 py-2 text-right font-medium">변화량</th>
-                    <th className="px-3 py-2 text-right font-medium">변화율</th>
+                    <th className="px-3 py-2 text-left font-medium">{t('whatifExt.simResult.item')}</th>
+                    <th className="px-3 py-2 text-right font-medium">{t('whatifExt.simResult.before')}</th>
+                    <th className="px-3 py-2 text-right font-medium">{t('whatifExt.simResult.after')}</th>
+                    <th className="px-3 py-2 text-right font-medium">{t('whatifExt.simResult.delta')}</th>
+                    <th className="px-3 py-2 text-right font-medium">{t('whatifExt.simResult.changeRate')}</th>
                   </tr>
                 </thead>
                 <tbody>

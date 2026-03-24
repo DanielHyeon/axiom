@@ -5,6 +5,7 @@
  * 클릭으로 단계 전환을 지원한다.
  */
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import type { WizardStep } from '../types/wizard';
 import { WIZARD_STEPS, WIZARD_STEP_META } from '../types/wizard';
@@ -23,10 +24,11 @@ export function WizardStepper({
   completedSteps,
   onStepClick,
 }: WizardStepperProps) {
+  const { t } = useTranslation();
   const currentIdx = WIZARD_STEPS.indexOf(currentStep);
 
   return (
-    <nav aria-label="위자드 단계" className="w-full">
+    <nav aria-label={t('whatifExt.wizardAria')} className="w-full">
       <ol className="flex items-center gap-2">
         {WIZARD_STEPS.map((step, idx) => {
           const meta = WIZARD_STEP_META[step];

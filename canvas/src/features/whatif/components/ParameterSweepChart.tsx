@@ -16,6 +16,7 @@ import {
   ReferenceLine,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useTranslation } from 'react-i18next';
 import type { SimulationResult } from '../types/wizard';
 
 interface ParameterSweepChartProps {
@@ -28,6 +29,7 @@ function shortKey(key: string): string {
 }
 
 export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
+  const { t } = useTranslation();
   // 변화율 데이터 준비
   const chartData = Object.entries(result.deltas)
     .map(([key, delta]) => {
@@ -49,7 +51,7 @@ export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
     return (
       <Card>
         <CardContent className="py-8 text-center text-muted-foreground text-sm">
-          시뮬레이션에서 변화가 감지되지 않았습니다.
+          {t('whatifExt.sweepChart.noChanges')}
         </CardContent>
       </Card>
     );
@@ -58,7 +60,7 @@ export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
   return (
     <Card>
       <CardHeader className="pb-3">
-        <CardTitle className="text-sm">변화율 비교 차트</CardTitle>
+        <CardTitle className="text-sm">{t('whatifExt.sweepChart.title')}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
@@ -98,7 +100,7 @@ export function ParameterSweepChart({ result }: ParameterSweepChartProps) {
                   const v = value ?? 0;
                   return [
                     `${v > 0 ? '+' : ''}${v}% (${entry.payload.baseline.toFixed(2)} -> ${entry.payload.predicted.toFixed(2)})`,
-                    '변화율',
+                    t('whatifExt.sweepChart.changeRate'),
                   ];
                 }) as never}
               />

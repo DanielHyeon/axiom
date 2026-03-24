@@ -1,6 +1,7 @@
 // features/process-designer/components/mining/VariantList.tsx
 // 변형 목록 — 클릭 시 캔버스에 해당 경로 하이라이트 (설계 §5.1)
 
+import { useTranslation } from 'react-i18next';
 import type { ConformanceResult } from '../../api/processDesignerApi';
 
 interface VariantListProps {
@@ -16,6 +17,7 @@ export function VariantList({
  onSelectVariant,
  loading,
 }: VariantListProps) {
+ const { t } = useTranslation();
  if (loading) {
  return (
  <div className="p-3 space-y-2">
@@ -29,7 +31,7 @@ export function VariantList({
  if (!conformance || conformance.deviations.length === 0) {
  return (
  <div className="p-3 text-xs text-foreground0 text-center">
- 변형 데이터가 없습니다. 이벤트 로그를 바인딩하세요.
+ {t('processDesignerExt.mining.noVariants')}
  </div>
  );
  }
@@ -41,7 +43,7 @@ export function VariantList({
  return (
  <div className="space-y-1 p-2">
  <div className="text-xs text-muted-foreground px-1 mb-2">
- 변형 목록 ({sorted.length}개)
+ {t('processDesignerExt.mining.variantList', { count: sorted.length })}
  </div>
  {sorted.map((dev, i) => {
  const isDeviation = dev.percentage > 0;

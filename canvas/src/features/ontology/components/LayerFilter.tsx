@@ -5,6 +5,7 @@
 
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { useTranslation } from 'react-i18next';
 
 const LAYERS = [
   { id: 'kpi', label: 'KPI', color: 'bg-destructive' },
@@ -22,6 +23,7 @@ interface LayerFilterProps {
 }
 
 export function LayerFilter({ activeLayers, onChange }: LayerFilterProps) {
+  const { t } = useTranslation();
   const toggle = (layerId: string) => {
     const next = new Set(activeLayers);
     if (next.has(layerId)) next.delete(layerId);
@@ -31,7 +33,7 @@ export function LayerFilter({ activeLayers, onChange }: LayerFilterProps) {
 
   return (
     <div className="space-y-2">
-      <span className="text-xs font-medium text-muted-foreground">계층 필터</span>
+      <span className="text-xs font-medium text-muted-foreground">{t('ontologyExt.wizard.layerFilter')}</span>
       {LAYERS.map((layer) => (
         <div key={layer.id} className="flex items-center gap-2">
           <Checkbox

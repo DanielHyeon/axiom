@@ -4,6 +4,7 @@
  */
 
 import { Badge } from '@/components/ui/badge';
+import { useTranslation } from 'react-i18next';
 
 interface ScenarioResult {
   id: string;
@@ -28,16 +29,17 @@ function formatDiff(baseline: number, value: number): { text: string; className:
 }
 
 export function ScenarioComparison({ baseline, scenarios, variables }: ScenarioComparisonProps) {
+  const { t } = useTranslation();
   return (
     <div className="border border-border rounded-lg overflow-auto">
       <table className="w-full text-sm">
         <thead>
           <tr className="bg-muted border-b border-border">
-            <th className="px-3 py-2 text-left font-medium">변수</th>
+            <th className="px-3 py-2 text-left font-medium">{t('whatifExt.scenarioComparison.variable')}</th>
             <th className="px-3 py-2 text-right font-medium">
               <div className="flex items-center justify-end gap-1">
                 {baseline.name}
-                <Badge variant="outline" className="text-[10px]">기준</Badge>
+                <Badge variant="outline" className="text-[10px]">{t('whatifExt.scenarioComparison.baseline')}</Badge>
               </div>
             </th>
             {scenarios.map((s) => (
