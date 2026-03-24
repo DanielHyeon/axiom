@@ -46,7 +46,7 @@ export function DirectSqlPanel({
  const msg =
  err instanceof AppError
  ? err.userMessage
- {t('nl2sqlPage.m5839e1b5')}
+ : (err as Error).message || 'SQL 실행에 실패했습니다.';
  setError(msg);
  } finally {
  setLoading(false);

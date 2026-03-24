@@ -13,20 +13,20 @@ import { useDocumentReview } from '@/features/document-management/hooks/useDocum
 import { useAuthStore } from '@/stores/authStore';
 
 const MOCK_ORIGINAL = `1. 계약 당사자
- {t('documentsPage.m8340df72')}
- {t('documentsPage.m11f0e3ca')}
+ 갑: (주)원청
+ 을: (주)하도급
 
 2. 공사 기간
- {t('documentsPage.mbb7eb8bc')}
- {t('documentsPage.m3fad7d73')}
+ 착공일: 2024-01-15
+ 준공일: 2024-06-30`;
 
 const MOCK_CURRENT = `1. 계약 당사자
- {t('documentsPage.m8340df72')}
- {t('documentsPage.m11f0e3ca')}
+ 갑: (주)원청
+ 을: (주)하도급
 
 2. 공사 기간
- {t('documentsPage.mbb7eb8bc')}
- {t('documentsPage.mab43ca66')}
+ 착공일: 2024-01-15
+ 준공일: 2024-07-15`;
 
 /** 문서 리뷰 페이지. Diff 뷰(react-diff-viewer-continued), 코멘트 쓰레드, 승인/반려/수정요청 API 연동·낙관적 업데이트·실패 시 롤백. */
 export function DocumentReviewPage() {

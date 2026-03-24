@@ -40,7 +40,7 @@ import { DEFAULT_NODE_DATA } from '../types/workflowEditor.types';
 const NODE_TYPE_KEYS: (NodeTypeInfo & { labelKey: string; descKey: string })[] = [
   {
     type: 'trigger',
-    {t('workflowEditorF.m4fd754c6')}
+    label: '', // 런타임에 t()로 채움
     labelKey: 'workflowEditor.toolbar.trigger',
     color: 'text-amber-400',
     borderColor: 'border-amber-500/30',
