@@ -1,5 +1,6 @@
 import { Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface PathHighlighterProps {
  /** 경로에 포함된 노드 ID 목록 (순서대로) */
@@ -11,6 +12,7 @@ interface PathHighlighterProps {
 
 /** 2노드 선택 시 최단 경로 하이라이트 배너. 경로 탐색 모드 안내 및 결과 요약. */
 export function PathHighlighter({ pathNodeIds, pathModeSource, onClear }: PathHighlighterProps) {
+ const { t } = useTranslation();
  if (pathNodeIds.length === 0) return null;
 
  return (
@@ -27,7 +29,7 @@ export function PathHighlighter({ pathNodeIds, pathModeSource, onClear }: PathHi
  onClick={onClear}
  className="h-7 text-primary hover:text-blue-700 hover:bg-blue-100 font-heading"
  >
- 탐색 종료
+ {t('ontology.pathHighlighter.endSearch')}
  </Button>
  </div>
  );

@@ -49,7 +49,7 @@ export function DataQualityPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
           >
             <Plus size={16} />
-            테스트 케이스 추가
+            {t('dataQuality.addTestCase')}
           </button>
         </div>
 

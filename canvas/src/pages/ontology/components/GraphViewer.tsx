@@ -3,6 +3,7 @@ import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
+import { useTranslation } from 'react-i18next';
 import type { OntologyGraphData } from '@/features/ontology/types/ontology';
 
 // Register layout extensions once
@@ -129,6 +130,7 @@ interface GraphViewerProps {
 }
 
 export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
+ const { t } = useTranslation();
  const cyRef = useRef<cytoscape.Core | null>(null);
  const containerRef = useRef<HTMLDivElement>(null);
  const { selectedNodeId, hoveredNodeId, selectNode, setHoveredNode } = useOntologyStore();
@@ -303,7 +305,7 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
  <div ref={containerRef} className="w-full h-full" />
  ) : (
  <div className="w-full h-full flex items-center justify-center text-foreground/60">
- 데이터가 없습니다.
+ {t('common.noData')}
  </div>
  )}
  </div>

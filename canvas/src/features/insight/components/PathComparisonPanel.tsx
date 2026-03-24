@@ -4,6 +4,7 @@
 import { cn } from '@/lib/utils';
 import { Route } from 'lucide-react';
 import type { ImpactPath } from '../types/insight';
+import { useTranslation } from 'react-i18next';
 
 interface PathComparisonPanelProps {
  paths: ImpactPath[];
@@ -38,6 +39,7 @@ export function PathComparisonPanel({
  highlightedPaths,
  onTogglePath,
 }: PathComparisonPanelProps) {
+ const { t } = useTranslation();
  const topPaths = [...paths]
  .sort((a, b) => (b.strength ?? 0) - (a.strength ?? 0))
  .slice(0, 3);
@@ -48,7 +50,7 @@ export function PathComparisonPanel({
  <div className="rounded-lg border border-border bg-card/50 p-3">
  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
  <Route className="h-3 w-3" />
- 영향 경로 Top {topPaths.length}
+ {t('insight.impactPathTop', { count: topPaths.length })}
  </div>
 
  <div className="space-y-1.5">

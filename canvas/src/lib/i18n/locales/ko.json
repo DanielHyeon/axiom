@@ -168,7 +168,8 @@
       "noDrivers": "Driver / Dimension 노드가 없습니다",
       "noResults": "\"{{query}}\" 검색 결과 없음",
       "evidenceCount": "근거 {{count}}건"
-    }
+    },
+    "impactPathTop": "영향 경로 Top {{count}}"
   },
   "ontology": {
     "title": "Ontology",
@@ -184,6 +185,18 @@
     "caseSelector": {
       "title": "온톨로지를 탐색할 케이스를 선택하세요",
       "noCases": "등록된 케이스가 없습니다."
+    },
+    "nodeDetail": {
+      "selectHint1": "노드를 선택하면",
+      "selectHint2": "상세 정보가 표시됩니다.",
+      "title": "노드 상세",
+      "properties": "속성",
+      "connections": "연결",
+      "findPath": "이 노드로 경로 탐색",
+      "impactAnalysis": "영향 분석"
+    },
+    "pathHighlighter": {
+      "endSearch": "탐색 종료"
     }
   },
   "olap": {
@@ -219,7 +232,8 @@
     },
     "feedLabel": "알림 피드",
     "timelineLabel": "이벤트 타임라인",
-    "rulesLabel": "알림 규칙 설정"
+    "rulesLabel": "알림 규칙 설정",
+    "noEvents": "이벤트가 없습니다."
   },
   "datasource": {
     "erd": {
@@ -273,7 +287,8 @@
   },
   "dataQuality": {
     "title": "데이터 품질",
-    "subtitle": "품질 테스트로 데이터에 대한 신뢰를 구축하세요."
+    "subtitle": "품질 테스트로 데이터에 대한 신뢰를 구축하세요.",
+    "addTestCase": "테스트 케이스 추가"
   },
   "ontologyWizard": {
     "title": "온톨로지 위자드",
@@ -394,7 +409,15 @@
     "toolbox": "도구 상자 (Toolbox)",
     "propertyPanel": "속성 패널 (Property Panel)",
     "selectNodeHint": "캔버스에서 노드를 선택하여 속성을 확인하세요.",
-    "minimapAria": "미니맵: 클릭하면 해당 위치로 뷰 이동"
+    "minimapAria": "미니맵: 클릭하면 해당 위치로 뷰 이동",
+    "basicProperties": "기본 속성",
+    "nodeLabelAria": "노드 라벨",
+    "timeProperties": "시간축 속성",
+    "timePropertiesHint": "예상 소요·SLA·실제 평균 (연동 예정)",
+    "eventLogBinding": "이벤트 로그 바인딩",
+    "eventLogBindingHint": "소스 테이블·타임스탬프·케이스 ID (연동 예정)",
+    "measureBinding": "측정값 바인딩",
+    "measureBindingHint": "연결된 KPI (연동 예정)"
   },
   "workflowEditor": {
     "title": "워크플로 에디터",
@@ -3508,5 +3531,24 @@
     "cannotGenerateERD": "ERD를 생성할 수 없습니다",
     "dataPreview": "데이터 프리뷰",
     "addFkRelation": "FK 관계 추가"
+  },
+  "whatif": {
+    "scenario": "시나리오",
+    "npvWacc": "NPV (WACC)",
+    "feasibility": "실현가능성",
+    "parameterSettings": "매개변수 설정",
+    "parameterSettingsHint": "슬라이더를 조정하여 시뮬레이션 하세요.",
+    "sensitivityAnalysis": "민감도 분석 (Tornado Chart)",
+    "decreaseImpact": "◄ 감소 영향",
+    "increaseImpact": "증가 영향 ►"
+  },
+  "dataIngestion": {
+    "title": "데이터 수집",
+    "subtitle": "파일 업로드 및 ETL 파이프라인을 통해 데이터를 수집합니다",
+    "connectionTest": "연결 테스트",
+    "usageGuide": "사용 가이드",
+    "guideStep1": "CSV, JSON, Excel 파일을 드래그하거나 클릭하여 업로드",
+    "guideStep2": "대상 데이터소스를 선택하면 해당 DB로 자동 적재",
+    "guideStep3": "ETL 파이프라인 탭에서 자동화된 수집 파이프라인 관리"
   }
 }

@@ -168,7 +168,8 @@
       "noDrivers": "No Driver / Dimension nodes found",
       "noResults": "No results for \"{{query}}\"",
       "evidenceCount": "{{count}} evidence(s)"
-    }
+    },
+    "impactPathTop": "Impact Path Top {{count}}"
   },
   "ontology": {
     "title": "Ontology",
@@ -184,6 +185,18 @@
     "caseSelector": {
       "title": "Select a case to explore the ontology",
       "noCases": "No cases registered."
+    },
+    "nodeDetail": {
+      "selectHint1": "Select a node",
+      "selectHint2": "to view details.",
+      "title": "Node Details",
+      "properties": "Properties",
+      "connections": "Connections",
+      "findPath": "Find path to this node",
+      "impactAnalysis": "Impact Analysis"
+    },
+    "pathHighlighter": {
+      "endSearch": "End Search"
     }
   },
   "olap": {
@@ -219,7 +232,8 @@
     },
     "feedLabel": "Alert feed",
     "timelineLabel": "Event timeline",
-    "rulesLabel": "Alert rule settings"
+    "rulesLabel": "Alert rule settings",
+    "noEvents": "No events."
   },
   "datasource": {
     "erd": {
@@ -273,7 +287,8 @@
   },
   "dataQuality": {
     "title": "Data Quality",
-    "subtitle": "Build trust in your data with quality tests."
+    "subtitle": "Build trust in your data with quality tests.",
+    "addTestCase": "Add Test Case"
   },
   "ontologyWizard": {
     "title": "Ontology Wizard",
@@ -394,7 +409,15 @@
     "toolbox": "Toolbox",
     "propertyPanel": "Property Panel",
     "selectNodeHint": "Select a node on the canvas to view properties.",
-    "minimapAria": "Minimap: click to move view to that position"
+    "minimapAria": "Minimap: click to move view to that position",
+    "basicProperties": "Basic Properties",
+    "nodeLabelAria": "Node label",
+    "timeProperties": "Time Properties",
+    "timePropertiesHint": "Expected duration, SLA, actual average (coming soon)",
+    "eventLogBinding": "Event Log Binding",
+    "eventLogBindingHint": "Source table, timestamp, case ID (coming soon)",
+    "measureBinding": "Measure Binding",
+    "measureBindingHint": "Linked KPIs (coming soon)"
   },
   "workflowEditor": {
     "title": "Workflow Editor",
@@ -3508,5 +3531,24 @@
     "cannotGenerateERD": "Cannot generate ERD",
     "dataPreview": "Data Preview",
     "addFkRelation": "Add FK Relation"
+  },
+  "whatif": {
+    "scenario": "Scenario",
+    "npvWacc": "NPV (WACC)",
+    "feasibility": "Feasibility",
+    "parameterSettings": "Parameter Settings",
+    "parameterSettingsHint": "Adjust sliders to run simulation.",
+    "sensitivityAnalysis": "Sensitivity Analysis (Tornado Chart)",
+    "decreaseImpact": "◄ Decrease Impact",
+    "increaseImpact": "Increase Impact ►"
+  },
+  "dataIngestion": {
+    "title": "Data Ingestion",
+    "subtitle": "Collect data via file uploads and ETL pipelines",
+    "connectionTest": "Connection Test",
+    "usageGuide": "Usage Guide",
+    "guideStep1": "Drag or click to upload CSV, JSON, or Excel files",
+    "guideStep2": "Select a target datasource for automatic loading",
+    "guideStep3": "Manage automated ingestion pipelines in the ETL tab"
   }
 }
