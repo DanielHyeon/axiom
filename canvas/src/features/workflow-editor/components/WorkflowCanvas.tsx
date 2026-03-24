@@ -68,7 +68,7 @@ export function WorkflowCanvas() {
 
     const cy = cytoscape({
       container: containerRef.current,
-      elements: [], // 요소는 아래 동기화 effect 에서 추가
+      {t('workflowEditorF.ma3d9b204')}
       style: [
         // 기본 노드 스타일
         {
@@ -270,18 +270,18 @@ export function WorkflowCanvas() {
         ref={containerRef}
         className="w-full h-full"
         role="img"
-        aria-label="워크플로 캔버스"
+        aria-label={t('workflowEditorExt.canvasAria')}
       />
 
       {/* 줌 컨트롤 오버레이 */}
       <div className="absolute bottom-3 right-3 flex flex-col gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-lg p-1">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} title="확대">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} title={t('workflowEditorExt.zoomIn')}>
           <ZoomIn className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} title="축소">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} title={t('workflowEditorExt.zoomOut')}>
           <ZoomOut className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitAll} title="전체 보기">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitAll} title={t('workflowEditorExt.viewAll')}>
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
       </div>

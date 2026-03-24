@@ -66,7 +66,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             <TableHead>{t('securityExt.statusColUser')}</TableHead>
             <TableHead>{t('securityExt.createdAt')}</TableHead>
             <TableHead>{t('securityExt.lastLogin')}</TableHead>
-            <TableHead className="w-24">작업</TableHead>
+            <TableHead className="w-24">{t('securityExt.actionsCol')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -160,7 +160,7 @@ export const UserTable: React.FC<UserTableProps> = ({
           {users.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                검색 결과가 없습니다
+                {t('explorerExt.noResults')}
               </TableCell>
             </TableRow>
           )}

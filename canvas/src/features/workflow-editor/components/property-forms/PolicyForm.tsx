@@ -56,7 +56,7 @@ export const PolicyForm: React.FC<PolicyFormProps> = ({ data, onChange }) => {
           value={data.command}
           onChange={(e) => onChange({ ...data, command: e.target.value })}
           className="h-8 text-xs"
-          placeholder="예: recalculate_kpi"
+          placeholder={t('workflowEditorF.msgf90c88ac')}
         />
       </div>
 

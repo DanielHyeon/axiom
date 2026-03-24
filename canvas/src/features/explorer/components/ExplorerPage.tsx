@@ -16,6 +16,7 @@
 
 import React, { useState, useCallback } from 'react';
 import {
+import { useTranslation } from 'react-i18next';
   Search,
   ChevronRight,
   Home,
@@ -41,6 +42,7 @@ import type { ObjectSearchResult } from '../types/explorer';
 // ──────────────────────────────────────
 
 export const ExplorerPage: React.FC = () => {
+  const { t } = useTranslation();
   // ── 검색어 입력 상태 ──
   const [inputValue, setInputValue] = useState('');
 
@@ -119,10 +121,10 @@ export const ExplorerPage: React.FC = () => {
         <Compass className="h-5 w-5 text-primary" />
         <div>
           <h1 className="text-base font-semibold text-foreground">
-            오브젝트 탐색기
+            {t('explorerF.m6fe4f74f')}
           </h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            데이터 오브젝트를 검색하고 관계를 드릴다운으로 탐색합니다
+            {t('explorerF.m51443782')}
           </p>
         </div>
       </div>
@@ -135,7 +137,7 @@ export const ExplorerPage: React.FC = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="오브젝트 검색... (예: 삼성전자, 고객명, 계약번호)"
+            placeholder={t('explorerExt.searchPlaceholder')}
             className="h-9 pl-9 pr-9 text-sm"
             disabled={isLoading}
           />
@@ -144,7 +146,7 @@ export const ExplorerPage: React.FC = () => {
             <button
               className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
               onClick={() => setInputValue('')}
-              aria-label="검색어 지우기"
+              aria-label={t('explorerExt.clearSearch')}
             >
               <X className="h-3.5 w-3.5" />
             </button>
@@ -163,7 +165,7 @@ export const ExplorerPage: React.FC = () => {
           ) : (
             <Search className="h-4 w-4" />
           )}
-          <span className="ml-1.5">검색</span>
+          <span className="ml-1.5">{t('objectExplorerExt.searchTab')}</span>
         </Button>
 
         {/* 초기화 버튼 */}
@@ -175,7 +177,7 @@ export const ExplorerPage: React.FC = () => {
             onClick={handleReset}
           >
             <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-            초기화
+            {t('objectExplorerExt.reset')}
           </Button>
         )}
       </div>
@@ -189,7 +191,7 @@ export const ExplorerPage: React.FC = () => {
             onClick={() => goBack(-1)}
           >
             <Home className="h-3 w-3" />
-            <span>검색 결과</span>
+            <span>{t('explorerExt.searchResults')}</span>
           </button>
 
           {/* 경로 항목 */}
@@ -234,17 +236,17 @@ export const ExplorerPage: React.FC = () => {
                     <span className="font-medium text-foreground">
                       {breadcrumb[breadcrumb.length - 1].name_value}
                     </span>
-                    의 하위 항목
+                    {t('explorerF.mdf5327f3')}
                   </>
                 ) : (
                   <>
                     <span className="font-medium text-foreground">"{searchQuery}"</span>
-                    {' '}검색 결과
+                    {' '}{t('explorerF.searchResults')}
                   </>
                 )}
               </span>
               <Badge variant="secondary" className="text-[10px]">
-                {results.length}건
+                {t('explorerF.resultCount', { count: results.length })}
               </Badge>
             </div>
           )}
@@ -256,9 +258,9 @@ export const ExplorerPage: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
                 <Search className="h-12 w-12 text-muted-foreground/30" />
                 <div className="text-center">
-                  <p className="text-sm font-medium">오브젝트를 검색해 주세요</p>
+                  <p className="text-sm font-medium">{t('explorerExt.searchPrompt')}</p>
                   <p className="text-xs mt-1">
-                    이름, ID, 키워드로 데이터 오브젝트를 찾을 수 있습니다
+                    {t('explorerF.m324b47cf')}
                   </p>
                 </div>
               </div>
@@ -269,7 +271,7 @@ export const ExplorerPage: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full gap-3">
                 <Loader2 className="h-8 w-8 text-primary animate-spin" />
                 <span className="text-xs text-muted-foreground">
-                  {isSearching ? '검색 중...' : '하위 항목 조회 중...'}
+                  {isSearching ? t('explorerExt.searching') : t('explorerExt.drilldownLoading')}
                 </span>
               </div>
             )}
@@ -285,7 +287,7 @@ export const ExplorerPage: React.FC = () => {
                   onClick={handleSearch}
                 >
                   <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
-                  다시 시도
+                  {t('datasource.erd.retryBtn')}
                 </Button>
               </div>
             )}
@@ -295,9 +297,9 @@ export const ExplorerPage: React.FC = () => {
               <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-3">
                 <Search className="h-8 w-8 text-muted-foreground/40" />
                 <div className="text-center">
-                  <p className="text-sm font-medium">검색 결과가 없습니다</p>
+                  <p className="text-sm font-medium">{t('explorerExt.noResults')}</p>
                   <p className="text-xs mt-1">
-                    다른 키워드로 다시 검색해 보세요
+                    {t('explorerF.mae814bed')}
                   </p>
                 </div>
               </div>
@@ -316,7 +318,7 @@ export const ExplorerPage: React.FC = () => {
                           {group.object_type}
                         </Badge>
                         <span className="text-[11px] text-muted-foreground">
-                          {group.count}건
+                          {t('explorerF.resultCount', { count: group.count })}
                         </span>
                       </div>
                       {/* 그룹 내 카드 */}
@@ -345,7 +347,7 @@ export const ExplorerPage: React.FC = () => {
                                 e.stopPropagation();
                                 handleDrillDown(item);
                               }}
-                              title="하위 항목 보기"
+                              title={t('explorerExt.viewChildren')}
                             >
                               <ArrowDownRight className="h-4 w-4 text-muted-foreground hover:text-primary" />
                             </Button>
@@ -381,7 +383,7 @@ export const ExplorerPage: React.FC = () => {
                             e.stopPropagation();
                             handleDrillDown(item);
                           }}
-                          title="하위 항목 보기"
+                          title={t('explorerExt.viewChildren')}
                         >
                           <ArrowDownRight className="h-4 w-4 text-muted-foreground hover:text-primary" />
                         </Button>
@@ -421,7 +423,7 @@ export const ExplorerPage: React.FC = () => {
                   size="icon"
                   className="h-7 w-7 shrink-0"
                   onClick={() => selectItem(null)}
-                  aria-label="상세 패널 닫기"
+                  aria-label={t('explorerExt.closeDetail')}
                 >
                   <X className="h-3.5 w-3.5" />
                 </Button>
@@ -432,7 +434,7 @@ export const ExplorerPage: React.FC = () => {
                 <div className="flex items-center gap-1.5 mb-3">
                   <Info className="h-3.5 w-3.5 text-muted-foreground" />
                   <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                    속성 ({Object.keys(selectedItem.properties).length}개)
+                    {t('explorerF.propertyCount', { count: Object.keys(selectedItem.properties).length })}
                   </span>
                 </div>
                 <PropertiesTable properties={selectedItem.properties} />
@@ -451,7 +453,7 @@ export const ExplorerPage: React.FC = () => {
                     ) : (
                       <ArrowDownRight className="h-3.5 w-3.5 mr-1.5" />
                     )}
-                    하위 항목 탐색
+                    {t('explorerF.mc998b79b')}
                   </Button>
                 </div>
               </div>
@@ -461,7 +463,7 @@ export const ExplorerPage: React.FC = () => {
             <div className="flex flex-col items-center justify-center h-full text-muted-foreground gap-2 px-6">
               <Info className="h-8 w-8 text-muted-foreground/30" />
               <p className="text-xs text-center">
-                카드를 클릭하면 속성 상세 정보가 여기에 표시됩니다
+                {t('explorerF.m27942ff2')}
               </p>
             </div>
           )}

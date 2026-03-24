@@ -32,8 +32,8 @@ import type {
 // 대상 서비스 옵션
 const SERVICE_OPTIONS = [
   { value: 'core', label: 'Core (BPM/Agent)' },
-  { value: 'synapse', label: 'Synapse (온톨로지)' },
-  { value: 'weaver', label: 'Weaver (데이터패브릭)' },
+  { value: 'synapse', label: t('domainModelerF.msg89547d28') },
+  { value: 'weaver', label: t('domainModelerF.msge6aac059') },
   { value: 'oracle', label: 'Oracle (NL2SQL)' },
   { value: 'vision', label: 'Vision (OLAP/What-if)' },
 ];

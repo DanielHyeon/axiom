@@ -54,14 +54,14 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
           </div>
           {/* 삭제 대상 안내 */}
           <p className="text-sm text-foreground">
-            <strong>{user.name}</strong> ({user.email}) 사용자를 정말
-            삭제하시겠습니까?
+            {t('securityF.deleteConfirmMessage', { name: user.name, email: user.email })}
+            {t('securityF.mde474ccf')}
           </p>
         </div>
         {/* 푸터 */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/30">
           <Button variant="outline" onClick={onClose}>
-            취소
+            {t('common.cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -69,7 +69,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             disabled={isPending}
           >
             {isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-            삭제
+            {t('ingestionExt.delete')}
           </Button>
         </div>
       </div>

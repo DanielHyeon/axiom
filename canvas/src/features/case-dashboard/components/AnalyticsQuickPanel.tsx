@@ -56,7 +56,7 @@ export function AnalyticsQuickPanel() {
           onClick={() => navigate(ROUTES.ANALYSIS.NL2SQL)}
         >
           <MessageSquareText className="h-3 w-3 mr-1" />
-          새 질문
+          {t('caseDashboardF.md56b6378')}
         </Button>
       </div>
 

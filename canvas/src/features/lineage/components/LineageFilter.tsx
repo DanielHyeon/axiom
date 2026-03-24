@@ -65,7 +65,7 @@ export function LineageFilter() {
           htmlFor="lineage-depth"
           className="text-xs font-medium text-muted-foreground whitespace-nowrap"
         >
-          깊이: {filters.depth}
+          {t('lineageF.depthLabel', { depth: filters.depth })}
         </label>
         <input
           id="lineage-depth"

@@ -261,7 +261,7 @@ export function LineageGraph({ isLoading = false }: LineageGraphProps) {
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center gap-3 bg-background/80 backdrop-blur-sm">
           <div className="h-9 w-9 animate-spin rounded-full border-[3px] border-border border-t-primary" />
           <span className="text-sm font-medium text-muted-foreground">
-            데이터 로딩 중...
+            {t('objectExplorerExt.dataLoading')}
           </span>
         </div>
       )}
@@ -272,10 +272,10 @@ export function LineageGraph({ isLoading = false }: LineageGraphProps) {
           <span className="text-5xl opacity-40">&#128279;</span>
           <div>
             <h3 className="text-lg font-semibold text-foreground">
-              데이터 리니지 없음
+              {t('lineage.noData')}
             </h3>
             <p className="mt-1 max-w-xs text-sm text-muted-foreground">
-              데이터소스를 등록하거나 ETL을 구성하면 리니지가 자동으로 생성됩니다.
+              {t('lineage.noDataHint')}
             </p>
           </div>
         </div>

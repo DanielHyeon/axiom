@@ -17,12 +17,12 @@ import { useTranslation } from 'react-i18next';
 
 /** 통계 카드 항목 */
 const STAT_CARDS = [
-  { key: 'sourceCount' as const, label: '소스 테이블', color: LINEAGE_NODE_STYLES.source.color },
-  { key: 'tableCount' as const, label: '테이블', color: LINEAGE_NODE_STYLES.table.color },
-  { key: 'transformCount' as const, label: '변환', color: LINEAGE_NODE_STYLES.transform.color },
-  { key: 'viewCount' as const, label: '뷰', color: LINEAGE_NODE_STYLES.view.color },
-  { key: 'reportCount' as const, label: '리포트', color: LINEAGE_NODE_STYLES.report.color },
-  { key: 'edgeCount' as const, label: '데이터 흐름', color: '#F59E0B' },
+  { key: 'sourceCount' as const, label: t('mvExt.sourceTable'), color: LINEAGE_NODE_STYLES.source.color },
+  { key: 'tableCount' as const, label: t('olapExt.chartTable'), color: LINEAGE_NODE_STYLES.table.color },
+  { key: 'transformCount' as const, label: t('lineageExt.dashboard.transform'), color: LINEAGE_NODE_STYLES.transform.color },
+  { key: 'viewCount' as const, label: t('lineageExt.dashboard.view'), color: LINEAGE_NODE_STYLES.view.color },
+  { key: 'reportCount' as const, label: t('lineageExt.dashboard.report'), color: LINEAGE_NODE_STYLES.report.color },
+  { key: 'edgeCount' as const, label: t('lineageExt.dataFlowLabel'), color: '#F59E0B' },
 ] as const;
 
 export function LineageDashboard() {
@@ -61,7 +61,7 @@ export function LineageDashboard() {
       <header className="flex flex-wrap items-center justify-between gap-2 md:gap-3 border-b border-border bg-card px-4 md:px-6 py-3 md:py-4">
         <div className="flex items-center gap-3">
           <h2 className="text-base md:text-lg font-semibold text-foreground">
-            데이터 리니지
+            {t('olapStudioExt.dataLineage')}
           </h2>
         </div>
 

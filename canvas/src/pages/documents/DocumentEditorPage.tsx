@@ -38,9 +38,9 @@ export function DocumentEditorPage() {
  const { t } = useTranslation();
  const [content, setContent] = useState(initialContent);
  const [comments] = useState([
- { id: '1', line: '7-8', author: '박전문가', time: '2시간 전', text: '운영팀 예산 확인 필요합니다. 12억이 맞는지?', resolved: false },
- { id: '2', line: '14', author: '박전문가', time: '1시간 전', text: '마케팅 비율 재계산 해주세요', resolved: true },
- { id: '3', line: '전체', author: '박전문가', time: '30분 전', text: '전반적으로 양호하나 금액 검증 필요', resolved: false },
+ { id: '1', line: '7-8', author: t('documentsPage.me498b838'), time: t('documentsPage.m5d542a81'), text: t('documentsPage.msg0f644c16'), resolved: false },
+ { id: '2', line: '14', author: t('documentsPage.me498b838'), time: t('documentsPage.m6dc29e57'), text: t('documentsPage.msg73f64c9a'), resolved: true },
+ { id: '3', line: t('dataQualityExt.dateRanges.all'), author: t('documentsPage.me498b838'), time: t('documentsPage.ma72aa936'), text: t('documentsPage.msg5ea61d6d'), resolved: false },
  ]);
 
  const editorOptions = {
@@ -57,7 +57,7 @@ export function DocumentEditorPage() {
  <div className="flex items-center space-x-2 md:space-x-4 min-w-0">
  <Button variant="ghost" size="sm" onClick={() => navigate('/documents')}>← {t('common.back')}</Button>
  <h1 className="text-base md:text-xl font-bold flex items-center gap-2 truncate">
- 이해관계자 목록 v3 <Badge variant="secondary">{t('documents.status.in_review')}</Badge>
+ {t('documentsPage.stakeholderListTitle')} <Badge variant="secondary">{t('documents.status.in_review')}</Badge>
  </h1>
  </div>
  <div className="flex gap-1 md:space-x-2 shrink-0">
@@ -91,7 +91,7 @@ export function DocumentEditorPage() {
  <div className="w-full lg:w-80 shrink-0 border border-border rounded-md bg-card flex flex-col max-h-[40vh] lg:max-h-none">
  <div className="p-4 border-b border-border">
  <h3 className="font-semibold text-sm mb-2">{t('documents.editor.reviewPanel')}</h3>
- <p className="text-xs text-muted-foreground">{t('documents.editor.reviewer')}: 박전문가</p>
+ <p className="text-xs text-muted-foreground">{t('documents.editor.reviewer')}: {t('documentsPage.reviewerName')}</p>
  <p className="text-xs text-muted-foreground">{t('documents.editor.deadline')}: 2024-03-15</p>
  </div>
 

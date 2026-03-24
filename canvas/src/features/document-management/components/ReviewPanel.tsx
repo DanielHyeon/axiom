@@ -56,7 +56,7 @@ export function ReviewPanel({ comments, onAddComment, readonly }: ReviewPanelPro
  className="flex-1 rounded border border-border bg-card px-3 py-2 text-sm text-primary-foreground placeholder:text-foreground0"
  />
  <Button type="button" variant="secondary" size="sm" onClick={handleSubmit}>
- 추가
+ {t('common.add')}
  </Button>
  </div>
  )}

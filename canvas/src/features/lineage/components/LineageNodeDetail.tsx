@@ -101,7 +101,7 @@ export function LineageNodeDetail() {
         {inbound.length > 0 && (
           <Section
             icon={<ArrowLeft className="h-3.5 w-3.5" />}
-            title={`데이터 입력원 (${inbound.length})`}
+            title={t('lineageF.dataInputSources', { count: inbound.length })}
           >
             <ConnectionList items={inbound} />
           </Section>
@@ -111,7 +111,7 @@ export function LineageNodeDetail() {
         {outbound.length > 0 && (
           <Section
             icon={<ArrowRight className="h-3.5 w-3.5" />}
-            title={`데이터 출력 (${outbound.length})`}
+            title={t('lineageF.dataOutputs', { count: outbound.length })}
           >
             <ConnectionList items={outbound} />
           </Section>
@@ -144,7 +144,7 @@ export function LineageNodeDetail() {
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <span className="text-3xl opacity-40 mb-3">&#128279;</span>
             <p className="text-sm text-muted-foreground">
-              연결된 데이터 흐름이 없습니다.
+              {t('lineage.detail.noConnections')}
             </p>
           </div>
         )}

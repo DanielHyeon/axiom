@@ -107,7 +107,7 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ObjectType 검색..."
+            placeholder={t('domainF.msg92cca6bb')}
             className="pl-8 h-8 text-sm"
           />
         </div>

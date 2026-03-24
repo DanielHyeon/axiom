@@ -31,12 +31,12 @@ export function Step1ScenarioDefine() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
-          {t('whatifWizard.step1.title', '시나리오 정의')}
+          {t('whatifWizard.step1.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           {t(
             'whatifWizard.step1.description',
-            'What-if 분석의 기본 정보와 시뮬레이션 방식을 설정합니다.',
+            t('whatifWizardF.step1Description'),
           )}
         </p>
       </div>
@@ -45,21 +45,21 @@ export function Step1ScenarioDefine() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-sm">
-            {t('whatifWizard.step1.basicInfo', '기본 정보')}
+            {t('whatifWizard.step1.basicInfo')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 시나리오 이름 */}
           <div className="space-y-2">
             <Label htmlFor="ww-scenario-name">
-              {t('whatifWizard.step1.nameLabel', '시나리오 이름')}{' '}
+              {t('whatifWizard.step1.nameLabel')}{' '}
               <span className="text-destructive">*</span>
             </Label>
             <Input
               id="ww-scenario-name"
               placeholder={t(
                 'whatifWizard.step1.namePlaceholder',
-                '예: 원가 20% 상승 시 OEE 영향 분석',
+                t('whatifWizardF.step1NamePlaceholder'),
               )}
               value={scenarioName}
               onChange={(e) => setScenarioName(e.target.value)}
@@ -71,13 +71,13 @@ export function Step1ScenarioDefine() {
           {/* 설명 */}
           <div className="space-y-2">
             <Label htmlFor="ww-scenario-desc">
-              {t('whatifWizard.step1.descLabel', '설명 (선택)')}
+              {t('whatifWizard.step1.descLabel')}
             </Label>
             <Textarea
               id="ww-scenario-desc"
               placeholder={t(
                 'whatifWizard.step1.descPlaceholder',
-                '이 시나리오의 목적과 배경을 설명하세요...',
+                t('whatifWizardF.step1DescPlaceholder'),
               )}
               value={scenarioDescription}
               onChange={(e) => setScenarioDescription(e.target.value)}
@@ -96,7 +96,7 @@ export function Step1ScenarioDefine() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Lightbulb className="w-4 h-4" />
-            {t('whatifWizard.step1.modeTitle', '시뮬레이션 모드')}
+            {t('whatifWizard.step1.modeTitle')}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -107,15 +107,15 @@ export function Step1ScenarioDefine() {
             <p className="text-xs text-muted-foreground">
               {simulationMode === 'dag' ? (
                 <>
-                  <strong className="text-foreground">DAG 모드 선택됨:</strong> Step 3에서
-                  인과 관계를 자동 발견하고, 학습된 모델 체인을 통해 개입 효과가 연쇄
-                  전파되는 과정을 시뮬레이션합니다.
+                  {t('whatifWizardF.step1EventForkNote')}
+                  {t('whatifWizardF.mddeea804')}
+                  {t('whatifWizardF.mdac84299')}
                 </>
               ) : (
                 <>
-                  <strong className="text-foreground">Event Fork 모드 선택됨:</strong>{' '}
-                  실제 이벤트 스트림을 분기하여 개입 값을 적용합니다. Step 3(인과 발견)은
-                  자동으로 건너뛸 수 있습니다.
+                  <strong className="text-foreground">{t('whatifWizardF.msgf4027fc0')}</strong>{' '}
+                  {t('whatifWizardF.mbd747488')}
+                  {t('whatifWizardF.m4cc18511')}
                 </>
               )}
             </p>

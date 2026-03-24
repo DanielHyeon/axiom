@@ -228,7 +228,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
       cy.destroy();
       cyRef.current = null;
     };
-  }, [instance, collapsed, getColor]); // onNodeClick 의도적 제외
+  {t('objExplorerF.m81fd29e3')}
 
   // 줌 컨트롤
   const zoomIn = useCallback(() => cyRef.current?.zoom(cyRef.current.zoom() * 1.3), []);

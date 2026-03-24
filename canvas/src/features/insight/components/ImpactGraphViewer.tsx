@@ -174,7 +174,7 @@ export function ImpactGraphViewer({
  return (
  <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-foreground0">
  <Loader2 className="h-8 w-8 animate-spin mb-3" />
- <p className="text-sm">Impact 그래프를 분석하고 있습니다...</p>
+ <p className="text-sm">{t('insightF.msgfec77a39')}</p>
  </div>
  );
  }
@@ -191,7 +191,7 @@ export function ImpactGraphViewer({
  onClick={onRetry}
  className="text-xs text-primary hover:underline"
  >
- 다시 시도
+ {t('datasource.erd.retryBtn')}
  </button>
  )}
  </div>

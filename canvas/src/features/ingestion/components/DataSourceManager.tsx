@@ -42,7 +42,7 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-blue-500" />
           <h4 className="text-sm font-semibold text-gray-900 font-heading">
-            대상 데이터소스
+            {t('ingestionF.md86641c9')}
           </h4>
         </div>
         {onRefresh && (
@@ -67,18 +67,18 @@ export const DataSourceManager: React.FC<DataSourceManagerProps> = ({
             : 'bg-card border border-gray-200 text-gray-500 hover:bg-gray-50'
         }`}
       >
-        선택 안 함 (파일만 업로드)
+        {t('ingestionF.me29075b4')}
       </button>
 
       {/* 데이터소스 리스트 */}
       {loading ? (
         <div className="flex items-center justify-center py-4 text-gray-400 gap-2">
           <RefreshCw className="h-4 w-4 animate-spin" />
-          <span className="text-xs">로딩 중...</span>
+          <span className="text-xs">{t('objectExplorerExt.loading')}</span>
         </div>
       ) : datasources.length === 0 ? (
         <p className="text-xs text-gray-400 text-center py-4">
-          등록된 데이터소스가 없습니다
+          {t('olapStudio.datasources.noDatasources')}
         </p>
       ) : (
         <div className="space-y-1.5 max-h-[200px] overflow-y-auto">

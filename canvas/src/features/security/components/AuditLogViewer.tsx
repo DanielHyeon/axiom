@@ -46,9 +46,9 @@ import { useTranslation } from 'react-i18next';
 // ---------------------------------------------------------------------------
 
 const STATUS_CONFIG: Record<string, { label: string; className: string }> = {
-  allowed: { label: '허용', className: 'bg-emerald-100 text-emerald-700' },
-  denied: { label: '거부', className: 'bg-red-100 text-red-600' },
-  rewritten: { label: '변경됨', className: 'bg-amber-100 text-amber-700' },
+  allowed: { label: t('securityExt.decision.allowed'), className: 'bg-emerald-100 text-emerald-700' },
+  denied: { label: t('securityExt.decision.denied'), className: 'bg-red-100 text-red-600' },
+  rewritten: { label: t('securityExt.decision.rewritten'), className: 'bg-amber-100 text-amber-700' },
 };
 
 // ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ export const AuditLogViewer: React.FC = () => {
       <div>
         <h2 className="text-lg font-semibold text-foreground">{t('securityExt.auditLog')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          시스템 활동 이력을 조회하고 보안 이벤트를 모니터링합니다
+          {t('securityF.m91771f5c')}
         </p>
       </div>
 
@@ -159,7 +159,7 @@ export const AuditLogViewer: React.FC = () => {
           }}
         >
           <SelectTrigger className="w-32">
-            <SelectValue placeholder="상태" />
+            <SelectValue placeholder={t('dataQualityExt.incidentCols.status')} />
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">{t('securityExt.allStatus')}</SelectItem>
@@ -203,7 +203,7 @@ export const AuditLogViewer: React.FC = () => {
           disabled={isLoading}
         >
           <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          새로고침
+          {t('datasourceExt.refreshBtn')}
         </Button>
       </div>
 
@@ -211,7 +211,7 @@ export const AuditLogViewer: React.FC = () => {
       {isError && (
         <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>감사 로그를 불러오는 데 실패했습니다. {(error as Error)?.message}</span>
+          <span>{t('securityF.msg29ca2c85')}</span>
         </div>
       )}
 
@@ -219,7 +219,7 @@ export const AuditLogViewer: React.FC = () => {
       {isLoading && !isError && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">로그 로딩 중...</span>
+          <span className="text-sm">{t('securityExt.loadingLogs')}</span>
         </div>
       )}
 
@@ -227,8 +227,8 @@ export const AuditLogViewer: React.FC = () => {
       {!isLoading && !isError && logs.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <FileText className="h-10 w-10" />
-          <p className="font-medium">감사 로그가 없습니다</p>
-          <span className="text-sm">시스템 활동이 발생하면 로그가 기록됩니다</span>
+          <p className="font-medium">{t('securityExt.noAuditLogs')}</p>
+          <span className="text-sm">{t('securityExt.noAuditLogsHint')}</span>
         </div>
       )}
 
@@ -245,7 +245,7 @@ export const AuditLogViewer: React.FC = () => {
                   <TableHead>{t('securityExt.resourceCol')}</TableHead>
                   <TableHead>{t('securityExt.statusCol')}</TableHead>
                   <TableHead>IP</TableHead>
-                  <TableHead className="w-16">상세</TableHead>
+                  <TableHead className="w-16">{t('objectExplorerExt.detailTab')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -299,8 +299,7 @@ export const AuditLogViewer: React.FC = () => {
           {/* 페이지네이션 */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">
-              전체 {total.toLocaleString()}건 중 {(currentPage - 1) * PAGE_SIZE + 1}-
-              {Math.min(currentPage * PAGE_SIZE, total)}건
+              {t('securityF.paginationInfo', { total: total.toLocaleString(), from: (currentPage - 1) * PAGE_SIZE + 1, to: Math.min(currentPage * PAGE_SIZE, total) })}
             </span>
             <div className="flex items-center gap-1">
               <Button
@@ -351,18 +350,18 @@ export const AuditLogViewer: React.FC = () => {
             {/* 본문 */}
             <div className="p-6 overflow-y-auto flex flex-col gap-4">
               {/* 기본 정보 */}
-              <DetailRow label="로그 ID" value={selectedLog.id} mono />
-              <DetailRow label="시간" value={formatFullTimestamp(selectedLog.timestamp)} />
-              <DetailRow label="사용자" value={selectedLog.user_email} />
-              <DetailRow label="액션" value={selectedLog.action} />
-              <DetailRow label="리소스" value={selectedLog.resource} />
-              <DetailRow label="IP 주소" value={selectedLog.ip_address || '-'} mono />
+              <DetailRow label={t('securityExt.logId')} value={selectedLog.id} mono />
+              <DetailRow label={t('securityExt.time')} value={formatFullTimestamp(selectedLog.timestamp)} />
+              <DetailRow label={t('caseDashboardExt.defaultUser')} value={selectedLog.user_email} />
+              <DetailRow label={t('mvExt.colActions')} value={selectedLog.action} />
+              <DetailRow label={t('securityExt.resourceCol')} value={selectedLog.resource} />
+              <DetailRow label={t('securityExt.ipAddress')} value={selectedLog.ip_address || '-'} mono />
 
               {/* 상태 */}
               {selectedLog.status && (
                 <div className="flex gap-4">
                   <span className="w-24 shrink-0 text-sm font-medium text-muted-foreground">
-                    상태
+                    {t('dataQualityExt.incidentCols.status')}
                   </span>
                   <span
                     className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STATUS_CONFIG[selectedLog.status]?.className || ''}`}
@@ -374,7 +373,7 @@ export const AuditLogViewer: React.FC = () => {
 
               {/* 상세 정보 */}
               {selectedLog.details && (
-                <DetailRow label="상세" value={selectedLog.details} />
+                <DetailRow label={t('objectExplorerExt.detailTab')} value={selectedLog.details} />
               )}
 
               {/* SQL (있을 경우) */}
@@ -399,7 +398,7 @@ export const AuditLogViewer: React.FC = () => {
               {/* 실행 시간 */}
               {selectedLog.execution_time_ms != null && (
                 <DetailRow
-                  label="실행 시간"
+                  label={t('securityExt.executionTime')}
                   value={`${selectedLog.execution_time_ms}ms`}
                 />
               )}

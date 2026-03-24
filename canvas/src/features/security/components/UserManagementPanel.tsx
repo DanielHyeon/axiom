@@ -154,7 +154,7 @@ export const UserManagementPanel: React.FC = () => {
           </Button>
           <Button onClick={handleOpenCreate}>
             <Plus className="h-4 w-4 mr-1" />
-            사용자 추가
+            {t('securityExt.addUser')}
           </Button>
         </div>
       </div>
@@ -164,8 +164,8 @@ export const UserManagementPanel: React.FC = () => {
         <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
           <span>
-            사용자 데이터를 불러오는 데 실패했습니다.{' '}
-            {(error as Error)?.message || '백엔드 서버가 실행 중인지 확인하세요.'}
+            {t('securityF.userLoadError')}{' '}
+            {(error as Error)?.message || t('securityF.checkBackend')}
           </span>
         </div>
       )}
@@ -174,7 +174,7 @@ export const UserManagementPanel: React.FC = () => {
       {isLoading && !isError && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">데이터 로딩 중...</span>
+          <span className="text-sm">{t('objectExplorerExt.dataLoading')}</span>
         </div>
       )}
 
@@ -182,8 +182,8 @@ export const UserManagementPanel: React.FC = () => {
       {!isLoading && !isError && users.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <UserPlus className="h-10 w-10" />
-          <p className="font-medium">등록된 사용자가 없습니다</p>
-          <span className="text-sm">사용자를 추가하여 시작하세요</span>
+          <p className="font-medium">{t('securityExt.noUsers')}</p>
+          <span className="text-sm">{t('securityExt.noUsersHint')}</span>
         </div>
       )}
 

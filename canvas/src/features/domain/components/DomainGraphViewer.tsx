@@ -178,7 +178,7 @@ export const DomainGraphViewer: React.FC<DomainGraphViewerProps> = ({
       cy.destroy();
       cyRef.current = null;
     };
-  }, [data, collapsed]); // onNodeClick는 의도적으로 의존성에서 제외 (ref 패턴 사용)
+  {t('domainF.mf8bb2b07')}
 
   // 선택 노드 하이라이트
   useEffect(() => {

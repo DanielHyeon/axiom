@@ -3,6 +3,7 @@
 
 import { cn } from '@/lib/utils';
 import type { TimeRange } from '../types/insight';
+import { useTranslation } from 'react-i18next';
 
 interface TimeRangeSelectorProps {
  value: TimeRange;
@@ -10,12 +11,13 @@ interface TimeRangeSelectorProps {
 }
 
 const OPTIONS: { value: TimeRange; label: string }[] = [
- { value: '7d', label: '7일' },
- { value: '30d', label: '30일' },
- { value: '90d', label: '90일' },
+ { value: '7d', label: t('insightExt.timeRange.7d') },
+ { value: '30d', label: t('insightExt.timeRange.30d') },
+ { value: '90d', label: t('insightExt.timeRange.90d') },
 ];
 
-export function TimeRangeSelector({ value, onChange }: TimeRangeSelectorProps) {
+export function TimeRangeSelector({
+  const { t } = useTranslation(); value, onChange }: TimeRangeSelectorProps) {
  return (
  <div className="inline-flex rounded-lg border border-border bg-muted/50 p-0.5">
  {OPTIONS.map((opt) => (

@@ -160,7 +160,7 @@ export const UserFormDialog: React.FC<UserFormDialogProps> = ({
           {/* 푸터 — form 내부에 배치하여 type="submit"이 native validation을 트리거 */}
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/30">
             <Button type="button" variant="outline" onClick={onClose}>
-              취소
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={isPending}>
               {isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}

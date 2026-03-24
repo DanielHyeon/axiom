@@ -5,6 +5,7 @@ import { SortableContext, verticalListSortingStrategy, useSortable } from '@dnd-
 import { CSS } from '@dnd-kit/utilities';
 import type { Dimension, Measure } from '@/features/olap/types/olap';
 import { X } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface DroppableZoneProps {
  id: 'rows' | 'columns' | 'measures' | 'filters';
@@ -14,7 +15,8 @@ interface DroppableZoneProps {
  onRemove: (id: string) => void;
 }
 
-export function DroppableZone({ id, title, items, accepts, onRemove }: DroppableZoneProps) {
+export function DroppableZone({
+  const { t } = useTranslation(); id, title, items, accepts, onRemove }: DroppableZoneProps) {
  const { isOver, setNodeRef } = useDroppable({
  id,
  data: { accepts }
@@ -43,7 +45,7 @@ export function DroppableZone({ id, title, items, accepts, onRemove }: Droppable
  ))}
  {items.length === 0 && (
  <div className="text-xs text-foreground0 flex items-center pl-2 h-[28px] italic w-full">
- 여기에 항목을 드롭하세요
+ {t('olapPage.m07a52cff')}
  </div>
  )}
  </SortableContext>

@@ -57,7 +57,7 @@ import { DataPreviewPanel } from './DataPreviewPanel';
 export interface CanvasTable {
   tableName: string;
   schema: string;
-  datasource?: string;  // 데이터소스 이름
+  {t('nl2sqlF.me57f2c15')}
   columns: ColumnMeta[];
   /** NL2SQL LLM 컨텍스트 포함 여부 */
   includedInContext: boolean;

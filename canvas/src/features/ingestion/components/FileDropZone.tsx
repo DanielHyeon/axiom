@@ -153,11 +153,11 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
 
         <div>
           <p className="text-[15px] text-gray-600">
-            파일을 <strong className="text-gray-900">드래그</strong>하거나{' '}
-            <strong className="text-blue-600">클릭</strong>하여 업로드
+            {t('ingestionF.dropOrClick')}
+            
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            최대 {maxSizeMB}MB / 다중 파일 지원
+            {t('ingestionF.maxSizeInfo', { size: maxSizeMB })}
           </p>
         </div>
 

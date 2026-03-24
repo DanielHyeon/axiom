@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { ErrorState } from '@/shared/components/ErrorState';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ListSkeleton } from '@/shared/components/ListSkeleton';
+import { useTranslation } from 'react-i18next';
 
 /** 데이터소스별 연결 테스트 결과 (인라인 표시용) */
 type TestResult = { status: 'ok' | 'fail'; message: string };
@@ -22,6 +23,7 @@ type BottomTab = 'schema' | 'erd';
 
 /** 데이터소스 관리 페이지. Weaver API 연동. */
 export const DatasourcePage: React.FC = () => {
+  const { t } = useTranslation();
  const { datasources, engineTypes, loading, error, refetch, addDatasource, removeDatasource, test } = useDatasources();
  const [testResultByDs, setTestResultByDs] = useState<Record<string, TestResult>>({});
  const [selectedDsName, setSelectedDsName] = useState<string | null>(null);
@@ -73,45 +75,45 @@ export const DatasourcePage: React.FC = () => {
  user: '',
  password: '',
  });
- toast.success('데이터소스가 추가되었습니다.');
+ toast.success(t('datasourcePage.datasourceAdded'));
  } catch (err) {
  console.error('Create datasource failed', err);
- toast.error('데이터소스 추가에 실패했습니다.');
+ toast.error(t('datasourcePage.datasourceAddFailed'));
  }
  };
 
  const handleTest = async (dsName: string) => {
- setTestResultByDs((prev) => ({ ...prev, [dsName]: { status: 'ok', message: '확인 중…' } }));
+ setTestResultByDs((prev) => ({ ...prev, [dsName]: { status: 'ok', message: t('datasourcePage.msg9b00c516') } }));
  try {
  const res = await test(dsName);
  const ok = !!(res as any).success;
  setTestResultByDs((prev) => ({
  ...prev,
- [dsName]: { status: ok ? 'ok' : 'fail', message: ok ? '연결 성공' : (res as any).message ?? '연결 실패' },
+ [dsName]: { status: ok ? 'ok' : 'fail', message: ok ? t('datasourcePage.connectionSuccess') : (res as any).message ?? t('datasourcePage.connectionFailed') },
  }));
- if (ok) toast.success('데이터소스 연결 테스트에 성공했습니다.');
- else toast.error('데이터소스 연결 테스트에 실패했습니다.');
+ if (ok) toast.success(t('datasourcePage.datasourceSuccess'));
+ else toast.error(t('datasourcePage.datasourceFailed'));
  } catch (err) {
- const msg = err instanceof Error ? err.message : '연결 실패';
+ const msg = err instanceof Error ? err.message : t('datasourcePage.connectionFailed');
  setTestResultByDs((prev) => ({ ...prev, [dsName]: { status: 'fail', message: msg } }));
- toast.error('데이터소스 연결 테스트에 실패했습니다.');
+ toast.error(t('datasourcePage.datasourceFailed'));
  }
  };
 
  const handleDelete = async (dsName: string) => {
  try {
  await removeDatasource(dsName);
- toast.success('데이터소스가 삭제되었습니다.');
+ toast.success(t('datasourcePage.datasourceDeleted'));
  } catch (err) {
  console.error('Delete datasource failed', err);
- toast.error('데이터소스 삭제에 실패했습니다.');
+ toast.error(t('datasourcePage.datasourceDeleteFailed'));
  }
  };
 
  if (loading) {
  return (
  <div className="px-4 md:px-8 lg:px-12 py-4 md:py-8 space-y-6">
- <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">{t('datasourcePage.msg71965f61')}</h1>
  <ListSkeleton rows={6} className="max-w-2xl" />
  </div>
  );
@@ -119,8 +121,8 @@ export const DatasourcePage: React.FC = () => {
  if (error) {
  return (
  <div className="px-4 md:px-8 lg:px-12 py-4 md:py-8 space-y-6">
- <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
- <ErrorState message={`목록을 불러올 수 없습니다. ${error.message}`} onRetry={refetch} />
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">{t('datasourcePage.msg71965f61')}</h1>
+ <ErrorState message={t('datasourcePage.listLoadError', { message: error.message })} onRetry={refetch} />
  </div>
  );
  }
@@ -130,9 +132,9 @@ export const DatasourcePage: React.FC = () => {
  {/* Title Row */}
  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
  <div className="space-y-1.5">
- <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">데이터리소스</h1>
+ <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">{t('datasourcePage.msg71965f61')}</h1>
  <p className="text-[12px] md:text-[13px] text-muted-foreground font-mono">
- 데이터베이스 연결을 설정하고 스키마를 관리합니다
+ {t('datasourcePage.subtitle')}
  </p>
  </div>
  <button
@@ -141,7 +143,7 @@ export const DatasourcePage: React.FC = () => {
  onClick={() => document.getElementById('ds-form')?.scrollIntoView({ behavior: 'smooth' })}
  >
  <Plus className="h-3.5 w-3.5" />
- 신규 등록
+ {t('datasourcePage.newRegister')}
  </button>
  </div>
 
@@ -154,17 +156,17 @@ export const DatasourcePage: React.FC = () => {
  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-5">
  {/* Left column — 주요 정보 */}
  <div className="space-y-5">
- <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">주요 정보</span>
- <FormField label="이름" error={errors.name?.message}>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('datasourcePage.msg2c559d27')}</span>
+ <FormField label={t('mvExt.colName')} error={errors.name?.message}>
  <Input
  {...register('name')}
  placeholder="DynamoDB_db"
  className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
- <FormField label="엔진">
+ <FormField label={t('datasourcePage.msg8bee614c')}>
  <select
- aria-label="엔진"
+ aria-label={t('datasourcePage.msg8bee614c')}
  {...register('engine')}
  className="h-9 w-full rounded border border-border bg-card px-3 text-[13px] text-foreground font-mono"
  >
@@ -172,14 +174,14 @@ export const DatasourcePage: React.FC = () => {
  </select>
  </FormField>
  <div className="grid grid-cols-2 gap-4">
- <FormField label="호스트" error={errors.host?.message}>
+ <FormField label={t('datasourcePage.msg37c95dca')} error={errors.host?.message}>
  <Input
  {...register('host')}
  placeholder="localhost"
  className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
- <FormField label="포트" error={errors.port?.message}>
+ <FormField label={t('datasourcePage.msg236f3a2c')} error={errors.port?.message}>
  <Input
  {...register('port')}
  placeholder="5432"
@@ -191,15 +193,15 @@ export const DatasourcePage: React.FC = () => {
 
  {/* Right column — 연결 */}
  <div className="space-y-5">
- <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">연결</span>
- <FormField label="사용자명" error={errors.user?.message}>
+ <span className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('datasourcePage.msgc20ec32f')}</span>
+ <FormField label={t('securityExt.usernamePlaceholder')} error={errors.user?.message}>
  <Input
  {...register('user')}
  placeholder="user"
  className="bg-card border-border text-foreground placeholder:text-foreground/60 font-mono text-[13px]"
  />
  </FormField>
- <FormField label="비밀번호" error={errors.password?.message}>
+ <FormField label={t('securityExt.passwordLabel')} error={errors.password?.message}>
  <Input
  type="password"
  {...register('password')}
@@ -212,7 +214,7 @@ export const DatasourcePage: React.FC = () => {
 
  {/* Database + submit */}
  <div className="space-y-4">
- <FormField label="데이터베이스" error={errors.database?.message}>
+ <FormField label={t('datasourcePage.msga1f81b46')} error={errors.database?.message}>
  <Input
  {...register('database')}
  placeholder="$INSTANCE_db"
@@ -225,7 +227,7 @@ export const DatasourcePage: React.FC = () => {
  className="flex items-center gap-2 px-4 py-2.5 bg-destructive text-primary-foreground text-[12px] font-medium font-heading rounded hover:bg-red-700 transition-colors disabled:opacity-50"
  >
  <Plus className="h-3.5 w-3.5" />
- 생성
+ {t('common.create')}
  </button>
  </div>
  </form>
@@ -233,21 +235,21 @@ export const DatasourcePage: React.FC = () => {
  {/* Datasource List Table */}
  <div className="space-y-4">
  <div className="flex items-center justify-between">
- <h2 className="text-sm font-semibold text-foreground font-heading">데이터리소스 목록</h2>
+ <h2 className="text-sm font-semibold text-foreground font-heading">{t('datasourcePage.msgb1302c4b')}</h2>
  <button
  type="button"
  className="flex items-center gap-2 px-3 py-1.5 text-[12px] text-muted-foreground border border-border rounded hover:bg-muted transition-colors"
  >
  <TestTubeDiagonal className="h-3.5 w-3.5" />
- 테스트
+ {t('datasourcePage.test')}
  </button>
  </div>
 
  {datasources.length === 0 ? (
  <EmptyState
  icon={Database}
- title="등록된 데이터소스가 없습니다"
- description="위 폼에서 연결 정보를 입력한 뒤 추가하면 스키마 탐색과 동기화를 사용할 수 있습니다."
+ title={t('olapStudio.datasources.noDatasources')}
+ description={t('datasourcePage.msge449ce46')}
  />
  ) : (
  <div className="border border-border rounded overflow-x-auto">
@@ -303,7 +305,7 @@ export const DatasourcePage: React.FC = () => {
  <button
  type="button"
  onClick={() => handleDelete(ds.name)}
- title="삭제"
+ title={t('ingestionExt.delete')}
  className="text-[11px] text-destructive hover:text-destructive transition-colors"
  >
  <Trash2 className="h-3 w-3" />
@@ -329,7 +331,7 @@ export const DatasourcePage: React.FC = () => {
      : 'text-foreground/60 hover:text-muted-foreground'
    }`}
   >
-   스키마 탐색
+   {t('datasourcePage.schemaExplore')}
   </button>
   <button
    type="button"
@@ -349,7 +351,7 @@ export const DatasourcePage: React.FC = () => {
  {bottomTab === 'schema' ? (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
    <div className="space-y-3">
-    <h3 className="text-sm font-semibold text-foreground font-heading">데이터매핑 관리</h3>
+    <h3 className="text-sm font-semibold text-foreground font-heading">{t('datasourcePage.msg8ddaaeaa')}</h3>
     <SchemaExplorer
      selectedDsName={selectedDsName}
      onSelectDs={(name) => setSelectedDsName(name || null)}
@@ -357,7 +359,7 @@ export const DatasourcePage: React.FC = () => {
     />
    </div>
    <div className="space-y-3">
-    <h3 className="text-sm font-semibold text-foreground font-heading">스키마 관리</h3>
+    <h3 className="text-sm font-semibold text-foreground font-heading">{t('datasourcePage.msg48b3b5f7')}</h3>
     <SyncProgress selectedDsName={selectedDsName} onComplete={refetch} />
    </div>
   </div>
@@ -368,8 +370,8 @@ export const DatasourcePage: React.FC = () => {
    ) : (
     <div className="flex flex-col items-center justify-center h-full min-h-[480px] text-foreground/60 gap-3">
      <Share2 className="h-8 w-8 opacity-30" />
-     <p className="text-sm">데이터소스를 선택하면 ERD 다이어그램이 표시됩니다.</p>
-     <p className="text-xs">위 목록에서 데이터소스 이름을 클릭하세요.</p>
+     <p className="text-sm">{t('datasourcePage.whenDatasourceSelected')}</p>
+     <p className="text-xs">{t('datasourcePage.msgabe20b08')}</p>
     </div>
    )}
   </div>

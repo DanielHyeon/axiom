@@ -16,9 +16,9 @@ import type { DQSubTab } from '@/features/data-quality/store/useDQStore';
 
 // 서브탭 정의
 const TABS: { key: DQSubTab; label: string }[] = [
-  { key: 'test-cases', label: '테스트 케이스' },
-  { key: 'incidents', label: '인시던트' },
-  { key: 'trend', label: '추이' },
+  { key: 'test-cases', label: t('dataQualityExt.incidentCols.testCase') },
+  { key: 'incidents', label: t('dataQualityPage.msg713cda17') },
+  { key: 'trend', label: t('dataQualityPage.msg1c176610') },
 ];
 
 export function DataQualityPage() {
@@ -36,10 +36,10 @@ export function DataQualityPage() {
             </div>
             <div>
               <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                {t('dataQuality.title', '데이터 품질')}
+                {t('dataQuality.title')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {t('dataQuality.subtitle', '품질 테스트로 데이터에 대한 신뢰를 구축하세요.')}
+                {t('dataQuality.subtitle')}
               </p>
             </div>
           </div>
@@ -49,7 +49,7 @@ export function DataQualityPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
           >
             <Plus size={16} />
-            테스트 케이스 추가
+            {t('dataQualityExt.addTestCase')}
           </button>
         </div>
 

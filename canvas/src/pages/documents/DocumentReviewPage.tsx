@@ -13,20 +13,20 @@ import { useDocumentReview } from '@/features/document-management/hooks/useDocum
 import { useAuthStore } from '@/stores/authStore';
 
 const MOCK_ORIGINAL = `1. 계약 당사자
- 갑: (주)원청
- 을: (주)하도급
+ {t('documentsPage.m8340df72')}
+ {t('documentsPage.m11f0e3ca')}
 
 2. 공사 기간
- 착공일: 2024-01-15
- 준공일: 2024-06-30`;
+ {t('documentsPage.mbb7eb8bc')}
+ {t('documentsPage.m3fad7d73')}
 
 const MOCK_CURRENT = `1. 계약 당사자
- 갑: (주)원청
- 을: (주)하도급
+ {t('documentsPage.m8340df72')}
+ {t('documentsPage.m11f0e3ca')}
 
 2. 공사 기간
- 착공일: 2024-01-15
- 준공일: 2024-07-15`;
+ {t('documentsPage.mbb7eb8bc')}
+ {t('documentsPage.mab43ca66')}
 
 /** 문서 리뷰 페이지. Diff 뷰(react-diff-viewer-continued), 코멘트 쓰레드, 승인/반려/수정요청 API 연동·낙관적 업데이트·실패 시 롤백. */
 export function DocumentReviewPage() {
@@ -36,8 +36,8 @@ export function DocumentReviewPage() {
  const [comments, setComments] = useState<ReviewComment[]>([
  {
  id: '1',
- author: '검토자1',
- text: '준공일 변경분 확인 부탁드립니다.',
+ author: t('documentsPage.m4bf28962'),
+ text: t('documentsPage.msg0685a78e'),
  createdAt: new Date(Date.now() - 86400000).toISOString(),
  },
  ]);
@@ -63,12 +63,12 @@ export function DocumentReviewPage() {
 
  const handleReject = () => {
  setActionMessage(null);
- mutate({ action: 'reject', comment: '내용 검토 후 반려합니다.' });
+ mutate({ action: 'reject', comment: t('documentsPage.m2235b47a') });
  };
 
  const handleRequestChanges = () => {
  setActionMessage(null);
- mutate({ action: 'request_changes', comment: '준공일 등 수정 후 재제출 부탁드립니다.' });
+ mutate({ action: 'request_changes', comment: t('documentsPage.m45df980b') });
  };
 
  const handleAddComment = (text: string) => {

@@ -4,6 +4,7 @@ import dagre from 'cytoscape-dagre';
 import coseBilkent from 'cytoscape-cose-bilkent';
 import { useOntologyStore } from '@/features/ontology/store/useOntologyStore';
 import type { OntologyGraphData } from '@/features/ontology/types/ontology';
+import { useTranslation } from 'react-i18next';
 
 // Register layout extensions once
 cytoscape.use(dagre);
@@ -128,7 +129,8 @@ interface GraphViewerProps {
  shortestPathIds: string[];
 }
 
-export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
+export function GraphViewer({
+  const { t } = useTranslation(); data, shortestPathIds }: GraphViewerProps) {
  const cyRef = useRef<cytoscape.Core | null>(null);
  const containerRef = useRef<HTMLDivElement>(null);
  const { selectedNodeId, hoveredNodeId, selectNode, setHoveredNode } = useOntologyStore();
@@ -298,12 +300,12 @@ export function GraphViewer({ data, shortestPathIds }: GraphViewerProps) {
  return (
  <div className="flex-1 w-full h-full bg-muted overflow-hidden relative"
  role="application"
- aria-label={`온톨로지 그래프. 노드 ${data.nodes.length}개 표출됨. 마우스 드래그로 이동.`}>
+ aria-label={t('ontologyPage.graphAriaLabel', { count: data.nodes.length })}>
  {data.nodes.length > 0 ? (
  <div ref={containerRef} className="w-full h-full" />
  ) : (
  <div className="w-full h-full flex items-center justify-center text-foreground/60">
- 데이터가 없습니다.
+ {t('ontologyPage.m3e7e5358')}
  </div>
  )}
  </div>

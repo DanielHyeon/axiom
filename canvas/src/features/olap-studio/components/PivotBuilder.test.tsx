@@ -11,14 +11,18 @@ import { PivotBuilder } from './PivotBuilder';
 // i18n mock — t()가 키 대신 한글 값을 반환
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string) => {
+    t: (key: string, opts?: Record<string, unknown>) => {
       const map: Record<string, string> = {
         'olapStudioExt.rowsLabel': '행 (Rows)',
         'olapStudioExt.colsLabel': '열 (Columns)',
         'olapStudioExt.measuresLabel': '측정값 (Measures)',
         'olapStudioExt.filtersLabel': '필터 (Filters)',
+        'olapStudioExt.addFieldHint': '필드를 추가하세요',
+        'olapStudioExt.removeField': '{{name}} 제거',
       };
-      return map[key] ?? key;
+      const tmpl = map[key] ?? key;
+      if (opts) return tmpl.replace(/\{\{(\w+)\}\}/g, (_, k) => String(opts[k] ?? ''));
+      return tmpl;
     },
     i18n: { language: 'ko' },
   }),

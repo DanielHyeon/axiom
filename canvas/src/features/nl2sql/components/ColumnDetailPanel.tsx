@@ -107,7 +107,7 @@ export function ColumnDetailPanel({
             label={t('columnDetail.foreignKeyInferred')}
           >
             <Badge variant="outline" className="text-[10px] border-blue-300 text-blue-600 bg-blue-50">
-              FOREIGN KEY (추론)
+              {t('nl2sqlF.m258cba1c')}
             </Badge>
           </PropertyRow>
         )}

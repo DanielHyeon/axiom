@@ -103,14 +103,14 @@ export function EtlPipelinesPage() {
         <div className="flex items-center gap-2">
           <GitBranch className="h-4 w-4 text-purple-500" />
           <h1 className="text-[14px] font-semibold font-heading">
-            ETL 파이프라인
+            {t('olapStudio.etl.title')}
           </h1>
           <span className="text-[11px] text-foreground/40 font-mono">
-            {pipelines.length}개
+            {t('olapStudioF.pipelineListCount', { count: pipelines.length })}
           </span>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> 추가
+          <Plus className="h-3 w-3 mr-1" /> {t('common.add')}
         </Button>
       </div>
 
@@ -119,7 +119,7 @@ export function EtlPipelinesPage() {
         <div className="px-6 py-4 bg-purple-50/30 border-b border-border space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">이름</Label>
+              <Label className="text-[11px] font-mono">{t('mvExt.colName')}</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
@@ -128,7 +128,7 @@ export function EtlPipelinesPage() {
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">유형</Label>
+              <Label className="text-[11px] font-mono">{t('dataQualityExt.detailLabels.type')}</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
@@ -140,7 +140,7 @@ export function EtlPipelinesPage() {
               </select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">설명</Label>
+              <Label className="text-[11px] font-mono">{t('objectExplorerExt.descLabel')}</Label>
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
@@ -155,7 +155,7 @@ export function EtlPipelinesPage() {
               size="sm"
               onClick={() => setShowForm(false)}
             >
-              취소
+              {t('common.cancel')}
             </Button>
             <Button
               size="sm"
@@ -165,7 +165,7 @@ export function EtlPipelinesPage() {
               {createMut.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                '생성'
+                {t('olapStudioF.m1bfb7f83')}
               )}
             </Button>
           </div>
@@ -184,7 +184,7 @@ export function EtlPipelinesPage() {
           <div className="text-center py-12">
             <GitBranch className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
             <p className="text-[12px] text-foreground/40 font-mono">
-              등록된 파이프라인이 없습니다
+              {t('ingestionExt.noPipelines')}
             </p>
           </div>
         )}
@@ -288,7 +288,7 @@ function PipelineRow({
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
             <>
-              <Play className="h-3 w-3 mr-1" /> 실행
+              <Play className="h-3 w-3 mr-1" /> {t('common.run')}
             </>
           )}
         </Button>
@@ -299,12 +299,12 @@ function PipelineRow({
         <div className="border-t border-border px-4 py-3 bg-muted/50/50">
           {runs.length === 0 ? (
             <p className="text-[10px] text-foreground/30 font-mono">
-              실행 이력 없음
+              {t('olapStudioF.ma449501e')}
             </p>
           ) : (
             <div className="space-y-1.5">
               <p className="text-[10px] text-foreground/40 font-mono font-medium mb-2">
-                최근 실행 이력
+                {t('olapStudioF.mf21fb6ec')}
               </p>
               {runs.map((run) => (
                 <RunItem key={run.id} run={run} />

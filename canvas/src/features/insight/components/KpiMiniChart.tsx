@@ -25,7 +25,7 @@ export function KpiMiniChart({
  style={{ width, height }}
  className={`flex items-center justify-center text-[10px] text-muted-foreground ${className ?? ''}`}
  >
- 데이터 없음
+ {t('caseDashboardExt.noData')}
  </div>
  );
  }

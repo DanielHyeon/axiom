@@ -2,13 +2,15 @@ import { useState, useMemo } from 'react';
 import MonacoEditor from 'react-monaco-editor';
 import { Button } from '@/components/ui/button';
 import { Copy, Check, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SqlPreviewProps {
  sql: string;
  onRun?: (sql: string) => void;
 }
 
-export function SqlPreview({ sql, onRun }: SqlPreviewProps) {
+export function SqlPreview({
+  const { t } = useTranslation(); sql, onRun }: SqlPreviewProps) {
  const [copied, setCopied] = useState(false);
 
  const handleCopy = () => {
@@ -27,11 +29,11 @@ export function SqlPreview({ sql, onRun }: SqlPreviewProps) {
  <div className="flex items-center justify-between px-3 py-1.5 bg-muted border-b border-border">
  <span className="text-xs font-mono text-foreground/60">SQL</span>
  <div className="flex space-x-1">
- <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy} title="복사">
+ <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleCopy} title={t('olapStudioExt.copy')}>
  {copied ? <Check className="h-3 w-3 text-success" /> : <Copy className="h-3 w-3 text-foreground/60" />}
  </Button>
  {onRun && (
- <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRun(sql)} title="실행">
+ <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => onRun(sql)} title={t('behaviorExt.tabs.execute')}>
  <Play className="h-3 w-3 text-destructive" />
  </Button>
  )}

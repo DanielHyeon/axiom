@@ -5,6 +5,7 @@ import type { QualityReport } from '@/features/ontology/types/ontology';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
+import { useTranslation } from 'react-i18next';
  AlertTriangle,
  CheckCircle,
  FileQuestion,
@@ -26,7 +27,8 @@ const LAYER_COLORS: Record<string, string> = {
  resource: 'bg-warning',
 };
 
-export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
+export function QualityDashboard({
+  const { t } = useTranslation(); caseId, onClose }: QualityDashboardProps) {
  const [report, setReport] = useState<QualityReport | null>(null);
  const [loading, setLoading] = useState(true);
  const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,7 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  <div className="flex flex-col h-full overflow-hidden">
  {/* Header */}
  <div className="flex items-center justify-between h-[52px] px-6 border-b border-border shrink-0">
- <span className="text-[13px] font-semibold text-foreground font-heading">데이터 품질</span>
+ <span className="text-[13px] font-semibold text-foreground font-heading">{t('dataQuality.title')}</span>
  <button type="button" onClick={onClose} className="text-foreground/60 hover:text-foreground text-lg transition-colors">
  ×
  </button>
@@ -76,35 +78,35 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  <>
  {/* Summary stats */}
  <div className="text-[11px] text-foreground/60 font-mono mb-1">
- 전체: {report.total_nodes} nodes, {report.total_relations} relations
+ {t('ontologyPage.graphSummary', { nodes: report.total_nodes, relations: report.total_relations })}
  </div>
 
  {/* Stat cards */}
  <div className="grid grid-cols-2 gap-2">
  <StatCard
  icon={<AlertTriangle className="h-4 w-4 text-warning" />}
- label="고립 노드"
+ label={t('ontologyPage.msgba31bbfd')}
  value={report.orphan_count}
  total={report.total_nodes}
  color="amber"
  />
  <StatCard
  icon={<CheckCircle className="h-4 w-4 text-destructive" />}
- label="미검증"
+ label={t('ontologyPage.msg24b41c31')}
  value={report.low_confidence_count}
  total={report.total_nodes}
  color="red"
  />
  <StatCard
  icon={<FileQuestion className="h-4 w-4 text-primary" />}
- label="설명 없음"
+ label={t('columnDetail.noDescription')}
  value={report.missing_description}
  total={report.total_nodes}
  color="blue"
  />
  <StatCard
  icon={<Copy className="h-4 w-4 text-purple-500" />}
- label="중복 이름"
+ label={t('ontologyPage.msg1c41a163')}
  value={report.duplicate_names}
  total={report.total_nodes}
  color="purple"
@@ -113,7 +115,7 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
 
  {/* Coverage by layer */}
  <div className="space-y-2">
- <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">계층별 커버리지</div>
+ <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('ontologyPage.msgcffbbdfc')}</div>
  {Object.entries(report.coverage_by_layer).map(([layer, data]) => {
  const pct = data.total > 0 ? Math.round((data.verified / data.total) * 100) : 0;
  return (
@@ -144,7 +146,7 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  </div>
  {data.orphan > 0 && (
  <div className="text-[10px] text-warning pl-1 font-mono">
- 고립: {data.orphan}
+ {t('ontologyPage.orphanCount', { count: data.orphan })}
  </div>
  )}
  </div>
@@ -155,7 +157,7 @@ export function QualityDashboard({ caseId, onClose }: QualityDashboardProps) {
  {/* Duplicate details */}
  {report.duplicate_names > 0 && (
  <div className="space-y-1">
- <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">중복 이름 상세</div>
+ <div className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">{t('ontologyPage.msg25df51cc')}</div>
  {Object.entries(report.duplicate_details).map(([name, count]) => (
  <div key={name} className="flex items-center justify-between text-xs text-muted-foreground">
  <span className="truncate max-w-[180px] font-mono">{name}</span>

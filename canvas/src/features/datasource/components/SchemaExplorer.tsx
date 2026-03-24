@@ -83,9 +83,9 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
  </button>
  {selectedDsName === name && (
  <div className="ml-4 mt-0.5">
- {schemasLoading && <p className="text-xs text-foreground0 p-1">로딩 중...</p>}
+ {schemasLoading && <p className="text-xs text-foreground0 p-1">{t('objectExplorerExt.loading')}</p>}
  {!schemasLoading && schemas.length === 0 && (
- <p className="text-xs text-foreground0 p-1">스키마 없음</p>
+ <p className="text-xs text-foreground0 p-1">{t('datasourceExt.noSchemas')}</p>
  )}
  {!schemasLoading &&
  schemas.map((schema) => (
@@ -101,7 +101,7 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
  </button>
  {expandedSchema === schema && (
  <div className="ml-4 py-1">
- {tablesLoading === schema && <p className="text-xs text-muted-foreground px-2">로딩 중...</p>}
+ {tablesLoading === schema && <p className="text-xs text-muted-foreground px-2">{t('objectExplorerExt.loading')}</p>}
  {tablesMap[schema]?.map((table) => (
  <div key={table} className="flex items-center gap-2 px-2 py-0.5 text-xs text-muted-foreground">
  <Table size={12} />

@@ -7,6 +7,7 @@ import { postDirectSql, type DirectSqlResponse } from '@/features/nl2sql/api/ora
 import type { ExecutionMetadata } from '@/features/nl2sql/types/nl2sql';
 import { AppError } from '@/lib/api/errors';
 import {
+import { useTranslation } from 'react-i18next';
  Play,
  ChevronDown,
  ChevronUp,
@@ -18,7 +19,8 @@ interface DirectSqlPanelProps {
  datasourceId: string;
 }
 
-export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
+export function DirectSqlPanel({
+  const { t } = useTranslation(); datasourceId }: DirectSqlPanelProps) {
  const [expanded, setExpanded] = useState(false);
  const [sql, setSql] = useState('');
  const [loading, setLoading] = useState(false);
@@ -38,13 +40,13 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  if (res.success && res.data) {
  setResult(res.data);
  } else {
- setError(res.error?.message ?? 'SQL 실행에 실패했습니다.');
+ setError(res.error?.message ?? t('nl2sqlPage.m6c42b427'));
  }
  } catch (err) {
  const msg =
  err instanceof AppError
  ? err.userMessage
- : (err as Error).message || 'SQL 실행에 실패했습니다.';
+ {t('nl2sqlPage.m5839e1b5')}
  setError(msg);
  } finally {
  setLoading(false);
@@ -128,11 +130,11 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  ) : (
  <Play className="h-3.5 w-3.5" />
  )}
- {loading ? '실행 중...' : 'SQL 실행'}
+ {loading ? t('dataQualityExt.running') : t('nl2sqlPage.m3d50a48e')}
  </Button>
  {!datasourceId && (
  <span className="text-xs text-foreground/60 font-mono">
- 데이터소스를 먼저 선택하세요.
+ {t('nl2sqlPage.me66cb9e5')}
  </span>
  )}
  </div>
@@ -160,7 +162,7 @@ export function DirectSqlPanel({ datasourceId }: DirectSqlPanelProps) {
  {/* Empty result */}
  {result && normalizedColumns.length === 0 && (
  <div className="text-sm text-foreground/60 py-2 font-mono">
- 실행 완료 (결과 없음, {result.result.row_count} rows affected)
+ {t('nl2sqlPage.executionDone', { count: result.result.row_count })}
  </div>
  )}
  </div>

@@ -25,12 +25,12 @@ import { useTranslation } from 'react-i18next';
 // ---------------------------------------------------------------------------
 
 const ROLE_LABEL: Record<string, string> = {
-  admin: '관리자',
-  manager: '매니저',
-  analyst: '분석가',
-  engineer: '엔지니어',
-  staff: '직원',
-  viewer: '뷰어',
+  admin: t('caseDashboardExt.role.admin'),
+  manager: t('caseDashboardExt.role.manager'),
+  analyst: t('caseDashboardExt.role.analyst'),
+  engineer: t('caseDashboardExt.role.engineer'),
+  staff: t('securityExt.roleName.staff'),
+  viewer: t('caseDashboardExt.role.viewer'),
 };
 
 // ---------------------------------------------------------------------------
@@ -104,7 +104,7 @@ export const TablePermissions: React.FC = () => {
         <div>
           <h2 className="text-lg font-semibold text-foreground">{t('securityExt.tablePermissions')}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            스키마/테이블별 역할 접근 권한을 관리합니다. 체크박스로 읽기/쓰기 권한을 제어합니다.
+            {t('securityF.maff7cf10')}
           </p>
         </div>
         <Button
@@ -114,7 +114,7 @@ export const TablePermissions: React.FC = () => {
           disabled={isLoading}
         >
           <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          새로고침
+          {t('datasourceExt.refreshBtn')}
         </Button>
       </div>
 
@@ -122,7 +122,7 @@ export const TablePermissions: React.FC = () => {
       {isError && (
         <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>테이블 권한 데이터를 불러오는 데 실패했습니다. {(error as Error)?.message}</span>
+          <span>{t('securityF.msg44e85d49')}</span>
         </div>
       )}
 
@@ -130,7 +130,7 @@ export const TablePermissions: React.FC = () => {
       {isLoading && !isError && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">테이블 권한 로딩 중...</span>
+          <span className="text-sm">{t('securityExt.loadingTablePerms')}</span>
         </div>
       )}
 
@@ -138,8 +138,8 @@ export const TablePermissions: React.FC = () => {
       {!isLoading && !isError && permissions.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Database className="h-10 w-10" />
-          <p className="font-medium">등록된 테이블 권한이 없습니다</p>
-          <span className="text-sm">데이터소스를 연결하면 테이블이 자동으로 표시됩니다</span>
+          <p className="font-medium">{t('securityExt.noTablePerms')}</p>
+          <span className="text-sm">{t('securityExt.noTablePermsHint')}</span>
         </div>
       )}
 
@@ -164,7 +164,7 @@ export const TablePermissions: React.FC = () => {
                 <thead>
                   <tr className="bg-muted/50 border-b border-border">
                     <th className="text-left px-4 py-3 text-xs font-semibold text-muted-foreground uppercase tracking-wider sticky left-0 bg-muted/50 z-10 min-w-[200px]">
-                      스키마 / 테이블
+                      {t('securityF.m8a2c9971')}
                     </th>
                     {allRoles.map((role) => (
                       <th
@@ -220,14 +220,14 @@ export const TablePermissions: React.FC = () => {
                               <Checkbox
                                 checked={perms.read}
                                 onCheckedChange={() => handleToggle(tp, role, 'read')}
-                                aria-label={`${tp.table_name} ${role} 읽기`}
+                                aria-label={t('securityF.tableRoleRead', { table: tp.table_name, role })}
                               />
                             </td>
                             <td className="text-center px-2 py-2.5">
                               <Checkbox
                                 checked={perms.write}
                                 onCheckedChange={() => handleToggle(tp, role, 'write')}
-                                aria-label={`${tp.table_name} ${role} 쓰기`}
+                                aria-label={t('securityF.tableRoleWrite', { table: tp.table_name, role })}
                               />
                             </td>
                           </React.Fragment>
@@ -241,7 +241,7 @@ export const TablePermissions: React.FC = () => {
                         colSpan={1 + allRoles.length * 2}
                         className="text-center py-8 text-muted-foreground"
                       >
-                        검색 결과가 없습니다
+                        {t('explorerExt.noResults')}
                       </td>
                     </tr>
                   )}
@@ -253,8 +253,8 @@ export const TablePermissions: React.FC = () => {
           {/* 범례 */}
           <div className="flex items-center gap-4 text-xs text-muted-foreground">
             <span className="font-medium">{t('securityExt.legend')}</span>
-            <span>R = 읽기 (Read)</span>
-            <span>W = 쓰기 (Write)</span>
+            <span>{t('securityF.msgf2d2cbc4')}</span>
+            <span>{t('securityF.msgcf9f8e85')}</span>
             <span className="text-amber-600">
               * 쓰기 활성화 시 읽기가 자동으로 활성화됩니다
             </span>

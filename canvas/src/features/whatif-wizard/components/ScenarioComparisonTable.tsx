@@ -31,7 +31,7 @@ export function ScenarioComparisonTable({
   title,
 }: ScenarioComparisonTableProps) {
   const { t } = useTranslation();
-  const resolvedTitle = title ?? t('whatifWizard.step5.scenarioComparison', '시나리오 비교');
+  const resolvedTitle = title ?? t('whatifWizard.step5.scenarioComparison');
   if (!data || data.scenarios.length === 0 || data.metrics.length === 0) {
     return (
       <Card>
@@ -59,7 +59,7 @@ export function ScenarioComparisonTable({
             {resolvedTitle}
           </CardTitle>
           <Badge variant="secondary" className="text-xs">
-            {data.scenarios.length}개 시나리오 x {data.metrics.length}개 지표
+            {t('whatifWizardF.comparisonSummary', { scenarios: data.scenarios.length, metrics: data.metrics.length })}
           </Badge>
         </div>
       </CardHeader>
@@ -70,7 +70,7 @@ export function ScenarioComparisonTable({
               <TableRow>
                 {/* 빈 셀 (행 제목 열) */}
                 <TableHead className="text-xs font-semibold min-w-[140px] sticky left-0 bg-card z-10">
-                  {t('semanticCatalog.summary.measures', '지표')}
+                  {t('semanticCatalog.summary.measures')}
                 </TableHead>
                 {/* 시나리오 열 헤더 */}
                 {data.scenarios.map((scenario) => (

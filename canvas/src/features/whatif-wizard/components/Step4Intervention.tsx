@@ -32,65 +32,65 @@ import type { InterventionSpec } from '../types/whatifWizard.types';
  */
 const NODE_FIELDS: Record<string, Array<{ field: string; label: string; baseline: number }>> = {
   kpi_oee: [
-    { field: 'oee_score', label: 'OEE 점수', baseline: 78.5 },
+    { field: 'oee_score', label: t('whatifExt.mockLabels.oee_score'), baseline: 78.5 },
   ],
   kpi_throughput: [
-    { field: 'throughput', label: '생산량 (개/시간)', baseline: 850 },
+    { field: 'throughput', label: t('whatifWizardF.msgda0d69e6'), baseline: 850 },
   ],
   kpi_defect: [
-    { field: 'defect_rate', label: '불량률 (%)', baseline: 3.2 },
+    { field: 'defect_rate', label: t('whatifWizardF.msgafb02098'), baseline: 3.2 },
   ],
   kpi_downtime: [
-    { field: 'downtime_hours', label: '중단 시간 (시간)', baseline: 4.5 },
+    { field: 'downtime_hours', label: t('whatifWizardF.msgcc0b550c'), baseline: 4.5 },
   ],
   msr_availability: [
-    { field: 'availability_pct', label: '가용률 (%)', baseline: 92 },
+    { field: 'availability_pct', label: t('whatifWizardF.msg9b89f8a1'), baseline: 92 },
   ],
   msr_performance: [
-    { field: 'performance_pct', label: '성능 효율 (%)', baseline: 88 },
+    { field: 'performance_pct', label: t('whatifWizardF.msgcd2f09f1'), baseline: 88 },
   ],
   msr_quality: [
-    { field: 'quality_pct', label: '품질률 (%)', baseline: 97 },
+    { field: 'quality_pct', label: t('whatifWizardF.msgd561c5e7'), baseline: 97 },
   ],
   msr_cycle_time: [
-    { field: 'cycle_time_sec', label: '사이클 타임 (초)', baseline: 12.3 },
+    { field: 'cycle_time_sec', label: t('whatifWizardF.msge1cf3896'), baseline: 12.3 },
   ],
   msr_mtbf: [
-    { field: 'mtbf_hours', label: 'MTBF (시간)', baseline: 720 },
+    { field: 'mtbf_hours', label: t('whatifWizardF.msg2c663557'), baseline: 720 },
   ],
   prc_assembly: [
-    { field: 'assembly_speed', label: '조립 속도', baseline: 100 },
-    { field: 'worker_count', label: '작업자 수', baseline: 5 },
+    { field: 'assembly_speed', label: t('whatifWizardF.msg6324798a'), baseline: 100 },
+    { field: 'worker_count', label: t('whatifWizardF.msgc05ea3b1'), baseline: 5 },
   ],
   prc_inspection: [
-    { field: 'inspection_rate', label: '검사 비율 (%)', baseline: 100 },
+    { field: 'inspection_rate', label: t('whatifWizardF.msg5aa88025'), baseline: 100 },
   ],
   prc_packaging: [
-    { field: 'packaging_speed', label: '포장 속도', baseline: 120 },
+    { field: 'packaging_speed', label: t('whatifWizardF.msg32731e7b'), baseline: 120 },
   ],
   prc_maintenance: [
-    { field: 'maintenance_interval', label: '정비 주기 (일)', baseline: 30 },
+    { field: 'maintenance_interval', label: t('whatifWizardF.msg8ccd9960'), baseline: 30 },
   ],
   rsc_machine_a: [
-    { field: 'machine_load', label: '설비 부하 (%)', baseline: 75 },
-    { field: 'machine_age', label: '설비 연식 (년)', baseline: 5 },
+    { field: 'machine_load', label: t('whatifWizardF.msgfe03a2b9'), baseline: 75 },
+    { field: 'machine_age', label: t('whatifWizardF.msgd3a27250'), baseline: 5 },
   ],
   rsc_robot_01: [
-    { field: 'robot_speed', label: '로봇 속도 (%)', baseline: 100 },
+    { field: 'robot_speed', label: t('whatifWizardF.msgb9e6ba49'), baseline: 100 },
   ],
   rsc_operator: [
-    { field: 'operator_count', label: '운영 인력 수', baseline: 10 },
-    { field: 'skill_level', label: '숙련도 (1-10)', baseline: 7 },
+    { field: 'operator_count', label: t('whatifWizardF.msgdefb8be5'), baseline: 10 },
+    { field: 'skill_level', label: t('whatifWizardF.msg8187495c'), baseline: 7 },
   ],
   rsc_material: [
-    { field: 'material_cost', label: '원자재 비용 (만원)', baseline: 45.5 },
-    { field: 'material_quality', label: '원자재 품질 (1-10)', baseline: 8 },
+    { field: 'material_cost', label: t('whatifWizardF.msgda854352'), baseline: 45.5 },
+    { field: 'material_quality', label: t('whatifWizardF.msg20d4aed4'), baseline: 8 },
   ],
 };
 
 /** 기본 필드 (매핑이 없는 노드용) */
 const DEFAULT_FIELDS = [
-  { field: 'value', label: '값', baseline: 100 },
+  { field: 'value', label: t('explorerExt.value'), baseline: 100 },
 ];
 
 export function Step4Intervention() {
@@ -130,7 +130,7 @@ export function Step4Intervention() {
       field: newField,
       value: newValue || fieldInfo.baseline,
       baselineValue: fieldInfo.baseline,
-      description: newDescription || `${node.name} - ${fieldInfo.label} 변경`,
+      description: newDescription || t('whatifWizardF.step4DefaultDesc', { name: node.name, label: fieldInfo.label }),
     };
 
     addIntervention(spec);
@@ -172,12 +172,12 @@ export function Step4Intervention() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <SlidersHorizontal className="w-5 h-5 text-primary" />
-          {t('whatifWizard.step4.title', '개입 설정')}
+          {t('whatifWizard.step4.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           {t(
             'whatifWizard.step4.description',
-            '시뮬레이션에서 변경할 파라미터 값을 설정합니다.',
+            t('whatifWizardF.step4Description'),
           )}
         </p>
       </div>
@@ -187,9 +187,9 @@ export function Step4Intervention() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">설정된 개입</CardTitle>
+              <CardTitle className="text-sm">{t('whatifWizardF.msg0798ada6')}</CardTitle>
               <Badge variant="secondary" className="text-xs">
-                {interventions.length}개
+                {t('whatifWizardF.interventionCountBadge', { count: interventions.length })}
               </Badge>
             </div>
           </CardHeader>
@@ -222,7 +222,7 @@ export function Step4Intervention() {
                       size="sm"
                       className="h-7 w-7 p-0 text-muted-foreground hover:text-destructive"
                       onClick={() => removeIntervention(idx)}
-                      aria-label="개입 삭제"
+                      aria-label={t('whatifWizardF.msgb7217069')}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </Button>
@@ -274,14 +274,14 @@ export function Step4Intervention() {
                       className="w-full"
                     />
                     <div className="flex justify-between text-[10px] text-muted-foreground">
-                      <span>베이스라인: {baseline.toFixed(1)}</span>
-                      <span>변경값: {iv.value.toFixed(1)}</span>
+                      <span>{t('whatifWizardF.msg72b2819d')}</span>
+                      <span>{t('whatifWizardF.msg10d30a11')}</span>
                     </div>
                   </div>
 
                   {/* 설명 */}
                   <Input
-                    placeholder="개입 설명..."
+                    placeholder={t('whatifWizardF.msg0368a51f')}
                     value={iv.description}
                     onChange={(e) =>
                       updateIntervention(idx, { description: e.target.value })
@@ -300,17 +300,17 @@ export function Step4Intervention() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Plus className="w-4 h-4" />
-            개입 추가
+            {t('whatifWizard.step4.addIntervention')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 노드 선택 */}
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-2">
-              <Label className="text-xs">대상 노드</Label>
+              <Label className="text-xs">{t('whatifWizardF.msg0b842b9c')}</Label>
               <Select value={newNodeId} onValueChange={handleNodeChange}>
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="노드 선택" />
+                  <SelectValue placeholder={t('whatifWizard.step4.selectNode')} />
                 </SelectTrigger>
                 <SelectContent>
                   {selectedNodes.map((node) => (
@@ -324,20 +324,20 @@ export function Step4Intervention() {
 
             {/* 필드 선택 */}
             <div className="space-y-2">
-              <Label className="text-xs">대상 필드</Label>
+              <Label className="text-xs">{t('whatifWizardF.msg2dc936dd')}</Label>
               <Select
                 value={newField}
                 onValueChange={handleFieldChange}
                 disabled={!newNodeId}
               >
                 <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="필드 선택" />
+                  <SelectValue placeholder={t('domainExt.selectField')} />
                 </SelectTrigger>
                 <SelectContent>
                   {newNodeId &&
                     getNodeFields(newNodeId).map((f) => (
                       <SelectItem key={f.field} value={f.field} className="text-xs">
-                        {f.label} (현재: {f.baseline})
+                        {t('whatifWizardF.fieldCurrentValue', { label: f.label, baseline: f.baseline })}
                       </SelectItem>
                     ))}
                 </SelectContent>
@@ -348,7 +348,7 @@ export function Step4Intervention() {
           {/* 값 입력 */}
           {newNodeId && newField && (
             <div className="space-y-2">
-              <Label className="text-xs">변경 값</Label>
+              <Label className="text-xs">{t('whatifWizardF.msg45e1a41e')}</Label>
               <Input
                 type="number"
                 step="any"
@@ -361,9 +361,9 @@ export function Step4Intervention() {
 
           {/* 설명 입력 */}
           <div className="space-y-2">
-            <Label className="text-xs">설명 (선택)</Label>
+            <Label className="text-xs">{t('cepExt.descriptionOpt')}</Label>
             <Input
-              placeholder="이 개입의 목적을 설명하세요..."
+              placeholder={t('whatifWizardF.msg6909ff3e')}
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
               className="h-8 text-xs"
@@ -379,7 +379,7 @@ export function Step4Intervention() {
             size="sm"
           >
             <Plus className="w-4 h-4 mr-2" />
-            개입 추가
+            {t('whatifWizard.step4.addIntervention')}
           </Button>
         </CardContent>
       </Card>

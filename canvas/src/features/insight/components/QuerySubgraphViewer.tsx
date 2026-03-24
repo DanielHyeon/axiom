@@ -60,7 +60,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  const msg =
  err?.response?.data?.error_message ??
  err?.message ??
- 'SQL 서브그래프 생성 실패';
+ {t('insightF.md0b0f59d')}
  setError(msg);
  })
  .finally(() => {
@@ -120,7 +120,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Loader2 className="h-8 w-8 animate-spin mb-3" />
- <p className="text-sm">SQL 구조 분석 중...</p>
+ <p className="text-sm">{t('insightF.msgb6b9a971')}</p>
  </div>
  );
  }

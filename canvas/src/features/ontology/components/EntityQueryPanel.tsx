@@ -27,7 +27,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const defaultQuery = `${nodeName}(${nodeDescription ?? nodeName})에 해당하는 모든 데이터를 조회해줘`;
+  const defaultQuery = t('ontologyF.defaultQuery', { name: nodeName, desc: nodeDescription ?? nodeName });
 
   // 쿼리 실행
   const executeQuery = async () => {
@@ -70,7 +70,7 @@ export function EntityQueryPanel({ nodeName, nodeDescription }: Props) {
         })),
         rowCount: 5,
       });
-      setError(null); // Mock으로 대체되었으므로 에러 해제
+      {t('ontologyF.ma91ba2d0')}
     } finally {
       setIsLoading(false);
     }

@@ -38,7 +38,7 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
       <div className="flex items-center justify-between px-3 py-1.5 bg-muted border-b border-border">
         <div className="flex items-center gap-1.5 text-[10px] text-muted-foreground font-mono">
           <Code className="h-3 w-3" />
-          SQL 미리보기
+          {t('olapStudio.pivot.sqlPreview')}
         </div>
         <button
           type="button"
@@ -60,7 +60,7 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
       <div className="flex-1 overflow-auto p-3">
         {isLoading ? (
           <div className="text-[10px] text-muted-foreground font-mono animate-pulse">
-            SQL 생성 중...
+            {t('olapStudioF.m88eef095')}
           </div>
         ) : sql ? (
           <pre className="text-[11px] text-muted-foreground font-mono whitespace-pre-wrap leading-relaxed">
@@ -68,7 +68,7 @@ export function PivotSqlPreview({ sql, isLoading }: PivotSqlPreviewProps) {
           </pre>
         ) : (
           <div className="text-[10px] text-muted-foreground font-mono">
-            피벗을 설정하고 미리보기를 클릭하세요
+            {t('olapStudioF.m6ac47a1e')}
           </div>
         )}
       </div>

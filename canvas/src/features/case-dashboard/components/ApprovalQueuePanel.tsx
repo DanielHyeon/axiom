@@ -1,7 +1,9 @@
 import { useApprovalQueue, useApproveHitl, useReworkWorkitem } from '../hooks/useApprovalQueue';
 import { CheckCircle2, XCircle, FileCheck } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function ApprovalQueuePanel() {
+  const { t } = useTranslation();
  const { data: items = [], isLoading, error } = useApprovalQueue(20);
  const approveHitl = useApproveHitl();
  const rework = useReworkWorkitem();
@@ -9,7 +11,7 @@ export function ApprovalQueuePanel() {
  if (isLoading) {
  return (
  <div className="glass-card rounded-xl p-5">
- <h2 className="mb-4 text-lg font-semibold text-foreground">검토 대기</h2>
+ <h2 className="mb-4 text-lg font-semibold text-foreground">{t('caseDashboardExt.approvalQueue')}</h2>
  <div className="space-y-3 animate-pulse">
  <div className="h-14 rounded-lg bg-muted/30" />
  <div className="h-14 rounded-lg bg-muted/30" />
@@ -22,15 +24,15 @@ export function ApprovalQueuePanel() {
  if (error) {
  return (
  <div className="glass-card rounded-xl border-destructive/20 p-5">
- <h2 className="mb-2 text-lg font-semibold text-foreground">검토 대기</h2>
- <p className="text-sm text-destructive">데이터를 불러오는 중 오류가 발생했습니다.</p>
+ <h2 className="mb-2 text-lg font-semibold text-foreground">{t('caseDashboardExt.approvalQueue')}</h2>
+ <p className="text-sm text-destructive">{t('caseDashboardExt.loadError')}</p>
  </div>
  );
  }
 
  return (
  <div className="glass-card rounded-xl p-5">
- <h2 className="mb-4 text-lg font-semibold text-foreground">검토 대기</h2>
+ <h2 className="mb-4 text-lg font-semibold text-foreground">{t('caseDashboardExt.approvalQueue')}</h2>
  <div className="grid gap-3">
  {items.map((item) => (
  <div
@@ -64,21 +66,21 @@ export function ApprovalQueuePanel() {
  className="inline-flex items-center gap-1.5 rounded-lg bg-success/90 px-3 py-1.5 text-xs font-medium text-primary-foreground transition-all duration-200 hover:bg-success hover:shadow-sm hover:shadow-success/25 disabled:opacity-50"
  >
  <CheckCircle2 className="h-3.5 w-3.5" />
- 승인
+ {t('common.approve')}
  </button>
  <button
  type="button"
  onClick={() =>
  rework.mutate({
  workitem_id: item.workitem_id,
- reason: '검토 반려',
+ reason: t('caseDashboardExt.rejectReason'),
  })
  }
  disabled={rework.isPending}
  className="inline-flex items-center gap-1.5 rounded-lg border border-border/30 bg-muted/40 px-3 py-1.5 text-xs font-medium text-muted-foreground transition-all duration-200 hover:text-foreground hover:bg-muted/60 disabled:opacity-50"
  >
  <XCircle className="h-3.5 w-3.5" />
- 반려
+ {t('caseDashboardExt.status.REJECTED')}
  </button>
  </div>
  </div>
@@ -88,7 +90,7 @@ export function ApprovalQueuePanel() {
  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
  <FileCheck className="h-5 w-5 text-muted-foreground/50" />
  </div>
- <p className="text-sm text-muted-foreground">승인/반려 대기 항목이 없습니다.</p>
+ <p className="text-sm text-muted-foreground">{t('caseDashboardExt.noApprovalItems')}</p>
  </div>
  )}
  </div>

@@ -55,11 +55,11 @@ function CustomTooltip({
           <span className="font-mono">{d.baseline.toFixed(2)}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">{t('whatifWizard.step5.resultLabel', '결과값')}:</span>{' '}
+          <span className="text-muted-foreground">{t('whatifWizard.step5.resultLabel')}:</span>{' '}
           <span className="font-mono">{d.result.toFixed(2)}</span>
         </p>
         <p>
-          <span className="text-muted-foreground">{t('whatifWizard.step5.deltaLabel', '변화량')}:</span>{' '}
+          <span className="text-muted-foreground">{t('whatifWizard.step5.deltaLabel')}:</span>{' '}
           <span
             className="font-mono"
             style={{ color: deltaColor(d.pctChange) }}

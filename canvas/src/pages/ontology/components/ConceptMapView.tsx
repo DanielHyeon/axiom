@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
+import { useTranslation } from 'react-i18next';
  getConceptMappings,
  createConceptMapping,
  deleteConceptMapping,
@@ -15,7 +16,8 @@ interface ConceptMapViewProps {
  caseId: string;
 }
 
-export function ConceptMapView({ caseId }: ConceptMapViewProps) {
+export function ConceptMapView({
+  const { t } = useTranslation(); caseId }: ConceptMapViewProps) {
  const queryClient = useQueryClient();
 
  // Existing mappings
@@ -68,18 +70,18 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  <div className="bg-muted border border-border rounded p-4">
  <h3 className="text-sm font-semibold text-foreground font-heading mb-3 flex items-center gap-2">
  <Plus size={14} />
- 새 매핑 추가
+ {t('ontologyPage.mad21f69e')}
  </h3>
  <div className="flex items-end gap-3">
  {/* Source: Ontology Node */}
  <div className="flex-1">
- <label className="block text-[11px] text-foreground/60 font-mono mb-1">온톨로지 노드</label>
+ <label className="block text-[11px] text-foreground/60 font-mono mb-1">{t('ontologyPage.msgdf153a6d')}</label>
  <select
  value={selectedSourceId}
  onChange={(e) => setSelectedSourceId(e.target.value)}
  className="w-full bg-card text-foreground text-[13px] rounded border border-border px-2 py-1.5 font-mono focus:outline-none focus:border-border"
  >
- <option value="">노드 선택...</option>
+ <option value="">{t('ontologyPage.msgc5bb7b84')}</option>
  {graphData.nodes.map((node) => (
  <option key={node.id} value={node.id}>
  [{node.layer}] {node.label}
@@ -90,7 +92,7 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
 
  {/* Relation type */}
  <div className="w-36">
- <label className="block text-[11px] text-foreground/60 font-mono mb-1">관계 유형</label>
+ <label className="block text-[11px] text-foreground/60 font-mono mb-1">{t('domain.relation.type')}</label>
  <select
  value={relType}
  onChange={(e) => setRelType(e.target.value)}
@@ -104,13 +106,13 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
 
  {/* Target: Table */}
  <div className="flex-1">
- <label className="block text-[11px] text-foreground/60 font-mono mb-1">스키마 테이블</label>
+ <label className="block text-[11px] text-foreground/60 font-mono mb-1">{t('ontologyPage.msga4771730')}</label>
  <select
  value={selectedTargetTable}
  onChange={(e) => setSelectedTargetTable(e.target.value)}
  className="w-full bg-card text-foreground text-[13px] rounded border border-border px-2 py-1.5 font-mono focus:outline-none focus:border-border"
  >
- <option value="">테이블 선택...</option>
+ <option value="">{t('ontologyPage.msg122f98c0')}</option>
  {tables.map((t) => (
  <option key={`${t.datasource}.${t.schema}.${t.name}`} value={t.name}>
  {t.schema}.{t.name}
@@ -125,11 +127,11 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  disabled={!selectedSourceId || !selectedTargetTable || createMut.isPending}
  className="px-4 py-1.5 bg-destructive hover:bg-red-700 disabled:bg-border disabled:text-foreground/60 text-primary-foreground text-[12px] font-medium font-heading rounded transition-colors"
  >
- {createMut.isPending ? '...' : '추가'}
+ {createMut.isPending ? '...' : t('common.add')}
  </button>
  </div>
  {createMut.isError && (
- <p className="text-xs text-destructive mt-2 font-mono">매핑 생성 실패. 노드 또는 테이블을 확인하세요.</p>
+ <p className="text-xs text-destructive mt-2 font-mono">{t('ontologyPage.msga9495711')}</p>
  )}
  </div>
 
@@ -145,7 +147,7 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  }`}
  >
  <List size={14} />
- 테이블
+ {t('olapExt.chartTable')}
  </button>
  <button
  type="button"
@@ -157,7 +159,7 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  }`}
  >
  <GitBranch size={14} />
- 시각화
+ {t('ontologyPage.m29c621c7')}
  </button>
  </div>
 
@@ -173,12 +175,12 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  <table className="w-full text-[13px]">
  <thead>
  <tr className="text-[11px] text-foreground/60 font-mono uppercase border-b border-border">
- <th className="text-left py-2 px-3 font-medium">소스 노드</th>
- <th className="text-left py-2 px-3 font-medium">레이어</th>
- <th className="text-left py-2 px-3 font-medium">관계</th>
- <th className="text-left py-2 px-3 font-medium">대상 테이블</th>
- <th className="text-left py-2 px-3 font-medium">스키마</th>
- <th className="text-left py-2 px-3 font-medium">생성일</th>
+ <th className="text-left py-2 px-3 font-medium">{t('ontologyPage.msg2aa42c05')}</th>
+ <th className="text-left py-2 px-3 font-medium">{t('ontologyExt.wizard.layer')}</th>
+ <th className="text-left py-2 px-3 font-medium">{t('objectExplorerExt.relations')}</th>
+ <th className="text-left py-2 px-3 font-medium">{t('ontologyPage.msgb351a9b7')}</th>
+ <th className="text-left py-2 px-3 font-medium">{t('mvExt.schema')}</th>
+ <th className="text-left py-2 px-3 font-medium">{t('mvExt.colCreatedAt')}</th>
  <th className="w-10"></th>
  </tr>
  </thead>
@@ -186,14 +188,14 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  {mappingsLoading ? (
  <tr>
  <td colSpan={7} className="text-center py-8 text-foreground/60">
- 로딩 중...
+ {t('objectExplorerExt.loading')}
  </td>
  </tr>
  ) : mappings.length === 0 ? (
  <tr>
  <td colSpan={7} className="text-center py-8 text-foreground/60">
  <Link size={20} className="inline-block mb-1 opacity-30" />
- <p className="font-mono">매핑이 없습니다. 위에서 새 매핑을 추가하세요.</p>
+ <p className="font-mono">{t('ontologyPage.msg8a21d159')}</p>
  </td>
  </tr>
  ) : (
@@ -222,7 +224,7 @@ export function ConceptMapView({ caseId }: ConceptMapViewProps) {
  onClick={() => deleteMut.mutate(m.rel_id)}
  disabled={deleteMut.isPending}
  className="p-1 text-foreground/60 hover:text-destructive transition-colors"
- title="매핑 삭제"
+ title={t('ontologyPage.msg7729f7f3')}
  >
  <Trash2 size={14} />
  </button>

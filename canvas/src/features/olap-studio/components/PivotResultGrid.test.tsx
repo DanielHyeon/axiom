@@ -3,10 +3,35 @@
  *
  * 결과 테이블, 로딩 상태, 에러 상태, 빈 결과 등 다양한 상태를 검증한다.
  */
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { PivotResultGrid } from './PivotResultGrid';
 import type { PivotResult } from '../hooks/usePivot';
+
+// i18n 모킹 — 번역 키에 대해 실제 한국어 값을 반환
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, params?: Record<string, unknown>) => {
+      const translations: Record<string, string> = {
+        'olapStudioExt.pivotEmptyHint': '피벗을 실행하면 결과가 여기에 표시됩니다',
+        'olapStudioExt.pivotNoResults': '결과가 없습니다',
+        'olapStudioExt.csvExport': 'CSV 내보내기',
+        'olapStudioF.rowCountLocale': '{{count}}행',
+        'olapStudioF.showingOf': '(표시: {{visible}}/{{total}})',
+        'olapStudioF.loadMore': '더 보기 ({{count}}행)',
+        'olapStudioF.remainingRows': ' / 남은 {{count}}행',
+      };
+      let text = translations[key] ?? key;
+      if (params) {
+        Object.entries(params).forEach(([k, v]) => {
+          text = text.replace(`{{${k}}}`, String(v));
+        });
+      }
+      return text;
+    },
+    i18n: { language: 'ko', changeLanguage: vi.fn() },
+  }),
+}));
 
 // ─── 테스트 헬퍼 ──────────────────────────────────────────
 

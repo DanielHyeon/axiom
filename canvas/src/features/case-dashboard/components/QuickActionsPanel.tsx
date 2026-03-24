@@ -4,9 +4,9 @@ import { List, MessageSquare, BarChart3 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 
 const ACTIONS = [
- { label: '케이스 목록', to: ROUTES.CASES.LIST, icon: List },
+ { label: t('caseDashboardExt.caseList'), to: ROUTES.CASES.LIST, icon: List },
  { label: 'NL2SQL', to: ROUTES.ANALYSIS.NL2SQL, icon: MessageSquare },
- { label: 'OLAP 피벗', to: ROUTES.ANALYSIS.OLAP, icon: BarChart3 },
+ { label: t('caseDashboardExt.olapPivot'), to: ROUTES.ANALYSIS.OLAP, icon: BarChart3 },
 ];
 
 export function QuickActionsPanel() {

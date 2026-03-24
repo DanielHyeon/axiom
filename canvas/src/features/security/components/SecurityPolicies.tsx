@@ -14,17 +14,18 @@ import { Shield, Pencil, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import type { SecurityPolicy, SecurityPolicyType } from '../types/security';
+import { useTranslation } from 'react-i18next';
 
 // ---------------------------------------------------------------------------
 // 정책 타입 라벨 + 아이콘
 // ---------------------------------------------------------------------------
 
 const POLICY_TYPE_CONFIG: Record<SecurityPolicyType, { label: string; color: string }> = {
-  query_limit: { label: '쿼리 제한', color: 'bg-blue-100 text-blue-700' },
-  column_mask: { label: '컬럼 마스킹', color: 'bg-purple-100 text-purple-700' },
-  column_filter: { label: '컬럼 필터', color: 'bg-red-100 text-red-600' },
-  query_rewrite: { label: '쿼리 변환', color: 'bg-amber-100 text-amber-700' },
-  rate_limit: { label: '속도 제한', color: 'bg-emerald-100 text-emerald-700' },
+  query_limit: { label: t('securityExt.policyType.query_limit'), color: 'bg-blue-100 text-blue-700' },
+  column_mask: { label: t('securityExt.policyType.column_mask'), color: 'bg-purple-100 text-purple-700' },
+  column_filter: { label: t('securityExt.policyType.column_filter'), color: 'bg-red-100 text-red-600' },
+  query_rewrite: { label: t('securityExt.policyType.query_rewrite'), color: 'bg-amber-100 text-amber-700' },
+  rate_limit: { label: t('securityExt.policyType.rate_limit'), color: 'bg-emerald-100 text-emerald-700' },
 };
 
 // ---------------------------------------------------------------------------
@@ -35,7 +36,7 @@ const MOCK_POLICIES: SecurityPolicy[] = [
   {
     name: 'default_limit',
     policy_type: 'query_limit',
-    description: '기본 SELECT 결과 행 수 제한',
+    description: t('securityExt.policyDesc.query_limit'),
     rules_json: JSON.stringify({ max_rows: 1000, enforce_limit: true }, null, 2),
     priority: 100,
     is_active: true,
@@ -43,7 +44,7 @@ const MOCK_POLICIES: SecurityPolicy[] = [
   {
     name: 'pii_protection',
     policy_type: 'column_mask',
-    description: '개인정보(PII) 컬럼 마스킹',
+    description: t('securityExt.policyDesc.column_mask'),
     rules_json: JSON.stringify(
       { masked_columns: ['ssn', 'phone', 'email', 'address'], mask_pattern: '***', except_roles: ['admin'] },
       null,
@@ -55,7 +56,7 @@ const MOCK_POLICIES: SecurityPolicy[] = [
   {
     name: 'salary_restriction',
     policy_type: 'column_filter',
-    description: '급여 정보 접근 제한',
+    description: t('securityExt.policyDesc.column_filter'),
     rules_json: JSON.stringify(
       { restricted_columns: ['salary', 'bonus', 'commission'], allowed_roles: ['admin', 'hr_manager'] },
       null,
@@ -67,7 +68,7 @@ const MOCK_POLICIES: SecurityPolicy[] = [
   {
     name: 'rate_limit',
     policy_type: 'rate_limit',
-    description: '쿼리 실행 속도 제한',
+    description: t('securityExt.policyDesc.rate_limit'),
     rules_json: JSON.stringify(
       { max_queries_per_minute: 100, max_concurrent: 5, except_roles: ['admin'] },
       null,
@@ -83,6 +84,7 @@ const MOCK_POLICIES: SecurityPolicy[] = [
 // ---------------------------------------------------------------------------
 
 export const SecurityPolicies: React.FC = () => {
+  const { t } = useTranslation();
   const [policies, setPolicies] = useState<SecurityPolicy[]>(MOCK_POLICIES);
   const [editingPolicy, setEditingPolicy] = useState<SecurityPolicy | null>(null);
   const [editJson, setEditJson] = useState('');
@@ -122,9 +124,9 @@ export const SecurityPolicies: React.FC = () => {
     <div className="flex flex-col gap-6">
       {/* 헤더 */}
       <div>
-        <h2 className="text-lg font-semibold text-foreground">보안 정책</h2>
+        <h2 className="text-lg font-semibold text-foreground">{t('securityExt.securityPolicies')}</h2>
         <p className="text-sm text-muted-foreground mt-1">
-          SQL 쿼리에 적용되는 보안 정책을 관리합니다
+          {t('securityF.mcc208a3a')}
         </p>
       </div>
 
@@ -132,8 +134,8 @@ export const SecurityPolicies: React.FC = () => {
       <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/5 border border-primary/20 text-sm text-muted-foreground">
         <Shield className="h-4 w-4 text-primary shrink-0" />
         <span>
-          보안 정책은 Oracle 서비스의 SQL Guard에 의해 쿼리 실행 시 자동 적용됩니다.
-          백엔드 API 연동 전까지 UI 미리보기로 제공됩니다.
+          {t('securityF.m9f62f2db')}
+          {t('securityF.m3bb50b29')}
         </span>
       </div>
 
@@ -179,7 +181,7 @@ export const SecurityPolicies: React.FC = () => {
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => openEdit(policy)}
-                    aria-label="정책 수정"
+                    aria-label={t('securityExt.editPolicy')}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -191,12 +193,12 @@ export const SecurityPolicies: React.FC = () => {
 
               {/* 메타 */}
               <div className="flex items-center gap-3 mb-3 text-xs">
-                <span className="text-muted-foreground">우선순위: {policy.priority}</span>
+                <span className="text-muted-foreground">{t('securityF.msgb890157b')}</span>
                 <Badge
                   variant={policy.is_active ? 'default' : 'secondary'}
                   className="text-[10px]"
                 >
-                  {policy.is_active ? '활성' : '비활성'}
+                  {policy.is_active ? t('cepExt.colEnabled') : t('semanticCatalogExt.inactive')}
                 </Badge>
               </div>
 
@@ -218,12 +220,12 @@ export const SecurityPolicies: React.FC = () => {
           }}
           role="dialog"
           aria-modal="true"
-          aria-label="보안 정책 수정"
+          aria-label={t('securityF.msg268c35d6')}
         >
           <div className="bg-card border border-border rounded-2xl w-[600px] max-h-[90vh] overflow-hidden shadow-2xl flex flex-col">
             <div className="flex items-center justify-between px-6 py-5 border-b border-border">
               <h3 className="text-lg font-semibold text-foreground">
-                {editingPolicy.name} 정책 수정
+                {t('securityF.editPolicy', { name: editingPolicy.name })}
               </h3>
               <Button variant="ghost" size="icon" onClick={() => setEditingPolicy(null)}>
                 <X className="h-5 w-5" />
@@ -232,7 +234,7 @@ export const SecurityPolicies: React.FC = () => {
             <div className="p-6 flex flex-col gap-4">
               <div className="flex flex-col gap-2">
                 <label className="text-sm font-medium text-muted-foreground">
-                  정책 규칙 (JSON)
+                  {t('securityF.m04e4c7e4')}
                 </label>
                 <textarea
                   value={editJson}
@@ -244,9 +246,9 @@ export const SecurityPolicies: React.FC = () => {
             </div>
             <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/30">
               <Button variant="outline" onClick={() => setEditingPolicy(null)}>
-                취소
+                {t('common.cancel')}
               </Button>
-              <Button onClick={saveEdit}>저장</Button>
+              <Button onClick={saveEdit}>{t('domainModeler.save')}</Button>
             </div>
           </div>
         </div>

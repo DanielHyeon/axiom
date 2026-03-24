@@ -78,13 +78,13 @@ export function ERDToolbar({
           htmlFor="erd-connected-only"
           className="text-[11px] text-foreground/60 font-mono cursor-pointer whitespace-nowrap"
         >
-          연결된 테이블만
+          {t('datasourceF.ma2d90592')}
         </label>
       </div>
 
       {/* 최대 테이블 수 */}
       <div className="flex items-center gap-1.5">
-        <span className="text-[11px] text-foreground/60 font-mono">최대:</span>
+        <span className="text-[11px] text-foreground/60 font-mono">{t('datasourceExt.maxLabel')}</span>
         <select
           value={filter.maxTables}
           onChange={(e) =>
@@ -95,7 +95,7 @@ export function ERDToolbar({
         >
           {MAX_TABLE_OPTIONS.map((n) => (
             <option key={n} value={n}>
-              {n}개
+              {t('datasourceF.countItems', { count: n })}
             </option>
           ))}
         </select>

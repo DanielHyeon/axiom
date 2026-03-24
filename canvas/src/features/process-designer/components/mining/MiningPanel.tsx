@@ -90,7 +90,7 @@ export function MiningPanel({
  : 'text-success'
  }
  >
- {bn.avgWaitTime.toFixed(0)}분
+ {t('processDesignerF.minutesSuffix', { min: bn.avgWaitTime.toFixed(0) })}
  </span>
  </div>
  ))}

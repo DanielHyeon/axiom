@@ -50,10 +50,10 @@ async function fetchPreviewData(
 ): Promise<PreviewData> {
   // 입력값 안전성 검증 — SQL 인젝션 방지 (C1 수정)
   if (!SAFE_IDENTIFIER.test(tableName)) {
-    throw new Error(`유효하지 않은 테이블명: ${tableName}`);
+    throw new Error(t('nl2sqlF.invalidTableName', { name: tableName }));
   }
   if (schema && !SAFE_IDENTIFIER.test(schema)) {
-    throw new Error(`유효하지 않은 스키마명: ${schema}`);
+    throw new Error(t('nl2sqlF.invalidSchemaName', { name: schema }));
   }
 
   // 파라미터 기반 프리뷰 요청 — 백엔드에서 쿼리를 안전하게 생성
@@ -155,7 +155,7 @@ export function DataPreviewPanel({
               onClick={() => setRetryCount((c) => c + 1)}
               className="mt-2 text-[10px]"
             >
-              재시도
+              {t('workflowEditor.policy.retryCount')}
             </Button>
           </div>
         )}

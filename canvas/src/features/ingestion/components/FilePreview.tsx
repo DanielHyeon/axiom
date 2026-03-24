@@ -33,7 +33,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         <div className="flex items-center gap-2">
           <Table2 className="h-4 w-4 text-blue-500" />
           <span className="text-sm font-semibold text-gray-900 font-heading">
-            미리보기
+            {t('olapStudioExt.preview')}
           </span>
           <span className="text-xs text-gray-500 font-mono">
             {fileName}
@@ -41,7 +41,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-gray-400 font-mono">
-            {data.columns.length}개 컬럼 / {data.totalRows.toLocaleString()}개 행
+            {t('ingestionF.columnRowCount', { cols: data.columns.length, rows: data.totalRows.toLocaleString() })}
           </span>
           {onClose && (
             <button
@@ -110,7 +110,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       {data.totalRows > 20 && (
         <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-center">
           <span className="text-[11px] text-gray-400">
-            처음 20행만 표시됩니다. 전체 {data.totalRows.toLocaleString()}행.
+            {t('ingestionF.showingFirst20', { total: data.totalRows.toLocaleString() })}
           </span>
         </div>
       )}

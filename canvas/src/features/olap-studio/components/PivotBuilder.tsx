@@ -119,6 +119,7 @@ interface DropZoneProps {
 
 /** 개별 드롭 영역 — 필드 칩 목록과 빈 상태를 표시한다 */
 function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
+  const { t } = useTranslation();
   const c = COLOR_MAP[color] || COLOR_MAP.blue;
 
   return (
@@ -138,7 +139,7 @@ function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
       {/* 빈 상태 또는 필드 칩 목록 */}
       {items.length === 0 ? (
         <p className="text-[10px] text-foreground/20 font-mono text-center py-2">
-          필드를 추가하세요
+          {t('olapStudioExt.addFieldHint')}
         </p>
       ) : (
         <div className="flex flex-wrap gap-1">
@@ -155,7 +156,7 @@ function DropZone({ label, icon, color, items, onRemove }: DropZoneProps) {
                 type="button"
                 onClick={() => onRemove(idx)}
                 className="hover:opacity-60"
-                aria-label={`${item} 제거`}
+                aria-label={t('olapStudioExt.removeField', { name: item })}
               >
                 <X className="h-2.5 w-2.5" />
               </button>

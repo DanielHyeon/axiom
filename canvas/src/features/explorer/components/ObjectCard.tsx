@@ -15,18 +15,19 @@ import { ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { ObjectSearchResult } from '../types/explorer';
+import { useTranslation } from 'react-i18next';
 
 // ──────────────────────────────────────
 // 유형별 배지 색상 매핑
 // ──────────────────────────────────────
 
 const TYPE_BADGE_VARIANTS: Record<string, string> = {
-  고객: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-  계약: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-  상품: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-  채널: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200',
-  청구: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-  사고: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
+  {t('explorerF.m5345fab1')}
+  {t('explorerF.m2b2d9f12')}
+  {t('explorerF.m206c0f4f')}
+  {t('explorerF.m55e9dc2b')}
+  {t('explorerF.mdd4d7357')}
+  {t('explorerF.m9047cc06')}
 };
 
 /** 유형에 따른 배지 스타일 반환 */
@@ -59,6 +60,7 @@ export const ObjectCard: React.FC<ObjectCardProps> = ({
   onClick,
   isSelected = false,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       role="button"

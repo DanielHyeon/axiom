@@ -66,7 +66,7 @@ export function VariantList({
  {dev.path.join(' → ')}
  </span>
  <span className="text-foreground0 ml-2 shrink-0">
- {dev.frequency}건
+ {t('processDesignerF.frequencyCount', { count: dev.frequency })}
  </span>
  </div>
  {/* 빈도 바 */}

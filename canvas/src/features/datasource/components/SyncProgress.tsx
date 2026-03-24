@@ -35,7 +35,7 @@ export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) 
  setProgress(null);
  onComplete?.();
  },
- onError: (data) => setError(data.message ?? '오류 발생'),
+ onError: (data) => setError(data.message ?? t('ontologyWizardExt.errorOccurred')),
  }
  );
  setSyncing(false);
@@ -44,7 +44,7 @@ export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) 
  } catch (e) {
  setSyncing(false);
  setProgress(null);
- setError(e instanceof Error ? e.message : '동기화 실패');
+ setError(e instanceof Error ? e.message : t('datasourceExt.syncFailed'));
  }
  };
 
@@ -59,7 +59,7 @@ export function SyncProgress({ selectedDsName, onComplete }: SyncProgressProps) 
  className="flex items-center gap-2 text-sm px-3 py-1.5 rounded border border-neutral-300 hover:bg-background disabled:opacity-50 disabled:cursor-not-allowed"
  >
  {syncing ? <Loader2 size={14} className="animate-spin" /> : <RefreshCw size={14} />}
- {syncing ? (progress?.percent != null ? `동기화 중 ${progress.percent}%` : '동기화 중...') : '동기화 시작'}
+ {syncing ? (progress?.percent != null ? t('datasourceF.syncingPercent', { percent: progress.percent }) : t('datasourceExt.syncing')) : t('datasourceExt.syncStart')}
  </button>
  {progress?.phase && (
  <p className="text-xs text-muted-foreground">

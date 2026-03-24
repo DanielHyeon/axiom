@@ -7,14 +7,15 @@
 import { Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import type { TriggerData, TriggerEventType } from '../../types/workflowEditor.types';
+import { useTranslation } from 'react-i18next';
 
 // 이벤트 유형별 라벨 (한글)
 const EVENT_LABELS: Record<TriggerEventType, string> = {
-  case_created: '케이스 생성',
-  case_updated: '케이스 수정',
-  kpi_threshold: 'KPI 임계값',
-  schedule_cron: '스케줄 (Cron)',
-  manual: '수동 실행',
+  case_created: t('workflowEditorExt.triggerEvents.case_created'),
+  case_updated: t('workflowEditorExt.triggerEvents.case_updated'),
+  kpi_threshold: t('workflowEditorExt.triggerEvents.kpi_threshold'),
+  schedule_cron: t('workflowEditorExt.triggerEvents.schedule_cron'),
+  manual: t('workflowEditorExt.triggerEvents.manual'),
   webhook: 'Webhook',
 };
 

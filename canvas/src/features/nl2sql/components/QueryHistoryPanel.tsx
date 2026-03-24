@@ -1,13 +1,15 @@
 import { getHistory, type HistoryItem } from '../api/oracleNl2sqlApi';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface QueryHistoryPanelProps {
  datasourceId?: string;
  onSelect?: (item: HistoryItem) => void;
 }
 
-export function QueryHistoryPanel({ datasourceId, onSelect }: QueryHistoryPanelProps) {
+export function QueryHistoryPanel({
+  const { t } = useTranslation(); datasourceId, onSelect }: QueryHistoryPanelProps) {
  const { data, isLoading, error } = useQuery({
  queryKey: ['nl2sql', 'history', datasourceId, 1, 20],
  queryFn: () => getHistory({ datasource_id: datasourceId, page: 1, page_size: 20 }),
@@ -32,7 +34,7 @@ export function QueryHistoryPanel({ datasourceId, onSelect }: QueryHistoryPanelP
  if (error) {
  return (
  <div className="py-8 text-center">
- <p className="text-xs text-foreground/60 font-mono">이력을 불러올 수 없습니다.</p>
+ <p className="text-xs text-foreground/60 font-mono">{t('nl2sqlF.k98cdb3LoadError')}</p>
  </div>
  );
  }
@@ -40,7 +42,7 @@ export function QueryHistoryPanel({ datasourceId, onSelect }: QueryHistoryPanelP
  if (history.length === 0) {
  return (
  <div className="py-8 text-center">
- <p className="text-xs text-foreground/60 font-mono">최근 질의가 없습니다.</p>
+ <p className="text-xs text-foreground/60 font-mono">{t('nl2sqlF.msg626f7131')}</p>
  </div>
  );
  }

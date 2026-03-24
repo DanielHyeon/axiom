@@ -94,7 +94,7 @@ export const TriggerForm: React.FC<TriggerFormProps> = ({ data, onChange }) => {
               value={data.kpiField ?? ''}
               onChange={(e) => onChange({ ...data, kpiField: e.target.value })}
               className="h-8 text-xs"
-              placeholder="예: oee"
+              placeholder={t('workflowEditorF.msgba7804b7')}
             />
           </div>
           <div className="space-y-1">

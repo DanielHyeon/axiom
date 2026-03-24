@@ -99,13 +99,13 @@ export function LineageSearchBar({ onNodeSelect }: LineageSearchBarProps) {
         >
           {isLoading && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              검색 중...
+              {t('explorerExt.searching')}
             </div>
           )}
 
           {!isLoading && results.length === 0 && (
             <div className="px-3 py-4 text-center text-sm text-muted-foreground">
-              결과 없음
+              {t('schemaSearch.noResults')}
             </div>
           )}
 

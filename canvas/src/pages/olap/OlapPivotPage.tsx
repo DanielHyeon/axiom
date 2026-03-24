@@ -188,7 +188,7 @@ export function OlapPivotPage() {
    type="button"
    onClick={() => setErrorDismissed(true)}
    className="shrink-0 p-0.5 rounded text-destructive/60 hover:text-destructive transition-colors"
-   aria-label="에러 배너 닫기"
+   aria-label={t('olapPage.msg064e0768')}
  >
    <X className="h-4 w-4" />
  </button>

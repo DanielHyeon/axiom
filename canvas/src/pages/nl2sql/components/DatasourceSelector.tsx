@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { getDatasources } from '@/features/nl2sql/api/oracleNl2sqlApi';
 import {
+import { useTranslation } from 'react-i18next';
  Select,
  SelectContent,
  SelectItem,
@@ -15,7 +16,8 @@ interface DatasourceSelectorProps {
  onChange: (datasourceId: string) => void;
 }
 
-export function DatasourceSelector({ value, onChange }: DatasourceSelectorProps) {
+export function DatasourceSelector({
+  const { t } = useTranslation(); value, onChange }: DatasourceSelectorProps) {
  const { data: datasources = [], isLoading } = useQuery({
  queryKey: ['nl2sql', 'datasources'],
  queryFn: getDatasources,
@@ -38,7 +40,7 @@ export function DatasourceSelector({ value, onChange }: DatasourceSelectorProps)
  return (
  <div className="flex items-center gap-2 text-sm text-foreground/60 font-mono">
  <Database className="h-4 w-4" />
- <span>데이터소스 없음</span>
+ <span>{t('nl2sqlPage.msgea674af3')}</span>
  </div>
  );
  }
@@ -48,7 +50,7 @@ export function DatasourceSelector({ value, onChange }: DatasourceSelectorProps)
  <SelectTrigger className="w-56 border-border bg-card">
  <div className="flex items-center gap-2">
  <Database className="h-4 w-4 text-foreground/60" />
- <SelectValue placeholder="데이터소스 선택" />
+ <SelectValue placeholder={t('ontologyExt.generator.selectDatasource')} />
  </div>
  </SelectTrigger>
  <SelectContent>

@@ -42,7 +42,7 @@ export function SystemHealthMiniCard() {
   const { data: services = [] } = useQuery({
     queryKey: ['system-health'],
     queryFn: fetchServiceHealth,
-    refetchInterval: 30_000, // 30초마다 갱신
+    {t('caseDashboardF.m51c78934')}
   });
 
   const healthyCount = services.filter((s) => s.status === 'healthy').length;
@@ -63,7 +63,7 @@ export function SystemHealthMiniCard() {
         ))}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {healthyCount}/{services.length} 정상
+        {t('caseDashboardF.healthyCount', { healthy: healthyCount, total: services.length })}
       </p>
     </div>
   );

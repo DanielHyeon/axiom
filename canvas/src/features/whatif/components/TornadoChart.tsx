@@ -5,11 +5,12 @@
  */
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, ReferenceLine } from 'recharts';
+import { useTranslation } from 'react-i18next';
 
 interface TornadoItem {
   variable: string;
-  positiveImpact: number;  // 양의 변동 영향
-  negativeImpact: number;  // 음의 변동 영향
+  {t('whatifF.mf807b122')}
+  {t('whatifF.m5b22c141')}
 }
 
 interface TornadoChartProps {
@@ -17,7 +18,8 @@ interface TornadoChartProps {
   title?: string;
 }
 
-export function TornadoChart({ data, title }: TornadoChartProps) {
+export function TornadoChart({
+  const { t } = useTranslation(); data, title }: TornadoChartProps) {
   // 절대값 기준 정렬 (가장 영향 큰 것이 위)
   const sorted = [...data].sort(
     (a, b) => Math.abs(b.positiveImpact) + Math.abs(b.negativeImpact)

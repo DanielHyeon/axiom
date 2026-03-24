@@ -12,6 +12,7 @@ import { TornadoChart } from './components/TornadoChart';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingDown, TrendingUp, Clock, Activity, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 function mapVisionResultToStore(visionResult: Record<string, unknown> | undefined): ScenarioResult {
  const summary = (visionResult?.summary as Record<string, unknown>) ?? {};
@@ -28,6 +29,7 @@ function mapVisionResultToStore(visionResult: Record<string, unknown> | undefine
 }
 
 export function WhatIfPage() {
+  const { t } = useTranslation();
  const { caseId } = useParams<{ caseId: string }>();
  const navigate = useNavigate();
  const {
@@ -60,7 +62,7 @@ export function WhatIfPage() {
  const mockId = 'scen-1';
  setScenarios([{
  id: mockId,
- name: caseId ? '새 What-if 시나리오' : '기본 물류 최적화 시나리오',
+ name: caseId ? t('whatifPage.mce4388fe') : t('whatifPage.m3dbc19b6'),
  status: 'DRAFT',
  parameters: {}
  }]);
@@ -113,7 +115,7 @@ export function WhatIfPage() {
  <div className="h-14 border-b border-border bg-background px-6 flex items-center justify-between shrink-0">
  <div className="flex items-center gap-4">
  <h1 className="font-semibold flex items-center gap-2 text-lg">
- <span className="text-xl">✨</span> What-if 시나리오 빌더
+ <span className="text-xl">✨</span> {t('whatifPage.wizardTitle')}
  </h1>
  <span className="text-sm px-2 py-0.5 rounded-full bg-indigo-900/40 text-indigo-300 border border-indigo-800">
  {activeScenario?.name}
@@ -121,10 +123,10 @@ export function WhatIfPage() {
  </div>
  <div className="flex items-center gap-2">
  <Button variant="outline" size="sm" className="h-8" onClick={() => navigate(ROUTES.ANALYSIS.WHATIF_WIZARD)}>
- 고급 분석 (Wizard)
+ {t('whatifPage.m4895869c')}
  </Button>
  <Button variant="outline" size="sm" className="h-8" onClick={handleCompare}>
- 시나리오 비교 (Compare)
+ {t('whatifPage.m916fd392')}
  </Button>
  </div>
  </div>
@@ -139,9 +141,9 @@ export function WhatIfPage() {
  <div className="absolute inset-0 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
  <Activity className="text-primary" size={24} />
  </div>
- <h3 className="text-lg font-semibold text-primary-foreground mb-2">시나리오 계산 중...</h3>
+ <h3 className="text-lg font-semibold text-primary-foreground mb-2">{t('whatifPage.msg9974a85b')}</h3>
  <p className="text-sm text-muted-foreground max-w-sm text-center">
- 수십만 건의 경로 데이터를 기반으로 변경된 매개변수에 대한 결괏값을 시뮬레이션하고 있습니다.
+ {t('whatifPage.m2f8410f0')}
  </p>
  </div>
  )}
@@ -153,7 +155,7 @@ export function WhatIfPage() {
  {!hasResult && !isComputing && (
  <div className="h-full flex flex-col items-center justify-center text-foreground0">
  <Activity size={48} className="mb-4 opacity-20" />
- <p>좌측 패널에서 슬라이더를 조정하고 <strong>"분석 실행"</strong>을 클릭하세요.</p>
+ <p>{t('whatifPage.msg1fc6ab45')} <strong>{t('whatifPage.msg3bb64241')}</strong>{t('whatifPage.msg3630e7ab')}</p>
  </div>
  )}
 
@@ -164,45 +166,45 @@ export function WhatIfPage() {
  <div className="grid grid-cols-3 gap-6">
  <Card className="bg-card border-border">
  <CardHeader className="pb-2 flex flex-row items-center justify-between">
- <CardTitle className="text-sm font-medium text-muted-foreground">예상 총 비용절감액</CardTitle>
+ <CardTitle className="text-sm font-medium text-muted-foreground">{t('whatifPage.msg962c0c2f')}</CardTitle>
  <TrendingDown className="text-success" size={16} />
  </CardHeader>
  <CardContent>
  <div className="text-3xl font-bold text-primary-foreground mb-1">
- {activeScenario.result.totalSavings.toLocaleString()} <span className="text-lg text-foreground0 font-normal">억원</span>
+ {activeScenario.result.totalSavings.toLocaleString()} <span className="text-lg text-foreground0 font-normal">{t('whatifExt.mockUnit.billion')}</span>
  </div>
  <p className="text-xs text-success flex items-center font-medium">
- 기준 대비 ▲ {activeScenario.result.savingsChangePct}%
+ {t('whatifPage.savingsChange', { pct: activeScenario.result.savingsChangePct })}
  </p>
  </CardContent>
  </Card>
 
  <Card className="bg-card border-border">
  <CardHeader className="pb-2 flex flex-row items-center justify-between">
- <CardTitle className="text-sm font-medium text-muted-foreground">이해관계자 만족도 향상</CardTitle>
+ <CardTitle className="text-sm font-medium text-muted-foreground">{t('whatifPage.msg7f21f31b')}</CardTitle>
  <TrendingUp className="text-primary" size={16} />
  </CardHeader>
  <CardContent>
  <div className="text-3xl font-bold text-primary-foreground mb-1">
- {activeScenario.result.satisfactionScore} <span className="text-lg text-foreground0 font-normal">점</span>
+ {activeScenario.result.satisfactionScore} <span className="text-lg text-foreground0 font-normal">{t('whatifPage.msg17a7dad1')}</span>
  </div>
  <p className="text-xs text-primary flex items-center font-medium">
- 기준점(40점) 대비 ▲ {activeScenario.result.satisfactionChangePt}p
+ {t('whatifPage.satisfactionChange', { pt: activeScenario.result.satisfactionChangePt })}
  </p>
  </CardContent>
  </Card>
 
  <Card className="bg-card border-border">
  <CardHeader className="pb-2 flex flex-row items-center justify-between">
- <CardTitle className="text-sm font-medium text-muted-foreground">소요 기간</CardTitle>
+ <CardTitle className="text-sm font-medium text-muted-foreground">{t('whatifPage.msg79e9810a')}</CardTitle>
  <Clock className="text-primary" size={16} />
  </CardHeader>
  <CardContent>
  <div className="text-3xl font-bold text-primary-foreground mb-1">
- {activeScenario.result.durationYears} <span className="text-lg text-foreground0 font-normal">년</span>
+ {activeScenario.result.durationYears} <span className="text-lg text-foreground0 font-normal">{t('whatifExt.mockUnit.year')}</span>
  </div>
  <p className="text-xs text-foreground0 flex items-center">
- 초기 계획과 동일함
+ {t('whatifPage.m29ca1497')}
  </p>
  </CardContent>
  </Card>
@@ -222,13 +224,13 @@ export function WhatIfPage() {
  <div className="border border-border rounded-lg overflow-hidden flex bg-background/50">
  <div className="p-4 flex-1 border-r border-border">
  <div className="text-xs text-foreground0 uppercase tracking-widest font-semibold mb-2">Optimistic Model (A)</div>
- <div className="text-lg font-mono">2,140 억원 절감 예측</div>
- <div className="text-xs text-muted-foreground mt-1">배분율 42%, 활용률 65%</div>
+ <div className="text-lg font-mono">{t('whatifPage.msga43a722c')}</div>
+ <div className="text-xs text-muted-foreground mt-1">{t('whatifPage.msg01d93f70')}</div>
  </div>
  <div className="p-4 flex-1">
  <div className="text-xs text-foreground0 uppercase tracking-widest font-semibold mb-2">Pessimistic Model (B)</div>
- <div className="text-lg font-mono">980 억원 절감 예측</div>
- <div className="text-xs text-muted-foreground mt-1">배분율 20%, 활용률 40%</div>
+ <div className="text-lg font-mono">{t('whatifPage.msg9f36a15e')}</div>
+ <div className="text-xs text-muted-foreground mt-1">{t('whatifPage.msga358074f')}</div>
  </div>
  </div>
 

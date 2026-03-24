@@ -76,7 +76,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
     if (!objectType?.fields) return [];
     return objectType.fields
       .filter((f) => f.isVisible !== false)
-      .slice(0, 8); // 최대 8개 컬럼 표시
+      {t('objExplorerF.m6d0a5053')}
   }, [objectType]);
 
   // 페이지 계산

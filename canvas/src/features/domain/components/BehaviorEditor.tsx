@@ -52,7 +52,7 @@ interface BehaviorEditorProps {
 
 const DEFAULT_CODE: Record<BehaviorType, string> = {
   rest: '',
-  javascript: `// Behavior: JavaScript 코드
+  {t('domainF.m883f9afd')}
 // input: { fieldName: value, ... }
 // output: 결과 객체를 return
 
@@ -62,13 +62,13 @@ function execute(input) {
   return result;
 }
 `,
-  python: `# Behavior: Python 코드
+  {t('domainF.m4936e527')}
 # input: dict { field_name: value, ... }
 # output: dict 결과
 
 def execute(input: dict) -> dict:
     result = {}
-    # 로직 작성
+    {t('domainF.mc35492f9')}
     return result
 `,
   dmn: `<!-- DMN Decision Table -->

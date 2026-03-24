@@ -17,15 +17,17 @@ import { useFileUpload } from '@/features/ingestion/hooks/useFileUpload';
 import { usePipelines } from '@/features/ingestion/hooks/usePipelines';
 import { useIngestionStore, type IngestionTab } from '@/features/ingestion/store/useIngestionStore';
 import { useDatasources } from '@/features/datasource/hooks/useDatasources';
+import { useTranslation } from 'react-i18next';
 
 /** 탭 설정 */
 const TAB_CONFIG: { key: IngestionTab; label: string; icon: React.ElementType }[] = [
-  { key: 'upload', label: '파일 업로드', icon: Upload },
-  { key: 'pipelines', label: 'ETL 파이프라인', icon: Zap },
-  { key: 'history', label: '수집 이력', icon: History },
+  { key: 'upload', label: t('dataIngestionPage.msg6c03f009'), icon: Upload },
+  { key: 'pipelines', label: t('olapStudio.etl.title'), icon: Zap },
+  { key: 'history', label: t('dataIngestionPage.msg690e7b16'), icon: History },
 ];
 
 export const DataIngestionPage: React.FC = () => {
+  const { t } = useTranslation();
   // 스토어
   const { activeTab, setActiveTab, previewFileId, previewData, setPreview } =
     useIngestionStore();
@@ -75,10 +77,10 @@ export const DataIngestionPage: React.FC = () => {
         <div className="flex items-start justify-between">
           <div className="space-y-1.5">
             <h1 className="text-2xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground font-heading">
-              데이터 수집
+              {t('sidebar.ingestion')}
             </h1>
             <p className="text-[12px] md:text-[13px] text-muted-foreground font-mono">
-              파일 업로드 및 ETL 파이프라인을 통해 데이터를 수집합니다
+              {t('dataIngestionPage.mc1344d3d')}
             </p>
           </div>
         </div>
@@ -160,33 +162,33 @@ export const DataIngestionPage: React.FC = () => {
                   className="w-full flex items-center justify-center gap-1.5 px-4 py-2 text-[12px] font-medium text-gray-600 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-heading"
                 >
                   <Database className="h-3.5 w-3.5" />
-                  연결 테스트
+                  {t('ingestionExt.connectionTestAria')}
                 </button>
               )}
 
               {/* 사용 가이드 */}
               <div className="p-4 bg-blue-50/60 rounded-xl border border-blue-100 space-y-3">
                 <h4 className="text-[12px] font-semibold text-blue-900 font-heading">
-                  사용 가이드
+                  {t('dataIngestionPage.m1a1f932e')}
                 </h4>
                 <ol className="space-y-2 text-[11px] text-blue-800/80 leading-relaxed">
                   <li className="flex gap-2">
                     <span className="shrink-0 flex items-center justify-center w-5 h-5 bg-blue-200 text-blue-800 rounded text-[10px] font-bold">
                       1
                     </span>
-                    <span>CSV, JSON, Excel 파일을 드래그하거나 클릭하여 업로드</span>
+                    <span>{t('dataIngestionPage.msgec2c2be5')}</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="shrink-0 flex items-center justify-center w-5 h-5 bg-blue-200 text-blue-800 rounded text-[10px] font-bold">
                       2
                     </span>
-                    <span>대상 데이터소스를 선택하면 해당 DB로 자동 적재</span>
+                    <span>{t('dataIngestionPage.whenDatasourceSelected')}</span>
                   </li>
                   <li className="flex gap-2">
                     <span className="shrink-0 flex items-center justify-center w-5 h-5 bg-blue-200 text-blue-800 rounded text-[10px] font-bold">
                       3
                     </span>
-                    <span>ETL 파이프라인 탭에서 자동화된 수집 파이프라인 관리</span>
+                    <span>{t('dataIngestionPage.msg6c9c29eb')}</span>
                   </li>
                 </ol>
               </div>

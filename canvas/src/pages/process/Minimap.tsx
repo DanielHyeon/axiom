@@ -1,4 +1,5 @@
 import type { CanvasItem, StageViewState } from '@/features/process-designer/types/processDesigner';
+import { useTranslation } from 'react-i18next';
 
 const PADDING = 40;
 const MINIMAP_WIDTH = 180;
@@ -29,7 +30,8 @@ function getContentRect(nodes: CanvasItem[]) {
  };
 }
 
-export function Minimap({ nodes, stageSize, stageView, onViewportClick }: MinimapProps) {
+export function Minimap({
+  const { t } = useTranslation(); nodes, stageSize, stageView, onViewportClick }: MinimapProps) {
  const content = getContentRect(nodes);
  const scale = Math.min(
  MINIMAP_WIDTH / content.width,
@@ -62,7 +64,7 @@ export function Minimap({ nodes, stageSize, stageView, onViewportClick }: Minima
  role="button"
  tabIndex={0}
  onKeyDown={(e) => e.key === 'Enter' && (e.currentTarget as HTMLDivElement).click()}
- aria-label="미니맵: 클릭하면 해당 위치로 뷰 이동"
+ aria-label={t('processDesigner.minimapAria')}
  >
  {nodes.map((node) => (
  <div

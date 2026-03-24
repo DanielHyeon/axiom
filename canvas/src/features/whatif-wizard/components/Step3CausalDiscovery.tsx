@@ -35,7 +35,7 @@ function confidenceColor(confidence: number): string {
 
 /** 방향 표시 텍스트 */
 function directionLabel(dir: 'positive' | 'negative'): string {
-  return dir === 'positive' ? '양(+)' : '음(-)';
+  return dir === 'positive' ? t('whatifWizard.step3.positive') : t('whatifWizard.step3.negative');
 }
 
 export function Step3CausalDiscovery() {
@@ -73,13 +73,10 @@ export function Step3CausalDiscovery() {
         <div>
           <h3 className="text-lg font-semibold flex items-center gap-2">
             <GitFork className="w-5 h-5 text-primary" />
-            {t('whatifWizard.step3.title', '인과 관계 발견')}
+            {t('whatifWizard.step3.title')}
           </h3>
           <p className="text-sm text-muted-foreground mt-1">
-            {t(
-              'whatifWizard.step3.description',
-              '선택한 노드 간의 인과 관계를 자동으로 분석합니다.',
-            )}
+            {t('whatifWizard.step3.description')}
           </p>
         </div>
 
@@ -87,7 +84,7 @@ export function Step3CausalDiscovery() {
         {isEventForkMode && (
           <Button variant="outline" size="sm" onClick={nextStep} className="gap-1.5">
             <SkipForward className="w-4 h-4" />
-            건너뛰기
+            {t('whatifWizardF.m537bb966')}
           </Button>
         )}
       </div>
@@ -95,8 +92,7 @@ export function Step3CausalDiscovery() {
       {/* Event Fork 모드 안내 */}
       {isEventForkMode && (
         <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 text-sm">
-          Event Fork 모드에서는 인과 관계 분석이 필수가 아닙니다. 분석을 건너뛰고 바로
-          개입 설정으로 이동할 수 있습니다.
+          {t('whatifWizardF.eventForkNotice')}
         </div>
       )}
 
@@ -106,10 +102,10 @@ export function Step3CausalDiscovery() {
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm flex items-center gap-2">
               <Sparkles className="w-4 h-4" />
-              인과 분석
+              {t('whatifWizardF.m073eb913')}
             </CardTitle>
             <Badge variant="outline" className="text-xs">
-              {selectedNodeIds.length}개 노드 대상
+              {t('whatifWizardF.nodeCount', { count: selectedNodeIds.length })}
             </Badge>
           </div>
         </CardHeader>
@@ -117,7 +113,7 @@ export function Step3CausalDiscovery() {
           {/* 신뢰도 임계값 슬라이더 */}
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <Label className="text-xs">신뢰도 임계값</Label>
+              <Label className="text-xs">{t('whatifWizard.step3.confidenceThreshold')}</Label>
               <span className="text-xs font-mono text-muted-foreground">
                 {(confidenceThreshold * 100).toFixed(0)}%
               </span>
@@ -131,7 +127,7 @@ export function Step3CausalDiscovery() {
               className="w-full"
             />
             <p className="text-xs text-muted-foreground">
-              임계값 이상의 신뢰도를 가진 관계만 표시합니다.
+              {t('whatifWizardF.m7bf7012e')}
             </p>
           </div>
 
@@ -144,12 +140,12 @@ export function Step3CausalDiscovery() {
             {isDiscovering ? (
               <>
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                분석 중...
+                {t('whatifExt.edgeDiscovery.analyzing')}
               </>
             ) : (
               <>
                 <Sparkles className="w-4 h-4 mr-2" />
-                인과 관계 분석 실행
+                {t('whatifWizardF.m4933c84f')}
               </>
             )}
           </Button>
@@ -168,13 +164,13 @@ export function Step3CausalDiscovery() {
         <Card>
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-sm">발견된 인과관계</CardTitle>
+              <CardTitle className="text-sm">{t('whatifWizardF.msgbb0c08ff')}</CardTitle>
               <div className="flex gap-2">
                 <Badge variant="secondary" className="text-xs">
-                  총 {causalRelations.length}개
+                  {t('whatifWizardF.totalCount', { count: causalRelations.length })}
                 </Badge>
                 <Badge variant="outline" className="text-xs">
-                  필터 후 {filteredRelations.length}개
+                  {t('whatifWizardF.filteredCount', { count: filteredRelations.length })}
                 </Badge>
               </div>
             </div>
@@ -185,14 +181,14 @@ export function Step3CausalDiscovery() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-xs">소스</TableHead>
+                    <TableHead className="text-xs">{t('lineageExt.nodeStyles.source')}</TableHead>
                     <TableHead className="text-xs w-8" />
-                    <TableHead className="text-xs">타겟</TableHead>
-                    <TableHead className="text-xs text-right">가중치</TableHead>
-                    <TableHead className="text-xs text-right">시차(일)</TableHead>
-                    <TableHead className="text-xs text-right">신뢰도</TableHead>
-                    <TableHead className="text-xs text-center">방향</TableHead>
-                    <TableHead className="text-xs text-center">방법</TableHead>
+                    <TableHead className="text-xs">{t('whatifExt.causalEdge.target')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('semanticCatalogExt.weight')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('whatifWizard.step3.lag')}</TableHead>
+                    <TableHead className="text-xs text-right">{t('semanticCatalogExt.confidence')}</TableHead>
+                    <TableHead className="text-xs text-center">{t('whatifExt.causalEdge.direction')}</TableHead>
+                    <TableHead className="text-xs text-center">{t('whatifWizardF.msgbbf7972e')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -247,8 +243,7 @@ export function Step3CausalDiscovery() {
 
             {filteredRelations.length === 0 && causalRelations.length > 0 && (
               <p className="text-sm text-muted-foreground text-center py-4">
-                현재 임계값({(confidenceThreshold * 100).toFixed(0)}%)을 만족하는 관계가
-                없습니다. 임계값을 낮춰보세요.
+                {t('whatifWizardF.noRelationsAboveThreshold', { threshold: (confidenceThreshold * 100).toFixed(0) })}
               </p>
             )}
           </CardContent>

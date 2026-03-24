@@ -49,7 +49,7 @@ export const PropertiesTable: React.FC<PropertiesTableProps> = ({ properties }) 
   if (entries.length === 0) {
     return (
       <div className="text-xs text-muted-foreground text-center py-6">
-        속성이 없습니다
+        {t('objectExplorerExt.noProperties')}
       </div>
     );
   }

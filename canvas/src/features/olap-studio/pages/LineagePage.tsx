@@ -40,14 +40,14 @@ async function fetchImpact(entityId: string): Promise<{ upstream: ImpactEntity[]
 // ─── 엔티티 타입 한글 라벨 ─────────────────────────────────
 
 const TYPE_LABELS: Record<string, string> = {
-  SOURCE_TABLE: '원천 테이블',
-  STAGING_TABLE: '스테이징',
-  FACT: '팩트',
-  DIMENSION: '차원',
-  CUBE: '큐브',
-  MEASURE: '측정값',
+  SOURCE_TABLE: t('olapStudioExt.lineageEntityType.SOURCE_TABLE'),
+  STAGING_TABLE: t('olapStudioExt.lineageEntityType.STAGING_TABLE'),
+  FACT: t('olapStudioExt.lineageEntityType.FACT'),
+  DIMENSION: t('semanticCatalogExt.tabs.dimensions'),
+  CUBE: t('olapStudioExt.lineageEntityType.CUBE'),
+  MEASURE: t('olapStudioExt.lineageEntityType.MEASURE'),
   DAG: 'DAG',
-  REPORT: '리포트',
+  REPORT: t('lineageExt.dashboard.report'),
 };
 
 // ─── 컴포넌트 ──────────────────────────────────────────────
@@ -89,7 +89,7 @@ export function LineagePage() {
             <h2 className="text-[13px] font-semibold font-heading">{t('olapStudioExt.dataLineage')}</h2>
           </div>
           <span className="text-[10px] text-foreground/40 font-mono">
-            {graph?.entities?.length ?? 0}개 엔티티
+            {t('olapStudioF.entityCount', { count: graph?.entities?.length ?? 0 })}
           </span>
         </div>
 

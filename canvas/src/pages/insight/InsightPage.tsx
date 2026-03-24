@@ -312,7 +312,7 @@ function MetaBar({ meta }: { meta: MetaType }) {
  className="flex items-center gap-1 text-amber-600 hover:text-warning"
  >
  <ExternalLink className="h-3 w-3" />
- 더 보기
+ {t('common.showMore')}
  </button>
  )}
 

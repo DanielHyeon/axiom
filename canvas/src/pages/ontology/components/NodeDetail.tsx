@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Network, ArrowRight, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 import type { OntologyLayer } from '@/features/ontology/types/ontology';
+import { useTranslation } from 'react-i18next';
 
 const LAYER_LABELS: Record<OntologyLayer, string> = {
  kpi: 'KPI',
@@ -18,7 +19,8 @@ interface NodeDetailProps {
  onImpactAnalysis: (nodeId: string) => void;
 }
 
-export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
+export function NodeDetail({
+  const { t } = useTranslation(); onFindPath, onImpactAnalysis }: NodeDetailProps) {
  const { selectedNodeId, caseId } = useOntologyStore();
  const { graphData } = useOntologyData(caseId);
 
@@ -52,8 +54,8 @@ export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
  return (
  <div className="p-6 flex flex-col items-center justify-center text-foreground/60 h-full">
  <Network size={32} className="mb-4 opacity-20" />
- <p className="text-sm font-mono">노드를 선택하면</p>
- <p className="text-sm font-mono">상세 정보가 표시됩니다.</p>
+ <p className="text-sm font-mono">{t('ontologyPage.whenNodeSelected')}</p>
+ <p className="text-sm font-mono">{t('ontologyPage.msg7d613942')}</p>
  </div>
  );
  }
@@ -84,7 +86,7 @@ export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
  {/* Properties */}
  <div>
  <h3 className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider mb-3">
- 속성
+ {t('objectExplorerExt.properties')}
  </h3>
  <div className="space-y-2 bg-muted rounded p-3">
  {Object.entries(selectedNode.properties).map(([key, value]) => (
@@ -100,7 +102,7 @@ export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
  <div>
  <div className="flex items-center justify-between mb-3">
  <h3 className="text-[11px] font-semibold text-foreground/60 font-mono uppercase tracking-wider">
- 연결
+ {t('datasourcePage.msgc20ec32f')}
  </h3>
  <span className="text-[11px] bg-muted px-2 py-0.5 rounded text-muted-foreground font-mono">
  {connections.length}
@@ -128,14 +130,14 @@ export function NodeDetail({ onFindPath, onImpactAnalysis }: NodeDetailProps) {
  className="w-full text-xs justify-between border-border text-muted-foreground hover:bg-muted font-heading"
  onClick={() => onFindPath(selectedNode.id)}
  >
- 이 노드로 경로 탐색 <ArrowRight size={14} className="ml-2 opacity-50" />
+ {t('ontologyPage.pathExplore')} <ArrowRight size={14} className="ml-2 opacity-50" />
  </Button>
  <Button
  variant="outline"
  className="w-full text-xs justify-between border-border text-muted-foreground hover:bg-muted font-heading"
  onClick={() => onImpactAnalysis(selectedNode.id)}
  >
- 영향 분석 <Zap size={14} className="ml-2 opacity-50" />
+ {t('ontologyPage.impactAnalysis')} <Zap size={14} className="ml-2 opacity-50" />
  </Button>
  </div>
  </div>
