@@ -1230,11 +1230,11 @@ def compare_snapshots(
 
     Feature Flag: FF_SNAPSHOT_COMPARE_API=true 일 때만 사용 가능.
     """
-    # Feature Flag 가드 — 고위험 기능이므로 플래그가 꺼져 있으면 404를 반환한다
+    # Feature Flag 가드 — 꺼져 있으면 501 반환 (404와 구분하여 "기능 미활성화" 명시)
     from shared.utils.feature_flags import is_enabled
     if not is_enabled("SNAPSHOT_COMPARE_API"):
         raise HTTPException(
-            status_code=404,
+            status_code=501,
             detail="스냅샷 비교 API가 비활성화 상태입니다 (FF_SNAPSHOT_COMPARE_API=false)",
         )
     _tenant(request)  # 인증 확인

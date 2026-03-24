@@ -38,6 +38,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app, allowed_connect_src: str = "'self'") -> None:  # noqa: D107
         super().__init__(app)
+        # Feature Flag는 __init__에서 1회만 평가 (환경변수는 프로세스 수명 동안 불변)
+        from shared.utils.feature_flags import is_enabled
+        self._enforce_csp = is_enabled("CSP_ENFORCE")
         # CSP 정책을 미리 만들어 둔다 (요청마다 문자열 조합하지 않기 위해)
         self._csp = (
             f"default-src 'self'; "
@@ -72,13 +75,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             "camera=(), microphone=(), geolocation=(), payment=()"
         )
 
-        # ── 5) CSP — Feature Flag(FF_CSP_ENFORCE)로 enforcing/report-only 전환 ──
-        from shared.utils.feature_flags import is_enabled  # 지연 임포트 (순환 방지)
-        if is_enabled("CSP_ENFORCE"):
-            # 차단 모드: 위반 시 리소스 로드를 차단한다
+        # ── 5) CSP — __init__에서 결정된 모드에 따라 헤더 설정 ──
+        if self._enforce_csp:
             response.headers["Content-Security-Policy"] = self._csp
         else:
-            # 보고 모드: 위반 시 차단하지 않고 보고만 한다 (Phase 1 기본값)
             response.headers["Content-Security-Policy-Report-Only"] = self._csp
 
         # ── 6) HSTS — 리버스 프록시가 HTTPS를 알려줄 때만 설정 ──

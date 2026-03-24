@@ -101,9 +101,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials | None = De
     if is_enabled("TOKEN_BLACKLIST"):
         from shared.auth.token_blacklist import TokenBlacklist
         try:
-            from app.core.redis import get_redis_client  # 서비스 Redis 클라이언트
+            from shared.events.safe_publish import get_redis_client  # 공유 Redis 클라이언트
             redis_client = get_redis_client()
-        except Exception:
+        except (ImportError, ConnectionError):
+            # Redis 미설정 시 블랙리스트 건너뛰기 (fail-open)
             redis_client = None
         if redis_client is not None:
             blacklist = TokenBlacklist(redis_client)
