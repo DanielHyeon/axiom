@@ -625,7 +625,11 @@
     "notFound": "The requested page could not be found.",
     "goToDashboard": "Go to Dashboard",
     "unknownError": "An unknown error occurred.",
-    "somethingWentWrong": "Something went wrong"
+    "somethingWentWrong": "Something went wrong",
+    "retry": "Retry",
+    "errorCode": "Error code: {{code}}",
+    "errorReportSent": "Error details have been automatically reported.",
+    "pageErrorTitle": "An error occurred on this page"
   },
   "auth": {
     "loginTitle": "Axiom Canvas",
