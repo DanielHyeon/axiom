@@ -1217,6 +1217,25 @@ def list_snapshots_endpoint(
     return {"success": True, "data": data, "count": len(data)}
 
 
+@router.get("/snapshots/compare")
+def compare_snapshots(
+    request: Request,
+    base_version: str = Query(..., description="기준 스냅샷 버전 (이전)"),
+    target_version: str = Query(..., description="대상 스냅샷 버전 (이후)"),
+):
+    """두 스냅샷의 아티팩트 레벨 diff를 반환한다.
+
+    base_version과 target_version 사이의 변경 사항(Add/Change/Delete)을
+    아티팩트 유형 × 컬렉션 단위로 비교한다. 변경된 필드 목록도 포함.
+    """
+    _tenant(request)  # 인증 확인
+    try:
+        data = _snapshot_registry.compare_snapshots(base_version, target_version)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return {"success": True, "data": data}
+
+
 @router.get("/snapshots/{version}")
 def get_snapshot_detail(request: Request, version: str):
     """특정 스냅샷 상세 조회 (아티팩트 포함)"""
