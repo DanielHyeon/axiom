@@ -5,6 +5,7 @@
  */
 
 import React, { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Trash2, Link2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -63,6 +64,7 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
   availableTargets,
   readOnly = false,
 }) => {
+  const { t } = useTranslation();
   const update = useCallback(
     (idx: number, patch: Partial<ObjectTypeRelation>) => {
       onChange(relations.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
@@ -95,12 +97,12 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Link2 className="h-4 w-4 text-primary" />
-          관계 ({relations.length})
+          {t('domainExt.relationsCount', { count: relations.length })}
         </h3>
         {!readOnly && (
           <Button variant="outline" size="sm" onClick={add}>
             <Plus className="h-3.5 w-3.5 mr-1" />
-            관계 추가
+            {t('domainExt.addRelation')}
           </Button>
         )}
       </div>
@@ -108,7 +110,7 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
       {/* 관계 목록 */}
       {relations.length === 0 ? (
         <div className="text-sm text-muted-foreground text-center py-6 border border-dashed border-border rounded-lg">
-          정의된 관계가 없습니다.
+          {t('domainExt.noRelations')}
         </div>
       ) : (
         <div className="space-y-2">
@@ -120,7 +122,7 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
                   <Input
                     value={rel.name}
                     onChange={(e) => update(idx, { name: e.target.value })}
-                    placeholder="관계명 (예: has_orders)"
+                    placeholder={t('domainExt.relationName')}
                     className="h-7 text-xs flex-1"
                     readOnly={readOnly}
                   />
@@ -170,7 +172,7 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
                     disabled={readOnly}
                   >
                     <SelectTrigger className="h-7 text-xs flex-1">
-                      <SelectValue placeholder="대상 ObjectType 선택" />
+                      <SelectValue placeholder={t('domainExt.selectTarget')} />
                     </SelectTrigger>
                     <SelectContent>
                       {availableTargets.map((t) => (
@@ -185,7 +187,7 @@ export const RelationEditor: React.FC<RelationEditorProps> = ({
                   <Input
                     value={rel.foreignKey}
                     onChange={(e) => update(idx, { foreignKey: e.target.value })}
-                    placeholder="FK 컬럼"
+                    placeholder={t('domainExt.fkColumn')}
                     className="h-7 text-xs w-36"
                     readOnly={readOnly}
                   />

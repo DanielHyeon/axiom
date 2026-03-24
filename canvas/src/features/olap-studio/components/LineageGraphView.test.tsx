@@ -10,6 +10,24 @@ import { render, screen } from '@testing-library/react';
 import { LineageGraphView } from './LineageGraphView';
 import type { LineageEntity, LineageEdge } from './LineageGraphView';
 
+// i18n 모킹 — 키를 그대로 반환하되 실제 번역값도 함께 매핑
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        'olapStudio.lineage.noLineage': '리니지 데이터가 없습니다',
+        'olapStudioExt.lineageEdge.LOADS_TO': '적재',
+        'olapStudioExt.lineageEdge.FEEDS': '공급',
+        'olapStudioExt.lineageEdge.DERIVES_TO': '파생',
+        'olapStudioExt.lineageEdge.DEPENDS_ON': '의존',
+        'domainExt.createSave': '생성',
+      };
+      return translations[key] ?? key;
+    },
+    i18n: { language: 'ko', changeLanguage: vi.fn() },
+  }),
+}));
+
 // MermaidERDRenderer 모킹 — mermaidCode를 그대로 표시
 vi.mock('@/shared/components/MermaidERDRenderer', () => ({
   MermaidERDRenderer: ({ mermaidCode }: { mermaidCode: string }) => (
@@ -69,7 +87,7 @@ describe('LineageGraphView', () => {
 
   // ── 엣지 라벨 매핑 ──────────────────────────────────────
 
-  it('알려진 엣지 타입은 한국어 라벨로 변환된다', () => {
+  it('알려진 엣지 타입은 번역된 라벨로 변환된다', () => {
     render(<LineageGraphView entities={sampleEntities} edges={sampleEdges} />);
     const code = getMermaidCode();
     // LOADS_TO → 적재, FEEDS → 공급

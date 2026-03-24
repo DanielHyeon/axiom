@@ -7,6 +7,7 @@ import coseBilkent from 'cytoscape-cose-bilkent';
 import dagre from 'cytoscape-dagre';
 import { Loader2, Network } from 'lucide-react';
 import type { GraphData, GraphNode } from '../types/insight';
+import { useTranslation } from 'react-i18next';
 import {
  toCytoscapeElements,
  getLayoutConfig,
@@ -44,6 +45,7 @@ export function ImpactGraphViewer({
  onNodeClick,
  onRetry,
 }: ImpactGraphViewerProps) {
+  const { t } = useTranslation();
  const containerRef = useRef<HTMLDivElement>(null);
  const cyRef = useRef<cytoscape.Core | null>(null);
 
@@ -172,7 +174,7 @@ export function ImpactGraphViewer({
  return (
  <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-foreground0">
  <Loader2 className="h-8 w-8 animate-spin mb-3" />
- <p className="text-sm">Impact 그래프를 분석하고 있습니다...</p>
+ <p className="text-sm">{t('insightF.msgfec77a39')}</p>
  </div>
  );
  }
@@ -189,7 +191,7 @@ export function ImpactGraphViewer({
  onClick={onRetry}
  className="text-xs text-primary hover:underline"
  >
- 다시 시도
+ {t('datasource.erd.retryBtn')}
  </button>
  )}
  </div>
@@ -200,7 +202,7 @@ export function ImpactGraphViewer({
  return (
  <div className="flex flex-col items-center justify-center h-full min-h-[300px] text-foreground0">
  <Network className="h-10 w-10 mb-3 opacity-30" />
- <p className="text-sm">KPI를 선택하면 Impact 그래프가 표시됩니다</p>
+ <p className="text-sm">{t('insightExt.selectKpiHint')}</p>
  </div>
  );
  }
@@ -217,7 +219,7 @@ export function ImpactGraphViewer({
  <button
  onClick={handleFit}
  className="rounded border border-border bg-muted/80 px-2 py-1 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
- title="화면에 맞추기"
+ title={t('insightExt.fitView')}
  >
  Fit
  </button>

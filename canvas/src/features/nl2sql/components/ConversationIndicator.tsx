@@ -8,6 +8,7 @@
 import { MessageSquare, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -27,6 +28,7 @@ export function ConversationIndicator({
   isMultiTurn,
   onNewConversation,
 }: ConversationIndicatorProps) {
+  const { t } = useTranslation();
   // 멀티턴이 아니면 표시하지 않음
   if (!isMultiTurn) return null;
 
@@ -42,7 +44,7 @@ export function ConversationIndicator({
       <div className="flex items-center gap-2">
         <MessageSquare className="h-3.5 w-3.5 text-indigo-500" />
         <Badge variant="outline" className="text-[11px] font-mono border-indigo-300 text-indigo-600">
-          대화 {turnCount}턴 진행 중
+          {t('conversation.turnProgress', { count: turnCount })}
         </Badge>
       </div>
 
@@ -59,7 +61,7 @@ export function ConversationIndicator({
         )}
       >
         <X className="h-3 w-3" />
-        새 대화
+        {t('conversation.newConversation')}
       </button>
     </div>
   );

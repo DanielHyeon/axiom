@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Slider } from '@/components/ui/slider';
 import { Zap, X, ChevronDown, ChevronRight, ArrowRight, Loader2 } from 'lucide-react';
 import type { OntologyLayer, ImpactNode } from '@/features/ontology/types/ontology';
+import { useTranslation } from 'react-i18next';
 
 const LAYER_COLORS: Record<string, string> = {
  kpi: '#EF4444',
@@ -101,7 +102,8 @@ function ImpactNodeRow({ node }: { node: ImpactNode }) {
  );
 }
 
-export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisPanelProps) {
+export function ImpactAnalysisPanel({
+  nodeId, caseId, onClose }: ImpactAnalysisPanelProps) {
  const [maxDepth, setMaxDepth] = useState(3);
 
  const { data, isLoading, isError } = useQuery({
@@ -129,7 +131,7 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  <div className="flex items-center justify-between h-[52px] px-6 border-b border-border shrink-0">
  <div className="flex items-center gap-2">
  <Zap size={14} className="text-warning" />
- <span className="text-[13px] font-semibold text-foreground font-heading">영향 분석</span>
+ <span className="text-[13px] font-semibold text-foreground font-heading">{t('olapStudioExt.impactAnalysis')}</span>
  </div>
  <button
  type="button"
@@ -160,8 +162,8 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  {/* Summary */}
  {data && (
  <div className="px-6 py-3 border-b border-border flex gap-4 text-[11px] text-foreground/60 font-mono">
- <span>영향 노드: {data.total_affected}</span>
- <span>최대 깊이: {data.max_depth_reached}</span>
+ <span>{t('ontologyPage.msg55eaf2e9')}</span>
+ <span>{t('ontologyPage.msgaa47202d')}</span>
  <span>{data.analysis_time_ms}ms</span>
  </div>
  )}
@@ -169,7 +171,7 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  {/* Depth Slider */}
  <div className="px-6 py-3 border-b border-border">
  <label className="text-[11px] text-foreground/60 font-mono block mb-2">
- 탐색 깊이: {maxDepth}
+ {t('ontologyPage.explorationDepth', { depth: maxDepth })}
  </label>
  <Slider
  min={1}
@@ -185,19 +187,19 @@ export function ImpactAnalysisPanel({ nodeId, caseId, onClose }: ImpactAnalysisP
  {isLoading && (
  <div className="flex flex-col items-center justify-center py-12 text-foreground/60">
  <Loader2 size={24} className="animate-spin mb-2" />
- <p className="text-sm font-mono">BFS 탐색 중...</p>
+ <p className="text-sm font-mono">{t('ontologyPage.msga5b287aa')}</p>
  </div>
  )}
 
  {isError && (
  <div className="rounded border border-red-200 bg-red-50 p-3 text-sm text-destructive">
- 영향 분석에 실패했습니다.
+ {t('ontologyPage.m2d6052be')}
  </div>
  )}
 
  {data && data.total_affected === 0 && !isLoading && (
  <div className="text-center py-8 text-foreground/60 text-sm font-mono">
- 연결된 영향 노드가 없습니다.
+ {t('ontologyPage.mfd34edd5')}
  </div>
  )}
 

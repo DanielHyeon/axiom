@@ -12,6 +12,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableHeader,
@@ -69,12 +70,13 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
   onSelectInstance,
   isLoading,
 }) => {
+  const { t } = useTranslation();
   // 동적 컬럼 (ObjectType의 fields에서 가시 필드만)
   const columns = useMemo(() => {
     if (!objectType?.fields) return [];
     return objectType.fields
       .filter((f) => f.isVisible !== false)
-      .slice(0, 8); // 최대 8개 컬럼 표시
+      {t('objExplorerF.m6d0a5053')}
   }, [objectType]);
 
   // 페이지 계산
@@ -109,7 +111,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
   if (!objectType) {
     return (
       <div className="flex items-center justify-center h-full text-muted-foreground text-sm">
-        좌측에서 Object Type을 선택하세요
+        {t('objectExplorerExt.selectObjectType')}
       </div>
     );
   }
@@ -120,7 +122,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-muted/30">
         <span className="text-xs font-medium text-foreground">
           {objectType.displayName || objectType.name}
-          <span className="text-muted-foreground ml-2">({total}건)</span>
+          <span className="text-muted-foreground ml-2">{t('objectExplorerExt.countUnit', { count: total })}</span>
         </span>
       </div>
 
@@ -129,11 +131,11 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
         {isLoading ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground text-xs gap-2">
             <div className="h-5 w-5 border-2 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
-            <span>데이터 로딩 중...</span>
+            <span>{t('objectExplorerExt.dataLoading')}</span>
           </div>
         ) : instances.length === 0 ? (
           <div className="flex items-center justify-center py-12 text-muted-foreground text-xs">
-            인스턴스가 없습니다
+            {t('objectExplorerExt.noInstances')}
           </div>
         ) : (
           <Table>
@@ -161,7 +163,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
                   onClick={() => handleSort('displayName')}
                 >
                   <span className="flex items-center gap-1">
-                    이름
+                    {t('objectExplorerExt.colName')}
                     {filter.sortBy === 'displayName' &&
                       (filter.sortOrder === 'asc' ? (
                         <ArrowUp className="h-3 w-3" />
@@ -239,7 +241,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
               className="h-7 w-7"
               disabled={currentPage <= 1}
               onClick={() => goToPage(1)}
-              title="첫 페이지"
+              title={t('objectExplorerExt.firstPage')}
             >
               <ChevronsLeft className="h-3.5 w-3.5" />
             </Button>
@@ -249,7 +251,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
               className="h-7 w-7"
               disabled={currentPage <= 1}
               onClick={() => goToPage(currentPage - 1)}
-              title="이전 페이지"
+              title={t('objectExplorerExt.prevPage')}
             >
               <ChevronLeft className="h-3.5 w-3.5" />
             </Button>
@@ -262,7 +264,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
               className="h-7 w-7"
               disabled={currentPage >= totalPages}
               onClick={() => goToPage(currentPage + 1)}
-              title="다음 페이지"
+              title={t('objectExplorerExt.nextPage')}
             >
               <ChevronRight className="h-3.5 w-3.5" />
             </Button>
@@ -272,7 +274,7 @@ export const InstanceTable: React.FC<InstanceTableProps> = ({
               className="h-7 w-7"
               disabled={currentPage >= totalPages}
               onClick={() => goToPage(totalPages)}
-              title="마지막 페이지"
+              title={t('objectExplorerExt.lastPage')}
             >
               <ChevronsRight className="h-3.5 w-3.5" />
             </Button>

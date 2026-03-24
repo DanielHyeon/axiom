@@ -4,6 +4,7 @@ import { getHITLItems, approveHITL, rejectHITL } from '@/features/ontology/api/o
 import type { HITLItem } from '@/features/ontology/types/ontology';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 import {
  CheckCircle,
  XCircle,
@@ -27,7 +28,8 @@ const LAYER_BADGE: Record<string, string> = {
  resource: 'border-amber-300 text-amber-600',
 };
 
-export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
+export function HITLReviewQueue({
+  caseId, onClose }: HITLReviewQueueProps) {
  const [items, setItems] = useState<HITLItem[]>([]);
  const [total, setTotal] = useState(0);
  const [loading, setLoading] = useState(true);
@@ -105,7 +107,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  {/* Header */}
  <div className="flex items-center justify-between h-[52px] px-6 border-b border-border shrink-0">
  <div className="flex items-center gap-2">
- <span className="text-[13px] font-semibold text-foreground font-heading">검토 대기열</span>
+ <span className="text-[13px] font-semibold text-foreground font-heading">{t('ontology.reviewQueue')}</span>
  <Badge variant="outline" className="text-[10px] border-border tabular-nums font-mono">
  {total}
  </Badge>
@@ -132,7 +134,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  {!loading && items.length === 0 && !error && (
  <div className="flex flex-col items-center justify-center py-8 text-foreground/60 gap-1">
  <CheckCircle className="h-6 w-6 opacity-40" />
- <span className="text-xs font-mono">검토 대기 항목이 없습니다</span>
+ <span className="text-xs font-mono">{t('ontologyPage.msgdfe5d31c')}</span>
  </div>
  )}
 
@@ -172,7 +174,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  {showComment && (
  <textarea
  className="w-full h-16 rounded border border-border bg-card p-2 text-xs text-foreground font-mono resize-none focus:outline-none focus:border-border"
- placeholder="검토 코멘트 (선택)"
+ placeholder={t('ontologyPage.msgaec5f238')}
  value={comment}
  onChange={(e) => setComment(e.target.value)}
  />
@@ -192,7 +194,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  ) : (
  <CheckCircle className="h-3.5 w-3.5" />
  )}
- <span className="ml-1 text-xs font-heading">승인</span>
+ <span className="ml-1 text-xs font-heading">{t('common.approve')}</span>
  </Button>
  <Button
  variant="ghost"
@@ -202,7 +204,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  onClick={() => handleReject(item.id)}
  >
  <XCircle className="h-3.5 w-3.5" />
- <span className="ml-1 text-xs font-heading">반려</span>
+ <span className="ml-1 text-xs font-heading">{t('caseDashboardExt.status.REJECTED')}</span>
  </Button>
  <Button
  variant="ghost"
@@ -243,7 +245,7 @@ export function HITLReviewQueue({ caseId, onClose }: HITLReviewQueueProps) {
  ) : (
  <ChevronDown className="h-3.5 w-3.5 mr-1" />
  )}
- 더 보기 ({items.length}/{total})
+ {t('ontologyPage.showMore', { shown: items.length, total })}
  </Button>
  </div>
  )}

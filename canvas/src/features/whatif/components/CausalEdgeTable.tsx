@@ -7,6 +7,7 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 import type { CausalEdge } from '../types/wizard';
 
 interface CausalEdgeTableProps {
@@ -17,6 +18,7 @@ interface CausalEdgeTableProps {
 }
 
 export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
+  const { t } = useTranslation();
   const selectedCount = edges.filter((e) => e.selected).length;
 
   return (
@@ -24,10 +26,10 @@ export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
       {/* 요약 */}
       <div className="flex items-center justify-between mb-3">
         <h5 className="text-sm font-semibold">
-          발견된 관계 ({edges.length}개)
+          {t('whatifExt.causalEdge.discoveredCount', { count: edges.length })}
         </h5>
         <span className="text-xs text-muted-foreground">
-          {selectedCount}개 선택됨
+          {t('whatifExt.causalEdge.selectedCount', { count: selectedCount })}
         </span>
       </div>
 
@@ -37,18 +39,18 @@ export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
           <thead>
             <tr className="bg-muted/50">
               <th className="w-10 px-3 py-2 text-center" />
-              <th className="px-3 py-2 text-left font-medium">소스</th>
-              <th className="px-3 py-2 text-left font-medium">필드</th>
+              <th className="px-3 py-2 text-left font-medium">{t('whatifExt.causalEdge.source')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('whatifExt.causalEdge.field')}</th>
               <th className="px-1 py-2 text-center text-muted-foreground">
                 &rarr;
               </th>
-              <th className="px-3 py-2 text-left font-medium">타겟</th>
-              <th className="px-3 py-2 text-left font-medium">필드</th>
-              <th className="px-3 py-2 text-right font-medium">강도</th>
+              <th className="px-3 py-2 text-left font-medium">{t('whatifExt.causalEdge.target')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('whatifExt.causalEdge.field')}</th>
+              <th className="px-3 py-2 text-right font-medium">{t('whatifExt.causalEdge.strength')}</th>
               <th className="px-3 py-2 text-right font-medium">Lag</th>
               <th className="px-3 py-2 text-right font-medium">Pearson</th>
               <th className="px-3 py-2 text-right font-medium">p-value</th>
-              <th className="px-3 py-2 text-center font-medium">방향</th>
+              <th className="px-3 py-2 text-center font-medium">{t('whatifExt.causalEdge.direction')}</th>
             </tr>
           </thead>
           <tbody>
@@ -67,7 +69,7 @@ export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
                   <Checkbox
                     checked={edge.selected}
                     onCheckedChange={() => onToggleEdge(idx)}
-                    aria-label={`${edge.sourceField} -> ${edge.targetField} 관계 선택`}
+                    aria-label={`${edge.sourceField} -> ${edge.targetField}`}
                   />
                 </td>
 
@@ -128,7 +130,7 @@ export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
                         : 'text-red-400 border-red-500/30'
                     )}
                   >
-                    {edge.direction === 'positive' ? '+ 양' : '- 음'}
+                    {edge.direction === 'positive' ? t('whatifExt.causalEdge.positive') : t('whatifExt.causalEdge.negative')}
                   </Badge>
                 </td>
               </tr>
@@ -140,7 +142,7 @@ export function CausalEdgeTable({ edges, onToggleEdge }: CausalEdgeTableProps) {
                   colSpan={11}
                   className="px-3 py-8 text-center text-muted-foreground"
                 >
-                  발견된 인과 관계가 없습니다. 파라미터를 조정하고 다시 분석하세요.
+                  {t('whatifExt.causalEdge.noRelations')}
                 </td>
               </tr>
             )}

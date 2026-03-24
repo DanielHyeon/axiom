@@ -19,6 +19,7 @@ let axeRun: ((node: Element) => Promise<{ violations: Array<{ id: string; impact
 
 try {
   // 동적 import — axe-core 미설치 시 null 유지
+  // @ts-expect-error axe-core는 선택 의존성 — 미설치 시 catch로 폴백
   const axe = await import('axe-core');
   axeRun = (node: Element) => axe.default.run(node);
 } catch {

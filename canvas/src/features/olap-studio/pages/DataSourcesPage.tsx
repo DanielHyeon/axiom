@@ -19,8 +19,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { dataSources } from '../api/olapStudioApi';
+import { useTranslation } from 'react-i18next';
 
 export function DataSourcesPage() {
+  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -72,32 +74,32 @@ export function DataSourcesPage() {
         <div className="flex items-center gap-2">
           <Database className="h-4 w-4 text-blue-500" />
           <h1 className="text-[14px] font-semibold font-heading">
-            데이터 소스
+            {t('olapStudioF.m6cfb3e99')}
           </h1>
           <span className="text-[11px] text-foreground/40 font-mono">
-            {sources.length}개
+            {t('olapStudioF.sourceCount', { count: sources.length })}
           </span>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> 추가
+          <Plus className="h-3 w-3 mr-1" /> {t('common.add')}
         </Button>
       </div>
 
       {/* 생성 폼 */}
       {showForm && (
         <div className="px-6 py-4 bg-blue-50/50 border-b border-border space-y-3">
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">이름</Label>
+              <Label className="text-[11px] font-mono">{t('olapStudioExt.name')}</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder="데이터소스 이름"
+                placeholder={t('olapStudioExt.datasourceName')}
                 className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">유형</Label>
+              <Label className="text-[11px] font-mono">{t('olapStudioExt.type')}</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
@@ -116,7 +118,7 @@ export function DataSourcesPage() {
               size="sm"
               onClick={() => setShowForm(false)}
             >
-              취소
+              {t('common.cancel')}
             </Button>
             <Button
               size="sm"
@@ -126,7 +128,7 @@ export function DataSourcesPage() {
               {createMut.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                '생성'
+                t('olapStudioExt.create')
               )}
             </Button>
           </div>
@@ -145,7 +147,7 @@ export function DataSourcesPage() {
           <div className="text-center py-12">
             <Database className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
             <p className="text-[12px] text-foreground/40 font-mono">
-              등록된 데이터소스가 없습니다
+              {t('olapStudio.datasources.noDatasources')}
             </p>
           </div>
         )}
@@ -172,7 +174,7 @@ export function DataSourcesPage() {
                       : 'bg-red-50 text-red-500',
                   )}
                 >
-                  {ds.is_active ? '활성' : '비활성'}
+                  {ds.is_active ? t('olapStudioExt.active') : t('olapStudioExt.inactive')}
                 </span>
               </div>
 
@@ -207,13 +209,13 @@ export function DataSourcesPage() {
                   className="flex items-center gap-1 text-[10px] text-blue-500 hover:text-blue-600 font-mono"
                   disabled={testMut.isPending}
                 >
-                  <Zap className="h-3 w-3" /> 연결 테스트
+                  <Zap className="h-3 w-3" /> {t('olapStudioF.connectionTest')}
                 </button>
                 <button
                   onClick={() => deleteMut.mutate(ds.id)}
                   className="flex items-center gap-1 text-[10px] text-red-400 hover:text-red-500 font-mono ml-auto"
                 >
-                  <Trash2 className="h-3 w-3" /> 삭제
+                  <Trash2 className="h-3 w-3" /> {t('common.delete')}
                 </button>
               </div>
             </div>

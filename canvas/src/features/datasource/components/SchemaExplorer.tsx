@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDatasourceSchemas, getDatasourceTables } from '../api/weaverDatasourceApi';
 import { ChevronRight, ChevronDown, Database, FolderOpen, Table } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface SchemaExplorerProps {
  selectedDsName: string | null;
@@ -9,6 +10,7 @@ interface SchemaExplorerProps {
 }
 
 export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: SchemaExplorerProps) {
+  const { t } = useTranslation();
  const [schemas, setSchemas] = useState<string[]>([]);
  const [schemasLoading, setSchemasLoading] = useState(false);
  const [expandedSchema, setExpandedSchema] = useState<string | null>(null);
@@ -63,10 +65,10 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
 
  return (
  <div className="border border-border rounded-lg bg-card overflow-hidden">
- <div className="p-3 border-b border-border bg-background font-medium text-sm">메타데이터 트리</div>
+ <div className="p-3 border-b border-border bg-background font-medium text-sm">{t('datasourceExt.metadataTree')}</div>
  <div className="p-2 max-h-80 overflow-y-auto">
  {datasourceNames.length === 0 && (
- <p className="text-foreground0 text-xs p-2">데이터소스를 먼저 추가하세요.</p>
+ <p className="text-foreground0 text-xs p-2">{t('datasourceExt.addDatasourceFirst')}</p>
  )}
  {datasourceNames.map((name) => (
  <div key={name}>
@@ -81,9 +83,9 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
  </button>
  {selectedDsName === name && (
  <div className="ml-4 mt-0.5">
- {schemasLoading && <p className="text-xs text-foreground0 p-1">로딩 중...</p>}
+ {schemasLoading && <p className="text-xs text-foreground0 p-1">{t('objectExplorerExt.loading')}</p>}
  {!schemasLoading && schemas.length === 0 && (
- <p className="text-xs text-foreground0 p-1">스키마 없음</p>
+ <p className="text-xs text-foreground0 p-1">{t('datasourceExt.noSchemas')}</p>
  )}
  {!schemasLoading &&
  schemas.map((schema) => (
@@ -99,7 +101,7 @@ export function SchemaExplorer({ selectedDsName, onSelectDs, datasourceNames }: 
  </button>
  {expandedSchema === schema && (
  <div className="ml-4 py-1">
- {tablesLoading === schema && <p className="text-xs text-muted-foreground px-2">로딩 중...</p>}
+ {tablesLoading === schema && <p className="text-xs text-muted-foreground px-2">{t('objectExplorerExt.loading')}</p>}
  {tablesMap[schema]?.map((table) => (
  <div key={table} className="flex items-center gap-2 px-2 py-0.5 text-xs text-muted-foreground">
  <Table size={12} />

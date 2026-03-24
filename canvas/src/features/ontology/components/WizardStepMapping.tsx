@@ -4,6 +4,7 @@
  * 자동 추천 후 사용자가 수동 조정 가능
  */
 import { ChevronLeft, ArrowRight } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { OntologyLayer } from '../types/ontology';
 import type { useOntologyWizard } from '../hooks/useOntologyWizard';
 
@@ -14,15 +15,16 @@ interface Props {
 }
 
 // 레이어 설정: 라벨, 색상, 설명
-const LAYERS: { key: OntologyLayer; label: string; color: string; description: string }[] = [
-  { key: 'kpi', label: 'KPI', color: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30', description: '핵심 성과 지표' },
-  { key: 'driver', label: 'Driver', color: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/15 dark:text-orange-400 dark:border-orange-500/30', description: '변동 원인 요인' },
-  { key: 'measure', label: 'Measure', color: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30', description: '측정 지표' },
-  { key: 'process', label: 'Process', color: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30', description: '비즈니스 프로세스' },
-  { key: 'resource', label: 'Resource', color: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30', description: '물리적/논리적 자원' },
+const LAYERS: { key: OntologyLayer; label: string; color: string; descKey: string }[] = [
+  { key: 'kpi', label: 'KPI', color: 'bg-red-100 text-red-700 border-red-200 dark:bg-red-500/15 dark:text-red-400 dark:border-red-500/30', descKey: 'ontologyExt.layerDesc.kpi' },
+  { key: 'driver', label: 'Driver', color: 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-500/15 dark:text-orange-400 dark:border-orange-500/30', descKey: 'ontologyExt.layerDesc.driver' },
+  { key: 'measure', label: 'Measure', color: 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30', descKey: 'ontologyExt.layerDesc.measure' },
+  { key: 'process', label: 'Process', color: 'bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30', descKey: 'ontologyExt.layerDesc.process' },
+  { key: 'resource', label: 'Resource', color: 'bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30', descKey: 'ontologyExt.layerDesc.resource' },
 ];
 
 export function WizardStepMapping({ wizard }: Props) {
+  const { t } = useTranslation();
   const { mappings, updateMappingLayer, goBack, goToReview } = wizard;
 
   return (
@@ -33,12 +35,13 @@ export function WizardStepMapping({ wizard }: Props) {
           type="button"
           onClick={goBack}
           className="p-1.5 rounded hover:bg-muted text-muted-foreground"
+          aria-label={t('common.back')}
         >
           <ChevronLeft size={16} />
         </button>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">레이어 매핑</h3>
-          <p className="text-sm text-muted-foreground">각 테이블을 온톨로지 레이어에 매핑하세요. 자동 추천된 레이어를 확인 후 수정할 수 있습니다.</p>
+          <h3 className="text-lg font-semibold text-foreground">{t('ontologyExt.wizard.layerMapping')}</h3>
+          <p className="text-sm text-muted-foreground">{t('ontologyExt.wizard.layerMappingHint')}</p>
         </div>
       </div>
 
@@ -50,7 +53,7 @@ export function WizardStepMapping({ wizard }: Props) {
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${l.color}`}
           >
             {l.label}
-            <span className="text-[10px] font-normal opacity-75">- {l.description}</span>
+            <span className="text-[10px] font-normal opacity-75">- {t(l.descKey)}</span>
           </span>
         ))}
       </div>
@@ -58,9 +61,9 @@ export function WizardStepMapping({ wizard }: Props) {
       {/* 매핑 테이블 */}
       <div className="border border-border rounded-lg overflow-hidden bg-card">
         <div className="grid grid-cols-[1fr_40px_1fr] items-center px-4 py-2.5 bg-muted/50 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-          <span>테이블</span>
+          <span>{t('ontologyExt.wizard.table')}</span>
           <span />
-          <span>레이어</span>
+          <span>{t('ontologyExt.wizard.layer')}</span>
         </div>
         <div className="divide-y divide-border max-h-[400px] overflow-y-auto">
           {mappings.map((m) => (
@@ -127,7 +130,7 @@ export function WizardStepMapping({ wizard }: Props) {
           onClick={goToReview}
           className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
         >
-          검토 및 생성
+          {t('ontologyExt.wizard.reviewAndCreate')}
         </button>
       </div>
     </div>

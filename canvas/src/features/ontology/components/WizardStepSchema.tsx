@@ -4,6 +4,7 @@
  * KAIR SchemaBasedGenerator.vue / SchemaSelector.vue를 참조하여 이식
  */
 import { Database, FolderOpen, Loader2, ChevronLeft, CheckSquare, Square } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { useOntologyWizard } from '../hooks/useOntologyWizard';
 
 type WizardHook = ReturnType<typeof useOntologyWizard>;
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function WizardStepSchema({ wizard }: Props) {
+  const { t } = useTranslation();
   const {
     datasources,
     datasourcesLoading,
@@ -36,12 +38,12 @@ export function WizardStepSchema({ wizard }: Props) {
     return (
       <div className="space-y-4">
         <div className="text-center space-y-1">
-          <h3 className="text-lg font-semibold text-foreground">데이터소스 선택</h3>
-          <p className="text-sm text-muted-foreground">온톨로지를 생성할 데이터소스를 선택하세요</p>
+          <h3 className="text-lg font-semibold text-foreground">{t('ontologyExt.wizard.selectDatasource')}</h3>
+          <p className="text-sm text-muted-foreground">{t('ontologyExt.wizard.selectDatasourceHint')}</p>
         </div>
 
         {datasourcesLoading ? (
-          <LoadingState message="데이터소스 로딩 중..." />
+          <LoadingState message={t('ontologyExt.wizard.loadingDatasources')} />
         ) : (
           <div className="space-y-2">
             {datasources.map((ds) => (
@@ -58,7 +60,7 @@ export function WizardStepSchema({ wizard }: Props) {
             ))}
             {datasources.length === 0 && (
               <p className="text-center text-sm text-muted-foreground py-8">
-                등록된 데이터소스가 없습니다.
+                {t('ontologyExt.wizard.noDatasources')}
               </p>
             )}
           </div>
@@ -79,14 +81,14 @@ export function WizardStepSchema({ wizard }: Props) {
           >
             <ChevronLeft size={16} />
           </button>
-          <h3 className="text-lg font-semibold text-foreground">스키마 선택</h3>
+          <h3 className="text-lg font-semibold text-foreground">{t('ontologyExt.wizard.selectSchema')}</h3>
           <span className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-xs font-medium">
             {selectedDatasource}
           </span>
         </div>
 
         {schemasLoading ? (
-          <LoadingState message="스키마 로딩 중..." />
+          <LoadingState message={t('ontologyExt.wizard.loadingSchemas')} />
         ) : (
           <div className="space-y-2">
             {schemas.map((s) => (
@@ -99,7 +101,7 @@ export function WizardStepSchema({ wizard }: Props) {
                 <FolderOpen size={18} className="text-yellow-600 shrink-0" />
                 <span className="flex-1 text-sm font-medium text-foreground">{s.name}</span>
                 {s.tableCount != null && (
-                  <span className="text-xs text-muted-foreground">{s.tableCount}개 테이블</span>
+                  <span className="text-xs text-muted-foreground">{t('ontologyExt.wizard.tableCount', { count: s.tableCount })}</span>
                 )}
               </button>
             ))}
@@ -120,7 +122,7 @@ export function WizardStepSchema({ wizard }: Props) {
         >
           <ChevronLeft size={16} />
         </button>
-        <h3 className="text-lg font-semibold text-foreground">테이블 선택</h3>
+        <h3 className="text-lg font-semibold text-foreground">{t('ontologyExt.wizard.selectTables')}</h3>
         <div className="flex items-center gap-1.5">
           <span className="px-2 py-0.5 bg-primary text-primary-foreground rounded text-xs font-medium">
             {selectedDatasource}
@@ -139,31 +141,31 @@ export function WizardStepSchema({ wizard }: Props) {
           onClick={selectAllTables}
           className="text-xs text-primary hover:underline"
         >
-          전체 선택
+          {t('whatifExt.dataSelect.selectAll')}
         </button>
         <button
           type="button"
           onClick={deselectAllTables}
           className="text-xs text-muted-foreground hover:underline"
         >
-          전체 해제
+          {t('whatifExt.dataSelect.deselectAll')}
         </button>
         <span className="text-xs text-muted-foreground ml-auto">
-          {selectedTables.length}개 선택됨
+          {t('whatifExt.causalEdge.selectedCount', { count: selectedTables.length })}
         </span>
       </div>
 
       {tablesLoading ? (
-        <LoadingState message="테이블 로딩 중..." />
+        <LoadingState message={t('ontologyExt.wizard.loadingTables')} />
       ) : (
         <div className="space-y-1 max-h-[400px] overflow-y-auto">
-          {tables.map((t) => {
-            const checked = selectedTables.includes(t.name);
+          {tables.map((tbl) => {
+            const checked = selectedTables.includes(tbl.name);
             return (
               <button
-                key={t.name}
+                key={tbl.name}
                 type="button"
-                onClick={() => toggleTable(t.name)}
+                onClick={() => toggleTable(tbl.name)}
                 className={`w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-colors text-left ${
                   checked ? 'bg-primary/10 border border-primary/30' : 'border border-transparent hover:bg-muted'
                 }`}
@@ -174,10 +176,10 @@ export function WizardStepSchema({ wizard }: Props) {
                   <Square size={16} className="text-muted-foreground shrink-0" />
                 )}
                 <span className={`flex-1 text-sm ${checked ? 'font-medium text-foreground' : 'text-muted-foreground'}`}>
-                  {t.name}
+                  {tbl.name}
                 </span>
-                {t.columnCount != null && (
-                  <span className="text-xs text-muted-foreground">{t.columnCount}개 컬럼</span>
+                {tbl.columnCount != null && (
+                  <span className="text-xs text-muted-foreground">{t('ontologyExt.wizard.columnCount', { count: tbl.columnCount })}</span>
                 )}
               </button>
             );
@@ -193,7 +195,7 @@ export function WizardStepSchema({ wizard }: Props) {
           disabled={selectedTables.length === 0}
           className="px-5 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          레이어 매핑 ({selectedTables.length}개 테이블)
+          {t('ontologyExt.wizard.layerMapping')} ({t('ontologyExt.wizard.tableCount', { count: selectedTables.length })})
         </button>
       </div>
     </div>

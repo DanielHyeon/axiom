@@ -3,6 +3,7 @@
  * KG-1: DMN 결정 테이블의 규칙 매칭 방식을 선택한다.
  */
 
+import { useTranslation } from 'react-i18next';
 import type { HitPolicy } from '../types/dmn';
 
 interface HitPolicySelectorProps {
@@ -11,22 +12,23 @@ interface HitPolicySelectorProps {
   disabled?: boolean;
 }
 
-const POLICIES: { value: HitPolicy; label: string; description: string }[] = [
-  { value: 'FIRST', label: 'First', description: '첫 번째 매칭 규칙만 적용' },
-  { value: 'COLLECT', label: 'Collect', description: '모든 매칭 규칙의 결과를 수집' },
-  { value: 'PRIORITY', label: 'Priority', description: '우선순위가 가장 높은 규칙 적용' },
+const POLICY_KEYS: { value: HitPolicy; label: string; descKey: string }[] = [
+  { value: 'FIRST', label: 'First', descKey: 'dmn.hitPolicy.first' },
+  { value: 'COLLECT', label: 'Collect', descKey: 'dmn.hitPolicy.collect' },
+  { value: 'PRIORITY', label: 'Priority', descKey: 'dmn.hitPolicy.priority' },
 ];
 
 export function HitPolicySelector({ value, onChange, disabled }: HitPolicySelectorProps) {
+  const { t } = useTranslation();
   return (
-    <div className="flex gap-1" role="radiogroup" aria-label="적중 정책">
-      {POLICIES.map((p) => (
+    <div className="flex gap-1" role="radiogroup" aria-label={t('dmn.hitPolicy.ariaLabel')}>
+      {POLICY_KEYS.map((p) => (
         <button
           key={p.value}
           type="button"
           role="radio"
           aria-checked={value === p.value}
-          title={p.description}
+          title={t(p.descKey)}
           disabled={disabled}
           onClick={() => onChange(p.value)}
           className={`px-3 py-1.5 text-xs rounded-md border transition-colors ${

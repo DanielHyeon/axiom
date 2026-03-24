@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Search, Loader2, BarChart3, GitBranch, Rows3 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 import { useWhatIfWizard } from '../hooks/useWhatIfWizard';
 import { CausalEdgeTable } from './CausalEdgeTable';
@@ -30,29 +31,31 @@ export function StepEdgeDiscovery() {
     discoveryStats,
   } = useWhatIfWizard();
 
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 max-w-5xl">
       {/* 헤더 */}
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Search className="w-5 h-5 text-primary" />
-          인과 관계 자동 발견
+          {t('whatifExt.edgeDiscovery.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          온톨로지 노드의 데이터에서 상관관계와 인과관계(Granger Causality)를 자동으로 분석합니다.
+          {t('whatifExt.edgeDiscovery.description')}
         </p>
       </div>
 
       {/* 파라미터 설정 */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm">분석 파라미터</CardTitle>
+          <CardTitle className="text-sm">{t('whatifExt.analysisParams')}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-end gap-6 flex-wrap">
             <div className="space-y-1">
               <Label htmlFor="max-lag" className="text-xs">
-                최대 시차 (Lag)
+                {t('whatifExt.edgeDiscovery.maxLag')}
               </Label>
               <Input
                 id="max-lag"
@@ -71,7 +74,7 @@ export function StepEdgeDiscovery() {
             </div>
             <div className="space-y-1">
               <Label htmlFor="min-corr" className="text-xs">
-                최소 상관계수
+                {t('whatifExt.edgeDiscovery.minCorrelation')}
               </Label>
               <Input
                 id="min-corr"
@@ -97,10 +100,10 @@ export function StepEdgeDiscovery() {
               {isDiscovering ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  분석 중...
+                  {t('whatifExt.edgeDiscovery.analyzing')}
                 </>
               ) : (
-                '관계 분석 시작'
+                t('whatifExt.startAnalysis')
               )}
             </Button>
           </div>
@@ -123,7 +126,7 @@ export function StepEdgeDiscovery() {
               <div className="text-2xl font-bold text-primary">
                 {discoveryStats.dataRows.toLocaleString()}
               </div>
-              <div className="text-xs text-muted-foreground">데이터 행</div>
+              <div className="text-xs text-muted-foreground">{t('whatifExt.dataRows')}</div>
             </CardContent>
           </Card>
           <Card className="bg-muted/30">
@@ -132,7 +135,7 @@ export function StepEdgeDiscovery() {
               <div className="text-2xl font-bold text-primary">
                 {discoveryStats.variablesCount}
               </div>
-              <div className="text-xs text-muted-foreground">변수</div>
+              <div className="text-xs text-muted-foreground">{t('whatifExt.variables')}</div>
             </CardContent>
           </Card>
           <Card className="bg-muted/30">
@@ -141,7 +144,7 @@ export function StepEdgeDiscovery() {
               <div className="text-2xl font-bold text-primary">
                 {discoveredEdges.length}
               </div>
-              <div className="text-xs text-muted-foreground">발견된 관계</div>
+              <div className="text-xs text-muted-foreground">{t('whatifExt.discoveredRelations')}</div>
             </CardContent>
           </Card>
         </div>
@@ -158,8 +161,7 @@ export function StepEdgeDiscovery() {
       {/* 빈 결과 안내 */}
       {discoveryStats && discoveredEdges.length === 0 && (
         <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-400 text-sm">
-          발견된 관계가 없습니다. 최소 상관계수를 낮추거나(예: 0.3 → 0.1),
-          분석 대상 노드를 다시 확인해 주세요.
+          {t('whatifExt.edgeDiscovery.noResults')}
         </div>
       )}
     </div>

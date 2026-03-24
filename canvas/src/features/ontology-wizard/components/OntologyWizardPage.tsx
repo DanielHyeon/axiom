@@ -8,6 +8,7 @@
  * Step 4 (완료): 성공 메시지 + 온톨로지 페이지 이동 버튼
  */
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import {
   Sparkles,
@@ -27,16 +28,11 @@ import { LayerProgressCard } from './LayerProgressCard';
 import type { TargetLayer } from '../types/wizard';
 import { LAYER_LABELS } from '../types/wizard';
 
-/** 선택 가능한 5계층 레이어 */
-const ALL_LAYERS: Array<{ value: TargetLayer; label: string }> = [
-  { value: 'kpi', label: 'KPI' },
-  { value: 'measure', label: '측정지표 (Measure)' },
-  { value: 'driver', label: '동인 (Driver)' },
-  { value: 'process', label: '프로세스 (Process)' },
-  { value: 'resource', label: '자원 (Resource)' },
-];
+/** 선택 가능한 5계층 레이어 — 라벨은 t()로 런타임 조회 */
+const ALL_LAYER_KEYS: TargetLayer[] = ['kpi', 'measure', 'driver', 'process', 'resource'];
 
 export function OntologyWizardPage() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const wizard = useMultiLayerWizard();
 
@@ -44,7 +40,7 @@ export function OntologyWizardPage() {
   const [inputText, setInputText] = useState('');
   const [domainHint, setDomainHint] = useState('');
   const [selectedLayers, setSelectedLayers] = useState<Set<TargetLayer>>(
-    new Set(['kpi', 'measure', 'driver', 'process', 'resource']),
+    new Set(ALL_LAYER_KEYS),
   );
 
   /** 레이어 체크박스 토글 */
@@ -63,11 +59,11 @@ export function OntologyWizardPage() {
 
   /** 전체 선택/해제 */
   const toggleAll = () => {
-    if (selectedLayers.size === ALL_LAYERS.length) {
+    if (selectedLayers.size === ALL_LAYER_KEYS.length) {
       // 모두 선택된 경우 → KPI만 남김
       setSelectedLayers(new Set(['kpi']));
     } else {
-      setSelectedLayers(new Set(ALL_LAYERS.map((l) => l.value)));
+      setSelectedLayers(new Set(ALL_LAYER_KEYS));
     }
   };
 
@@ -99,29 +95,29 @@ export function OntologyWizardPage() {
     wizard.reset();
     setInputText('');
     setDomainHint('');
-    setSelectedLayers(new Set(ALL_LAYERS.map((l) => l.value)));
+    setSelectedLayers(new Set(ALL_LAYER_KEYS));
   };
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-8">
+      <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 md:py-8">
         {/* 페이지 제목 */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 rounded-lg bg-primary/10">
+        <div className="flex items-center gap-3 mb-4 md:mb-6">
+          <div className="p-2 rounded-lg bg-primary/10 shrink-0">
             <Sparkles size={24} className="text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              온톨로지 생성 위자드
+            <h1 className="text-xl md:text-2xl font-bold text-foreground">
+              {t('ontologyWizardExt.title')}
             </h1>
-            <p className="text-sm text-muted-foreground">
-              Deep Agents 기반 멀티레이어 온톨로지를 자동 생성합니다
+            <p className="text-xs md:text-sm text-muted-foreground">
+              {t('ontologyWizardExt.subtitle')}
             </p>
           </div>
         </div>
 
         {/* 단계 표시기 */}
-        <div className="mb-8 p-4 bg-card border border-border rounded-xl">
+        <div className="mb-4 md:mb-8 p-3 md:p-4 bg-card border border-border rounded-xl overflow-x-auto">
           <StepIndicator currentStep={wizard.step} />
         </div>
 
@@ -129,26 +125,25 @@ export function OntologyWizardPage() {
         {wizard.step === 'INPUT' && (
           <div className="space-y-6">
             {/* 입력 텍스트 */}
-            <div className="bg-card border border-border rounded-xl p-6">
+            <div className="bg-card border border-border rounded-xl p-4 md:p-6">
               <div className="flex items-center gap-2 mb-3">
                 <FileText size={18} className="text-primary" />
-                <h3 className="text-base font-semibold text-foreground">
-                  입력 텍스트
+                <h3 className="text-sm md:text-base font-semibold text-foreground">
+                  {t('ontologyWizardExt.inputText')}
                 </h3>
               </div>
-              <p className="text-sm text-muted-foreground mb-3">
-                온톨로지를 생성할 도메인 설명, 비즈니스 문서, 또는 요구사항을 입력하세요.
-                (최소 10자)
+              <p className="text-xs md:text-sm text-muted-foreground mb-3">
+                {t('ontologyWizardExt.inputHint')}
               </p>
               <textarea
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="예: 제조 공정에서 OEE(전체 설비 효율)를 관리하기 위한 온톨로지를 생성합니다. 주요 KPI로는 가동률, 성능률, 양품률이 있으며..."
+                placeholder={t('ontologyWizardExt.inputPlaceholder')}
                 className="w-full min-h-[180px] p-4 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground resize-y focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm leading-relaxed"
               />
               <div className="flex justify-end mt-1">
                 <span className={`text-xs ${inputText.length < 10 ? 'text-muted-foreground' : 'text-green-600'}`}>
-                  {inputText.length}자
+                  {t('ontologyWizardExt.charCount', { count: inputText.length })}
                 </span>
               </div>
             </div>
@@ -156,16 +151,16 @@ export function OntologyWizardPage() {
             {/* 도메인 힌트 */}
             <div className="bg-card border border-border rounded-xl p-6">
               <h3 className="text-base font-semibold text-foreground mb-2">
-                도메인 힌트 (선택)
+                {t('ontologyWizardExt.domainHint')}
               </h3>
               <p className="text-sm text-muted-foreground mb-3">
-                업종이나 분야를 지정하면 더 정확한 온톨로지가 생성됩니다.
+                {t('ontologyWizardExt.domainHintDesc')}
               </p>
               <input
                 type="text"
                 value={domainHint}
                 onChange={(e) => setDomainHint(e.target.value)}
-                placeholder="예: 제조업, 금융, 물류, 의료"
+                placeholder={t('ontologyWizardExt.domainHintPlaceholder')}
                 className="w-full p-3 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/40 text-sm"
               />
             </div>
@@ -176,7 +171,7 @@ export function OntologyWizardPage() {
                 <div className="flex items-center gap-2">
                   <Layers size={18} className="text-primary" />
                   <h3 className="text-base font-semibold text-foreground">
-                    대상 레이어
+                    {t('ontologyWizardExt.targetLayers')}
                   </h3>
                 </div>
                 <button
@@ -184,15 +179,15 @@ export function OntologyWizardPage() {
                   onClick={toggleAll}
                   className="text-xs text-primary hover:underline"
                 >
-                  {selectedLayers.size === ALL_LAYERS.length ? '최소 선택' : '전체 선택'}
+                  {selectedLayers.size === ALL_LAYER_KEYS.length ? t('ontologyWizardExt.selectMin') : t('ontologyWizardExt.selectAll')}
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                {ALL_LAYERS.map((layer) => {
-                  const checked = selectedLayers.has(layer.value);
+                {ALL_LAYER_KEYS.map((layerKey) => {
+                  const checked = selectedLayers.has(layerKey);
                   return (
                     <label
-                      key={layer.value}
+                      key={layerKey}
                       className={`
                         flex items-center gap-2.5 p-3 rounded-lg border cursor-pointer
                         transition-colors duration-200
@@ -205,10 +200,10 @@ export function OntologyWizardPage() {
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => toggleLayer(layer.value)}
+                        onChange={() => toggleLayer(layerKey)}
                         className="w-4 h-4 rounded border-border text-primary focus:ring-primary/40"
                       />
-                      <span className="text-sm text-foreground">{layer.label}</span>
+                      <span className="text-sm text-foreground">{t(`ontologyWizardExt.layers.${layerKey}`)}</span>
                     </label>
                   );
                 })}
@@ -229,7 +224,7 @@ export function OntologyWizardPage() {
                 "
               >
                 <Sparkles size={16} />
-                생성 시작
+                {t('ontologyWizardExt.startGeneration')}
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -245,7 +240,7 @@ export function OntologyWizardPage() {
                 <div className="flex items-center gap-2">
                   <Loader2 size={18} className="text-primary animate-spin" />
                   <h3 className="text-base font-semibold text-foreground">
-                    온톨로지 생성 중...
+                    {t('ontologyWizardExt.generating')}
                   </h3>
                 </div>
                 <span className="text-sm font-mono text-muted-foreground">
@@ -272,7 +267,7 @@ export function OntologyWizardPage() {
               <div className="flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
                 <AlertCircle size={18} className="text-destructive mt-0.5 shrink-0" />
                 <div>
-                  <p className="text-sm font-medium text-destructive">오류 발생</p>
+                  <p className="text-sm font-medium text-destructive">{t('ontologyWizardExt.errorOccurred')}</p>
                   <p className="text-sm text-destructive/80 mt-1">{wizard.error}</p>
                 </div>
               </div>
@@ -290,7 +285,7 @@ export function OntologyWizardPage() {
                 "
               >
                 <XCircle size={16} />
-                생성 중단
+                {t('ontologyWizardExt.abortGeneration')}
               </button>
             </div>
           </div>
@@ -304,21 +299,21 @@ export function OntologyWizardPage() {
               <div className="flex items-center gap-2 mb-4">
                 <CheckCircle2 size={20} className="text-green-500" />
                 <h3 className="text-base font-semibold text-foreground">
-                  생성 완료
+                  {t('ontologyWizardExt.generationComplete')}
                 </h3>
               </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
-                  <p className="text-2xl font-bold text-blue-700">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+                <div className="p-3 md:p-4 rounded-lg bg-blue-50 border border-blue-200">
+                  <p className="text-xl md:text-2xl font-bold text-blue-700">
                     {wizard.result.totalNodes}
                   </p>
-                  <p className="text-sm text-blue-600">전체 노드</p>
+                  <p className="text-sm text-blue-600">{t('ontologyWizardExt.totalNodes')}</p>
                 </div>
-                <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                  <p className="text-2xl font-bold text-green-700">
+                <div className="p-3 md:p-4 rounded-lg bg-green-50 border border-green-200">
+                  <p className="text-xl md:text-2xl font-bold text-green-700">
                     {wizard.result.totalRelations}
                   </p>
-                  <p className="text-sm text-green-600">전체 관계</p>
+                  <p className="text-sm text-green-600">{t('ontologyWizardExt.totalRelations')}</p>
                 </div>
               </div>
             </div>
@@ -335,7 +330,7 @@ export function OntologyWizardPage() {
                       {LAYER_LABELS[schema.layer] ?? schema.layer}
                     </h4>
                     <span className="text-xs text-muted-foreground">
-                      노드 {schema.nodes.length}개 / 관계 {schema.relations.length}개
+                      {t('ontologyWizardExt.nodeCount', { count: schema.nodes.length, relCount: schema.relations.length })}
                     </span>
                   </div>
                   <div className="p-4">
@@ -353,7 +348,7 @@ export function OntologyWizardPage() {
                       </div>
                     ) : (
                       <p className="text-sm text-muted-foreground italic">
-                        생성된 노드가 없습니다
+                        {t('ontologyWizardExt.noNodesGenerated')}
                       </p>
                     )}
                   </div>
@@ -362,29 +357,29 @@ export function OntologyWizardPage() {
             </div>
 
             {/* 액션 버튼 */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={handleReset}
                 className="
-                  inline-flex items-center gap-2 px-5 py-2.5 rounded-lg
+                  inline-flex items-center justify-center gap-2 px-4 md:px-5 py-2.5 rounded-lg
                   border border-border text-foreground text-sm font-medium
                   hover:bg-muted transition-colors
                 "
               >
                 <RotateCcw size={16} />
-                다시 생성
+                {t('ontologyWizardExt.regenerate')}
               </button>
               <button
                 type="button"
                 onClick={() => wizard.step === 'REVIEW' && navigate('/data/ontology')}
                 className="
-                  inline-flex items-center gap-2 px-6 py-3 rounded-lg
+                  inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 md:py-3 rounded-lg
                   bg-primary text-primary-foreground font-medium text-sm
                   hover:bg-primary/90 transition-colors
                 "
               >
-                온톨로지 보기
+                {t('ontologyWizardExt.viewOntology')}
                 <ExternalLink size={16} />
               </button>
             </div>
@@ -396,7 +391,7 @@ export function OntologyWizardPage() {
           <div className="mt-4 flex items-start gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/20">
             <AlertCircle size={18} className="text-destructive mt-0.5 shrink-0" />
             <div>
-              <p className="text-sm font-medium text-destructive">이전 생성 중 오류 발생</p>
+              <p className="text-sm font-medium text-destructive">{t('ontologyWizardExt.prevErrorTitle')}</p>
               <p className="text-sm text-destructive/80 mt-1">{wizard.error}</p>
             </div>
           </div>

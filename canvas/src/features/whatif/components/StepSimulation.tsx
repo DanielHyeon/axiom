@@ -14,12 +14,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Slider } from '@/components/ui/slider';
 import { Badge } from '@/components/ui/badge';
 import { Loader2, Play, RotateCcw, Zap } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 import { useWhatIfWizard } from '../hooks/useWhatIfWizard';
 import { SimulationResultPanel } from './SimulationResultPanel';
 import { ParameterSweepChart } from './ParameterSweepChart';
 
 export function StepSimulation() {
+  const { t } = useTranslation();
   const {
     snapshotData,
     simulationResults,
@@ -111,10 +113,10 @@ export function StepSimulation() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Zap className="w-5 h-5 text-primary" />
-          시뮬레이션 실행
+          {t('whatifExt.simulation.title')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          변수 값을 변경하여 모델 체인을 통한 연쇄 영향을 시뮬레이션합니다.
+          {t('whatifExt.simulation.description')}
         </p>
       </div>
 
@@ -122,7 +124,7 @@ export function StepSimulation() {
       {isLoadingSnapshot && (
         <div className="flex flex-col items-center py-12 gap-3">
           <Loader2 className="w-8 h-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">스냅샷 로드 중...</p>
+          <p className="text-sm text-muted-foreground">{t('whatifExt.snapshotLoading')}</p>
         </div>
       )}
 
@@ -140,7 +142,7 @@ export function StepSimulation() {
             <CardHeader className="pb-3">
               <div className="flex items-center justify-between">
                 <CardTitle className="text-sm">
-                  스냅샷 파라미터
+                  {t('whatifExt.simulation.snapshotParams')}
                   {snapshotData.date && (
                     <Badge variant="outline" className="ml-2 text-xs">
                       {snapshotData.date}
@@ -155,7 +157,7 @@ export function StepSimulation() {
                     className="h-7 text-xs"
                   >
                     <RotateCcw className="w-3 h-3 mr-1" />
-                    초기화
+                    {t('whatifWizard.resetWizard')}
                   </Button>
                 )}
               </div>
@@ -239,7 +241,7 @@ export function StepSimulation() {
                   {changedVars.length > 0 ? (
                     <>
                       <Badge variant="secondary" className="text-xs">
-                        {changedVars.length}개 변수 변경됨
+                        {t('whatifExt.simulation.varsChanged', { count: changedVars.length })}
                       </Badge>
                       {changedVars.slice(0, 3).map((cv) => (
                         <Badge
@@ -253,13 +255,13 @@ export function StepSimulation() {
                       ))}
                       {changedVars.length > 3 && (
                         <span className="text-xs text-muted-foreground">
-                          +{changedVars.length - 3}개
+                          +{changedVars.length - 3}
                         </span>
                       )}
                     </>
                   ) : (
                     <span className="text-xs text-muted-foreground">
-                      슬라이더를 조절하여 값을 변경하세요.
+                      {t('whatifExt.simulation.adjustSliders')}
                     </span>
                   )}
                 </div>
@@ -272,12 +274,12 @@ export function StepSimulation() {
                   {isSimulating ? (
                     <>
                       <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      실행 중...
+                      {t('whatifExt.simulation.running')}
                     </>
                   ) : (
                     <>
                       <Play className="w-4 h-4 mr-2" />
-                      시뮬레이션 실행
+                      {t('whatifExt.simulation.run')}
                     </>
                   )}
                 </Button>

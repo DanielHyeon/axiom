@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
 import { BarChart3, MessageSquareText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 interface RecentQuery {
   id: string;
@@ -34,6 +35,7 @@ async function fetchRecentQueries(): Promise<RecentQuery[]> {
 }
 
 export function AnalyticsQuickPanel() {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: queries = [] } = useQuery({
     queryKey: ['recent-queries'],
@@ -45,7 +47,7 @@ export function AnalyticsQuickPanel() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-          <h3 className="text-sm font-medium">최근 분석</h3>
+          <h3 className="text-sm font-medium">{t('caseDashboardExt.recentAnalysis')}</h3>
         </div>
         <Button
           variant="ghost"
@@ -54,12 +56,12 @@ export function AnalyticsQuickPanel() {
           onClick={() => navigate(ROUTES.ANALYSIS.NL2SQL)}
         >
           <MessageSquareText className="h-3 w-3 mr-1" />
-          새 질문
+          {t('caseDashboardF.md56b6378')}
         </Button>
       </div>
 
       {queries.length === 0 ? (
-        <p className="text-xs text-muted-foreground">최근 분석 이력이 없습니다</p>
+        <p className="text-xs text-muted-foreground">{t('caseDashboardExt.noRecentAnalysis')}</p>
       ) : (
         <div className="space-y-2">
           {queries.map((q) => (

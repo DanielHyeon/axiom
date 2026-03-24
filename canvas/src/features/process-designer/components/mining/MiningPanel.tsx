@@ -1,6 +1,7 @@
 // features/process-designer/components/mining/MiningPanel.tsx
 // 프로세스 마이닝 결과 사이드 패널 — ConformanceScore + VariantList + 컨트롤
 
+import { useTranslation } from 'react-i18next';
 import { ConformanceScore } from './ConformanceScore';
 import { VariantList } from './VariantList';
 import type { ConformanceResult, BottleneckResult } from '../../api/processDesignerApi';
@@ -28,11 +29,12 @@ export function MiningPanel({
  selectedVariant,
  onSelectVariant,
 }: MiningPanelProps) {
+ const { t } = useTranslation();
  return (
  <div className="border-t border-border mt-auto">
  {/* Header */}
  <div className="flex items-center justify-between px-3 py-2 border-b border-border">
- <span className="text-xs font-semibold text-foreground/80">프로세스 마이닝</span>
+ <span className="text-xs font-semibold text-foreground/80">{t('processDesignerExt.mining.title')}</span>
  <div className="flex items-center gap-1.5">
  <button
  type="button"
@@ -43,7 +45,7 @@ export function MiningPanel({
  : 'bg-muted text-muted-foreground hover:text-foreground'
  }`}
  >
- {overlayVisible ? '오버레이 ON' : '오버레이 OFF'}
+ {overlayVisible ? t('processDesignerExt.mining.overlayOn') : t('processDesignerExt.mining.overlayOff')}
  </button>
  <button
  type="button"
@@ -51,7 +53,7 @@ export function MiningPanel({
  disabled={loading}
  className="text-xs text-foreground0 hover:text-foreground/80 disabled:opacity-50"
  >
- 새로고침
+ {t('common.refresh')}
  </button>
  </div>
  </div>
@@ -72,7 +74,7 @@ export function MiningPanel({
  {/* Bottleneck summary */}
  {bottlenecks && bottlenecks.bottlenecks.length > 0 && (
  <div className="px-3 py-2 border-t border-border">
- <div className="text-xs text-muted-foreground mb-1">병목 지점</div>
+ <div className="text-xs text-muted-foreground mb-1">{t('processDesignerExt.mining.bottlenecks')}</div>
  {bottlenecks.bottlenecks.map((bn) => (
  <div
  key={bn.activityName}
@@ -88,7 +90,7 @@ export function MiningPanel({
  : 'text-success'
  }
  >
- {bn.avgWaitTime.toFixed(0)}분
+ {t('processDesignerF.minutesSuffix', { min: bn.avgWaitTime.toFixed(0) })}
  </span>
  </div>
  ))}

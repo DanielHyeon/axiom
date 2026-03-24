@@ -12,6 +12,7 @@
  */
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   Copy,
@@ -91,17 +92,18 @@ function extractLatestToolName(steps: ReactStreamStep[]): string | null {
 
 // ─── 상태 설정 맵 ─────────────────────────────────────────
 
-const STATUS_CONFIG: Record<AgentStatus, { label: string; icon: React.ElementType; className: string }> = {
-  idle: { label: '대기', icon: Clock, className: 'bg-muted text-foreground/50' },
-  running: { label: '에이전트 실행 중', icon: Zap, className: 'bg-blue-50 text-blue-600 animate-pulse' },
-  needs_user_input: { label: '추가 입력 대기 중', icon: MessageSquare, className: 'bg-amber-50 text-amber-600' },
-  completed: { label: '완료', icon: CheckCircle2, className: 'bg-green-50 text-green-600' },
-  error: { label: '오류 발생', icon: XCircle, className: 'bg-red-50 text-red-600' },
+const STATUS_CONFIG: Record<AgentStatus, { labelKey: string; icon: React.ElementType; className: string }> = {
+  idle: { labelKey: 'reactSummary.idle', icon: Clock, className: 'bg-muted text-foreground/50' },
+  running: { labelKey: 'reactSummary.running', icon: Zap, className: 'bg-blue-50 text-blue-600 animate-pulse' },
+  needs_user_input: { labelKey: 'reactSummary.needsInput', icon: MessageSquare, className: 'bg-amber-50 text-amber-600' },
+  completed: { labelKey: 'reactSummary.completed', icon: CheckCircle2, className: 'bg-green-50 text-green-600' },
+  error: { labelKey: 'reactSummary.error', icon: XCircle, className: 'bg-red-50 text-red-600' },
 };
 
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) {
+  const { t } = useTranslation();
   const status = deriveStatus(steps, isRunning);
   const partialSql = extractSql(steps, 'partial_sql');
   const finalSql = extractSql(steps, 'sql');
@@ -129,7 +131,7 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
             )}
           >
             <StatusIcon className="h-3.5 w-3.5" />
-            {statusConfig.label}
+            {t(statusConfig.labelKey)}
           </span>
           {currentStep > 0 && (
             <span className="px-2 py-1 bg-blue-50 border border-blue-200 rounded-full text-[10px] font-semibold text-blue-600 font-mono">
@@ -140,7 +142,7 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
 
         {/* 메타 정보 */}
         <div className="flex items-center gap-3 text-[11px] text-foreground/40 font-mono">
-          <span>남은 호출: <strong className="text-foreground/60">{Math.max(0, remainingCalls)}</strong></span>
+          <span>{t('reactSummary.remainingCalls')}: <strong className="text-foreground/60">{Math.max(0, remainingCalls)}</strong></span>
           {latestToolName && (
             <span className="flex items-center gap-1">
               <Wrench className="h-3 w-3" />
@@ -152,17 +154,17 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
 
       {/* 부분 SQL */}
       {partialSql && !finalSql && (
-        <SqlSection title="현재 SQL 스냅샷" sql={partialSql} variant="default" />
+        <SqlSection title={t('reactSummary.partialSql')} sql={partialSql} variant="default" />
       )}
 
       {/* 최종 SQL */}
       {finalSql && (
-        <SqlSection title="최종 SQL" sql={finalSql} variant="success" />
+        <SqlSection title={t('reactSummary.finalSql')} sql={finalSql} variant="success" />
       )}
 
       {/* 검증된 SQL (최종과 다른 경우만) */}
       {validatedSql && validatedSql !== finalSql && (
-        <SqlSection title="검증된 SQL" sql={validatedSql} variant="info" />
+        <SqlSection title={t('reactSummary.validatedSql')} sql={validatedSql} variant="info" />
       )}
 
       {/* 경고 */}
@@ -170,7 +172,7 @@ export function ReactSummaryPanel({ steps, isRunning }: ReactSummaryPanelProps) 
         <div className="bg-amber-50/50 border-l-2 border-amber-400 p-3 rounded-r">
           <div className="flex items-center gap-1.5 text-[12px] text-amber-600 font-semibold font-mono mb-1">
             <AlertTriangle className="h-3.5 w-3.5" />
-            경고 ({warnings.length})
+            {t('reactSummary.warnings')} ({warnings.length})
           </div>
           <ul className="space-y-0.5">
             {warnings.map((w, i) => (
@@ -206,6 +208,7 @@ const HEADER_STYLES = {
 };
 
 function SqlSection({ title, sql, variant }: SqlSectionProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   const handleCopy = useCallback(() => {
@@ -226,7 +229,7 @@ function SqlSection({ title, sql, variant }: SqlSectionProps) {
           className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-foreground/40 hover:text-foreground/60 rounded transition-colors"
         >
           {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
-          {copied ? '복사됨' : '복사'}
+          {copied ? t('reactSummary.copied') : t('reactSummary.copy')}
         </button>
       </div>
       <div className="px-3 pb-2 max-h-[200px] overflow-auto">

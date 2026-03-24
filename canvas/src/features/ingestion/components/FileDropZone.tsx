@@ -8,6 +8,7 @@
 
 import React, { useCallback, useRef, useState } from 'react';
 import { Upload, FileSpreadsheet, FileJson, FileText } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface FileDropZoneProps {
   /** 파일 드롭/선택 시 콜백 */
@@ -53,6 +54,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
   maxSize = 100 * 1024 * 1024,
   disabled = false,
 }) => {
+  const { t } = useTranslation();
   const [isDragOver, setIsDragOver] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -108,7 +110,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
     <div
       role="button"
       tabIndex={0}
-      aria-label="파일 업로드 영역"
+      aria-label={t('ingestionExt.dropzoneAria')}
       onClick={handleClick}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(); }}
       onDragOver={handleDragOver}
@@ -139,7 +141,7 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
       {isDragOver && (
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-blue-50/80 rounded-xl z-10">
           <Upload className="h-12 w-12 text-blue-500 animate-bounce" />
-          <span className="text-base font-semibold text-blue-600">여기에 놓으세요</span>
+          <span className="text-base font-semibold text-blue-600">{t('ingestionExt.dropHere')}</span>
         </div>
       )}
 
@@ -151,11 +153,11 @@ export const FileDropZone: React.FC<FileDropZoneProps> = ({
 
         <div>
           <p className="text-[15px] text-gray-600">
-            파일을 <strong className="text-gray-900">드래그</strong>하거나{' '}
-            <strong className="text-blue-600">클릭</strong>하여 업로드
+            {t('ingestionF.dropOrClick')}
+            
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            최대 {maxSizeMB}MB / 다중 파일 지원
+            {t('ingestionF.maxSizeInfo', { size: maxSizeMB })}
           </p>
         </div>
 

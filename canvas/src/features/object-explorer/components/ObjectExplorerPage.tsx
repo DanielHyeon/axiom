@@ -12,6 +12,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 
 // ObjectType 목록 조회 훅은 shared를 통해 접근 (feature 간 의존 제거)
@@ -36,6 +37,7 @@ import type { ObjectType, ObjectInstance } from '../types/object-explorer';
 // ──────────────────────────────────────
 
 export const ObjectExplorerPage: React.FC = () => {
+  const { t } = useTranslation();
   // ── 스토어 ──
   const {
     selectedObjectTypeId,
@@ -146,7 +148,7 @@ export const ObjectExplorerPage: React.FC = () => {
               )}
               onClick={() => setLeftPanelTab('search')}
             >
-              검색
+              {t('objectExplorerExt.searchTab')}
             </button>
             <button
               className={cn(
@@ -159,7 +161,7 @@ export const ObjectExplorerPage: React.FC = () => {
               disabled={!displayInstance}
               onClick={() => displayInstance && setLeftPanelTab('detail')}
             >
-              상세
+              {t('objectExplorerExt.detailTab')}
             </button>
           </div>
 
@@ -186,7 +188,7 @@ export const ObjectExplorerPage: React.FC = () => {
 
             {leftPanelTab === 'detail' && !displayInstance && (
               <div className="flex items-center justify-center h-full text-muted-foreground text-xs">
-                노드를 선택하면 상세 정보가 표시됩니다
+                {t('objectExplorerExt.noNodeSelection')}
               </div>
             )}
           </div>

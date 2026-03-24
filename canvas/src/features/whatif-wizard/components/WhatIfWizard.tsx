@@ -96,7 +96,7 @@ export function WhatIfWizard() {
     <div className="flex flex-col h-full bg-background text-foreground">
       {/* 상단: 스텝 인디케이터 */}
       <div className="shrink-0 border-b border-border bg-card px-6 py-3">
-        <nav aria-label="위자드 단계" className="w-full">
+        <nav aria-label={t('whatifExt.wizardAria')} className="w-full">
           <ol className="flex items-center gap-2">
             {STEPS.map((step, idx) => {
               const meta = WIZARD_STEP_META[step];
@@ -170,7 +170,7 @@ export function WhatIfWizard() {
             className="h-7 text-xs text-muted-foreground hover:text-foreground"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
-            {t('whatifWizard.reset', '초기화')}
+            {t('whatifWizard.reset')}
           </Button>
         </div>
       </div>
@@ -190,7 +190,7 @@ export function WhatIfWizard() {
             className="h-9"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
-            {t('whatifWizard.prev', '이전')}
+            {t('whatifWizard.prev')}
           </Button>
 
           {/* 진행 표시 */}
@@ -206,7 +206,7 @@ export function WhatIfWizard() {
               disabled={!canProceed()}
               className="h-9"
             >
-              {t('whatifWizard.next', '다음')}
+              {t('whatifWizard.next')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (

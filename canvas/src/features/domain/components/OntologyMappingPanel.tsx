@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Network, Link2, Unlink, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -37,6 +38,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
   onLink,
   onUnlink,
 }) => {
+  const { t } = useTranslation();
   const isLinked = !!objectType.ontologyNodeId;
 
   return (
@@ -44,7 +46,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <Network className="h-4 w-4 text-primary" />
-          온톨로지 매핑
+          {t('domainExt.ontologyMapping')}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -56,7 +58,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">
-                  온톨로지 노드에 연결됨
+                  {t('domainExt.ontologyLinked')}
                 </p>
                 <p className="text-xs text-muted-foreground">
                   ID: {objectType.ontologyNodeId}
@@ -73,7 +75,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
                 }}
               >
                 <ExternalLink className="h-3 w-3 mr-1" />
-                보기
+                {t('common.view')}
               </Button>
               {onUnlink && (
                 <Button
@@ -83,7 +85,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
                   onClick={() => onUnlink(objectType.id)}
                 >
                   <Unlink className="h-3 w-3 mr-1" />
-                  해제
+                  {t('domainExt.ontologyUnlink')}
                 </Button>
               )}
             </div>
@@ -95,10 +97,10 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
             </div>
             <div>
               <p className="text-sm text-muted-foreground">
-                온톨로지 노드에 연결되지 않았습니다.
+                {t('domainExt.ontologyNotLinked')}
               </p>
               <p className="text-xs text-muted-foreground mt-0.5">
-                온톨로지에 매핑하면 그래프 분석과 영향도 분석에 활용됩니다.
+                {t('domainExt.ontologyNotLinkedHint')}
               </p>
             </div>
             {onLink && (
@@ -109,7 +111,7 @@ export const OntologyMappingPanel: React.FC<OntologyMappingPanelProps> = ({
                 onClick={() => onLink(objectType.id)}
               >
                 <Link2 className="h-3 w-3 mr-1" />
-                온톨로지 노드 연결
+                {t('domainExt.ontologyLink')}
               </Button>
             )}
           </div>

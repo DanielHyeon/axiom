@@ -66,8 +66,8 @@ export function QueryToolbar({
             ? 'bg-blue-50 text-blue-600'
             : 'text-foreground/40 hover:text-foreground/60 hover:bg-muted',
         )}
-        title={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
-        aria-label={schemaTreeOpen ? '스키마 트리 닫기' : '스키마 트리 열기'}
+        title={schemaTreeOpen ? t('nl2sqlPage.m5872d46f') : t('nl2sqlPage.m29e10a0a')}
+        aria-label={schemaTreeOpen ? t('nl2sqlPage.m5872d46f') : t('nl2sqlPage.m29e10a0a')}
       >
         {schemaTreeOpen ? (
           <PanelLeftClose className="h-4 w-4" />

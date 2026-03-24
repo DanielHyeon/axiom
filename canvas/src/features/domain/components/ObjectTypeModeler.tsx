@@ -10,6 +10,7 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { MousePointerClick } from 'lucide-react';
 import { ObjectTypeList } from './ObjectTypeList';
 import { ObjectTypeDetail } from './ObjectTypeDetail';
@@ -175,16 +176,19 @@ export const ObjectTypeModeler: React.FC = () => {
 // 빈 상태 컴포넌트
 // ──────────────────────────────────────
 
-const EmptyState: React.FC = () => (
-  <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
-    <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-muted/50">
-      <MousePointerClick className="h-8 w-8" />
+const EmptyState: React.FC = () => {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-col items-center justify-center h-full gap-4 text-muted-foreground">
+      <div className="flex items-center justify-center w-16 h-16 rounded-2xl bg-muted/50">
+        <MousePointerClick className="h-8 w-8" />
+      </div>
+      <div className="text-center">
+        <p className="text-sm font-medium">{t('domainExt.selectObjectType')}</p>
+        <p className="text-xs mt-1">
+          {t('domainExt.selectObjectTypeHint')}
+        </p>
+      </div>
     </div>
-    <div className="text-center">
-      <p className="text-sm font-medium">ObjectType을 선택하세요</p>
-      <p className="text-xs mt-1">
-        좌측 목록에서 ObjectType을 클릭하거나 그래프의 노드를 클릭합니다.
-      </p>
-    </div>
-  </div>
-);
+  );
+};

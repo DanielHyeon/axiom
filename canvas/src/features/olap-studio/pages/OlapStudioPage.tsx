@@ -6,6 +6,7 @@
  * 하단: SQL 미리보기
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import {
@@ -40,6 +41,7 @@ interface MeasureEntry {
 }
 
 export function OlapStudioPage() {
+  const { t } = useTranslation();
   const pivot = usePivot();
   const [showSql, setShowSql] = useState(false);
   const [expandedDim, setExpandedDim] = useState<string | null>(null);
@@ -86,7 +88,7 @@ export function OlapStudioPage() {
         {/* 큐브 선택 드롭다운 */}
         <div className="px-3 py-3 border-b border-border">
           <label className="text-[10px] text-foreground/50 font-mono mb-1 block">
-            큐브 선택
+            {t('olapStudioExt.selectCube')}
           </label>
           <select
             value={pivot.selectedCubeId || ''}
@@ -95,9 +97,9 @@ export function OlapStudioPage() {
               if (cube) pivot.selectCube(cube);
             }}
             className="w-full rounded border border-border bg-card px-2 py-1.5 text-[11px] font-mono"
-            aria-label="큐브 선택"
+            aria-label={t('olapStudioExt.selectCube')}
           >
-            <option value="">선택...</option>
+            <option value="">{t('olapStudioExt.selectPlaceholder')}</option>
             {(pivot.cubeList.data || [])
               .filter((c) => c.cube_status === 'PUBLISHED')
               .map((c) => (
@@ -112,13 +114,13 @@ export function OlapStudioPage() {
         <div className="flex-1 overflow-y-auto">
           {/* 차원 섹션 헤더 */}
           <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-b border-border">
-            차원 (Dimensions)
+            {t('olapStudioF.m78b740cf')}
           </div>
 
           {/* 큐브 미선택 또는 로딩 중 안내 */}
           {!pivot.selectedCubeId && (
             <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
-              큐브를 선택하세요
+              {t('olapPage.selectCube')}
             </div>
           )}
           {pivot.selectedCubeId && cubeDetail.isLoading && (
@@ -128,7 +130,7 @@ export function OlapStudioPage() {
           )}
           {pivot.selectedCubeId && !cubeDetail.isLoading && dimensions.length === 0 && (
             <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
-              차원이 없습니다
+              {t('olapStudioF.m63004a8e')}
             </div>
           )}
 
@@ -163,8 +165,8 @@ export function OlapStudioPage() {
                         type="button"
                         onClick={() => pivot.addRow({ dimension: dim.dimension, level })}
                         className="p-0.5 rounded hover:bg-blue-50 text-blue-400"
-                        title="행에 추가"
-                        aria-label={`${level}을 행에 추가`}
+                        title={t('olapStudioExt.addToRows')}
+                        aria-label={t('olapStudioF.addToRows', { name: level })}
                       >
                         <Rows3 className="h-2.5 w-2.5" />
                       </button>
@@ -172,8 +174,8 @@ export function OlapStudioPage() {
                         type="button"
                         onClick={() => pivot.addColumn({ dimension: dim.dimension, level })}
                         className="p-0.5 rounded hover:bg-purple-50 text-purple-400"
-                        title="열에 추가"
-                        aria-label={`${level}을 열에 추가`}
+                        title={t('olapStudioExt.addToCols')}
+                        aria-label={t('olapStudioF.addToCols', { name: level })}
                       >
                         <Columns3 className="h-2.5 w-2.5" />
                       </button>
@@ -186,7 +188,7 @@ export function OlapStudioPage() {
 
           {/* 측정값 섹션 헤더 */}
           <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-y border-border mt-2">
-            측정값 (Measures)
+            {t('olapStudioExt.measuresLabel')}
           </div>
 
           {/* 측정값 목록 — 클릭으로 추가 */}
@@ -196,7 +198,7 @@ export function OlapStudioPage() {
               type="button"
               onClick={() => pivot.addMeasure(m)}
               className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors"
-              aria-label={`측정값 ${m.name} 추가`}
+              aria-label={t('olapStudioF.addMeasure', { name: m.name })}
             >
               <BarChart3 className="h-3 w-3 text-emerald-400" />
               <span className="text-foreground/70">{m.name}</span>
@@ -235,7 +237,7 @@ export function OlapStudioPage() {
               ) : (
                 <Eye className="h-3 w-3 mr-1" />
               )}
-              SQL 보기
+              {t('olapStudioF.meb375f35')}
             </Button>
 
             {/* 실행 버튼 */}
@@ -250,7 +252,7 @@ export function OlapStudioPage() {
               ) : (
                 <Play className="h-3 w-3 mr-1" />
               )}
-              실행
+              {t('behaviorExt.tabs.execute')}
             </Button>
           </div>
         </div>
@@ -283,7 +285,7 @@ export function OlapStudioPage() {
               aria-selected={!showSql}
               role="tab"
             >
-              결과
+              {t('whatifWizard.step3.target')}
             </button>
             <button
               type="button"

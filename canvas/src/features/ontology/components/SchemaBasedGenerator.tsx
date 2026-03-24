@@ -6,6 +6,7 @@
  */
 import { useState } from 'react';
 import { Loader2, Check, Sparkles, ChevronLeft, AlertCircle } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useOntologyWizard } from '../hooks/useOntologyWizard';
 
 interface Props {
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
+  const { t } = useTranslation();
   const wizard = useOntologyWizard();
   const {
     datasources,
@@ -54,9 +56,9 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
             <Check size={20} className="text-green-600" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">온톨로지 생성 완료</p>
+            <p className="text-sm font-semibold text-foreground">{t('ontologyExt.generator.generationComplete')}</p>
             <p className="text-xs text-muted-foreground">
-              {generationResult.tablesProcessed}개 테이블 처리, {generationResult.nodes.length}개 노드 생성
+              {t('ontologyExt.generator.generationStats', { tables: generationResult.tablesProcessed, nodes: generationResult.nodes.length })}
             </p>
           </div>
         </div>
@@ -65,7 +67,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
           onClick={() => { onGenerated?.(); onClose(); }}
           className="w-full px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
         >
-          확인
+          {t('common.confirm')}
         </button>
       </div>
     );
@@ -75,9 +77,9 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
   if (!selectedDatasource) {
     return (
       <div className="p-4 space-y-3">
-        <h4 className="text-sm font-semibold text-foreground">데이터소스 선택</h4>
+        <h4 className="text-sm font-semibold text-foreground">{t('ontologyExt.generator.selectDatasource')}</h4>
         {datasourcesLoading ? (
-          <LoadingSmall message="로딩 중..." />
+          <LoadingSmall message={t('ontologyExt.generator.loading')} />
         ) : (
           <div className="space-y-1.5">
             {datasources.map((ds) => (
@@ -105,10 +107,10 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
           <button type="button" onClick={() => setSelectedDatasource('')} className="text-xs text-muted-foreground hover:text-foreground">
             <ChevronLeft size={14} />
           </button>
-          <h4 className="text-sm font-semibold text-foreground">스키마 선택 ({selectedDatasource})</h4>
+          <h4 className="text-sm font-semibold text-foreground">{t('ontologyExt.generator.selectSchema', { datasource: selectedDatasource })}</h4>
         </div>
         {schemasLoading ? (
-          <LoadingSmall message="스키마 로딩 중..." />
+          <LoadingSmall message={t('ontologyExt.generator.schemaLoading')} />
         ) : (
           <div className="space-y-1.5">
             {schemas.map((s) => (
@@ -120,7 +122,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
               >
                 <span className="text-sm font-medium text-foreground">{s.name}</span>
                 {s.tableCount != null && (
-                  <span className="text-xs text-muted-foreground ml-auto">{s.tableCount}개</span>
+                  <span className="text-xs text-muted-foreground ml-auto">{t('ontologyExt.generator.tableCount', { count: s.tableCount })}</span>
                 )}
               </button>
             ))}
@@ -137,7 +139,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
         <button type="button" onClick={() => setSelectedSchema('')} className="text-xs text-muted-foreground hover:text-foreground">
           <ChevronLeft size={14} />
         </button>
-        <h4 className="text-sm font-semibold text-foreground">자동 생성 옵션</h4>
+        <h4 className="text-sm font-semibold text-foreground">{t('ontologyExt.generator.autoOptions')}</h4>
       </div>
 
       {/* 소스 표시 */}
@@ -149,7 +151,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
 
       {/* 이름 */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">온톨로지 이름</label>
+        <label className="text-xs font-medium text-muted-foreground">{t('ontologyExt.generator.ontologyName')}</label>
         <input
           type="text"
           value={ontologyName}
@@ -161,11 +163,11 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
 
       {/* 설명 */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">설명 (선택)</label>
+        <label className="text-xs font-medium text-muted-foreground">{t('ontologyExt.generator.descriptionOpt')}</label>
         <textarea
           value={ontologyDescription}
           onChange={(e) => setOntologyDescription(e.target.value)}
-          placeholder="온톨로지 설명..."
+          placeholder={t('ontologyExt.generator.descriptionPlaceholder')}
           rows={2}
           className="w-full px-3 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:border-primary resize-y"
         />
@@ -173,12 +175,12 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
 
       {/* 도메인 힌트 */}
       <div className="space-y-1">
-        <label className="text-xs font-medium text-muted-foreground">도메인 힌트 (선택)</label>
+        <label className="text-xs font-medium text-muted-foreground">{t('ontologyExt.generator.domainHint')}</label>
         <input
           type="text"
           value={domainHint}
           onChange={(e) => setDomainHint(e.target.value)}
-          placeholder="예: 제조업, 공급망 관리..."
+          placeholder={t('ontologyExt.generator.domainHintPlaceholder')}
           className="w-full px-3 py-2 bg-card border border-border rounded-md text-sm focus:outline-none focus:border-primary"
         />
       </div>
@@ -191,7 +193,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
           onChange={(e) => setInferCausal(e.target.checked)}
           className="w-3.5 h-3.5 accent-primary"
         />
-        <span className="text-xs text-foreground">인과관계 자동 추론</span>
+        <span className="text-xs text-foreground">{t('ontologyExt.generator.causalInference')}</span>
       </label>
 
       {/* 에러 */}
@@ -199,7 +201,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
         <div className="flex items-start gap-2 p-2.5 bg-destructive/10 border border-destructive/30 rounded-lg">
           <AlertCircle size={14} className="text-destructive shrink-0 mt-0.5" />
           <p className="text-xs text-destructive">
-            {generationError instanceof Error ? generationError.message : '생성 실패'}
+            {generationError instanceof Error ? generationError.message : t('ontologyExt.generator.generationFailed')}
           </p>
         </div>
       )}
@@ -211,7 +213,7 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
           onClick={onClose}
           className="flex-1 px-3 py-2 text-sm border border-border rounded-md text-muted-foreground hover:bg-muted transition-colors"
         >
-          취소
+          {t('common.cancel')}
         </button>
         <button
           type="button"
@@ -222,12 +224,12 @@ export function SchemaBasedGenerator({ onClose, onGenerated }: Props) {
           {isGenerating ? (
             <>
               <Loader2 size={14} className="animate-spin" />
-              생성 중...
+              {t('ontologyExt.generator.generating')}
             </>
           ) : (
             <>
               <Sparkles size={14} />
-              자동 생성
+              {t('ontologyExt.generator.autoGenerate')}
             </>
           )}
         </button>

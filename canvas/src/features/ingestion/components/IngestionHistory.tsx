@@ -12,6 +12,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import type { IngestionRecord } from '../types/ingestion';
+import { useTranslation } from 'react-i18next';
 
 interface IngestionHistoryProps {
   /** 수집 이력 목록 */
@@ -64,6 +65,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
   loading = false,
   onRefresh,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="space-y-3">
       {/* 헤더 */}
@@ -71,10 +73,10 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
         <div className="flex items-center gap-2">
           <History className="h-4 w-4 text-blue-500" />
           <h3 className="text-sm font-semibold text-gray-900 font-heading">
-            수집 이력
+            {t('dataIngestionPage.msg690e7b16')}
           </h3>
           <span className="text-xs text-gray-400 font-mono">
-            {records.length}건
+            {t('ingestionF.recordCount', { count: records.length })}
           </span>
         </div>
         {onRefresh && (
@@ -84,7 +86,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
             className="flex items-center gap-1 px-2 py-1 text-[11px] text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
           >
             <RefreshCw className={`h-3 w-3 ${loading ? 'animate-spin' : ''}`} />
-            새로고침
+            {t('datasourceExt.refreshBtn')}
           </button>
         )}
       </div>
@@ -93,7 +95,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
       {loading && (
         <div className="flex items-center justify-center py-8 text-gray-400 gap-2">
           <Loader2 className="h-4 w-4 animate-spin" />
-          <span className="text-sm">이력 로딩 중...</span>
+          <span className="text-sm">{t('ingestionExt.historyLoading')}</span>
         </div>
       )}
 
@@ -101,7 +103,7 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
       {!loading && records.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2 border border-dashed border-gray-200 rounded-xl">
           <History className="h-8 w-8 opacity-30" />
-          <p className="text-sm">수집 이력이 없습니다</p>
+          <p className="text-sm">{t('ingestionExt.noHistory')}</p>
         </div>
       )}
 
@@ -114,19 +116,19 @@ export const IngestionHistory: React.FC<IngestionHistoryProps> = ({
               #
             </span>
             <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
-              파이프라인
+              {t('ingestionF.me39ee198')}
             </span>
             <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
-              시작 시각
+              {t('ingestionF.m08d7f94f')}
             </span>
             <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
-              처리 행
+              {t('ingestionF.m19714f2d')}
             </span>
             <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
-              소요 시간
+              {t('processDesignerExtended.properties.duration')}
             </span>
             <span className="text-[10px] font-medium text-gray-500 font-mono uppercase">
-              상태
+              {t('dataQualityExt.incidentCols.status')}
             </span>
           </div>
 

@@ -1,4 +1,5 @@
 import { Bell } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useNotificationBell } from '../../features/watch/hooks/useNotificationBell';
 import {
  Popover,
@@ -9,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
 
 export function NotificationBell() {
+ const { t } = useTranslation();
  const { unreadCount, recentAlerts, clearBadge } = useNotificationBell();
 
  return (
@@ -26,17 +28,17 @@ export function NotificationBell() {
  </PopoverTrigger>
  <PopoverContent className="w-80 p-0 bg-popover border-border text-foreground" align="end" sideOffset={8}>
  <div className="flex items-center justify-between p-4 border-b border-border bg-popover">
- <h4 className="font-semibold text-sm">알림</h4>
+ <h4 className="font-semibold text-sm">{t('notification.title')}</h4>
  {unreadCount > 0 && (
  <span className="text-xs bg-destructive/20 text-destructive px-2 py-0.5 rounded-full font-medium">
- {unreadCount} 새로운 알림
+ {t('notification.newCount', { count: unreadCount })}
  </span>
  )}
  </div>
  <div className="max-h-80 overflow-y-auto">
  {recentAlerts.length === 0 ? (
  <div className="p-4 text-sm text-foreground0 text-center py-8">
- 새로운 알림이 없습니다.
+ {t('notification.empty')}
  </div>
  ) : (
  <div className="flex flex-col">
@@ -69,7 +71,7 @@ export function NotificationBell() {
  <div className="p-2 border-t border-border bg-popover">
  <Link to="/watch">
  <Button variant="ghost" className="w-full text-xs text-muted-foreground hover:text-foreground h-8">
- 모든 알림 보기
+ {t('notification.viewAll')}
  </Button>
  </Link>
  </div>

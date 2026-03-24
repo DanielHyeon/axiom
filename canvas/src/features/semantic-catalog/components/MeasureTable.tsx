@@ -2,6 +2,7 @@
  * 시멘틱 지표 테이블 — 지표 목록 + SQL 식 + 컴파일/배포 액션
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Code2, Play, Rocket } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import type { SemanticMeasure, CompileResult } from '../types/semantic';
@@ -14,6 +15,7 @@ interface Props {
 }
 
 export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: Props) {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [compileResult, setCompileResult] = useState<CompileResult | null>(null);
   const [compiling, setCompiling] = useState(false);
@@ -35,13 +37,13 @@ export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: P
         <thead>
           <tr className="border-b bg-muted/50">
             <th className="w-8 px-3 py-2" />
-            <th className="px-3 py-2 text-left font-medium">지표 ID</th>
-            <th className="px-3 py-2 text-left font-medium">이름</th>
-            <th className="px-3 py-2 text-left font-medium">타입</th>
-            <th className="px-3 py-2 text-left font-medium">엔티티</th>
-            <th className="px-3 py-2 text-left font-medium">상태</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.measureId')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.name')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.type')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entity')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.status')}</th>
             <th className="px-3 py-2 text-center font-medium">v</th>
-            <th className="px-3 py-2 text-center font-medium">액션</th>
+            <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.action')}</th>
           </tr>
         </thead>
         <tbody>
@@ -73,7 +75,7 @@ export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: P
                       {onCompile && (
                         <button
                           className="p-1 rounded hover:bg-muted"
-                          title="컴파일"
+                          title={t('semanticCatalogExt.compile')}
                           onClick={(e) => { e.stopPropagation(); handleCompile(m.measure_id); }}
                           disabled={compiling}
                         >
@@ -83,7 +85,7 @@ export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: P
                       {onPublish && m.status !== 'approved' && m.bound_concept_id && (
                         <button
                           className="p-1 rounded hover:bg-muted"
-                          title="배포"
+                          title={t('semanticCatalogExt.publish')}
                           onClick={(e) => { e.stopPropagation(); onPublish(m.measure_id); }}
                           disabled={isPublishing}
                         >
@@ -135,7 +137,7 @@ export function MeasureTable({ measures, onCompile, onPublish, isPublishing }: P
         </tbody>
       </table>
       {measures.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground text-sm">등록된 지표가 없습니다</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.measure.noMeasures')}</div>
       )}
     </div>
   );

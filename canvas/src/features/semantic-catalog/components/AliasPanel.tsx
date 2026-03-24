@@ -5,6 +5,7 @@
  * 그룹 생성 폼과 규칙 활성화/비활성화 토글을 지원한다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tags, Plus, ChevronUp } from 'lucide-react';
 import type { AliasGroup, ExpansionRule, ExpansionRuleType, ExpansionRuleStatus } from '../types/semantic';
 
@@ -53,6 +54,7 @@ export function AliasPanel({
   onDeprecateRule,
   isCreatingGroup,
 }: Props) {
+  const { t } = useTranslation();
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ ...EMPTY_GROUP });
 
@@ -73,7 +75,7 @@ export function AliasPanel({
         <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Tags className="h-4 w-4 text-teal-600" />
-            별칭 그룹
+            {t('semanticCatalogExt.aliasGroups')}
           </div>
           {onCreateGroup && (
             <button
@@ -81,7 +83,7 @@ export function AliasPanel({
               onClick={() => setShowForm(!showForm)}
             >
               {showForm ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-              {showForm ? '닫기' : '그룹 등록'}
+              {showForm ? t('common.close') : t('semanticCatalogExt.registerGroup')}
             </button>
           )}
         </div>
@@ -91,7 +93,7 @@ export function AliasPanel({
           <div className="border-b bg-muted/20 px-4 py-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-3">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">그룹 이름</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.groupName')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={form.group_name}
@@ -99,7 +101,7 @@ export function AliasPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">도메인 ID</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.domainId')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={form.domain_id}
@@ -107,7 +109,7 @@ export function AliasPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">표준 용어 ID</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.canonicalTermId')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={form.canonical_term_id}
@@ -115,14 +117,14 @@ export function AliasPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">언어</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.language')}</label>
                 <select
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={form.language_code}
                   onChange={(e) => handleChange('language_code', e.target.value)}
                 >
-                  <option value="ko">한국어</option>
-                  <option value="en">영어</option>
+                  <option value="ko">{t('semanticCatalogExt.korean')}</option>
+                  <option value="en">{t('semanticCatalogExt.english')}</option>
                 </select>
               </div>
             </div>
@@ -131,7 +133,7 @@ export function AliasPanel({
               disabled={isCreatingGroup || !form.group_name || !form.domain_id}
               onClick={handleSubmit}
             >
-              {isCreatingGroup ? '등록 중...' : '등록'}
+              {isCreatingGroup ? t('semanticCatalogExt.registering') : t('semanticCatalogExt.register')}
             </button>
           </div>
         )}
@@ -140,11 +142,11 @@ export function AliasPanel({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="px-3 py-2 text-left font-medium">그룹 이름</th>
-              <th className="px-3 py-2 text-left font-medium">도메인</th>
-              <th className="px-3 py-2 text-left font-medium">표준 용어 ID</th>
-              <th className="px-3 py-2 text-center font-medium">언어</th>
-              <th className="px-3 py-2 text-center font-medium">상태</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.groupName')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.domain')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.canonicalTermId')}</th>
+              <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.language')}</th>
+              <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
             </tr>
           </thead>
           <tbody>
@@ -168,7 +170,7 @@ export function AliasPanel({
           </tbody>
         </table>
         {aliasGroups.length === 0 && (
-          <div className="py-6 text-center text-muted-foreground text-sm">등록된 별칭 그룹이 없습니다</div>
+          <div className="py-6 text-center text-muted-foreground text-sm">{t('semanticCatalog.alias.noGroups')}</div>
         )}
       </div>
 
@@ -176,19 +178,19 @@ export function AliasPanel({
       {selectedGroupId && (
         <div className="rounded-lg border">
           <div className="border-b bg-muted/50 px-3 py-2">
-            <span className="text-sm font-medium">확장 규칙</span>
+            <span className="text-sm font-medium">{t('semanticCatalogExt.expansionRules')}</span>
             <span className="ml-2 text-xs text-muted-foreground">
-              그룹: {aliasGroups.find((g) => g.id === selectedGroupId)?.group_name ?? selectedGroupId}
+              {t('semanticCatalogExt.group')}: {aliasGroups.find((g) => g.id === selectedGroupId)?.group_name ?? selectedGroupId}
             </span>
           </div>
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left font-medium">타입</th>
-                <th className="px-3 py-2 text-left font-medium">매칭 패턴</th>
-                <th className="px-3 py-2 text-center font-medium">부스트</th>
-                <th className="px-3 py-2 text-center font-medium">우선순위</th>
-                <th className="px-3 py-2 text-center font-medium">상태</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.type')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.matchPattern')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.boost')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.priority')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
                 {(onActivateRule || onDeprecateRule) && <th className="px-3 py-2 w-20" />}
               </tr>
             </thead>
@@ -220,7 +222,7 @@ export function AliasPanel({
                             className="text-xs px-2 py-0.5 rounded bg-green-50 hover:bg-green-100 text-green-700"
                             onClick={() => onActivateRule(r.id)}
                           >
-                            활성화
+                            {t('semanticCatalogExt.activate')}
                           </button>
                         )}
                         {r.status === 'ACTIVE' && onDeprecateRule && (
@@ -228,7 +230,7 @@ export function AliasPanel({
                             className="text-xs px-2 py-0.5 rounded bg-red-50 hover:bg-red-100 text-red-700"
                             onClick={() => onDeprecateRule(r.id)}
                           >
-                            비활성화
+                            {t('semanticCatalogExt.deactivate')}
                           </button>
                         )}
                       </td>
@@ -239,7 +241,7 @@ export function AliasPanel({
             </tbody>
           </table>
           {expansionRules.length === 0 && (
-            <div className="py-6 text-center text-muted-foreground text-sm">이 그룹에 등록된 확장 규칙이 없습니다</div>
+            <div className="py-6 text-center text-muted-foreground text-sm">{t('semanticCatalogExt.noExpansionRulesForGroup')}</div>
           )}
         </div>
       )}

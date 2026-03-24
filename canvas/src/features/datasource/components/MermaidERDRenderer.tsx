@@ -6,6 +6,7 @@
 
 import { useRef, useEffect, useState, useCallback } from 'react';
 import mermaid from 'mermaid';
+import { useTranslation } from 'react-i18next';
 
 interface MermaidERDRendererProps {
   /** Mermaid erDiagram 코드 */
@@ -37,6 +38,7 @@ function ensureMermaidInit() {
 }
 
 export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRendererProps) {
+  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +118,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
   if (!mermaidCode) {
     return (
       <div className="flex-1 flex items-center justify-center text-foreground/60 text-sm">
-        데이터소스를 선택하면 ERD 다이어그램이 표시됩니다.
+        {t('datasourcePage.whenDatasourceSelected')}
       </div>
     );
   }
@@ -137,7 +139,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
         <div className="absolute inset-0 flex items-center justify-center bg-card/80 z-10">
           <div className="flex items-center gap-2 text-sm text-foreground/60">
             <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
-            ERD 렌더링 중...
+            {t('datasourceF.m46102ba8')}
           </div>
         </div>
       )}
@@ -145,7 +147,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
       {/* 에러 표시 */}
       {error && (
         <div className="absolute top-4 left-4 right-4 p-3 bg-red-50 border border-red-200 rounded text-xs text-red-700 z-10">
-          <strong>렌더링 오류:</strong> {error}
+          <strong>{t('datasourceExt.renderError')}</strong> {error}
         </div>
       )}
 
@@ -165,8 +167,8 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={() => setScale((s) => Math.min(s + 0.2, 4))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title="확대"
-          aria-label="확대"
+          title={t('datasourceExt.zoomIn')}
+          aria-label={t('workflowEditorExt.zoomIn')}
         >
           +
         </button>
@@ -177,8 +179,8 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={() => setScale((s) => Math.max(s - 0.2, 0.2))}
           className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title="축소"
-          aria-label="축소"
+          title={t('datasourceExt.zoomOut')}
+          aria-label={t('workflowEditorExt.zoomOut')}
         >
           -
         </button>
@@ -186,8 +188,8 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
           type="button"
           onClick={handleResetZoom}
           className="px-2 py-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors border-l border-border"
-          title="줌 초기화"
-          aria-label="원래 크기"
+          title={t('datasourceExt.resetZoom')}
+          aria-label={t('datasourceExt.originalSize')}
         >
           Reset
         </button>

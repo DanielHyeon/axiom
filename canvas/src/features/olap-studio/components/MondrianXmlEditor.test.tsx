@@ -7,6 +7,29 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MondrianXmlEditor } from './MondrianXmlEditor';
 
+// i18n mock — t()가 키 대신 한글 값을 반환
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string, opts?: Record<string, unknown>) => {
+      const map: Record<string, string> = {
+        'olapStudioExt.noContent': '내용이 없습니다',
+        'olapStudioExt.edit': '편집',
+        'olapStudioExt.preview': '미리보기',
+        'olapStudioExt.upload': '업로드',
+        'olapStudioExt.download': '다운로드',
+        'olapStudioExt.validate': '검증',
+        'olapStudioExt.xmlPlaceholder': 'Mondrian XML을 입력하거나 파일을 업로드하세요...',
+        'olapStudioExt.charCount': '{{count}} 문자',
+        'olapStudioExt.lineCount': '{{count}} 줄',
+      };
+      const tmpl = map[key] ?? key;
+      if (opts) return tmpl.replace(/\{\{(\w+)\}\}/g, (_, k) => String(opts[k] ?? ''));
+      return tmpl;
+    },
+    i18n: { language: 'ko' },
+  }),
+}));
+
 // ─── 테스트 헬퍼 ──────────────────────────────────────────────
 
 const SAMPLE_XML = '<Schema name="test"></Schema>';

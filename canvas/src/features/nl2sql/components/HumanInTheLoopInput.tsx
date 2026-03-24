@@ -10,6 +10,7 @@
  * 사용자 답변을 session_state와 함께 부모로 전달한다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { HilRequest, HilResponse } from '@/features/nl2sql/types/nl2sql';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,7 @@ export function HumanInTheLoopInput({
   onCancel,
   isSubmitting,
 }: HumanInTheLoopInputProps) {
+  const { t } = useTranslation();
   // 선택된 값 (select/confirm) 또는 입력 텍스트
   const [selectedValue, setSelectedValue] = useState('');
   const [textValue, setTextValue] = useState('');
@@ -72,7 +74,7 @@ export function HumanInTheLoopInput({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-sm font-semibold text-amber-800">
           <HelpCircle className="h-4 w-4" />
-          에이전트가 추가 정보를 요청합니다
+          {t('hil.agentRequest')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -131,7 +133,7 @@ export function HumanInTheLoopInput({
                 selectedValue === 'yes' && 'bg-amber-600 hover:bg-amber-700 text-primary-foreground',
               )}
             >
-              예
+              {t('hil.yes')}
             </Button>
             <Button
               variant={selectedValue === 'no' ? 'default' : 'outline'}
@@ -141,14 +143,14 @@ export function HumanInTheLoopInput({
                 selectedValue === 'no' && 'bg-amber-600 hover:bg-amber-700 text-primary-foreground',
               )}
             >
-              아니오
+              {t('hil.no')}
             </Button>
           </div>
         )}
 
         {request.type === 'text' && (
           <Input
-            placeholder="추가 정보를 입력하세요..."
+            placeholder={t('hil.textPlaceholder')}
             value={textValue}
             onChange={(e) => setTextValue(e.target.value)}
             onKeyDown={(e) => {
@@ -168,7 +170,7 @@ export function HumanInTheLoopInput({
             className="text-amber-700 hover:text-amber-900 hover:bg-amber-100"
           >
             <X className="h-3.5 w-3.5 mr-1" />
-            중단
+            {t('hil.abort')}
           </Button>
           <Button
             size="sm"
@@ -177,7 +179,7 @@ export function HumanInTheLoopInput({
             className="bg-amber-600 hover:bg-amber-700 text-primary-foreground"
           >
             <Send className="h-3.5 w-3.5 mr-1" />
-            {isSubmitting ? '전송 중...' : '답변 전송'}
+            {isSubmitting ? t('hil.sending') : t('hil.sendResponse')}
           </Button>
         </div>
       </CardContent>

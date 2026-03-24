@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { DmnTableEditor } from '@/features/dmn/components/DmnTableEditor';
 import { useDmnTables, useDmnTable, useUpdateDmnTable, useExecuteDmnTest } from '@/features/dmn/hooks/useDmnTable';
 import type { DmnTestResult } from '@/features/dmn/types/dmn';
-import { TableProperties, Plus } from 'lucide-react';
+import { TableProperties, Plus , FileText } from 'lucide-react';
 
 export function DmnEditorPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -63,8 +63,9 @@ export function DmnEditorPage() {
       <div className="flex-1 overflow-auto p-6">
         {!selectedTable ? (
           <EmptyState
+            icon={FileText}
             title="결정 테이블을 선택하세요"
-            message="좌측 목록에서 테이블을 클릭하면 편집할 수 있습니다"
+            description="좌측 목록에서 테이블을 클릭하면 편집할 수 있습니다"
           />
         ) : (
           <DmnTableEditor

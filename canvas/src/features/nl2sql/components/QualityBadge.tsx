@@ -5,6 +5,7 @@
  * 그리고 Sprint 2의 품질 신뢰 등급을 시각적으로 알려준다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ShieldCheck,
   ShieldAlert,
@@ -48,35 +49,35 @@ const TIER_STYLES: Record<TrustTier, {
   bg: string;
   border: string;
   text: string;
-  label: string;
+  labelKey: string;
   Icon: typeof ShieldCheck;
 }> = {
   TRUSTED: {
     bg: 'bg-green-50',
     border: 'border-green-200',
     text: 'text-green-700',
-    label: '신뢰 가능',
+    labelKey: 'qualityBadge.trusted',
     Icon: ShieldCheck,
   },
   CAUTION: {
     bg: 'bg-yellow-50',
     border: 'border-yellow-300',
     text: 'text-yellow-700',
-    label: '주의 필요',
+    labelKey: 'qualityBadge.caution',
     Icon: Shield,
   },
   REFERENCE_ONLY: {
     bg: 'bg-orange-50',
     border: 'border-orange-300',
     text: 'text-orange-700',
-    label: '참고용',
+    labelKey: 'qualityBadge.referenceOnly',
     Icon: ShieldOff,
   },
   BLOCKED: {
     bg: 'bg-red-50',
     border: 'border-red-300',
     text: 'text-red-700',
-    label: '사용 제한',
+    labelKey: 'qualityBadge.blocked',
     Icon: ShieldBan,
   },
 };
@@ -92,6 +93,7 @@ export function QualityBadge({
   synonymMatches,
   fallbackMode,
 }: Props) {
+  const { t } = useTranslation();
   const [expanded, setExpanded] = useState(false);
   const hasWarnings = qualityWarnings.length > 0;
 
@@ -108,12 +110,12 @@ export function QualityBadge({
         {tierStyle ? (
           <span
             className={`inline-flex items-center gap-1 rounded-full ${tierStyle.bg} border ${tierStyle.border} px-2 py-0.5 text-xs ${tierStyle.text}`}
-            title={qualityBanner || tierStyle.label}
+            title={qualityBanner || t(tierStyle.labelKey)}
           >
             <tierStyle.Icon className="h-3 w-3" />
-            {tierStyle.label}
+            {t(tierStyle.labelKey)}
             {qualityScore != null && (
-              <span className="ml-0.5 font-medium">{Math.round(qualityScore)}점</span>
+              <span className="ml-0.5 font-medium">{t('qualityBadge.score', { score: Math.round(qualityScore) })}</span>
             )}
           </span>
         ) : (
@@ -121,12 +123,12 @@ export function QualityBadge({
           semanticContextUsed ? (
             <span className="inline-flex items-center gap-1 rounded-full bg-green-50 border border-green-200 px-2 py-0.5 text-xs text-green-700">
               <ShieldCheck className="h-3 w-3" />
-              시멘틱 계약 기반
+              {t('qualityBadge.semanticBased')}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 rounded-full bg-slate-50 border border-slate-200 px-2 py-0.5 text-xs text-slate-500">
               <ShieldAlert className="h-3 w-3" />
-              Raw 스키마 기반
+              {t('qualityBadge.rawBased')}
             </span>
           )
         )}
@@ -148,7 +150,7 @@ export function QualityBadge({
         {synonymMatches != null && synonymMatches > 0 && (
           <span className="inline-flex items-center gap-1 rounded-full bg-cyan-50 border border-cyan-200 px-2 py-0.5 text-xs text-cyan-700">
             <Link2 className="h-3 w-3" />
-            동의어 {synonymMatches}건
+            {t('qualityBadge.synonymCount', { count: synonymMatches })}
           </span>
         )}
 
@@ -162,7 +164,7 @@ export function QualityBadge({
             }`}
           >
             <BookOpen className="h-3 w-3" />
-            {fallbackMode === 'REFERENCE_ONLY' ? '참고용' : '안전 모드'}
+            {fallbackMode === 'REFERENCE_ONLY' ? t('qualityBadge.referenceMode') : t('qualityBadge.safeMode')}
           </span>
         )}
 
@@ -174,7 +176,7 @@ export function QualityBadge({
             onClick={() => setExpanded(!expanded)}
           >
             <AlertTriangle className="h-3 w-3" />
-            {qualityWarnings.length}건 품질 경고
+            {t('qualityBadge.qualityWarnings', { count: qualityWarnings.length })}
             {expanded ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
           </button>
         )}

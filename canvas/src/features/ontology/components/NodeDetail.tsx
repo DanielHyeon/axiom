@@ -6,6 +6,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { X, ExternalLink } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
 
@@ -21,6 +22,7 @@ interface NodeDetailProps {
 }
 
 export function NodeDetail({ node, onClose }: NodeDetailProps) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   if (!node) return null;
@@ -33,14 +35,14 @@ export function NodeDetail({ node, onClose }: NodeDetailProps) {
           <h3 className="text-sm font-semibold">{node.name}</h3>
           <Badge variant="outline" className="mt-1 text-xs">{node.layer}</Badge>
         </div>
-        <button onClick={onClose} aria-label="닫기" className="p-1 hover:bg-muted rounded">
+        <button onClick={onClose} aria-label={t('common.close')} className="p-1 hover:bg-muted rounded">
           <X className="h-4 w-4" />
         </button>
       </div>
 
       {/* 속성 */}
       <div className="space-y-2 mb-4">
-        <h4 className="text-xs font-medium text-muted-foreground">속성</h4>
+        <h4 className="text-xs font-medium text-muted-foreground">{t('ontologyExt.nodeDetail.properties')}</h4>
         {Object.entries(node.properties).map(([key, value]) => (
           <div key={key} className="flex justify-between text-sm">
             <span className="text-muted-foreground">{key}</span>
@@ -51,7 +53,7 @@ export function NodeDetail({ node, onClose }: NodeDetailProps) {
 
       {/* 연결 */}
       <div className="space-y-2 mb-4">
-        <h4 className="text-xs font-medium text-muted-foreground">연결 ({node.connections.length})</h4>
+        <h4 className="text-xs font-medium text-muted-foreground">{t('ontologyExt.nodeDetail.connections', { count: node.connections.length })}</h4>
         {node.connections.slice(0, 10).map((conn, i) => (
           <div key={i} className="flex items-center justify-between text-sm">
             <span className="truncate">{conn.targetName}</span>
@@ -68,7 +70,7 @@ export function NodeDetail({ node, onClose }: NodeDetailProps) {
         onClick={() => navigate(`${ROUTES.PROCESS_DESIGNER.LIST}?ontologyNodeId=${node.id}`)}
       >
         <ExternalLink className="h-3.5 w-3.5" />
-        프로세스 디자이너에서 보기
+        {t('ontologyExt.nodeDetail.viewInDesigner')}
       </Button>
     </div>
   );

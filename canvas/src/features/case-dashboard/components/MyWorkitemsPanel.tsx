@@ -2,14 +2,16 @@ import { Link } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
 import { useMyWorkitems } from '../hooks/useMyWorkitems';
 import { ClipboardList } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export function MyWorkitemsPanel() {
+  const { t } = useTranslation();
  const { data: items = [], isLoading, error } = useMyWorkitems(20);
 
  if (isLoading) {
  return (
  <div className="glass-card rounded-xl p-5">
- <h2 className="mb-4 text-lg font-semibold text-foreground">내 할당 업무</h2>
+ <h2 className="mb-4 text-lg font-semibold text-foreground">{t('caseDashboardExt.myWork')}</h2>
  <div className="space-y-3 animate-pulse">
  <div className="h-14 rounded-lg bg-muted/30" />
  <div className="h-14 rounded-lg bg-muted/30" />
@@ -22,15 +24,15 @@ export function MyWorkitemsPanel() {
  if (error) {
  return (
  <div className="glass-card rounded-xl border-destructive/20 p-5">
- <h2 className="mb-2 text-lg font-semibold text-foreground">내 할당 업무</h2>
- <p className="text-sm text-destructive">데이터를 불러오는 중 오류가 발생했습니다.</p>
+ <h2 className="mb-2 text-lg font-semibold text-foreground">{t('caseDashboardExt.myWork')}</h2>
+ <p className="text-sm text-destructive">{t('caseDashboardExt.loadError')}</p>
  </div>
  );
  }
 
  return (
  <div className="glass-card rounded-xl p-5">
- <h2 className="mb-4 text-lg font-semibold text-foreground">내 할당 업무</h2>
+ <h2 className="mb-4 text-lg font-semibold text-foreground">{t('caseDashboardExt.myWork')}</h2>
  <div className="grid gap-3">
  {items.map((item) => (
  <Link
@@ -55,7 +57,7 @@ export function MyWorkitemsPanel() {
  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-muted/50">
  <ClipboardList className="h-5 w-5 text-muted-foreground/50" />
  </div>
- <p className="text-sm text-muted-foreground">할당된 워크아이템이 없습니다.</p>
+ <p className="text-sm text-muted-foreground">{t('caseDashboardExt.noWorkitems')}</p>
  </div>
  )}
  </div>

@@ -26,8 +26,8 @@ export function KpiSelector({ onSelect, loading }: KpiSelectorProps) {
  fetchKpis({ limit: 10 })
  .then((res) => setKpis(res.kpis))
  .catch((err: unknown) => {
-   const msg = err instanceof Error ? err.message : '알 수 없는 오류';
-   toast.error('KPI 목록을 불러오지 못했습니다', { description: msg });
+   const msg = err instanceof Error ? err.message : t('insightExt.unknownError');
+   toast.error(t('insightF.kpiLoadError'), { description: msg });
    setKpis([]);
  })
  .finally(() => setKpisLoading(false));

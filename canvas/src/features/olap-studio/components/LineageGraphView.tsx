@@ -6,6 +6,7 @@
  */
 import { useMemo } from 'react';
 import { MermaidERDRenderer } from '@/shared/components/MermaidERDRenderer';
+import { useTranslation } from 'react-i18next';
 
 // ─── 타입 정의 ─────────────────────────────────────────────
 
@@ -41,14 +42,14 @@ const ENTITY_SHAPES: Record<string, { prefix: string; suffix: string }> = {
   REPORT: { prefix: '[', suffix: ']' },           // 사각형 (기본값)
 };
 
-// ─── 엣지 타입별 한글 라벨 ────────────────────────────────
+// ─── 엣지 타입별 라벨 키 ────────────────────────────────
 
-const EDGE_LABELS: Record<string, string> = {
-  DERIVES_TO: '파생',
-  LOADS_TO: '적재',
-  DEPENDS_ON: '의존',
-  GENERATES: '생성',
-  FEEDS: '공급',
+const EDGE_LABEL_KEYS: Record<string, string> = {
+  DERIVES_TO: 'olapStudioExt.lineageEdge.DERIVES_TO',
+  LOADS_TO: 'olapStudioExt.lineageEdge.LOADS_TO',
+  DEPENDS_ON: 'olapStudioExt.lineageEdge.DEPENDS_ON',
+  GENERATES: 'domainExt.createSave',
+  FEEDS: 'olapStudioExt.lineageEdge.FEEDS',
 };
 
 // ─── 엔티티 타입별 색상 (Mermaid style) ────────────────────
@@ -72,6 +73,7 @@ function sanitizeId(id: string): string {
 // ─── 컴포넌트 ──────────────────────────────────────────────
 
 export function LineageGraphView({ entities, edges }: LineageGraphViewProps) {
+  const { t } = useTranslation();
   // Mermaid flowchart 코드 생성
   const mermaidCode = useMemo(() => {
     if (entities.length === 0) return '';
@@ -94,7 +96,8 @@ export function LineageGraphView({ entities, edges }: LineageGraphViewProps) {
       const from = idMap.get(edge.from_entity_id);
       const to = idMap.get(edge.to_entity_id);
       if (from && to) {
-        const label = EDGE_LABELS[edge.edge_type] || edge.edge_type;
+        const labelKey = EDGE_LABEL_KEYS[edge.edge_type];
+        const label = labelKey ? t(labelKey) : edge.edge_type;
         lines.push(`    ${from} -->|${label}| ${to}`);
       }
     });
@@ -109,13 +112,13 @@ export function LineageGraphView({ entities, edges }: LineageGraphViewProps) {
     });
 
     return lines.join('\n');
-  }, [entities, edges]);
+  }, [entities, edges, t]);
 
   // 빈 상태
   if (!mermaidCode) {
     return (
       <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-mono">
-        리니지 데이터가 없습니다
+        {t('olapStudio.lineage.noLineage')}
       </div>
     );
   }

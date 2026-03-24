@@ -25,6 +25,7 @@ import {
   SelectItem,
 } from '@/components/ui/select';
 import type { SecurityUser } from '../../types/security';
+import { useTranslation } from 'react-i18next';
 import {
   ROLE_LABEL,
   STATUS_CONFIG,
@@ -54,17 +55,18 @@ export const UserTable: React.FC<UserTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   return (
     <div className="border border-border rounded-xl overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>사용자</TableHead>
-            <TableHead>역할</TableHead>
-            <TableHead>상태</TableHead>
-            <TableHead>생성일</TableHead>
-            <TableHead>마지막 로그인</TableHead>
-            <TableHead className="w-24">작업</TableHead>
+            <TableHead>{t('securityExt.userCol')}</TableHead>
+            <TableHead>{t('securityExt.roleCol')}</TableHead>
+            <TableHead>{t('securityExt.statusColUser')}</TableHead>
+            <TableHead>{t('securityExt.createdAt')}</TableHead>
+            <TableHead>{t('securityExt.lastLogin')}</TableHead>
+            <TableHead className="w-24">{t('securityExt.actionsCol')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -137,7 +139,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                     size="icon"
                     className="h-8 w-8"
                     onClick={() => onEdit(user)}
-                    aria-label="수정"
+                    aria-label={t('securityExt.editBtn')}
                   >
                     <Pencil className="h-4 w-4" />
                   </Button>
@@ -146,7 +148,7 @@ export const UserTable: React.FC<UserTableProps> = ({
                     size="icon"
                     className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                     onClick={() => onDelete(user)}
-                    aria-label="삭제"
+                    aria-label={t('common.delete')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -158,7 +160,7 @@ export const UserTable: React.FC<UserTableProps> = ({
           {users.length === 0 && (
             <TableRow>
               <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                검색 결과가 없습니다
+                {t('explorerExt.noResults')}
               </TableCell>
             </TableRow>
           )}

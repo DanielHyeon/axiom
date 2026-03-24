@@ -3,6 +3,7 @@
 // 이벤트 로그 소스 선택 → discoverProcess API → 자동 배치
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { discoverProcess, type DiscoveredProcess, type DiscoverRequest } from '../api/processDesignerApi';
 
 interface AiDiscoverDialogProps {
@@ -14,6 +15,7 @@ interface AiDiscoverDialogProps {
 type DiscoverStep = 'input' | 'discovering' | 'done' | 'error';
 
 export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialogProps) {
+ const { t } = useTranslation();
  const [step, setStep] = useState<DiscoverStep>('input');
  const [error, setError] = useState<string | null>(null);
 
@@ -40,7 +42,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  onDiscover(result);
  onClose();
  } catch (e) {
- setError(e instanceof Error ? e.message : '프로세스 발견에 실패했습니다.');
+ setError(e instanceof Error ? e.message : t('processDesignerExt.aiDiscover.failed'));
  setStep('error');
  }
  }, [sourceTable, timestampColumn, caseIdColumn, activityColumn, algorithm, onDiscover, onClose]);
@@ -57,7 +59,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  <div className="bg-card border border-border rounded-lg w-[480px] max-h-[80vh] overflow-auto shadow-xl">
  {/* Header */}
  <div className="flex items-center justify-between px-5 py-4 border-b border-border">
- <h2 className="text-sm font-semibold text-foreground">AI 프로세스 발견</h2>
+ <h2 className="text-sm font-semibold text-foreground">{t('processDesignerExt.aiDiscover.title')}</h2>
  <button
  type="button"
  onClick={onClose}
@@ -72,23 +74,23 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  {step === 'input' && (
  <>
  <p className="text-xs text-muted-foreground">
- 이벤트 로그 데이터 소스를 지정하면 pm4py가 프로세스 모델을 자동으로 발견합니다.
+ {t('processDesignerExt.aiDiscover.description')}
  </p>
 
  <label className="block">
- <span className="text-xs text-muted-foreground">소스 테이블 *</span>
+ <span className="text-xs text-muted-foreground">{t('processDesignerExt.aiDiscover.sourceTable')}</span>
  <input
  type="text"
  value={sourceTable}
  onChange={(e) => setSourceTable(e.target.value)}
- placeholder="예: event_log"
+ placeholder={t('processDesignerExt.aiDiscover.sourcePlaceholder')}
  className="mt-1 w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-500"
  />
  </label>
 
  <div className="grid grid-cols-2 gap-3">
  <label className="block">
- <span className="text-xs text-muted-foreground">타임스탬프 컬럼</span>
+ <span className="text-xs text-muted-foreground">{t('processDesignerExt.aiDiscover.timestampCol')}</span>
  <input
  type="text"
  value={timestampColumn}
@@ -97,7 +99,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  />
  </label>
  <label className="block">
- <span className="text-xs text-muted-foreground">케이스 ID 컬럼</span>
+ <span className="text-xs text-muted-foreground">{t('processDesignerExt.aiDiscover.caseIdCol')}</span>
  <input
  type="text"
  value={caseIdColumn}
@@ -108,7 +110,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  </div>
 
  <label className="block">
- <span className="text-xs text-muted-foreground">활동 컬럼</span>
+ <span className="text-xs text-muted-foreground">{t('processDesignerExt.aiDiscover.activityCol')}</span>
  <input
  type="text"
  value={activityColumn}
@@ -118,13 +120,13 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  </label>
 
  <label className="block">
- <span className="text-xs text-muted-foreground">알고리즘</span>
+ <span className="text-xs text-muted-foreground">{t('processDesignerExt.aiDiscover.algorithm')}</span>
  <select
  value={algorithm}
  onChange={(e) => setAlgorithm(e.target.value as DiscoverRequest['algorithm'])}
  className="mt-1 w-full bg-muted border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:border-blue-500"
  >
- <option value="inductive">Inductive Miner (권장)</option>
+ <option value="inductive">{t('processDesignerExt.aiDiscover.inductiveRecommended')}</option>
  <option value="alpha">Alpha Miner</option>
  <option value="heuristic">Heuristic Miner</option>
  </select>
@@ -135,8 +137,8 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  {step === 'discovering' && (
  <div className="flex flex-col items-center py-8 gap-3">
  <div className="w-8 h-8 border-2 border-border border-t-blue-400 rounded-full animate-spin" />
- <p className="text-sm text-foreground/80">프로세스를 발견하는 중...</p>
- <p className="text-xs text-foreground0">pm4py가 이벤트 로그를 분석합니다.</p>
+ <p className="text-sm text-foreground/80">{t('processDesignerExt.aiDiscover.discovering')}</p>
+ <p className="text-xs text-foreground0">{t('processDesignerExt.aiDiscover.pm4pyAnalyzing')}</p>
  </div>
  )}
 
@@ -150,7 +152,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  onClick={handleReset}
  className="mt-3 text-xs text-primary hover:text-primary/80"
  >
- 다시 시도
+ {t('common.retry')}
  </button>
  </div>
  )}
@@ -164,7 +166,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  onClick={onClose}
  className="px-4 py-2 text-sm text-muted-foreground hover:text-foreground"
  >
- 취소
+ {t('common.cancel')}
  </button>
  <button
  type="button"
@@ -172,7 +174,7 @@ export function AiDiscoverDialog({ open, onClose, onDiscover }: AiDiscoverDialog
  disabled={!sourceTable.trim()}
  className="px-4 py-2 text-sm bg-primary text-primary-foreground rounded disabled:opacity-50 hover:bg-primary"
  >
- 프로세스 발견
+ {t('processDesignerExt.aiDiscover.title')}
  </button>
  </div>
  )}

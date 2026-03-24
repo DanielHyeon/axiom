@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, CheckCircle2, XCircle, Clock } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { TrainedModel } from '../types/wizard';
 
 interface ModelTrainingProgressProps {
@@ -17,26 +18,26 @@ interface ModelTrainingProgressProps {
 /** 상태별 아이콘과 스타일 */
 const STATUS_CONFIG: Record<
   TrainedModel['status'],
-  { icon: React.ElementType; label: string; color: string }
+  { icon: React.ElementType; labelKey: string; color: string }
 > = {
   pending: {
     icon: Clock,
-    label: '대기',
+    labelKey: 'whatifExt.trainingStatus.pending',
     color: 'text-muted-foreground',
   },
   training: {
     icon: Loader2,
-    label: '학습 중',
+    labelKey: 'whatifExt.trainingStatus.training',
     color: 'text-primary',
   },
   trained: {
     icon: CheckCircle2,
-    label: '완료',
+    labelKey: 'whatifExt.trainingStatus.done',
     color: 'text-emerald-400',
   },
   failed: {
     icon: XCircle,
-    label: '실패',
+    labelKey: 'whatifExt.trainingStatus.failed',
     color: 'text-destructive',
   },
 };
@@ -49,6 +50,7 @@ function r2Color(r2: number): string {
 }
 
 export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
+  const { t } = useTranslation();
   const trainedCount = models.filter((m) => m.status === 'trained').length;
   const totalCount = models.length;
 
@@ -57,11 +59,11 @@ export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
       {/* 전체 진행률 */}
       <div className="flex items-center justify-between text-sm">
         <span className="text-muted-foreground">
-          모델 학습 진행: {trainedCount}/{totalCount}
+          {t('whatifExt.trainModels.progress', { trained: trainedCount, total: totalCount })}
         </span>
         {trainedCount === totalCount && totalCount > 0 && (
           <Badge variant="outline" className="text-emerald-400 border-emerald-500/30">
-            전체 완료
+            {t('whatifExt.trainModels.allComplete')}
           </Badge>
         )}
       </div>
@@ -104,7 +106,7 @@ export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
                         model.status === 'training' && 'animate-spin'
                       )}
                     />
-                    <span className="text-xs font-medium">{cfg.label}</span>
+                    <span className="text-xs font-medium">{t(cfg.labelKey)}</span>
                   </div>
                 </div>
 
@@ -127,7 +129,7 @@ export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
                       <div className="text-sm font-bold text-muted-foreground">
                         {model.modelType || '-'}
                       </div>
-                      <div className="text-[10px] text-muted-foreground">알고리즘</div>
+                      <div className="text-[10px] text-muted-foreground">{t('whatifExt.algorithmLabel')}</div>
                     </div>
                   </div>
                 )}
@@ -143,7 +145,7 @@ export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
                           : 'text-destructive border-destructive/30'
                       )}
                     >
-                      {model.neo4jSaved ? 'Neo4j 등록 완료' : 'Neo4j 미등록'}
+                      {model.neo4jSaved ? t('whatifExt.neo4jRegistered') : t('whatifExt.neo4jNotRegistered')}
                     </Badge>
                   </div>
                 )}
@@ -151,7 +153,7 @@ export function ModelTrainingProgress({ models }: ModelTrainingProgressProps) {
                 {/* 실패 시 메시지 */}
                 {model.status === 'failed' && (
                   <p className="text-xs text-destructive mt-1">
-                    모델 학습에 실패했습니다. 데이터를 확인해주세요.
+                    {t('whatifExt.trainModels.failedMessage')}
                   </p>
                 )}
               </CardContent>

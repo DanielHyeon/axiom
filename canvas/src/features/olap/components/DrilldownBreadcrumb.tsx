@@ -1,11 +1,13 @@
 import { useSearchParams } from 'react-router-dom';
 import { usePivotConfig } from '../store/usePivotConfig';
 import { useMemo, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 
 const DRILL_PARAM = 'drill';
 
 /** 드릴다운 경로 표시 및 URL search params 동기화 */
 export function DrilldownBreadcrumb() {
+  const { t } = useTranslation();
  const [searchParams] = useSearchParams();
  const drilldownPath = usePivotConfig((s) => s.drilldownPath);
  const setDrilldownPath = usePivotConfig((s) => s.setDrilldownPath);
@@ -31,7 +33,7 @@ export function DrilldownBreadcrumb() {
 
  return (
  <div className="flex items-center gap-2 text-sm text-muted-foreground flex-wrap">
- <span>드릴다운:</span>
+ <span>{t('olapExt.drilldown')}</span>
  {displayPath.map((step, i) => (
  <span key={i} className="flex items-center gap-2">
  {i > 0 && <span className="text-muted-foreground">/</span>}

@@ -3,6 +3,7 @@ import { useMemo, useRef, useEffect, useState } from 'react';
 import cytoscape from 'cytoscape';
 import { Link } from 'lucide-react';
 import type { OntologyNode, OntologyLayer, ConceptMapping, SchemaEntity } from '@/features/ontology/types/ontology';
+import { useTranslation } from 'react-i18next';
 
 const LAYER_COLORS: Record<OntologyLayer, string> = {
  kpi: '#EF4444',
@@ -285,7 +286,7 @@ export function BipartiteGraphView({
  return (
  <div className="flex flex-col items-center justify-center py-12 text-foreground/60">
  <Link size={24} className="mb-2 opacity-30" />
- <p className="text-sm font-mono">매핑이 없습니다. 위에서 새 매핑을 추가하면 시각화가 표시됩니다.</p>
+ <p className="text-sm font-mono">{t('ontologyPage.msg705f37e2')}</p>
  </div>
  );
  }
@@ -294,7 +295,7 @@ export function BipartiteGraphView({
  <div className="w-full border border-border rounded bg-muted overflow-hidden">
  {/* Legend */}
  <div className="flex items-center gap-4 px-3 py-2 border-b border-border text-[10px] text-foreground/60 font-mono">
- <span className="font-medium text-muted-foreground">범례:</span>
+ <span className="font-medium text-muted-foreground">{t('securityExt.legend')}</span>
  {Object.entries(LAYER_COLORS).map(([layer, color]) => (
  <span key={layer} className="flex items-center gap-1">
  <span className="w-2 h-2 rounded-full inline-block" style={{ backgroundColor: color }} />

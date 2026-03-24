@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Database,
   Plus,
@@ -57,6 +58,7 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
   onRefresh,
   onDelete,
 }) => {
+  const { t } = useTranslation();
   const {
     selectedObjectTypeId,
     selectObjectType,
@@ -92,7 +94,7 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
           variant="default"
           className="h-7 w-7"
           onClick={openCreateDialog}
-          title="새 ObjectType 생성"
+          title={t('domainExt.createObjectType')}
         >
           <Plus className="h-3.5 w-3.5" />
         </Button>
@@ -105,7 +107,7 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="ObjectType 검색..."
+            placeholder={t('domainF.msg92cca6bb')}
             className="pl-8 h-8 text-sm"
           />
         </div>
@@ -116,14 +118,14 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
         {isLoading ? (
           <div className="flex items-center justify-center py-12 text-sm text-muted-foreground">
             <RefreshCw className="h-4 w-4 animate-spin mr-2" />
-            로딩 중...
+            {t('common.loading')}
           </div>
         ) : filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-sm text-muted-foreground gap-3">
-            <p>ObjectType이 없습니다</p>
+            <p>{t('domainExt.noObjectTypes')}</p>
             <Button size="sm" variant="secondary" onClick={openCreateDialog}>
               <Plus className="h-3.5 w-3.5 mr-1" />
-              첫 ObjectType 생성
+              {t('domainExt.createObjectType')}
             </Button>
           </div>
         ) : (
@@ -153,7 +155,7 @@ export const ObjectTypeList: React.FC<ObjectTypeListProps> = ({
           disabled={isLoading}
         >
           <RefreshCw className={cn('h-3 w-3 mr-1.5', isLoading && 'animate-spin')} />
-          새로고침
+          {t('common.refresh')}
         </Button>
       </div>
     </aside>
@@ -181,6 +183,7 @@ const ObjectTypeItem: React.FC<ObjectTypeItemProps> = ({
   onDelete,
   onAddBehavior,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       role="button"
@@ -210,7 +213,7 @@ const ObjectTypeItem: React.FC<ObjectTypeItemProps> = ({
           </Badge>
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-          <span>{objectType.fields.length} 필드</span>
+          <span>{t('domainExt.fieldCount', { count: objectType.fields.length })}</span>
           {objectType.behaviors.length > 0 && (
             <span className="flex items-center gap-0.5 text-violet-400">
               <Zap className="h-3 w-3" />
@@ -226,7 +229,7 @@ const ObjectTypeItem: React.FC<ObjectTypeItemProps> = ({
           type="button"
           className="p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary"
           onClick={(e) => { e.stopPropagation(); onEdit(); }}
-          title="편집"
+          title={t('domainExt.editBtn')}
         >
           <Pencil className="h-3.5 w-3.5" />
         </button>
@@ -234,7 +237,7 @@ const ObjectTypeItem: React.FC<ObjectTypeItemProps> = ({
           type="button"
           className="p-1 rounded hover:bg-violet-500/10 text-muted-foreground hover:text-violet-400"
           onClick={(e) => { e.stopPropagation(); onAddBehavior(); }}
-          title="Behavior 추가"
+          title={t('domainExt.addBehavior')}
         >
           <Zap className="h-3.5 w-3.5" />
         </button>
@@ -242,7 +245,7 @@ const ObjectTypeItem: React.FC<ObjectTypeItemProps> = ({
           type="button"
           className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
           onClick={(e) => { e.stopPropagation(); onDelete(); }}
-          title="삭제"
+          title={t('domainExt.deleteBtn')}
         >
           <Trash2 className="h-3.5 w-3.5" />
         </button>

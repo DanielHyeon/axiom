@@ -5,6 +5,7 @@
  * 정책 섹션: 접이식 생성 폼 + 테이블 (policy_type 배지, is_active 토글)
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Scale, Shield, Plus, Trash2, ChevronUp } from 'lucide-react';
 import type {
   OntologyRule,
@@ -85,6 +86,7 @@ export function RulePolicyPanel({
   isCreatingRule,
   isCreatingPolicy,
 }: Props) {
+  const { t } = useTranslation();
   // ── 규칙 폼 상태 ──
   const [showRuleForm, setShowRuleForm] = useState(false);
   const [ruleForm, setRuleForm] = useState({ ...EMPTY_RULE });
@@ -127,7 +129,7 @@ export function RulePolicyPanel({
         <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Scale className="h-4 w-4 text-blue-600" />
-            온톨로지 규칙
+            {t('semanticCatalogExt.ontologyRules')}
           </div>
           {onCreateRule && (
             <button
@@ -135,7 +137,7 @@ export function RulePolicyPanel({
               onClick={() => setShowRuleForm(!showRuleForm)}
             >
               {showRuleForm ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-              {showRuleForm ? '닫기' : '규칙 등록'}
+              {showRuleForm ? t('common.close') : t('semanticCatalogExt.registerRule')}
             </button>
           )}
         </div>
@@ -145,7 +147,7 @@ export function RulePolicyPanel({
           <div className="border-b bg-muted/20 px-4 py-3 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">개념 ID</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.conceptIdLabel')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   placeholder="concept_..."
@@ -154,7 +156,7 @@ export function RulePolicyPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">규칙 타입</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.ruleType')}</label>
                 <select
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={ruleForm.rule_type}
@@ -166,7 +168,7 @@ export function RulePolicyPanel({
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">언어</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.language')}</label>
                 <select
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={ruleForm.expression_lang}
@@ -178,7 +180,7 @@ export function RulePolicyPanel({
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">심각도</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.severity')}</label>
                 <select
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={ruleForm.severity}
@@ -191,10 +193,10 @@ export function RulePolicyPanel({
               </div>
             </div>
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">표현식</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.expression')}</label>
               <textarea
                 className="w-full rounded-md border px-2 py-1.5 text-sm font-mono h-16 resize-y"
-                placeholder="규칙 표현식을 입력하세요..."
+                placeholder={t('semanticCatalogExt.ruleExprPlaceholder')}
                 value={ruleForm.rule_expression}
                 onChange={(e) => handleRuleChange('rule_expression', e.target.value)}
               />
@@ -202,7 +204,7 @@ export function RulePolicyPanel({
             <div className="flex items-center gap-3">
               <input
                 className="flex-1 rounded-md border px-2 py-1.5 text-sm"
-                placeholder="설명 (선택)"
+                placeholder={t('semanticCatalogExt.descriptionOptional')}
                 value={ruleForm.description}
                 onChange={(e) => handleRuleChange('description', e.target.value)}
               />
@@ -211,7 +213,7 @@ export function RulePolicyPanel({
                 disabled={isCreatingRule || !ruleForm.concept_id || !ruleForm.rule_expression}
                 onClick={handleRuleSubmit}
               >
-                {isCreatingRule ? '등록 중...' : '등록'}
+                {isCreatingRule ? t('semanticCatalogExt.registering') : t('semanticCatalogExt.register')}
               </button>
             </div>
           </div>
@@ -221,12 +223,12 @@ export function RulePolicyPanel({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="px-3 py-2 text-left font-medium">규칙 ID</th>
-              <th className="px-3 py-2 text-left font-medium">개념 ID</th>
-              <th className="px-3 py-2 text-left font-medium">타입</th>
-              <th className="px-3 py-2 text-left font-medium">표현식</th>
-              <th className="px-3 py-2 text-center font-medium">심각도</th>
-              <th className="px-3 py-2 text-center font-medium">언어</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.ruleId')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.conceptIdLabel')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.type')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.expression')}</th>
+              <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.severity')}</th>
+              <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.language')}</th>
               {onDeleteRule && <th className="px-3 py-2 w-10" />}
             </tr>
           </thead>
@@ -256,7 +258,7 @@ export function RulePolicyPanel({
                     <td className="px-3 py-2">
                       <button
                         className="p-1 rounded hover:bg-red-50 text-red-500 hover:text-red-700"
-                        title="삭제"
+                        title={t('common.delete')}
                         onClick={() => onDeleteRule(r.rule_id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -269,7 +271,7 @@ export function RulePolicyPanel({
           </tbody>
         </table>
         {rules.length === 0 && (
-          <div className="py-8 text-center text-muted-foreground text-sm">등록된 규칙이 없습니다</div>
+          <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.rulePolicy.noRules')}</div>
         )}
       </div>
 
@@ -279,7 +281,7 @@ export function RulePolicyPanel({
         <div className="flex items-center justify-between border-b bg-muted/50 px-3 py-2">
           <div className="flex items-center gap-2 text-sm font-medium">
             <Shield className="h-4 w-4 text-indigo-600" />
-            온톨로지 정책
+            {t('semanticCatalogExt.ontologyPolicies')}
           </div>
           {onCreatePolicy && (
             <button
@@ -287,7 +289,7 @@ export function RulePolicyPanel({
               onClick={() => setShowPolicyForm(!showPolicyForm)}
             >
               {showPolicyForm ? <ChevronUp className="h-3.5 w-3.5" /> : <Plus className="h-3.5 w-3.5" />}
-              {showPolicyForm ? '닫기' : '정책 등록'}
+              {showPolicyForm ? t('common.close') : t('semanticCatalogExt.registerPolicy')}
             </button>
           )}
         </div>
@@ -297,7 +299,7 @@ export function RulePolicyPanel({
           <div className="border-b bg-muted/20 px-4 py-3 space-y-3">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">개념 ID</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.conceptIdLabel')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   placeholder="concept_..."
@@ -306,7 +308,7 @@ export function RulePolicyPanel({
                 />
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">정책 타입</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.policyType')}</label>
                 <select
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
                   value={policyForm.policy_type}
@@ -318,20 +320,20 @@ export function RulePolicyPanel({
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1">설명 (선택)</label>
+                <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.descriptionOptional')}</label>
                 <input
                   className="w-full rounded-md border px-2 py-1.5 text-sm"
-                  placeholder="정책 설명..."
+                  placeholder={t('semanticCatalogExt.policyDescPlaceholder')}
                   value={policyForm.description}
                   onChange={(e) => handlePolicyChange('description', e.target.value)}
                 />
               </div>
             </div>
             <div>
-              <label className="block text-xs text-muted-foreground mb-1">정책 표현식</label>
+              <label className="block text-xs text-muted-foreground mb-1">{t('semanticCatalogExt.policyExpression')}</label>
               <textarea
                 className="w-full rounded-md border px-2 py-1.5 text-sm font-mono h-16 resize-y"
-                placeholder="정책 표현식을 입력하세요..."
+                placeholder={t('semanticCatalogExt.policyExprPlaceholder')}
                 value={policyForm.policy_expression}
                 onChange={(e) => handlePolicyChange('policy_expression', e.target.value)}
               />
@@ -341,7 +343,7 @@ export function RulePolicyPanel({
               disabled={isCreatingPolicy || !policyForm.concept_id || !policyForm.policy_expression}
               onClick={handlePolicySubmit}
             >
-              {isCreatingPolicy ? '등록 중...' : '등록'}
+              {isCreatingPolicy ? t('semanticCatalogExt.registering') : t('semanticCatalogExt.register')}
             </button>
           </div>
         )}
@@ -350,11 +352,11 @@ export function RulePolicyPanel({
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-muted/50">
-              <th className="px-3 py-2 text-left font-medium">정책 ID</th>
-              <th className="px-3 py-2 text-left font-medium">개념 ID</th>
-              <th className="px-3 py-2 text-left font-medium">타입</th>
-              <th className="px-3 py-2 text-left font-medium">표현식</th>
-              <th className="px-3 py-2 text-center font-medium">활성</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.policyId')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.conceptIdLabel')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.type')}</th>
+              <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.expression')}</th>
+              <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.activeCol')}</th>
               {onDeletePolicy && <th className="px-3 py-2 w-10" />}
             </tr>
           </thead>
@@ -378,7 +380,7 @@ export function RulePolicyPanel({
                     <button
                       className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${p.is_active ? 'bg-green-500' : 'bg-gray-300'}`}
                       onClick={() => onTogglePolicyActive?.(p.policy_id, !p.is_active)}
-                      title={p.is_active ? '비활성화' : '활성화'}
+                      title={p.is_active ? t('semanticCatalogExt.deactivate') : t('semanticCatalogExt.activate')}
                     >
                       <span
                         className={`inline-block h-3.5 w-3.5 transform rounded-full bg-card transition-transform ${p.is_active ? 'translate-x-4.5' : 'translate-x-0.5'}`}
@@ -389,7 +391,7 @@ export function RulePolicyPanel({
                     <td className="px-3 py-2">
                       <button
                         className="p-1 rounded hover:bg-red-50 text-red-500 hover:text-red-700"
-                        title="삭제"
+                        title={t('common.delete')}
                         onClick={() => onDeletePolicy(p.policy_id)}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
@@ -402,7 +404,7 @@ export function RulePolicyPanel({
           </tbody>
         </table>
         {policies.length === 0 && (
-          <div className="py-8 text-center text-muted-foreground text-sm">등록된 정책이 없습니다</div>
+          <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.rulePolicy.noPolicies')}</div>
         )}
       </div>
     </div>

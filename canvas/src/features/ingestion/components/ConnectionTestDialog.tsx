@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 // 연결 테스트 API는 shared를 통해 접근한다 (feature 간 의존 제거)
 import { testConnection } from '@/shared/api/datasourceApi';
+import { useTranslation } from 'react-i18next';
 
 interface ConnectionTestDialogProps {
   /** 다이얼로그 표시 여부 */
@@ -35,6 +36,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
   onClose,
   datasourceName,
 }) => {
+  const { t } = useTranslation();
   const [testing, setTesting] = useState(false);
   const [result, setResult] = useState<TestResult | null>(null);
 
@@ -45,13 +47,13 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
       const res = await testConnection(datasourceName);
       setResult({
         success: !!res.success,
-        message: res.success ? '연결 성공' : (res.message ?? '연결 실패'),
+        message: res.success ? t('ingestionExt.connectionSuccess') : (res.message ?? t('ingestionExt.connectionFailed')),
         responseTimeMs: res.response_time_ms,
       });
     } catch (err) {
       setResult({
         success: false,
-        message: err instanceof Error ? err.message : '연결 테스트 실패',
+        message: err instanceof Error ? err.message : t('ingestionExt.connectionTestFailed'),
       });
     } finally {
       setTesting(false);
@@ -67,7 +69,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
       role="dialog"
       aria-modal="true"
-      aria-label="연결 테스트"
+      aria-label={t('ingestionExt.connectionTestAria')}
     >
       <div className="w-full max-w-md bg-card rounded-2xl shadow-2xl overflow-hidden">
         {/* 헤더 */}
@@ -75,14 +77,14 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
           <div className="flex items-center gap-2">
             <TestTubeDiagonal className="h-5 w-5 text-blue-500" />
             <h2 className="text-base font-semibold text-gray-900 font-heading">
-              연결 테스트
+              {t('ingestionExt.connectionTestAria')}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-            aria-label="닫기"
+            aria-label={t('ingestionExt.closeBtn')}
           >
             <X className="h-5 w-5" />
           </button>
@@ -93,7 +95,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
           {/* 대상 정보 */}
           <div className="px-4 py-3 bg-gray-50 rounded-lg">
             <span className="text-[11px] text-gray-400 font-mono uppercase">
-              대상 데이터소스
+              {t('ingestionF.md86641c9')}
             </span>
             <p className="text-sm font-semibold text-gray-900 mt-0.5 font-heading">
               {datasourceName}
@@ -121,7 +123,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
                 {result.responseTimeMs != null && (
                   <p className="flex items-center gap-1 mt-1 text-[11px] text-gray-500">
                     <Clock className="h-3 w-3" />
-                    응답 시간: {result.responseTimeMs}ms
+                    {t('ingestionF.responseTime', { ms: result.responseTimeMs })}
                   </p>
                 )}
               </div>
@@ -136,7 +138,7 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
             onClick={onClose}
             className="px-4 py-2 text-[13px] text-gray-600 bg-card border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors font-heading"
           >
-            닫기
+            {t('lineageExt.closeDetail')}
           </button>
           <button
             type="button"
@@ -147,12 +149,12 @@ export const ConnectionTestDialog: React.FC<ConnectionTestDialogProps> = ({
             {testing ? (
               <>
                 <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                테스트 중...
+                {t('ingestion.testing')}
               </>
             ) : (
               <>
                 <TestTubeDiagonal className="h-3.5 w-3.5" />
-                테스트 실행
+                {t('dataQualityExt.runTest')}
               </>
             )}
           </button>

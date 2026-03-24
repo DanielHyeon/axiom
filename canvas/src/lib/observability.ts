@@ -88,14 +88,14 @@ export function onMutationError(error: unknown): void {
 /** Web Vitals 메트릭 수집 */
 async function initWebVitals(): Promise<void> {
   try {
-    const { onCLS, onFID, onLCP } = await import('web-vitals');
+    const { onCLS, onINP, onLCP } = await import('web-vitals');
     const report = (metric: { name: string; value: number }) => {
       if (import.meta.env.DEV) {
         console.log(`[Web-Vital] ${metric.name}: ${metric.value.toFixed(2)}`);
       }
     };
     onCLS(report);
-    onFID(report);
+    onINP(report);
     onLCP(report);
   } catch {
     // web-vitals 미설치 — 무시

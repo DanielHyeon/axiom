@@ -4,6 +4,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { Holiday } from '../types/calendar';
@@ -14,13 +15,15 @@ interface CalendarGridProps {
   weekendDays?: number[];
 }
 
-const DAY_NAMES = ['일', '월', '화', '수', '목', '금', '토'];
+// DAY_NAMES는 t()로 조회 — calendarExt.dayNames 배열
 
 function formatDate(y: number, m: number, d: number): string {
   return `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 }
 
 export function CalendarGrid({ holidays, onDateClick, weekendDays = [0, 6] }: CalendarGridProps) {
+  const { t } = useTranslation();
+  const dayNames = t('calendarExt.dayNames', { returnObjects: true }) as string[];
   const today = new Date();
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth());
@@ -66,18 +69,18 @@ export function CalendarGrid({ holidays, onDateClick, weekendDays = [0, 6] }: Ca
     <div className="border border-border rounded-lg bg-card p-4">
       {/* 월 네비게이션 */}
       <div className="flex items-center justify-between mb-4">
-        <Button variant="ghost" size="sm" onClick={prevMonth} aria-label="이전 달">
+        <Button variant="ghost" size="sm" onClick={prevMonth} aria-label={t('calendarExt.prevMonth')}>
           <ChevronLeft className="h-4 w-4" />
         </Button>
-        <h3 className="text-sm font-medium">{year}년 {month + 1}월</h3>
-        <Button variant="ghost" size="sm" onClick={nextMonth} aria-label="다음 달">
+        <h3 className="text-sm font-medium">{t('calendarExt.yearMonth', { year, month: month + 1 })}</h3>
+        <Button variant="ghost" size="sm" onClick={nextMonth} aria-label={t('calendarExt.nextMonth')}>
           <ChevronRight className="h-4 w-4" />
         </Button>
       </div>
 
       {/* 요일 헤더 */}
       <div className="grid grid-cols-7 gap-1 mb-1">
-        {DAY_NAMES.map((d, i) => (
+        {dayNames.map((d, i) => (
           <div
             key={d}
             className={`text-center text-xs font-medium py-1 ${
@@ -114,7 +117,7 @@ export function CalendarGrid({ holidays, onDateClick, weekendDays = [0, 6] }: Ca
               key={dateStr}
               type="button"
               onClick={() => onDateClick?.(dateStr)}
-              title={holidayName ?? (isWeekend ? '주말' : undefined)}
+              title={holidayName ?? (isWeekend ? t('calendarExt.weekend') : undefined)}
               className={`relative h-8 rounded text-xs transition-colors ${
                 isToday ? 'ring-1 ring-primary font-bold' : ''
               } ${

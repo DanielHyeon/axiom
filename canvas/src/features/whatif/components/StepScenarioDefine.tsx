@@ -17,22 +17,23 @@ import {
 } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileText, Target } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 
 /** 미리 정의된 케이스/스키마 목록 (추후 API에서 로드) */
 const AVAILABLE_CASES = [
-  { id: 'demo_manufacturing', name: '제조업 OEE 분석' },
-  { id: 'demo_logistics', name: '물류 최적화 시나리오' },
-  { id: 'demo_quality', name: '품질 관리 시나리오' },
+  { id: 'demo_manufacturing', nameKey: 'whatifExt.demoScenarios.manufacturing' },
+  { id: 'demo_logistics', nameKey: 'whatifExt.demoScenarios.logistics' },
+  { id: 'demo_quality', nameKey: 'whatifExt.demoScenarios.quality' },
 ];
 
 /** 대상 KPI 목록 (추후 Synapse 온톨로지에서 로드) */
 const AVAILABLE_KPIS = [
-  { id: 'oee', name: 'OEE (Overall Equipment Effectiveness)' },
-  { id: 'throughput_rate', name: 'Throughput Rate (생산량)' },
-  { id: 'defect_rate', name: 'Defect Rate (불량률)' },
-  { id: 'downtime', name: 'Downtime (가동 중단 시간)' },
-  { id: 'mtbf', name: 'MTBF (평균 고장 간격)' },
+  { id: 'oee', nameKey: 'whatifExt.demoKpis.oee' },
+  { id: 'throughput_rate', nameKey: 'whatifExt.demoKpis.throughputRate' },
+  { id: 'defect_rate', nameKey: 'whatifExt.demoKpis.defectRate' },
+  { id: 'downtime', nameKey: 'whatifExt.demoKpis.downtime' },
+  { id: 'mtbf', nameKey: 'whatifExt.demoKpis.mtbf' },
 ];
 
 export function StepScenarioDefine() {
@@ -47,32 +48,34 @@ export function StepScenarioDefine() {
     setTargetKpiId,
   } = useWhatIfWizardStore();
 
+  const { t } = useTranslation();
+
   return (
     <div className="space-y-6 max-w-2xl">
       {/* 헤더 */}
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <FileText className="w-5 h-5 text-primary" />
-          시나리오 정의
+          {t('whatifExt.scenarioDefine.heading')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          What-if 분석의 기본 정보를 설정합니다. 시나리오 이름과 분석 대상 KPI를 선택하세요.
+          {t('whatifExt.scenarioDefine.headingDesc')}
         </p>
       </div>
 
       {/* 시나리오 이름 */}
       <Card>
         <CardHeader className="pb-3">
-          <CardTitle className="text-sm">기본 정보</CardTitle>
+          <CardTitle className="text-sm">{t('whatifExt.scenarioDefine.basicInfo')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="scenario-name">
-              시나리오 이름 <span className="text-destructive">*</span>
+              {t('whatifWizard.step1.nameLabel')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="scenario-name"
-              placeholder="예: 원가 상승 시 OEE 영향 분석"
+              placeholder={t('whatifExt.scenarioDefine.namePlaceholder')}
               value={scenarioName}
               onChange={(e) => setScenarioName(e.target.value)}
               maxLength={100}
@@ -80,10 +83,10 @@ export function StepScenarioDefine() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="scenario-desc">설명 (선택)</Label>
+            <Label htmlFor="scenario-desc">{t('whatifExt.scenarioDefine.descOpt')}</Label>
             <Textarea
               id="scenario-desc"
-              placeholder="이 시나리오의 목적과 배경을 설명하세요..."
+              placeholder={t('whatifExt.scenarioDefine.descPlaceholder')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={3}
@@ -101,49 +104,49 @@ export function StepScenarioDefine() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Target className="w-4 h-4" />
-            분석 대상
+            {t('whatifExt.scenarioDefine.analysisTarget')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {/* 케이스(스키마) 선택 */}
           <div className="space-y-2">
             <Label htmlFor="case-select">
-              케이스 (데이터 스키마) <span className="text-destructive">*</span>
+              {t('whatifExt.scenarioDefine.caseLabel')} <span className="text-destructive">*</span>
             </Label>
             <Select value={caseId} onValueChange={setCaseId}>
               <SelectTrigger id="case-select">
-                <SelectValue placeholder="분석할 케이스를 선택하세요" />
+                <SelectValue placeholder={t('whatifExt.scenarioDefine.selectCase')} />
               </SelectTrigger>
               <SelectContent>
                 {AVAILABLE_CASES.map((c) => (
                   <SelectItem key={c.id} value={c.id}>
-                    {c.name}
+                    {t(c.nameKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              온톨로지에 등록된 데이터 스키마 기준으로 분석합니다.
+              {t('whatifExt.scenarioDefine.caseHint')}
             </p>
           </div>
 
           {/* 대상 KPI 선택 */}
           <div className="space-y-2">
-            <Label htmlFor="kpi-select">대상 KPI (선택)</Label>
+            <Label htmlFor="kpi-select">{t('whatifExt.scenarioDefine.kpiLabel')}</Label>
             <Select value={targetKpiId} onValueChange={setTargetKpiId}>
               <SelectTrigger id="kpi-select">
-                <SelectValue placeholder="분석 대상 KPI를 선택하세요" />
+                <SelectValue placeholder={t('whatifExt.scenarioDefine.selectKpi')} />
               </SelectTrigger>
               <SelectContent>
                 {AVAILABLE_KPIS.map((k) => (
                   <SelectItem key={k.id} value={k.id}>
-                    {k.name}
+                    {t(k.nameKey)}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <p className="text-xs text-muted-foreground">
-              특정 KPI를 지정하면 해당 KPI와 관련된 변수만 인과 분석에 포함됩니다.
+              {t('whatifExt.scenarioDefine.kpiHint')}
             </p>
           </div>
         </CardContent>

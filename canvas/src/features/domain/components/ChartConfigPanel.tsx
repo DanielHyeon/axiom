@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { BarChart3, LineChart, PieChart, Map } from 'lucide-react';
 // Label은 기본 HTML label로 대체
 import {
@@ -38,12 +39,12 @@ interface ChartConfigPanelProps {
 // 차트 유형 옵션
 // ──────────────────────────────────────
 
-const CHART_OPTIONS: { value: ChartType; label: string; icon: React.ReactNode; description: string }[] = [
-  { value: 'none', label: '없음', icon: null, description: '차트 없음' },
-  { value: 'bar', label: '바 차트', icon: <BarChart3 className="h-4 w-4" />, description: '카테고리별 값 비교' },
-  { value: 'line', label: '라인 차트', icon: <LineChart className="h-4 w-4" />, description: '시계열 데이터' },
-  { value: 'pie', label: '파이 차트', icon: <PieChart className="h-4 w-4" />, description: '비율/구성' },
-  { value: 'map', label: '지도', icon: <Map className="h-4 w-4" />, description: '위치 기반' },
+const CHART_OPTIONS: { value: ChartType; labelKey: string; icon: React.ReactNode; descKey: string }[] = [
+  { value: 'none', labelKey: 'domainExt.chartNone', icon: null, descKey: 'domainExt.chartNoneDesc' },
+  { value: 'bar', labelKey: 'domainExt.chartBar', icon: <BarChart3 className="h-4 w-4" />, descKey: 'domainExt.chartBarDesc' },
+  { value: 'line', labelKey: 'domainExt.chartLine', icon: <LineChart className="h-4 w-4" />, descKey: 'domainExt.chartLineDesc' },
+  { value: 'pie', labelKey: 'domainExt.chartPie', icon: <PieChart className="h-4 w-4" />, descKey: 'domainExt.chartPieDesc' },
+  { value: 'map', labelKey: 'domainExt.chartMap', icon: <Map className="h-4 w-4" />, descKey: 'domainExt.chartMapDesc' },
 ];
 
 // ──────────────────────────────────────
@@ -56,6 +57,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
   fields,
   readOnly = false,
 }) => {
+  const { t } = useTranslation();
   const update = (patch: Partial<ChartConfig>) => onChange({ ...config, ...patch });
 
   // 숫자형 필드만 필터 (y축 / value 후보)
@@ -75,13 +77,13 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
       <CardHeader className="pb-3">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <BarChart3 className="h-4 w-4 text-primary" />
-          차트 설정
+          {t('domainExt.chartTab')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {/* 차트 유형 선택 */}
         <div className="space-y-1.5">
-          <label className="text-xs text-muted-foreground">차트 유형</label>
+          <label className="text-xs text-muted-foreground">{t('domainExt.chartTypeLabel')}</label>
           <div className="grid grid-cols-5 gap-1.5">
             {CHART_OPTIONS.map((opt) => (
               <button
@@ -97,7 +99,7 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
                 )}
               >
                 {opt.icon ?? <span className="h-4 w-4 flex items-center justify-center text-xs">-</span>}
-                <span>{opt.label}</span>
+                <span>{t(opt.labelKey)}</span>
               </button>
             ))}
           </div>
@@ -110,14 +112,14 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
             {(config.chartType === 'bar' || config.chartType === 'line') && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">X축 (카테고리)</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.xAxisLabel')}</label>
                   <Select
                     value={config.xAxis ?? ''}
                     onValueChange={(v) => update({ xAxis: v })}
                     disabled={readOnly}
                   >
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="필드 선택" />
+                      <SelectValue placeholder={t('domainExt.selectField')} />
                     </SelectTrigger>
                     <SelectContent>
                       {fields.map((f) => (
@@ -129,14 +131,14 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">Y축 (값)</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.yAxisLabel')}</label>
                   <Select
                     value={config.yAxis ?? ''}
                     onValueChange={(v) => update({ yAxis: v })}
                     disabled={readOnly}
                   >
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="필드 선택" />
+                      <SelectValue placeholder={t('domainExt.selectField')} />
                     </SelectTrigger>
                     <SelectContent>
                       {numericFields.map((f) => (
@@ -154,14 +156,14 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
             {config.chartType === 'pie' && (
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">라벨 필드</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.labelField')}</label>
                   <Select
                     value={config.labelField ?? ''}
                     onValueChange={(v) => update({ labelField: v })}
                     disabled={readOnly}
                   >
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="필드 선택" />
+                      <SelectValue placeholder={t('domainExt.selectField')} />
                     </SelectTrigger>
                     <SelectContent>
                       {textFields.map((f) => (
@@ -173,14 +175,14 @@ export const ChartConfigPanel: React.FC<ChartConfigPanelProps> = ({
                   </Select>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">값 필드</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.valueField')}</label>
                   <Select
                     value={config.valueField ?? ''}
                     onValueChange={(v) => update({ valueField: v })}
                     disabled={readOnly}
                   >
                     <SelectTrigger className="h-8 text-xs">
-                      <SelectValue placeholder="필드 선택" />
+                      <SelectValue placeholder={t('domainExt.selectField')} />
                     </SelectTrigger>
                     <SelectContent>
                       {numericFields.map((f) => (

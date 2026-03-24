@@ -9,6 +9,7 @@
  */
 
 import React, { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Database,
   Pencil,
@@ -133,6 +134,8 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
     (generateMutation.error as Error)?.message ||
     null;
 
+  const { t } = useTranslation();
+
   if (!open) return null;
 
   return (
@@ -141,9 +144,9 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
         {/* 헤더 */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
-            <h2 className="text-sm font-semibold text-foreground">새 ObjectType 생성</h2>
+            <h2 className="text-sm font-semibold text-foreground">{t('domainExt.createDialog.title')}</h2>
             <p className="text-xs text-muted-foreground mt-0.5">
-              DB 테이블에서 자동 생성하거나 필드를 직접 정의하세요.
+              {t('domainExt.createDialog.subtitle')}
             </p>
           </div>
           <button type="button" onClick={handleClose} className="text-muted-foreground hover:text-foreground p-1">
@@ -164,7 +167,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
             )}
           >
             <Wand2 className="h-3.5 w-3.5" />
-            테이블 자동 생성
+            {t('domainExt.createDialog.autoGenerate')}
           </button>
           <button
             type="button"
@@ -177,7 +180,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
             )}
           >
             <Pencil className="h-3.5 w-3.5" />
-            수동 정의
+            {t('domainExt.createDialog.manualDefine')}
           </button>
         </div>
 
@@ -187,11 +190,11 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
           {mode === 'auto' && (
             <>
               <p className="text-sm text-muted-foreground">
-                데이터소스의 테이블을 선택하면 컬럼 정보를 자동으로 추출하여 ObjectType을 생성합니다.
+                {t('domainExt.createDialog.autoDesc')}
               </p>
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">데이터소스 *</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.datasource')}</label>
                   <Input
                     value={datasource}
                     onChange={(e) => setDatasource(e.target.value)}
@@ -200,7 +203,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">스키마 *</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.schema')}</label>
                   <Input
                     value={schema}
                     onChange={(e) => setSchema(e.target.value)}
@@ -209,7 +212,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">테이블 *</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.table')}</label>
                   <Input
                     value={table}
                     onChange={(e) => setTable(e.target.value)}
@@ -226,7 +229,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
             <>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">이름 * (영문, snake_case)</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.name')}</label>
                   <Input
                     value={name}
                     onChange={(e) => setName(e.target.value.replace(/\s+/g, '_'))}
@@ -235,21 +238,21 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-xs text-muted-foreground">표시명</label>
+                  <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.displayName')}</label>
                   <Input
                     value={displayName}
                     onChange={(e) => setDisplayName(e.target.value)}
-                    placeholder="주문 항목"
+                    placeholder={t('domainExt.createDialog.displayNamePlaceholder')}
                     className="h-8 text-sm"
                   />
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-xs text-muted-foreground">설명</label>
+                <label className="text-xs text-muted-foreground">{t('domainExt.createDialog.description')}</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="이 ObjectType의 설명..."
+                  placeholder={t('domainExt.createDialog.descriptionPlaceholder')}
                   className="w-full h-16 px-3 py-2 text-sm bg-background border border-border rounded-md resize-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
@@ -270,7 +273,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
         {/* 푸터 */}
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-border">
           <Button variant="ghost" size="sm" onClick={handleClose} disabled={isLoading}>
-            취소
+            {t('common.cancel')}
           </Button>
           {mode === 'auto' ? (
             <Button
@@ -280,7 +283,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
             >
               {isLoading && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
               <Database className="h-3.5 w-3.5 mr-1" />
-              자동 생성
+              {t('domainExt.createDialog.autoGenerateBtn')}
             </Button>
           ) : (
             <Button
@@ -289,7 +292,7 @@ export const CreateObjectTypeDialog: React.FC<CreateObjectTypeDialogProps> = ({
               disabled={!name.trim() || isLoading}
             >
               {isLoading && <Loader2 className="h-3.5 w-3.5 mr-1 animate-spin" />}
-              생성
+              {t('domainExt.createSave')}
             </Button>
           )}
         </div>

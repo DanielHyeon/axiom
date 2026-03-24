@@ -6,6 +6,7 @@
 import React, { useMemo } from 'react';
 import { FileText, Table2, X } from 'lucide-react';
 import type { FilePreviewData } from '../types/ingestion';
+import { useTranslation } from 'react-i18next';
 
 interface FilePreviewProps {
   /** 파일 이름 */
@@ -21,6 +22,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
   data,
   onClose,
 }) => {
+  const { t } = useTranslation();
   /** 표시할 행 (최대 20행) */
   const displayRows = useMemo(() => data.rows.slice(0, 20), [data.rows]);
 
@@ -31,7 +33,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         <div className="flex items-center gap-2">
           <Table2 className="h-4 w-4 text-blue-500" />
           <span className="text-sm font-semibold text-gray-900 font-heading">
-            미리보기
+            {t('olapStudioExt.preview')}
           </span>
           <span className="text-xs text-gray-500 font-mono">
             {fileName}
@@ -39,14 +41,14 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[11px] text-gray-400 font-mono">
-            {data.columns.length}개 컬럼 / {data.totalRows.toLocaleString()}개 행
+            {t('ingestionF.columnRowCount', { cols: data.columns.length, rows: data.totalRows.toLocaleString() })}
           </span>
           {onClose && (
             <button
               type="button"
               onClick={onClose}
               className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-              aria-label="미리보기 닫기"
+              aria-label={t('ingestionExt.previewClose')}
             >
               <X className="h-4 w-4" />
             </button>
@@ -100,7 +102,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       ) : (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-2">
           <FileText className="h-8 w-8 opacity-30" />
-          <p className="text-sm">미리보기할 데이터가 없습니다</p>
+          <p className="text-sm">{t('ingestionExt.noPreviewData')}</p>
         </div>
       )}
 
@@ -108,7 +110,7 @@ export const FilePreview: React.FC<FilePreviewProps> = ({
       {data.totalRows > 20 && (
         <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-center">
           <span className="text-[11px] text-gray-400">
-            처음 20행만 표시됩니다. 전체 {data.totalRows.toLocaleString()}행.
+            {t('ingestionF.showingFirst20', { total: data.totalRows.toLocaleString() })}
           </span>
         </div>
       )}

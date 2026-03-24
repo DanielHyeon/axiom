@@ -1,22 +1,20 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { ROUTES } from '@/lib/routes/routes';
 import { useCaseParams } from '@/lib/routes/params';
 import { useCases } from '@/features/case-dashboard/hooks/useCases';
 import { Badge } from '@/components/ui/badge';
 
-const statusLabel: Record<string, string> = {
- PENDING: '대기',
- IN_PROGRESS: '진행 중',
- COMPLETED: '완료',
- REJECTED: '반려',
-};
-
 /** 케이스 상세 페이지 (설계 정렬). Phase 1에서 본 구현. */
 export const CaseDetailPage: React.FC = () => {
+ const { t, i18n } = useTranslation();
  const { caseId } = useCaseParams();
  const { data: cases, isLoading, error } = useCases();
  const caseItem = cases?.find((c) => c.id === caseId);
+
+ // 현재 로케일에 맞는 날짜 포맷
+ const dateLocale = i18n.language === 'ko' ? 'ko-KR' : 'en-US';
 
  if (isLoading) {
  return (
@@ -30,12 +28,12 @@ export const CaseDetailPage: React.FC = () => {
  if (error || !caseItem) {
  return (
  <div className="space-y-4 p-6">
- <h1 className="text-xl font-semibold text-primary-foreground">케이스 상세</h1>
+ <h1 className="text-xl font-semibold text-primary-foreground">{t('cases.detail.title')}</h1>
  <p className="text-sm text-foreground0">
- 케이스를 찾을 수 없습니다. (ID: {caseId})
+ {t('cases.detail.notFound', { id: caseId })}
  </p>
  <Link to={ROUTES.CASES.LIST} className="text-primary hover:underline">
- 목록으로
+ {t('cases.detail.backToList')}
  </Link>
  </div>
  );
@@ -45,14 +43,14 @@ export const CaseDetailPage: React.FC = () => {
  <div className="space-y-4 p-6">
  <h1 className="text-xl font-semibold text-primary-foreground">{caseItem.title}</h1>
  <div className="flex flex-wrap items-center gap-2 text-sm">
- <Badge variant="outline">{statusLabel[caseItem.status] ?? caseItem.status}</Badge>
+ <Badge variant="outline">{t(`cases.status.${caseItem.status}`, { defaultValue: caseItem.status })}</Badge>
  <Badge variant="secondary">{caseItem.priority}</Badge>
  <span className="text-foreground0">
- 생성일: {new Date(caseItem.createdAt).toLocaleDateString('ko-KR')}
+ {t('cases.detail.createdAt')}: {new Date(caseItem.createdAt).toLocaleDateString(dateLocale)}
  </span>
  {caseItem.dueDate && (
  <span className="text-foreground0">
- 마감: {new Date(caseItem.dueDate).toLocaleDateString('ko-KR')}
+ {t('cases.detail.dueDate')}: {new Date(caseItem.dueDate).toLocaleDateString(dateLocale)}
  </span>
  )}
  </div>
@@ -61,22 +59,22 @@ export const CaseDetailPage: React.FC = () => {
  to={ROUTES.CASES.DOCUMENTS(caseId)}
  className="text-primary hover:underline"
  >
- 문서
+ {t('cases.detail.documents')}
  </Link>
  <Link
  to={ROUTES.DATA.ONTOLOGY_CASE(caseId)}
  className="text-primary hover:underline"
  >
- 온톨로지
+ {t('cases.detail.ontology')}
  </Link>
  <Link
  to={ROUTES.CASES.SCENARIOS(caseId)}
  className="text-primary hover:underline"
  >
- 시나리오
+ {t('cases.detail.scenarios')}
  </Link>
  <Link to={ROUTES.CASES.LIST} className="text-primary hover:underline">
- 목록
+ {t('common.list')}
  </Link>
  </div>
  </div>

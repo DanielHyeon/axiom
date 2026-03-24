@@ -2,12 +2,14 @@
  * IncidentDetail — 인시던트 상세 패널 (Sheet / Slide-over)
  * 선택된 DQ 규칙의 상세 정보, 최근 실행 결과, 인시던트 히스토리를 표시합니다.
  */
+import { useTranslation } from 'react-i18next';
 import { X, Play, CheckCircle2, AlertTriangle, Clock } from 'lucide-react';
 import { useDQStore } from '../store/useDQStore';
 import { useDQRules, useRunDQTest } from '../hooks/useDQMetrics';
 import type { DQRule } from '../types/data-quality';
 
 export function IncidentDetail() {
+  const { t } = useTranslation();
   const { selectedRuleId, selectRule } = useDQStore();
   const { data: rules } = useDQRules();
   const runTest = useRunDQTest();
@@ -46,11 +48,11 @@ export function IncidentDetail() {
           )}
           <div>
             <p className="text-sm font-medium text-foreground">
-              {rule.lastResult?.passed ? '테스트 통과' : '테스트 실패'}
+              {rule.lastResult?.passed ? t('dataQualityExt.testPassed') : t('dataQualityExt.testFailed')}
             </p>
             {rule.lastResult && (
               <p className="text-xs text-muted-foreground">
-                {rule.lastResult.failedRows}행 실패 / {rule.lastResult.totalRows}행 전체
+                {t('dataQualityExt.failedRowsDetail', { failed: rule.lastResult.failedRows, total: rule.lastResult.totalRows })}
               </p>
             )}
           </div>
@@ -58,15 +60,15 @@ export function IncidentDetail() {
 
         {/* 속성 */}
         <div className="space-y-3">
-          <DetailRow label="테이블" value={rule.tableName} />
-          {rule.columnName && <DetailRow label="컬럼" value={rule.columnName} />}
-          <DetailRow label="유형" value={rule.type} />
-          <DetailRow label="심각도" value={rule.severity} />
-          <DetailRow label="레벨" value={rule.level} />
-          <DetailRow label="활성" value={rule.enabled ? '예' : '아니오'} />
+          <DetailRow label={t('dataQualityExt.detailLabels.table')} value={rule.tableName} />
+          {rule.columnName && <DetailRow label={t('dataQualityExt.detailLabels.column')} value={rule.columnName} />}
+          <DetailRow label={t('dataQualityExt.detailLabels.type')} value={rule.type} />
+          <DetailRow label={t('dataQualityExt.detailLabels.severity')} value={rule.severity} />
+          <DetailRow label={t('dataQualityExt.detailLabels.level')} value={rule.level} />
+          <DetailRow label={t('dataQualityExt.detailLabels.enabled')} value={rule.enabled ? t('dataQualityExt.detailLabels.yes') : t('dataQualityExt.detailLabels.no')} />
           {rule.tags && rule.tags.length > 0 && (
             <div>
-              <p className="text-xs text-muted-foreground mb-1">태그</p>
+              <p className="text-xs text-muted-foreground mb-1">{t('dataQualityExt.detailLabels.tags')}</p>
               <div className="flex flex-wrap gap-1">
                 {rule.tags.map((tag) => (
                   <span key={tag} className="px-2 py-0.5 rounded-full text-[10px] bg-muted text-muted-foreground">
@@ -80,7 +82,7 @@ export function IncidentDetail() {
 
         {/* 표현식 */}
         <div>
-          <p className="text-xs text-muted-foreground mb-1">표현식</p>
+          <p className="text-xs text-muted-foreground mb-1">{t('dataQualityExt.detailLabels.expression')}</p>
           <pre className="p-3 rounded-md bg-muted text-xs text-foreground font-mono whitespace-pre-wrap break-all">
             {rule.expression}
           </pre>
@@ -90,7 +92,7 @@ export function IncidentDetail() {
         {rule.lastResult && (
           <div className="flex items-center gap-2 text-xs text-muted-foreground">
             <Clock size={12} />
-            마지막 실행: {new Date(rule.lastResult.checkedAt).toLocaleString('ko-KR')}
+            {t('dataQualityExt.lastRun', { time: new Date(rule.lastResult.checkedAt).toLocaleString() })}
           </div>
         )}
       </div>
@@ -104,7 +106,7 @@ export function IncidentDetail() {
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
         >
           <Play size={14} />
-          {runTest.isPending ? '실행 중...' : '테스트 실행'}
+          {runTest.isPending ? t('dataQualityExt.running') : t('dataQualityExt.runTest')}
         </button>
       </div>
     </div>

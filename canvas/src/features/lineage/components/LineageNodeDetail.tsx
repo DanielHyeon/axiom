@@ -7,8 +7,10 @@ import { X, ArrowLeft, ArrowRight, ClipboardList } from 'lucide-react';
 import { useLineageStore } from '../store/useLineageStore';
 import { LINEAGE_NODE_STYLES, type LineageNode, type LineageEdge } from '../types/lineage';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 
 export function LineageNodeDetail() {
+  const { t } = useTranslation();
   const { selectedNode, nodes, edges, closeDetail } = useLineageStore();
 
   // 인바운드 연결 (이 노드로 들어오는 엣지)
@@ -46,7 +48,7 @@ export function LineageNodeDetail() {
     <aside
       className="absolute top-0 right-0 z-50 flex h-full w-80 flex-col border-l border-border bg-card shadow-xl"
       role="complementary"
-      aria-label="노드 상세 정보"
+      aria-label={t('lineageExt.nodeDetailAria')}
     >
       {/* ── 헤더 ── */}
       <header
@@ -73,7 +75,7 @@ export function LineageNodeDetail() {
         <button
           onClick={closeDetail}
           className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          aria-label="닫기"
+          aria-label={t('lineageExt.closeDetail')}
         >
           <X className="h-4 w-4" />
         </button>
@@ -99,7 +101,7 @@ export function LineageNodeDetail() {
         {inbound.length > 0 && (
           <Section
             icon={<ArrowLeft className="h-3.5 w-3.5" />}
-            title={`데이터 입력원 (${inbound.length})`}
+            title={t('lineageF.dataInputSources', { count: inbound.length })}
           >
             <ConnectionList items={inbound} />
           </Section>
@@ -109,7 +111,7 @@ export function LineageNodeDetail() {
         {outbound.length > 0 && (
           <Section
             icon={<ArrowRight className="h-3.5 w-3.5" />}
-            title={`데이터 출력 (${outbound.length})`}
+            title={t('lineageF.dataOutputs', { count: outbound.length })}
           >
             <ConnectionList items={outbound} />
           </Section>
@@ -119,7 +121,7 @@ export function LineageNodeDetail() {
         {displayProps.length > 0 && (
           <Section
             icon={<ClipboardList className="h-3.5 w-3.5" />}
-            title="속성"
+            title={t('lineageExt.propertiesTitle')}
           >
             <div className="flex flex-col gap-1">
               {displayProps.map(({ key, value }) => (
@@ -142,7 +144,7 @@ export function LineageNodeDetail() {
           <div className="flex flex-col items-center justify-center py-8 text-center">
             <span className="text-3xl opacity-40 mb-3">&#128279;</span>
             <p className="text-sm text-muted-foreground">
-              연결된 데이터 흐름이 없습니다.
+              {t('lineage.detail.noConnections')}
             </p>
           </div>
         )}

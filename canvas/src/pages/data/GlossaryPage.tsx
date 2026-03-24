@@ -13,8 +13,8 @@ export const GlossaryPage: React.FC = () => {
   return (
     <div className="flex flex-col h-full">
       {/* 페이지 헤더 */}
-      <header className="shrink-0 px-6 py-4 border-b bg-background">
-        <h1 className="text-lg font-semibold">{t('glossary.title')}</h1>
+      <header className="shrink-0 px-4 md:px-6 py-3 md:py-4 border-b bg-background">
+        <h1 className="text-base md:text-lg font-semibold">{t('glossary.title')}</h1>
         <p className="text-sm text-muted-foreground mt-0.5">{t('glossary.subtitle')}</p>
       </header>
 

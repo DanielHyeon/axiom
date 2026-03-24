@@ -5,7 +5,7 @@ import { ROUTES } from '@/lib/routes/routes';
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
  [
- 'px-3 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
+ 'px-2.5 md:px-3 py-2 text-xs md:text-sm font-medium border-b-2 -mb-px transition-colors whitespace-nowrap',
  isActive
  ? 'text-primary border-primary'
  : 'text-secondary-foreground border-transparent hover:text-foreground hover:border-border',
@@ -15,9 +15,9 @@ const tabClass = ({ isActive }: { isActive: boolean }) =>
 export const SettingsPage: React.FC = () => {
  const { t } = useTranslation();
  return (
- <div className="space-y-4">
- <h1 className="text-xl font-semibold text-foreground">{t('settings.title')}</h1>
- <nav className="flex gap-1 border-b border-border" role="tablist" aria-label={t('settings.menuLabel')}>
+ <div className="space-y-3 md:space-y-4">
+ <h1 className="text-lg md:text-xl font-semibold text-foreground">{t('settings.title')}</h1>
+ <nav className="flex gap-1 border-b border-border overflow-x-auto scrollbar-none" role="tablist" aria-label={t('settings.menuLabel')}>
  <NavLink to={ROUTES.SETTINGS_SYSTEM} className={tabClass} end role="tab">{t('settings.tabs.system')}</NavLink>
  <NavLink to={ROUTES.SETTINGS_LOGS} className={tabClass} role="tab">{t('settings.tabs.logs')}</NavLink>
  <NavLink to={ROUTES.SETTINGS_USERS} className={tabClass} role="tab">{t('settings.tabs.users')}</NavLink>

@@ -3,6 +3,27 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { SchemaEmptyState } from './SchemaEmptyState';
 
+// i18n mock — t() 가 키 대신 한글 값을 반환하도록 설정
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const map: Record<string, string> = {
+        'schemaEmpty.roboTitle': '분석된 코드 객체가 아직 없습니다',
+        'schemaEmpty.roboDesc': '소스 코드를 분석하면 테이블 구조를 자동으로 추출합니다',
+        'schemaEmpty.text2sqlTitle': '연결된 데이터소스 스키마가 없습니다',
+        'schemaEmpty.text2sqlDesc': '데이터소스를 연결하면 테이블과 관계가 자동으로 표시됩니다',
+        'schemaEmpty.noneTitle': '아직 탐색할 스키마가 없습니다',
+        'schemaEmpty.noneDesc': '데이터소스를 연결하거나 소스 코드를 분석하여 시작하세요',
+        'schemaEmpty.connectDatasource': '데이터소스 연결하기',
+        'schemaEmpty.viewDatasource': '데이터소스 스키마에서 보기 →',
+        'schemaEmpty.viewCode': '코드 분석 스키마에서 보기 →',
+      };
+      return map[key] ?? key;
+    },
+    i18n: { language: 'ko' },
+  }),
+}));
+
 // ---------------------------------------------------------------------------
 // 테스트 헬퍼 — 가용성 데이터 생성
 // ---------------------------------------------------------------------------

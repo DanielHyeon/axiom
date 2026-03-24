@@ -11,7 +11,7 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { CalendarGrid } from '@/features/calendar/components/CalendarGrid';
 import { useCalendars, useCalendar, useAddHoliday, useRemoveHoliday } from '@/features/calendar/hooks/useBusinessCalendar';
-import { Calendar, Plus, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Trash2 , FileText } from 'lucide-react';
 
 export function BusinessCalendarPage() {
   const { data: calendars = [], isLoading } = useCalendars();
@@ -44,7 +44,7 @@ export function BusinessCalendarPage() {
 
       {/* 캘린더 선택 */}
       {calendars.length === 0 ? (
-        <EmptyState title="캘린더가 없습니다" message="시스템 관리자에게 캘린더 생성을 요청하세요" />
+        <EmptyState icon={FileText} title="캘린더가 없습니다" description="시스템 관리자에게 캘린더 생성을 요청하세요" />
       ) : (
         <div className="flex gap-2">
           {calendars.map((c) => (

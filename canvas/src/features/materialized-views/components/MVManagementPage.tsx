@@ -8,6 +8,7 @@
  * - 삭제 확인 다이얼로그
  */
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import {
   Plus,
@@ -45,6 +46,7 @@ const EMPTY_FORM: MVCreatePayload = {
 // ─── 메인 컴포넌트 ──────────────────────────────────────────
 
 export function MVManagementPage() {
+  const { t } = useTranslation();
   // MV 목록 상태
   const [mvs, setMvs] = useState<MaterializedView[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +71,7 @@ export function MVManagementPage() {
       const data = await mvApi.listMVs();
       setMvs(data);
     } catch {
-      toast.error('Materialized View 목록을 불러오지 못했습니다');
+      toast.error(t('mvExt.toast.fetchFailed'));
     } finally {
       setLoading(false);
     }
@@ -83,23 +85,23 @@ export function MVManagementPage() {
 
   const handleCreate = async () => {
     if (!form.name.trim()) {
-      toast.error('MV 이름을 입력하세요');
+      toast.error(t('mvExt.toast.nameRequired'));
       return;
     }
     if (!form.source_table.trim()) {
-      toast.error('소스 테이블을 입력하세요');
+      toast.error(t('mvExt.toast.sourceRequired'));
       return;
     }
 
     setSaving(true);
     try {
       await mvApi.createMV(form);
-      toast.success(`MV "${form.name}"이(가) 생성되었습니다`);
+      toast.success(t('mvExt.toast.created', { name: form.name }));
       setCreateOpen(false);
       setForm({ ...EMPTY_FORM });
       fetchMVs();
     } catch {
-      toast.error('MV 생성에 실패했습니다');
+      toast.error(t('mvExt.toast.createFailed'));
     } finally {
       setSaving(false);
     }
@@ -111,9 +113,9 @@ export function MVManagementPage() {
     setRefreshingName(name);
     try {
       await mvApi.refreshMV(name);
-      toast.success(`"${name}" 새로고침 완료`);
+      toast.success(t('mvExt.toast.refreshed', { name }));
     } catch {
-      toast.error(`"${name}" 새로고침에 실패했습니다`);
+      toast.error(t('mvExt.toast.refreshFailed', { name }));
     } finally {
       setRefreshingName(null);
     }
@@ -126,11 +128,11 @@ export function MVManagementPage() {
     setDeleting(true);
     try {
       await mvApi.deleteMV(deleteTarget);
-      toast.success(`"${deleteTarget}"이(가) 삭제되었습니다`);
+      toast.success(t('mvExt.toast.deleted', { name: deleteTarget }));
       setDeleteTarget(null);
       fetchMVs();
     } catch {
-      toast.error('MV 삭제에 실패했습니다');
+      toast.error(t('mvExt.toast.deleteFailed'));
     } finally {
       setDeleting(false);
     }
@@ -143,9 +145,9 @@ export function MVManagementPage() {
       {/* 헤더 */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Materialized View 관리</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t('mvExt.title')}</h1>
           <p className="text-sm text-foreground/50 mt-1">
-            데이터 성능 최적화를 위한 구체화 뷰를 관리합니다
+            {t('mvExt.subtitle')}
           </p>
         </div>
         <Button
@@ -156,7 +158,7 @@ export function MVManagementPage() {
           className="gap-1.5"
         >
           <Plus className="h-4 w-4" />
-          새 MV 생성
+          {t('mvExt.newMV')}
         </Button>
       </div>
 
@@ -168,17 +170,17 @@ export function MVManagementPage() {
       ) : mvs.length === 0 ? (
         <div className="flex flex-col items-center py-16 text-foreground/40 gap-2">
           <Database className="h-8 w-8" />
-          <p className="text-sm">등록된 Materialized View가 없습니다</p>
+          <p className="text-sm">{t('mvExt.noMVs')}</p>
         </div>
       ) : (
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>이름</TableHead>
-              <TableHead>소스 테이블</TableHead>
-              <TableHead>스키마</TableHead>
-              <TableHead>생성일</TableHead>
-              <TableHead className="text-right">액션</TableHead>
+              <TableHead>{t('mvExt.colName')}</TableHead>
+              <TableHead>{t('mvExt.colSourceTable')}</TableHead>
+              <TableHead>{t('mvExt.colSchema')}</TableHead>
+              <TableHead>{t('mvExt.colCreatedAt')}</TableHead>
+              <TableHead className="text-right">{t('mvExt.colActions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -210,7 +212,7 @@ export function MVManagementPage() {
                       variant="ghost"
                       size="sm"
                       className="h-7 w-7 p-0"
-                      title="새로고침"
+                      title={t('common.refresh')}
                       disabled={refreshingName === mv.name}
                       onClick={() => handleRefresh(mv.name)}
                     >
@@ -224,7 +226,7 @@ export function MVManagementPage() {
                       variant="ghost"
                       size="sm"
                       className="h-7 w-7 p-0 text-red-500 hover:text-red-600"
-                      title="삭제"
+                      title={t('common.delete')}
                       onClick={() => setDeleteTarget(mv.name)}
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -246,7 +248,7 @@ export function MVManagementPage() {
           <div className="bg-card rounded-lg shadow-xl w-full max-w-lg mx-4">
             {/* 모달 헤더 */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-              <h2 className="text-base font-semibold">새 Materialized View 생성</h2>
+              <h2 className="text-base font-semibold">{t('mvExt.createTitle')}</h2>
               <button
                 onClick={() => setCreateOpen(false)}
                 className="text-foreground/40 hover:text-foreground"
@@ -259,29 +261,29 @@ export function MVManagementPage() {
             <div className="flex flex-col gap-4 px-6 py-5">
               {/* MV 이름 */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/70">MV 이름</label>
+                <label className="text-sm font-medium text-foreground/70">{t('mvExt.mvName')}</label>
                 <Input
                   value={form.name}
                   onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  placeholder="예: mv_daily_sales_summary"
+                  placeholder={t('mvExt.mvNamePlaceholder')}
                   className="font-mono text-sm"
                 />
               </div>
 
               {/* 소스 테이블 */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/70">소스 테이블</label>
+                <label className="text-sm font-medium text-foreground/70">{t('mvExt.sourceTable')}</label>
                 <Input
                   value={form.source_table}
                   onChange={(e) => setForm((f) => ({ ...f, source_table: e.target.value }))}
-                  placeholder="예: sales_orders"
+                  placeholder={t('mvExt.sourceTablePlaceholder')}
                   className="font-mono text-sm"
                 />
               </div>
 
               {/* 스키마 */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-sm font-medium text-foreground/70">스키마</label>
+                <label className="text-sm font-medium text-foreground/70">{t('mvExt.schema')}</label>
                 <Input
                   value={form.schema}
                   onChange={(e) => setForm((f) => ({ ...f, schema: e.target.value }))}
@@ -293,7 +295,7 @@ export function MVManagementPage() {
               {/* 커스텀 SELECT */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-sm font-medium text-foreground/70">
-                  커스텀 SELECT 쿼리 (선택)
+                  {t('mvExt.customSelect')}
                 </label>
                 <Textarea
                   value={form.query ?? ''}
@@ -303,7 +305,7 @@ export function MVManagementPage() {
                   className="font-mono text-xs"
                 />
                 <p className="text-[11px] text-foreground/40">
-                  비워두면 소스 테이블 전체를 복사합니다
+                  {t('mvExt.customSelectHint')}
                 </p>
               </div>
             </div>
@@ -311,11 +313,11 @@ export function MVManagementPage() {
             {/* 푸터 */}
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
               <Button variant="outline" onClick={() => setCreateOpen(false)} disabled={saving}>
-                취소
+                {t('common.cancel')}
               </Button>
               <Button onClick={handleCreate} disabled={saving}>
                 {saving && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                생성
+                {t('common.confirm')}
               </Button>
             </div>
           </div>
@@ -330,15 +332,15 @@ export function MVManagementPage() {
         >
           <div className="bg-card rounded-lg shadow-xl w-full max-w-sm mx-4">
             <div className="px-6 py-5">
-              <h3 className="text-base font-semibold text-foreground mb-2">MV 삭제 확인</h3>
+              <h3 className="text-base font-semibold text-foreground mb-2">{t('mvExt.deleteConfirmTitle')}</h3>
               <p className="text-sm text-foreground/60">
                 <span className="font-mono font-medium text-foreground">{deleteTarget}</span>
-                을(를) 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.
+                {' '}{t('mvExt.deleteConfirmMsg')}
               </p>
             </div>
             <div className="flex items-center justify-end gap-2 px-6 py-4 border-t border-border">
               <Button variant="outline" onClick={() => setDeleteTarget(null)} disabled={deleting}>
-                취소
+                {t('common.cancel')}
               </Button>
               <Button
                 variant="destructive"
@@ -346,7 +348,7 @@ export function MVManagementPage() {
                 disabled={deleting}
               >
                 {deleting && <Loader2 className="h-4 w-4 animate-spin mr-1.5" />}
-                삭제
+                {t('common.delete')}
               </Button>
             </div>
           </div>

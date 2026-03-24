@@ -2,6 +2,7 @@
  * 시멘틱 엔티티 테이블 — 엔티티 목록 + 물리 소스 + 그레인 정의 + 배포 액션
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight, Database, Rocket, Link } from 'lucide-react';
 import { StatusBadge } from './StatusBadge';
 import type { SemanticEntity } from '../types/semantic';
@@ -13,6 +14,7 @@ interface Props {
 }
 
 export function EntityTable({ entities, onPublish, isPublishing }: Props) {
+  const { t } = useTranslation();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   return (
@@ -21,13 +23,13 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
         <thead>
           <tr className="border-b bg-muted/50">
             <th className="w-8 px-3 py-2" />
-            <th className="px-3 py-2 text-left font-medium">엔티티 ID</th>
-            <th className="px-3 py-2 text-left font-medium">물리 소스</th>
-            <th className="px-3 py-2 text-left font-medium">타입</th>
-            <th className="px-3 py-2 text-left font-medium">개념 바인딩</th>
-            <th className="px-3 py-2 text-left font-medium">상태</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.entityId')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.physicalSource')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.type')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.conceptBinding')}</th>
+            <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.status')}</th>
             <th className="px-3 py-2 text-center font-medium">v</th>
-            <th className="px-3 py-2 text-center font-medium">액션</th>
+            <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.action')}</th>
           </tr>
         </thead>
         <tbody>
@@ -66,7 +68,7 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
                         <span className="font-mono text-green-700">{e.bound_concept_id}</span>
                       </div>
                     ) : (
-                      <span className="text-xs text-muted-foreground">미바인딩</span>
+                      <span className="text-xs text-muted-foreground">{t('semanticCatalogExt.unbound')}</span>
                     )}
                   </td>
                   <td className="px-3 py-2"><StatusBadge status={e.status} /></td>
@@ -75,7 +77,7 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
                     {onPublish && e.status !== 'approved' && (
                       <button
                         className="p-1 rounded hover:bg-muted"
-                        title="배포"
+                        title={t('semanticCatalogExt.publish')}
                         onClick={(ev) => { ev.stopPropagation(); onPublish(e.entity_id); }}
                         disabled={isPublishing}
                       >
@@ -89,7 +91,7 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
                     <td colSpan={8} className="px-6 py-3">
                       <div className="grid grid-cols-2 gap-4 text-xs">
                         <div>
-                          <span className="font-medium text-muted-foreground">그레인 정의:</span>
+                          <span className="font-medium text-muted-foreground">{t('semanticCatalogExt.grainDefinition')}:</span>
                           <p className="mt-0.5">{e.grain_definition || '—'}</p>
                         </div>
                         <div>
@@ -99,7 +101,7 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
                         {e.freshness_sla_minutes && (
                           <div>
                             <span className="font-medium text-muted-foreground">Freshness SLA:</span>
-                            <p className="mt-0.5">{e.freshness_sla_minutes}분</p>
+                            <p className="mt-0.5">{e.freshness_sla_minutes}{t('semanticCatalogExt.minutes')}</p>
                           </div>
                         )}
                       </div>
@@ -112,7 +114,7 @@ export function EntityTable({ entities, onPublish, isPublishing }: Props) {
         </tbody>
       </table>
       {entities.length === 0 && (
-        <div className="py-8 text-center text-muted-foreground text-sm">등록된 엔티티가 없습니다</div>
+        <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalog.entity.noEntities')}</div>
       )}
     </div>
   );

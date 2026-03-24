@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Workflow } from 'lucide-react';
 import { ROUTES } from '@/lib/routes/routes';
 import { usePermission } from '@/shared/hooks/usePermission';
+import { useTranslation } from 'react-i18next';
 import {
  listProcessDefinitions,
  createProcessDefinition,
@@ -13,6 +14,7 @@ import { ErrorState } from '@/shared/components/ErrorState';
 import { ListSkeleton } from '@/shared/components/ListSkeleton';
 
 export const ProcessDesignerListPage: React.FC = () => {
+  const { t } = useTranslation();
  const canEdit = usePermission('process:initiate');
  const [searchParams] = useSearchParams();
  const fromOntology = searchParams.get('fromOntology');
@@ -29,7 +31,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  const res = await listProcessDefinitions({ limit: 50 });
  setBoards(res.data ?? []);
  } catch (e) {
- setError(e instanceof Error ? e.message : '보드 목록을 불러오지 못했습니다.');
+ setError(e instanceof Error ? e.message : t('processDesignerPage2.m4d421089'));
  } finally {
  setLoading(false);
  }
@@ -51,7 +53,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  });
  navigate(ROUTES.PROCESS_DESIGNER.BOARD(res.proc_def_id));
  } catch (e) {
- setError(e instanceof Error ? e.message : '보드 생성에 실패했습니다.');
+ setError(e instanceof Error ? e.message : t('processDesignerPage2.mef0d9a16'));
  } finally {
  setCreating(false);
  }
@@ -59,11 +61,11 @@ export const ProcessDesignerListPage: React.FC = () => {
 
  return (
  <div className="space-y-4">
- <h1 className="text-xl font-semibold text-foreground">프로세스 디자이너</h1>
+ <h1 className="text-xl font-semibold text-foreground">{t('processDesignerExt.canvas.roleDescription')}</h1>
 
  {fromOntology && (
  <p className="text-sm text-primary bg-blue-950/30 border border-blue-800 rounded px-3 py-2">
- 온톨로지에서 이동됨: <code className="font-mono">{fromOntology}</code>
+ {t('processDesignerPage2.fromOntology')} <code className="font-mono">{fromOntology}</code>
  </p>
  )}
 
@@ -75,7 +77,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  disabled={creating}
  className="rounded bg-primary text-primary-foreground px-4 py-2 text-sm font-medium disabled:opacity-50"
  >
- {creating ? '생성 중...' : '새 보드'}
+ {creating ? t('dataQualityExt.creating') : t('processDesignerPage2.m0ebd2fec')}
  </button>
  )}
  <button
@@ -84,7 +86,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  disabled={loading}
  className="rounded border border-border text-foreground px-4 py-2 text-sm disabled:opacity-50 hover:bg-muted"
  >
- 새로고침
+ {t('datasourceExt.refreshBtn')}
  </button>
  </div>
 
@@ -100,9 +102,9 @@ export const ProcessDesignerListPage: React.FC = () => {
  {!loading && !error && boards.length === 0 && (
  <EmptyState
  icon={Workflow}
- title="보드가 없습니다"
- description={canEdit ? '새 보드를 만들어 비즈니스 프로세스를 설계해 보세요.' : '아직 생성된 보드가 없습니다.'}
- actionLabel={canEdit ? '새 보드 만들기' : undefined}
+ title={t('processDesignerPage2.msg6a50e378')}
+ description={canEdit ? t('processDesignerPage2.mc4488938') : t('processDesignerPage2.m2fd4382a')}
+ actionLabel={canEdit ? t('processDesignerPage2.m6f4c613b') : undefined}
  onAction={canEdit ? handleCreateBoard : undefined}
  />
  )}
@@ -128,7 +130,7 @@ export const ProcessDesignerListPage: React.FC = () => {
  )}
 
  <Link to={ROUTES.DASHBOARD} className="text-primary hover:underline text-sm">
- 대시보드로
+ {t('processDesignerPage2.mbbcea42e')}
  </Link>
  </div>
  );

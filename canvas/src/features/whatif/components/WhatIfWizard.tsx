@@ -14,6 +14,7 @@
 import { useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight, RotateCcw } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 import { WIZARD_STEPS, WIZARD_STEP_META } from '../types/wizard';
 import type { WizardStep } from '../types/wizard';
@@ -25,6 +26,7 @@ import { StepTrainModels } from './StepTrainModels';
 import { StepSimulation } from './StepSimulation';
 
 export function WhatIfWizard() {
+  const { t } = useTranslation();
   const store = useWhatIfWizardStore();
   const { currentStep, goToStep, nextStep, prevStep, canProceed, resetWizard } = store;
 
@@ -123,7 +125,7 @@ export function WhatIfWizard() {
             className="h-7 text-xs text-muted-foreground hover:text-foreground"
           >
             <RotateCcw className="w-3 h-3 mr-1" />
-            초기화
+            {t('whatifWizard.resetWizard')}
           </Button>
         </div>
       </div>
@@ -145,7 +147,7 @@ export function WhatIfWizard() {
             className="h-9"
           >
             <ChevronLeft className="w-4 h-4 mr-1" />
-            이전
+            {t('whatifWizard.prev')}
           </Button>
 
           {/* 진행 표시 */}
@@ -161,7 +163,7 @@ export function WhatIfWizard() {
               disabled={!canProceed()}
               className="h-9"
             >
-              다음
+              {t('whatifWizard.next')}
               <ChevronRight className="w-4 h-4 ml-1" />
             </Button>
           ) : (

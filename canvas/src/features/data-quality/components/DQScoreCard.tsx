@@ -2,6 +2,7 @@
  * DQScoreCard — DQ 점수 카드 (도넛 게이지 포함)
  * KAIR DataQuality.vue의 stats-cards 섹션을 React+Tailwind로 이식
  */
+import { useTranslation } from 'react-i18next';
 import { useDQStats } from '../hooks/useDQMetrics';
 
 // SVG 도넛 게이지 컴포넌트
@@ -44,11 +45,12 @@ function DonutGauge({
 }
 
 export function DQScoreCard() {
+  const { t } = useTranslation();
   const stats = useDQStats();
 
   if (!stats) {
     return (
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="h-32 animate-pulse rounded-lg bg-muted" />
         ))}
@@ -59,44 +61,44 @@ export function DQScoreCard() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       {/* 카드 1: 전체 테스트 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg gap-3">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">전체 테스트</p>
-          <p className="text-3xl font-bold text-foreground">{stats.totalTests}</p>
+          <p className="text-sm text-muted-foreground">{t('dataQualityExt.totalTests')}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.totalTests}</p>
         </div>
         <div className="flex items-center gap-3">
           <DonutGauge value={stats.successRate} color="text-green-500" />
           <div className="flex flex-col gap-0.5 text-xs text-muted-foreground">
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-green-500" />
-              성공 {stats.successCount}
+              {t('dataQualityExt.success')} {stats.successCount}
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-yellow-500" />
-              중단 {stats.abortedCount}
+              {t('dataQualityExt.aborted')} {stats.abortedCount}
             </span>
             <span className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-red-500" />
-              실패 {stats.failedCount}
+              {t('dataQualityExt.failed')} {stats.failedCount}
             </span>
           </div>
         </div>
       </div>
 
       {/* 카드 2: 정상 데이터 자산 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">정상 데이터 자산</p>
-          <p className="text-3xl font-bold text-foreground">{stats.healthyAssets}</p>
+          <p className="text-sm text-muted-foreground">{t('dataQualityExt.healthyAssets')}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.healthyAssets}</p>
         </div>
         <DonutGauge value={stats.healthyRate} color="text-primary" />
       </div>
 
       {/* 카드 3: 데이터 자산 커버리지 */}
-      <div className="flex items-center justify-between p-5 bg-card border border-border rounded-lg">
+      <div className="flex items-center justify-between p-4 md:p-5 bg-card border border-border rounded-lg">
         <div className="space-y-1">
-          <p className="text-sm text-muted-foreground">데이터 자산 커버리지</p>
-          <p className="text-3xl font-bold text-foreground">{stats.totalAssets}</p>
+          <p className="text-sm text-muted-foreground">{t('dataQualityExt.assetCoverage')}</p>
+          <p className="text-2xl md:text-3xl font-bold text-foreground">{stats.totalAssets}</p>
         </div>
         <DonutGauge value={Math.round(stats.coverageRate)} color="text-primary" />
       </div>

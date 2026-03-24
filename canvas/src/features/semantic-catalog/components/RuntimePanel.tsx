@@ -5,6 +5,7 @@
  * 운영자가 Oracle이 어떤 시멘틱 기준으로 답변하고 있는지 확인할 수 있다.
  */
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Clock,
   GitBranch,
@@ -82,6 +83,7 @@ function SnapshotStatusBadge({ status }: { status: string }) {
 
 /** 스냅샷 관리 섹션 (RuntimePanel 하위) */
 function SnapshotSection() {
+  const { t } = useTranslation();
   const { data: snapshots = [], isLoading: snapshotsLoading } = useSnapshots();
   const { data: activeSnapshot } = useActiveSnapshot();
   const buildSnapshot = useBuildSnapshot();
@@ -113,27 +115,27 @@ function SnapshotSection() {
         <div className="rounded-lg border bg-gradient-to-r from-green-50 to-emerald-50 p-4">
           <div className="flex items-center gap-2 mb-3">
             <Camera className="h-5 w-5 text-green-600" />
-            <h3 className="font-semibold text-green-900">현재 활성 스냅샷</h3>
+            <h3 className="font-semibold text-green-900">{t('semanticCatalogExt.runtime.activeSnapshot')}</h3>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">스냅샷 버전</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.snapshotVersion')}</span>
               <Badge variant="outline" className="font-mono">
                 {activeSnapshot.snapshot_version}
               </Badge>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">릴리스 버전</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.releaseVersion')}</span>
               <span className="font-mono text-xs">{activeSnapshot.release_version}</span>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">콘텐츠 해시</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.contentHash')}</span>
               <span className="font-mono text-xs text-muted-foreground">
                 {activeSnapshot.content_hash?.slice(0, 12)}...
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">활성화 시각</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.activatedAt')}</span>
               <span className="font-mono text-xs">{formatDate(activeSnapshot.activated_at)}</span>
             </div>
           </div>
@@ -144,8 +146,8 @@ function SnapshotSection() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Camera className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold">스냅샷 목록</h3>
-          <Badge variant="secondary" className="text-xs">{snapshots.length}건</Badge>
+          <h3 className="font-semibold">{t('semanticCatalogExt.runtime.snapshotList')}</h3>
+          <Badge variant="secondary" className="text-xs">{snapshots.length}{t('semanticCatalogExt.runtime.count')}</Badge>
         </div>
         <Button
           variant="outline"
@@ -158,7 +160,7 @@ function SnapshotSection() {
           ) : (
             <Hammer className="h-3.5 w-3.5 mr-1" />
           )}
-          새 스냅샷 빌드
+          {t('semanticCatalogExt.runtime.buildSnapshot')}
         </Button>
       </div>
 
@@ -166,23 +168,23 @@ function SnapshotSection() {
       {snapshotsLoading ? (
         <div className="flex items-center justify-center py-8 text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin mr-2" />
-          스냅샷을 불러오는 중...
+          {t('semanticCatalogExt.runtime.loadingSnapshots')}
         </div>
       ) : snapshots.length === 0 ? (
         <div className="py-8 text-center text-muted-foreground text-sm border rounded-lg">
-          스냅샷이 없습니다. 새 스냅샷을 빌드해 주세요.
+          {t('semanticCatalogExt.runtime.noSnapshots')}
         </div>
       ) : (
         <div className="rounded-lg border overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b bg-muted/50">
-                <th className="px-3 py-2 text-left font-medium">스냅샷 버전</th>
-                <th className="px-3 py-2 text-left font-medium">릴리스 버전</th>
-                <th className="px-3 py-2 text-center font-medium">상태</th>
-                <th className="px-3 py-2 text-left font-medium">빌드 시각</th>
-                <th className="px-3 py-2 text-left font-medium">활성화 시각</th>
-                <th className="px-3 py-2 text-center font-medium">액션</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.snapshotVersion')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.releaseVersion')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.builtAt')}</th>
+                <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.activatedAt')}</th>
+                <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -209,7 +211,7 @@ function SnapshotSection() {
                       {snap.status === 'READY' && (
                         <button
                           className="p-1 rounded hover:bg-green-50"
-                          title="활성화"
+                          title={t('semanticCatalogExt.activate')}
                           onClick={() => activateSnapshot.mutate(snap.snapshot_version)}
                           disabled={activateSnapshot.isPending}
                         >
@@ -220,7 +222,7 @@ function SnapshotSection() {
                       {snap.status === 'ACTIVE' && (
                         <button
                           className="p-1 rounded hover:bg-red-50"
-                          title="무효화"
+                          title={t('semanticCatalogExt.runtime.invalidate')}
                           onClick={() => setInvalidateTarget(snap.snapshot_version)}
                           disabled={invalidateSnap.isPending}
                         >
@@ -241,7 +243,7 @@ function SnapshotSection() {
                     {invalidateTarget === snap.snapshot_version && (
                       <div className="flex items-center gap-1 mt-2">
                         <Input
-                          placeholder="무효화 사유"
+                          placeholder={t('semanticCatalogExt.runtime.invalidateReason')}
                           className="h-7 text-xs"
                           value={invalidateReason}
                           onChange={(e) => setInvalidateReason(e.target.value)}
@@ -261,7 +263,7 @@ function SnapshotSection() {
                           onClick={() => handleInvalidate(snap.snapshot_version)}
                           disabled={invalidateSnap.isPending || !invalidateReason.trim()}
                         >
-                          확인
+                          {t('common.confirm')}
                         </Button>
                         <Button
                           type="button"
@@ -273,7 +275,7 @@ function SnapshotSection() {
                             setInvalidateReason('');
                           }}
                         >
-                          취소
+                          {t('common.cancel')}
                         </Button>
                       </div>
                     )}
@@ -289,13 +291,13 @@ function SnapshotSection() {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Users className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold">소비자 바인딩</h3>
+          <h3 className="font-semibold">{t('semanticCatalogExt.runtime.consumerBindings')}</h3>
         </div>
         <div className="rounded-lg border border-dashed p-6 text-center text-muted-foreground">
           <Users className="h-6 w-6 mx-auto mb-2 opacity-50" />
-          <p className="text-sm">소비자 바인딩 현황</p>
+          <p className="text-sm">{t('semanticCatalogExt.runtime.consumerBindingsStatus')}</p>
           <p className="text-xs mt-1">
-            스냅샷에 바인딩된 소비자 서비스 (Oracle 등) 목록이 여기에 표시됩니다
+            {t('semanticCatalogExt.runtime.consumerBindingsHint')}
           </p>
         </div>
       </div>
@@ -304,11 +306,12 @@ function SnapshotSection() {
 }
 
 export function RuntimePanel({ releases, isLoading }: RuntimePanelProps) {
+  const { t } = useTranslation();
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground">
         <Clock className="h-5 w-5 animate-spin mr-2" />
-        릴리스 이력을 불러오는 중...
+        {t('semanticCatalogExt.runtime.loadingReleases')}
       </div>
     );
   }
@@ -322,32 +325,32 @@ export function RuntimePanel({ releases, isLoading }: RuntimePanelProps) {
       <div className="rounded-lg border bg-gradient-to-r from-blue-50 to-indigo-50 p-4">
         <div className="flex items-center gap-2 mb-3">
           <GitBranch className="h-5 w-5 text-blue-600" />
-          <h3 className="font-semibold text-blue-900">현재 활성 시멘틱 릴리스</h3>
+          <h3 className="font-semibold text-blue-900">{t('semanticCatalogExt.runtime.activeRelease')}</h3>
         </div>
         {latestRelease ? (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">릴리스 ID</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.releaseId')}</span>
               <span className="font-mono font-medium">#{latestRelease.release_id}</span>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">대상</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.target')}</span>
               <span className="font-medium">{latestRelease.semantic_object_type}</span>
               <span className="text-muted-foreground ml-1 font-mono text-xs">
                 {latestRelease.semantic_object_id}
               </span>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">버전</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.version')}</span>
               <Badge variant="outline" className="font-mono">v{latestRelease.version}</Badge>
             </div>
             <div>
-              <span className="text-muted-foreground block text-xs mb-1">배포 시각</span>
+              <span className="text-muted-foreground block text-xs mb-1">{t('semanticCatalogExt.runtime.deployedAt')}</span>
               <span className="font-mono text-xs">{formatDate(latestRelease.deployed_at)}</span>
             </div>
           </div>
         ) : (
-          <p className="text-sm text-muted-foreground">배포된 릴리스가 없습니다</p>
+          <p className="text-sm text-muted-foreground">{t('semanticCatalogExt.runtime.noReleases')}</p>
         )}
       </div>
 
@@ -355,13 +358,13 @@ export function RuntimePanel({ releases, isLoading }: RuntimePanelProps) {
       <div>
         <div className="flex items-center gap-2 mb-3">
           <Rocket className="h-5 w-5 text-muted-foreground" />
-          <h3 className="font-semibold">배포 이력 타임라인</h3>
-          <Badge variant="secondary" className="text-xs">{releases.length}건</Badge>
+          <h3 className="font-semibold">{t('semanticCatalogExt.runtime.deployHistory')}</h3>
+          <Badge variant="secondary" className="text-xs">{releases.length}{t('semanticCatalogExt.runtime.count')}</Badge>
         </div>
 
         {releases.length === 0 ? (
           <div className="py-8 text-center text-muted-foreground text-sm border rounded-lg">
-            배포 이력이 없습니다
+            {t('semanticCatalogExt.runtime.noDeployHistory')}
           </div>
         ) : (
           <div className="rounded-lg border overflow-hidden">
@@ -369,12 +372,12 @@ export function RuntimePanel({ releases, isLoading }: RuntimePanelProps) {
               <thead>
                 <tr className="border-b bg-muted/50">
                   <th className="px-3 py-2 text-left font-medium w-16">#</th>
-                  <th className="px-3 py-2 text-left font-medium">대상 타입</th>
-                  <th className="px-3 py-2 text-left font-medium">대상 ID</th>
-                  <th className="px-3 py-2 text-center font-medium">버전</th>
-                  <th className="px-3 py-2 text-center font-medium">상태</th>
-                  <th className="px-3 py-2 text-left font-medium">검토자</th>
-                  <th className="px-3 py-2 text-left font-medium">배포 시각</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.targetType')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.targetId')}</th>
+                  <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.runtime.version')}</th>
+                  <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.status')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.reviewer')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.runtime.deployedAt')}</th>
                 </tr>
               </thead>
               <tbody>

@@ -61,28 +61,30 @@ export function FeedbackDashboard() {
   return (
     <div className="space-y-6">
       {/* 필터 바 */}
-      <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <label className="text-xs text-muted-foreground font-mono">{t('feedback.dashboard.periodLabel')}</label>
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => {
-              setDateFrom(e.target.value);
-              setListPage(1);
-            }}
-            className="h-8 w-36 text-xs"
-          />
-          <span className="text-xs text-muted-foreground">~</span>
-          <Input
-            type="date"
-            value={dateTo}
-            onChange={(e) => {
-              setDateTo(e.target.value);
-              setListPage(1);
-            }}
-            className="h-8 w-36 text-xs"
-          />
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+          <label className="text-xs text-muted-foreground font-mono shrink-0">{t('feedback.dashboard.periodLabel')}</label>
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Input
+              type="date"
+              value={dateFrom}
+              onChange={(e) => {
+                setDateFrom(e.target.value);
+                setListPage(1);
+              }}
+              className="h-8 w-full sm:w-36 text-xs"
+            />
+            <span className="text-xs text-muted-foreground">~</span>
+            <Input
+              type="date"
+              value={dateTo}
+              onChange={(e) => {
+                setDateTo(e.target.value);
+                setListPage(1);
+              }}
+              className="h-8 w-full sm:w-36 text-xs"
+            />
+          </div>
         </div>
 
         <Select

@@ -7,6 +7,7 @@
 
 import { Code2, Database, Table2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -29,22 +30,10 @@ interface SchemaEmptyStateProps {
 // ─── 모드별 설정 ──────────────────────────────────────────
 
 /** 각 모드에 대응하는 아이콘, 제목, 설명 */
-const MODE_CONFIG = {
-  robo: {
-    icon: Code2,
-    title: '분석된 코드 객체가 아직 없습니다',
-    description: '소스 코드를 분석하면 테이블 구조를 자동으로 추출합니다',
-  },
-  text2sql: {
-    icon: Database,
-    title: '연결된 데이터소스 스키마가 없습니다',
-    description: '데이터소스를 연결하면 테이블과 관계가 자동으로 표시됩니다',
-  },
-  none: {
-    icon: Table2,
-    title: '아직 탐색할 스키마가 없습니다',
-    description: '데이터소스를 연결하거나 소스 코드를 분석하여 시작하세요',
-  },
+const MODE_ICON = {
+  robo: Code2,
+  text2sql: Database,
+  none: Table2,
 } as const;
 
 // ─── 컴포넌트 ─────────────────────────────────────────────
@@ -56,8 +45,10 @@ export function SchemaEmptyState({
   onSwitchToText2sql,
   onSwitchToRobo,
 }: SchemaEmptyStateProps) {
-  const config = MODE_CONFIG[mode];
-  const Icon = config.icon;
+  const { t } = useTranslation();
+  const Icon = MODE_ICON[mode];
+  const titleKey = mode === 'robo' ? 'schemaEmpty.roboTitle' : mode === 'text2sql' ? 'schemaEmpty.text2sqlTitle' : 'schemaEmpty.noneTitle';
+  const descKey = mode === 'robo' ? 'schemaEmpty.roboDesc' : mode === 'text2sql' ? 'schemaEmpty.text2sqlDesc' : 'schemaEmpty.noneDesc';
 
   /** text2sql 쪽에 데이터가 있는지 여부 */
   const hasText2sqlData = (availability?.text2sql.table_count ?? 0) > 0;
@@ -75,12 +66,12 @@ export function SchemaEmptyState({
 
         {/* 제목 */}
         <p className="font-heading text-[14px] font-medium text-foreground/60">
-          {config.title}
+          {t(titleKey)}
         </p>
 
         {/* 설명 */}
         <p className="mt-1.5 font-mono text-[11px] text-foreground/30">
-          {config.description}
+          {t(descKey)}
         </p>
 
         {/* 데이터소스 연결 버튼 */}
@@ -91,7 +82,7 @@ export function SchemaEmptyState({
             className="mt-4"
             onClick={onNavigateDatasource}
           >
-            데이터소스 연결하기
+            {t('schemaEmpty.connectDatasource')}
           </Button>
         )}
 
@@ -102,7 +93,7 @@ export function SchemaEmptyState({
             className="mt-2 cursor-pointer text-[11px] text-blue-500 hover:text-blue-600"
             onClick={onSwitchToText2sql}
           >
-            데이터소스 스키마에서 보기 →
+            {t('schemaEmpty.viewDatasource')}
           </button>
         )}
 
@@ -113,7 +104,7 @@ export function SchemaEmptyState({
             className="mt-2 cursor-pointer text-[11px] text-blue-500 hover:text-blue-600"
             onClick={onSwitchToRobo}
           >
-            코드 분석 스키마에서 보기 →
+            {t('schemaEmpty.viewCode')}
           </button>
         )}
       </div>

@@ -1,6 +1,7 @@
 // features/process-designer/components/property-panel/BasicProperties.tsx
 // 기본 속성 섹션 — label, description, size, parentContextBoxId (설계 §4, §12 RBAC)
 
+import { useTranslation } from 'react-i18next';
 import type { CanvasItem } from '../../types/processDesigner';
 import { NODE_CONFIGS } from '../../utils/nodeConfig';
 
@@ -15,6 +16,7 @@ interface BasicPropertiesProps {
 const readOnlyTextClass = 'text-sm px-2 py-1.5 bg-background rounded text-foreground/80 truncate';
 
 export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false }: BasicPropertiesProps) {
+ const { t } = useTranslation();
  const config = NODE_CONFIGS[item.type];
 
  const parentBox = item.parentContextBoxId
@@ -23,7 +25,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
 
  return (
  <section className="space-y-3">
- <h3 className="text-xs text-foreground0 uppercase tracking-wider">기본 속성</h3>
+ <h3 className="text-xs text-foreground0 uppercase tracking-wider">{t('processDesignerExt.basic.title')}</h3>
 
  {/* ID (always read-only) */}
  <Field label="ID">
@@ -67,7 +69,7 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
  onChange={(e) => onUpdate(item.id, { description: e.target.value || undefined })}
  rows={2}
  className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground resize-none"
- placeholder="노드 설명을 입력하세요"
+ placeholder={t('processDesignerExt.basic.descPlaceholder')}
  />
  )}
  </Field>
@@ -114,17 +116,17 @@ export function BasicProperties({ item, contextBoxes, onUpdate, readOnly = false
 
  {/* Parent Context Box (not for contextBox itself) */}
  {item.type !== 'contextBox' && contextBoxes.length > 0 && (
- <Field label="소속 Domain">
+ <Field label={t('processDesignerExt.basic.parentDomain')}>
  {readOnly ? (
- <div className={readOnlyTextClass}>{parentBox?.label ?? '없음'}</div>
+ <div className={readOnlyTextClass}>{parentBox?.label ?? t('processDesignerExt.basic.none')}</div>
  ) : (
  <select
  value={item.parentContextBoxId ?? ''}
  onChange={(e) => onUpdate(item.id, { parentContextBoxId: e.target.value || null })}
- aria-label="소속 Domain"
+ aria-label={t('processDesignerExt.basic.parentDomain')}
  className="w-full bg-muted border border-border rounded px-2 py-1.5 text-sm text-primary-foreground"
  >
- <option value="">없음</option>
+ <option value="">{t('processDesignerExt.basic.none')}</option>
  {contextBoxes.map((cb) => (
  <option key={cb.id} value={cb.id}>{cb.label}</option>
  ))}

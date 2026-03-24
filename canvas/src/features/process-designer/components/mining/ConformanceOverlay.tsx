@@ -7,6 +7,7 @@ import { Rect, Text, Arrow } from 'react-konva';
 import type { CanvasItem } from '../../types/processDesigner';
 import type { BottleneckResult, ConformanceResult } from '../../api/processDesignerApi';
 import { computeEdgePoints } from '../../utils/edgePoints';
+import { useTranslation } from 'react-i18next';
 
 interface ConformanceOverlayProps {
  items: CanvasItem[];
@@ -30,9 +31,9 @@ function severityIcon(severity: 'low' | 'medium' | 'high'): string {
 }
 
 function severityLabel(severity: 'low' | 'medium' | 'high'): string {
- if (severity === 'high') return '병목(심각)';
- if (severity === 'medium') return '병목(주의)';
- return '정상';
+ if (severity === 'high') return t('processDesignerF.bottleneckHigh');
+ if (severity === 'medium') return t('processDesignerF.bottleneckMedium');
+ return t('processDesignerF.normalStatus');
 }
 
 /**
@@ -78,7 +79,7 @@ export function ConformanceOverlay({
  <Text
  x={node.x}
  y={node.y - 18}
- text={`${severityIcon(bn.severity)} ${severityLabel(bn.severity)} · ${bn.avgWaitTime.toFixed(0)}분 (${(bn.slaViolationRate * 100).toFixed(0)}% 위반)`}
+ text={t('processDesignerF.bottleneckDetail', { icon: severityIcon(bn.severity), label: severityLabel(bn.severity), time: bn.avgWaitTime.toFixed(0), rate: (bn.slaViolationRate * 100).toFixed(0) })}
  fontSize={10}
  fontFamily="system-ui, sans-serif"
  fill={color}
@@ -128,7 +129,7 @@ export function ConformanceOverlay({
  key={`dev-lbl-${i}`}
  x={(src.x + src.width / 2 + tgt.x + tgt.width / 2) / 2}
  y={(src.y + src.height / 2 + tgt.y + tgt.height / 2) / 2 - 12}
- text={`${dev.frequency}건 (${dev.percentage.toFixed(1)}%)`}
+ text={t('processDesignerF.deviationDetail', { count: dev.frequency, pct: dev.percentage.toFixed(1) })}
  fontSize={9}
  fontFamily="system-ui, sans-serif"
  fill="#94a3b8"
@@ -148,7 +149,7 @@ export function ConformanceOverlay({
  const status = it.temporal!.status!;
  const icon = status === 'violation' ? '✕' : '⚠';
  const color = status === 'violation' ? '#ef4444' : '#f97316';
- const label = status === 'violation' ? 'SLA 위반' : 'SLA 주의';
+ const label = status === 'violation' ? t('processDesignerExt.temporal.slaViolation') : t('processDesignerExt.mining.slaWarning');
 
  return (
  <Text

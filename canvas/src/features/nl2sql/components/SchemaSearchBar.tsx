@@ -6,6 +6,7 @@
  */
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, Table2, Columns3, X } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import type { SchemaSearchResult } from '../types/schema';
@@ -32,8 +33,10 @@ export function SchemaSearchBar({
   onChange,
   results,
   onSelectResult,
-  placeholder = '테이블·컬럼 검색...',
+  placeholder,
 }: SchemaSearchBarProps) {
+  const { t } = useTranslation();
+  const resolvedPlaceholder = placeholder ?? t('schemaSearch.placeholder');
   const [isFocused, setIsFocused] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -73,7 +76,7 @@ export function SchemaSearchBar({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
-          placeholder={placeholder}
+          placeholder={resolvedPlaceholder}
           className="pl-7 pr-7 h-7 text-[11px] bg-card border-border font-mono"
         />
         {value && (
@@ -81,7 +84,7 @@ export function SchemaSearchBar({
             type="button"
             onClick={handleClear}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-muted"
-            aria-label="검색어 초기화"
+            aria-label={t('schemaSearch.clearSearch')}
           >
             <X className="h-3 w-3 text-foreground/30" />
           </button>
@@ -118,7 +121,7 @@ export function SchemaSearchBar({
       {isFocused && value.trim().length > 0 && results.length === 0 && (
         <div className="absolute left-3 right-3 top-full mt-1 bg-card border border-border rounded shadow-lg z-50 px-3 py-2">
           <span className="text-[10px] text-foreground/30 font-mono">
-            결과 없음
+            {t('schemaSearch.noResults')}
           </span>
         </div>
       )}

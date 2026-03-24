@@ -23,8 +23,10 @@ import type { EventLogBindingData } from '@/features/process-designer/types/proc
 import type { DiscoveredProcess } from '@/features/process-designer/api/processDesignerApi';
 
 import { Minimap } from './Minimap';
+import { useTranslation } from 'react-i18next';
 
 export function ProcessDesignerPage() {
+  const { t } = useTranslation();
  const { boardId } = useParams<{ boardId: string }>();
  const [searchParams] = useSearchParams();
  const fromOntology = searchParams.get('fromOntology');
@@ -142,14 +144,14 @@ export function ProcessDesignerPage() {
  <ConnectionStatusBanner connected={connected} wsEnabled={wsEnabled} />
  {fromOntology && (
  <div className="shrink-0 text-xs text-primary/80 bg-blue-950/50 border-b border-blue-800 px-3 py-1.5">
- 온톨로지 연동: <span className="font-mono">{fromOntology}</span>
+ {t('processPage.ontologyLink')} <span className="font-mono">{fromOntology}</span>
  </div>
  )}
  <div className="flex flex-1 min-h-0">
  {/* 1. Toolbox + Mining Panel */}
  <div className="w-64 border-r border-border bg-card flex flex-col">
  <div className="p-4 border-b border-border font-bold text-sm text-foreground/80 flex items-center justify-between gap-2">
- <span>도구 상자 (Toolbox)</span>
+ <span>{t('processDesigner.toolbox')}</span>
  <div className="flex items-center gap-2 shrink-0">
  {boardId && canEdit && (
  <button
@@ -157,14 +159,14 @@ export function ProcessDesignerPage() {
  onClick={handleSaveBoard}
  className="rounded bg-success text-primary-foreground px-2 py-1 text-xs font-medium"
  >
- 저장
+ {t('domainModeler.save')}
  </button>
  )}
  <Link
  to={ROUTES.PROCESS_DESIGNER.LIST}
  className="text-xs text-muted-foreground hover:text-foreground"
  >
- 목록
+ {t('common.list')}
  </Link>
  </div>
  </div>
@@ -190,7 +192,7 @@ export function ProcessDesignerPage() {
  <div className="flex-1 relative flex flex-col">
  {/* View mode tabs (§10.1) */}
  <div className="shrink-0 flex items-center gap-1 px-3 py-1.5 bg-card border-b border-border">
- <div role="tablist" aria-label="뷰 전환" className="flex items-center gap-1">
+ <div role="tablist" aria-label={t('processPage.msg49ae3491')} className="flex items-center gap-1">
  <button
  type="button"
  role="tab"
@@ -198,7 +200,7 @@ export function ProcessDesignerPage() {
  onClick={() => setViewMode('canvas')}
  className={`px-3 py-1 text-xs rounded ${viewMode === 'canvas' ? 'bg-muted text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
  >
- 캔버스 뷰
+ {t('processPage.mc468e74e')}
  </button>
  <button
  type="button"
@@ -207,7 +209,7 @@ export function ProcessDesignerPage() {
  onClick={() => setViewMode('tree')}
  className={`px-3 py-1 text-xs rounded ${viewMode === 'tree' ? 'bg-muted text-primary-foreground' : 'text-muted-foreground hover:text-foreground'}`}
  >
- 트리 뷰
+ {t('processPage.mf4ab9ccd')}
  </button>
  </div>
  <span className="flex-1" />
@@ -215,7 +217,7 @@ export function ProcessDesignerPage() {
  type="button"
  onClick={() => setShortcutsOpen(true)}
  className="text-[10px] text-foreground0 hover:text-foreground/80"
- aria-label="키보드 단축키 도움말"
+ aria-label={t('processPage.msge8f9593e')}
  >
  Shift+?
  </button>
@@ -245,7 +247,7 @@ export function ProcessDesignerPage() {
  onClick={() => setAiDiscoverOpen(true)}
  className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-primary hover:bg-primary text-primary-foreground px-4 py-2 rounded text-sm font-medium shadow-lg"
  >
- AI 프로세스 발견
+ {t('processDesignerExt.aiDiscover.title')}
  </button>
  )}
  </div>

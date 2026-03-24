@@ -8,6 +8,7 @@
  * 모달로 표시되며, OntologyPage의 "위자드" 버튼으로 열립니다.
  */
 import { X, Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useOntologyWizard } from '../hooks/useOntologyWizard';
 import { useOntologyWizardStore } from '../store/useOntologyWizardStore';
 import { WizardStepSchema } from './WizardStepSchema';
@@ -21,9 +22,14 @@ function stepNumber(step: string): number {
   return 3;
 }
 
-const STEP_LABELS = ['스키마 선택', '레이어 매핑', '검토 + 생성'];
+const STEP_LABEL_KEYS = [
+  'ontologyExt.wizard.schemaSelect',
+  'ontologyExt.wizard.layerMapping',
+  'ontologyExt.wizard.reviewAndCreate',
+];
 
 export function OntologyWizard() {
+  const { t } = useTranslation();
   const { isOpen, closeWizard } = useOntologyWizardStore();
   const wizard = useOntologyWizard();
 
@@ -42,7 +48,7 @@ export function OntologyWizard() {
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">온톨로지 위자드</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('ontologyExt.wizard.title')}</h2>
           <button
             type="button"
             onClick={() => { wizard.reset(); closeWizard(); }}
@@ -55,7 +61,8 @@ export function OntologyWizard() {
         {/* 진행 표시줄 */}
         <div className="px-6 pt-4">
           <div className="flex items-center justify-between mb-3">
-            {STEP_LABELS.map((label, i) => {
+            {STEP_LABEL_KEYS.map((labelKey, i) => {
+              const label = t(labelKey);
               const num = i + 1;
               const isActive = num === currentStepNum;
               const isCompleted = num < currentStepNum;

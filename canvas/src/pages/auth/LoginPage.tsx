@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
 import { zodResolver } from '@hookform/resolvers/zod';
 import axios from 'axios';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -54,6 +55,7 @@ const toUserFromToken = (accessToken: string, emailFallback: string): User => {
 };
 
 export function LoginPage() {
+ const { t } = useTranslation();
  const navigate = useNavigate();
  const location = useLocation();
  const login = useAuthStore((state) => state.login);
@@ -90,7 +92,7 @@ export function LoginPage() {
  const reason =
  (err as { response?: { data?: { detail?: string }; message?: string } })?.response?.data?.detail ||
  (err as Error)?.message ||
- '로그인에 실패했습니다.';
+ t('auth.loginFailed');
  setError(String(reason));
  return;
  }
@@ -120,13 +122,13 @@ export function LoginPage() {
  <div className="absolute bottom-1/4 right-1/4 h-[400px] w-[400px] rounded-full bg-primary/5 blur-[80px]" />
  </div>
 
- <div className="glass-card relative w-full max-w-sm rounded-2xl p-8">
- <div className="mb-8 text-center">
- <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-400 shadow-lg shadow-primary/25">
- <span className="text-lg font-bold text-primary-foreground">A</span>
+ <div className="glass-card relative w-full max-w-[calc(100%-2rem)] sm:max-w-sm rounded-2xl p-5 sm:p-8">
+ <div className="mb-6 sm:mb-8 text-center">
+ <div className="mx-auto mb-3 sm:mb-4 flex h-10 w-10 sm:h-12 sm:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-blue-400 shadow-lg shadow-primary/25">
+ <span className="text-base sm:text-lg font-bold text-primary-foreground">A</span>
  </div>
- <h1 className="text-2xl font-bold tracking-tight text-foreground mb-2">Axiom Canvas</h1>
- <p className="text-sm text-muted-foreground">시스템에 접속하려면 로그인하세요</p>
+ <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground mb-2">Axiom Canvas</h1>
+ <p className="text-sm text-muted-foreground">{t('auth.loginSubtitle')}</p>
  </div>
 
  <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -157,14 +159,14 @@ export function LoginPage() {
  disabled={submitting}
  className="w-full rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2.5 text-sm font-medium transition-all duration-200 mt-2 disabled:opacity-50"
  >
- {submitting ? '로그인 중...' : '로그인'}
+ {submitting ? t('auth.loggingIn') : t('auth.login')}
  </button>
  {error && <p className="text-sm text-destructive">{error}</p>}
  </form>
 
  {TEST_ACCOUNTS.length > 0 && (
  <div className="mt-6 border-t border-border/30 pt-6">
- <p className="text-xs text-muted-foreground mb-2">테스트 계정 (Docker/개발)</p>
+ <p className="text-xs text-muted-foreground mb-2">{t('auth.testAccounts')}</p>
  <div className="flex flex-col gap-2">
  {TEST_ACCOUNTS.map((account) => (
  <button
@@ -174,7 +176,7 @@ export function LoginPage() {
  onClick={() => onTestAccount(account)}
  className="w-full rounded-lg border border-border/30 bg-muted/40 px-4 py-2.5 text-sm text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all duration-200 disabled:opacity-50"
  >
- {account.label}으로 로그인 ({account.email})
+ {t('auth.loginAs', { label: account.label, email: account.email })}
  </button>
  ))}
  </div>

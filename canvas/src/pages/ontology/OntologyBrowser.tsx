@@ -1,6 +1,7 @@
 import React from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
+import { useTranslation } from 'react-i18next';
 
 const MOCK_NODES = [
  { id: 'customer-profile', label: 'Customer Profile', className: 'bg-teal-500 border-teal-300', place: 'center' as const },
@@ -9,6 +10,7 @@ const MOCK_NODES = [
 ];
 
 export const OntologyBrowser: React.FC = () => {
+  const { t } = useTranslation();
  const [searchParams] = useSearchParams();
  const pathParam = searchParams.get('path') ?? searchParams.get('highlight') ?? '';
  const highlightIds = pathParam ? pathParam.split(',').map((s) => s.trim()).filter(Boolean) : [];
@@ -18,13 +20,13 @@ export const OntologyBrowser: React.FC = () => {
  <div className="border-b pb-4 mb-4 flex justify-between items-start">
  <div>
  <h1 className="text-2xl font-bold text-gray-800">Ontology Map</h1>
- <p className="text-muted-foreground text-sm">Explore metadata vertices parsed by Synapse and Weaver. URL <code className="text-xs bg-accent px-1">?path=id1,id2</code> 하이라이트.</p>
+ <p className="text-muted-foreground text-sm">Explore metadata vertices parsed by Synapse and Weaver. URL <code className="text-xs bg-accent px-1">?path=id1,id2</code> {t('ontologyPage.msg9a0c3deb')}</p>
  </div>
  <Link
  to={`${ROUTES.PROCESS_DESIGNER.LIST}?fromOntology=${highlightIds[0] ?? 'customer-profile'}`}
  className="text-sm text-primary hover:underline"
  >
- 프로세스 디자이너에서 보기
+ {t('ontologyExt.nodeDetail.viewInDesigner')}
  </Link>
  </div>
 

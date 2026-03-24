@@ -8,6 +8,7 @@
 import { useState, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Loader2, BookOpen } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import {
   useSemanticCatalog,
   useConcepts,
@@ -61,6 +62,7 @@ type TabKey =
   | 'relations' | 'rules' | 'aliases' | 'l2-extended';
 
 export function SemanticCatalogPage() {
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const caseId = searchParams.get('case_id') || undefined;
 
@@ -165,9 +167,9 @@ export function SemanticCatalogPage() {
       <div className="flex items-center gap-3">
         <BookOpen className="h-6 w-6 text-primary" />
         <div>
-          <h1 className="text-xl font-bold">시멘틱 카탈로그</h1>
+          <h1 className="text-xl font-bold">{t('sidebar.semanticCatalog')}</h1>
           <p className="text-sm text-muted-foreground">
-            온톨로지 개념 · 시멘틱 지표 · 차원 · 조인 · 그레인 · 관계 · 규칙 · 별칭 계약을 관리합니다
+            {t('semanticCatalogPage.m36cf6869')}
           </p>
         </div>
       </div>
@@ -212,12 +214,12 @@ export function SemanticCatalogPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="px-3 py-2 text-left font-medium">차원 ID</th>
-                  <th className="px-3 py-2 text-left font-medium">이름</th>
-                  <th className="px-3 py-2 text-left font-medium">타입</th>
-                  <th className="px-3 py-2 text-left font-medium">SQL 표현식</th>
-                  <th className="px-3 py-2 text-left font-medium">계층</th>
-                  <th className="px-3 py-2 text-left font-medium">상태</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogPage.msgc2d743e6')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('mvExt.colName')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('objectExplorerExt.typeLabel')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('dataQualityExt.sqlExpression')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('olapStudioExt.hierarchy')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('dataQualityExt.incidentCols.status')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -238,7 +240,7 @@ export function SemanticCatalogPage() {
               </tbody>
             </table>
             {dimensions.length === 0 && (
-              <div className="py-8 text-center text-muted-foreground text-sm">등록된 차원이 없습니다</div>
+              <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalogExt.noDimensions')}</div>
             )}
           </div>
         )}
@@ -248,11 +250,11 @@ export function SemanticCatalogPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-muted/50">
-                  <th className="px-3 py-2 text-left font-medium">조인 ID</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('semanticCatalogExt.joinId')}</th>
                   <th className="px-3 py-2 text-left font-medium">Left → Right</th>
-                  <th className="px-3 py-2 text-left font-medium">타입</th>
-                  <th className="px-3 py-2 text-left font-medium">조건</th>
-                  <th className="px-3 py-2 text-center font-medium">AI 허용</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('objectExplorerExt.typeLabel')}</th>
+                  <th className="px-3 py-2 text-left font-medium">{t('cepExt.colCondition')}</th>
+                  <th className="px-3 py-2 text-center font-medium">{t('semanticCatalogExt.aiAllowed')}</th>
                   <th className="px-3 py-2 text-center font-medium">Fanout</th>
                 </tr>
               </thead>
@@ -290,7 +292,7 @@ export function SemanticCatalogPage() {
               </tbody>
             </table>
             {joins.length === 0 && (
-              <div className="py-8 text-center text-muted-foreground text-sm">등록된 조인 계약이 없습니다</div>
+              <div className="py-8 text-center text-muted-foreground text-sm">{t('semanticCatalogExt.noJoinContracts')}</div>
             )}
           </div>
         )}

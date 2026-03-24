@@ -1,4 +1,5 @@
 import ReactDiffViewer from 'react-diff-viewer-continued';
+import { useTranslation } from 'react-i18next';
 
 const diffViewerStyles = {
  variables: {
@@ -23,6 +24,7 @@ interface DocumentDiffViewerProps {
 
 /** Side-by-side 또는 unified diff. react-diff-viewer-continued 사용. */
 export function DocumentDiffViewer({ oldValue, newValue, splitView = true }: DocumentDiffViewerProps) {
+  const { t } = useTranslation();
  return (
  <div className="rounded border border-border overflow-hidden">
  <ReactDiffViewer
@@ -31,8 +33,8 @@ export function DocumentDiffViewer({ oldValue, newValue, splitView = true }: Doc
  splitView={splitView}
  useDarkTheme
  styles={diffViewerStyles}
- leftTitle="원본"
- rightTitle="현재 버전"
+ leftTitle={t('documentExt.diffOriginal')}
+ rightTitle={t('documentExt.diffCurrent')}
  showDiffOnly={false}
  />
  </div>

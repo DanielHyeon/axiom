@@ -4,6 +4,7 @@
  * 정렬, 검색, 인시던트 뱃지, 테스트 실행 버튼 포함
  */
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   CheckCircle2,
   AlertTriangle,
@@ -20,6 +21,7 @@ import type { DQRule } from '../types/data-quality';
 type SortKey = 'name' | 'lastRun' | 'status';
 
 export function DQRuleTable() {
+  const { t } = useTranslation();
   const { filteredRules, isLoading } = useDQRules();
   const { filters, setSearchQuery, selectRule } = useDQStore();
   const runTest = useRunDQTest();
@@ -60,7 +62,7 @@ export function DQRuleTable() {
   // 상태 뱃지 렌더러
   const StatusBadge = ({ rule }: { rule: DQRule }) => {
     if (!rule.lastResult) {
-      return <span className="text-xs text-muted-foreground">미실행</span>;
+      return <span className="text-xs text-muted-foreground">{t('dataQualityExt.notExecuted')}</span>;
     }
     if (rule.lastResult.passed) {
       return (
@@ -86,7 +88,7 @@ export function DQRuleTable() {
     const pct = ((rule.lastResult.failedRows / rule.lastResult.totalRows) * 100).toFixed(2);
     return (
       <span className="text-xs text-muted-foreground">
-        {rule.lastResult.failedRows}행 실패 ({pct}%)
+        {t('dataQualityExt.failedRowsPct', { count: rule.lastResult.failedRows, pct })}
       </span>
     );
   };
@@ -95,7 +97,7 @@ export function DQRuleTable() {
     return (
       <div className="flex items-center justify-center py-12 text-muted-foreground gap-2">
         <Loader2 className="animate-spin" size={16} />
-        <span className="text-sm">규칙 목록 로딩 중...</span>
+        <span className="text-sm">{t('dataQualityExt.rulesLoading')}</span>
       </div>
     );
   }
@@ -105,9 +107,9 @@ export function DQRuleTable() {
       {/* 섹션 헤더 */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-border">
         <div>
-          <h2 className="text-base font-semibold text-foreground">테스트 케이스 인사이트</h2>
+          <h2 className="text-base font-semibold text-foreground">{t('dataQualityExt.ruleTableTitle')}</h2>
           <p className="text-xs text-muted-foreground mt-0.5">
-            구성된 테스트 검증을 기반으로 데이터셋 상태를 확인합니다.
+            {t('dataQualityExt.ruleTableDesc')}
           </p>
         </div>
         <div className="flex items-center gap-2 px-3 py-2 bg-secondary rounded border border-border min-w-[240px]">
@@ -116,7 +118,7 @@ export function DQRuleTable() {
             type="text"
             value={filters.searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="테스트 케이스 검색"
+            placeholder={t('dataQualityExt.searchTestCase')}
             className="flex-1 bg-transparent border-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
           />
         </div>
@@ -129,30 +131,30 @@ export function DQRuleTable() {
             <tr className="bg-muted/50">
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 <button type="button" onClick={() => toggleSort('status')} className="hover:text-foreground">
-                  현황 {sortKey === 'status' ? (sortAsc ? '↑' : '↓') : ''}
+                  {t('dataQualityExt.colStatus')} {sortKey === 'status' ? (sortAsc ? '↑' : '↓') : ''}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                실패 사유
+                {t('dataQualityExt.colFailReason')}
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 <button type="button" onClick={() => toggleSort('lastRun')} className="hover:text-foreground">
-                  마지막 실행 {sortKey === 'lastRun' ? (sortAsc ? '↑' : '↓') : ''}
+                  {t('dataQualityExt.colLastRun')} {sortKey === 'lastRun' ? (sortAsc ? '↑' : '↓') : ''}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 <button type="button" onClick={() => toggleSort('name')} className="hover:text-foreground">
-                  이름 {sortKey === 'name' ? (sortAsc ? '↑' : '↓') : ''}
+                  {t('dataQualityExt.colName')} {sortKey === 'name' ? (sortAsc ? '↑' : '↓') : ''}
                 </button>
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                테이블
+                {t('dataQualityExt.colTable')}
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                컬럼
+                {t('dataQualityExt.colColumn')}
               </th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                심각도
+                {t('dataQualityExt.colSeverity')}
               </th>
               <th className="px-4 py-3 w-20" />
             </tr>
@@ -161,7 +163,7 @@ export function DQRuleTable() {
             {sortedRules.length === 0 ? (
               <tr>
                 <td colSpan={8} className="px-4 py-12 text-center text-sm text-muted-foreground">
-                  테스트 케이스가 없습니다.
+                  {t('dataQualityExt.noTestCases')}
                 </td>
               </tr>
             ) : (
@@ -194,7 +196,7 @@ export function DQRuleTable() {
                     <div className="flex items-center gap-1">
                       <button
                         type="button"
-                        title="테스트 실행"
+                        title={t('dataQualityExt.runTest')}
                         onClick={(e) => {
                           e.stopPropagation();
                           runTest.mutate(rule.id);

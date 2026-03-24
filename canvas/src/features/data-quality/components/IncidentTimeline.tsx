@@ -3,19 +3,21 @@
  * KAIR IncidentManager.vue를 이식 — 필터링, 상태 뱃지, 담당자 표시
  */
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { User } from 'lucide-react';
 import { useDQIncidents, useUpdateIncident } from '../hooks/useDQMetrics';
 import type { DQIncident, IncidentStatus } from '../types/data-quality';
 
-// 날짜 범위 옵션
-const DATE_RANGES = [
-  { label: '최근 7일', value: 7 },
-  { label: '최근 30일', value: 30 },
-  { label: '최근 90일', value: 90 },
-  { label: '전체', value: 365 },
+// 날짜 범위 옵션 — 라벨은 t()로 런타임 조회
+const DATE_RANGE_VALUES = [
+  { i18nKey: 'dataQualityExt.dateRanges.7d', value: 7 },
+  { i18nKey: 'dataQualityExt.dateRanges.30d', value: 30 },
+  { i18nKey: 'dataQualityExt.dateRanges.90d', value: 90 },
+  { i18nKey: 'dataQualityExt.dateRanges.all', value: 365 },
 ];
 
 export function IncidentTimeline() {
+  const { t } = useTranslation();
   const { data: incidents, isLoading } = useDQIncidents();
   const updateIncident = useUpdateIncident();
   const [statusFilter, setStatusFilter] = useState<IncidentStatus | ''>('');
@@ -50,7 +52,7 @@ export function IncidentTimeline() {
   };
 
   if (isLoading) {
-    return <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">인시던트 로딩 중...</div>;
+    return <div className="flex items-center justify-center py-12 text-muted-foreground text-sm">{t('dataQualityExt.incidentLoading')}</div>;
   }
 
   return (
@@ -62,7 +64,7 @@ export function IncidentTimeline() {
           onChange={(e) => setStatusFilter(e.target.value as IncidentStatus | '')}
           className="px-3 py-2 bg-card border border-border rounded-md text-sm text-foreground focus:outline-none focus:border-primary"
         >
-          <option value="">전체 상태</option>
+          <option value="">{t('dataQualityExt.allStatus')}</option>
           <option value="open">Open</option>
           <option value="acknowledged">Acknowledged</option>
           <option value="resolved">Resolved</option>
@@ -75,8 +77,8 @@ export function IncidentTimeline() {
           onChange={(e) => setDateRange(Number(e.target.value))}
           className="px-3 py-2 bg-card border border-border rounded-md text-sm text-foreground focus:outline-none focus:border-primary"
         >
-          {DATE_RANGES.map((r) => (
-            <option key={r.value} value={r.value}>{r.label}</option>
+          {DATE_RANGE_VALUES.map((r) => (
+            <option key={r.value} value={r.value}>{t(r.i18nKey)}</option>
           ))}
         </select>
       </div>
@@ -86,20 +88,20 @@ export function IncidentTimeline() {
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-muted/50">
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">테스트 케이스</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">테이블</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">감지 시간</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">상태</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">심각도</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">실패 행</th>
-              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">담당자</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.testCase')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.table')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.detectedAt')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.status')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.severity')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.failedRows')}</th>
+              <th className="px-5 py-3 text-left text-[11px] font-semibold text-muted-foreground uppercase">{t('dataQualityExt.incidentCols.assignee')}</th>
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-5 py-12 text-center text-sm text-muted-foreground">
-                  인시던트가 없습니다.
+                  {t('dataQualityExt.noIncidents')}
                 </td>
               </tr>
             ) : (
@@ -135,7 +137,7 @@ export function IncidentTimeline() {
                     ) : (
                       <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
                         <User size={12} />
-                        미지정
+                        {t('dataQualityExt.unassigned')}
                       </span>
                     )}
                   </td>

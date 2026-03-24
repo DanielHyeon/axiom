@@ -46,14 +46,14 @@ export function CaseDashboardPage() {
 
  if (error) {
  return (
- <div className="p-6">
- <ErrorState message={`케이스 목록을 불러올 수 없습니다. ${error.message}`} onRetry={refetchCases} />
+ <div className="p-4 md:p-6 lg:p-8">
+ <ErrorState message={t('dashboard.errorLoadCases', { message: error.message })} onRetry={refetchCases} />
  </div>
  );
  }
 
  return (
- <div className="p-6">
+ <div className="p-4 md:p-6 lg:p-8">
  <RoleGreeting
  userName={userEmail}
  role={role}
@@ -65,10 +65,10 @@ export function CaseDashboardPage() {
  <CardGridSkeleton count={4} />
  ) : (
  <>
- <StatsCard label={t('dashboard.allCases')} value={stats.total} trend="same" trendLabel="전일 대비" />
- <StatsCard label={t('dashboard.inProgress')} value={stats.inProgress} trend="same" trendLabel="전일 대비" />
- <StatsCard label={t('dashboard.inReview')} value={stats.inReview} trend="same" trendLabel="전일 대비" />
- <StatsCard label={t('dashboard.dueThisWeek')} value={stats.dueThisWeek} trend="same" trendLabel="전일 대비" />
+ <StatsCard label={t('dashboard.allCases')} value={stats.total} trend="same" trendLabel={t('common.comparedToYesterday')} />
+ <StatsCard label={t('dashboard.inProgress')} value={stats.inProgress} trend="same" trendLabel={t('common.comparedToYesterday')} />
+ <StatsCard label={t('dashboard.inReview')} value={stats.inReview} trend="same" trendLabel={t('common.comparedToYesterday')} />
+ <StatsCard label={t('dashboard.dueThisWeek')} value={stats.dueThisWeek} trend="same" trendLabel={t('common.comparedToYesterday')} />
  </>
  )}
  </div>
@@ -89,7 +89,7 @@ export function CaseDashboardPage() {
  </div>
 
  {/* 역할별 패널 — DashboardComposer가 useDashboardConfig 기반으로 조합 */}
- <div className="mb-6 grid grid-cols-1 gap-6 lg:grid-cols-3">
+ <div className="mb-6 grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-3">
  <div className="lg:col-span-2">
   <DashboardComposer panels={panels} />
  </div>
@@ -100,13 +100,13 @@ export function CaseDashboardPage() {
  </div>
 
  <div>
- <div className="mb-3 flex items-center justify-between">
- <h2 className="text-lg font-semibold text-foreground">{t('dashboard.caseSummary')}</h2>
+ <div className="mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+ <h2 className="text-base md:text-lg font-semibold text-foreground">{t('dashboard.caseSummary')}</h2>
  <Link
  to={ROUTES.CASES.LIST}
  className="text-sm text-primary hover:underline"
  >
- 전체 보기
+ {t('common.viewAll')}
  </Link>
  </div>
  {isLoading ? (
@@ -114,9 +114,9 @@ export function CaseDashboardPage() {
  ) : filteredCases.length === 0 ? (
  <EmptyState
  icon={FolderOpen}
- title="케이스가 없습니다"
- description="등록된 케이스가 없거나 필터 조건에 맞는 케이스가 없습니다."
- actionLabel="케이스 목록 보기"
+ title={t('dashboard.noCases')}
+ description={t('dashboard.noCasesDesc')}
+ actionLabel={t('dashboard.viewCaseList')}
  onAction={() => navigate(ROUTES.CASES.LIST)}
  />
  ) : (

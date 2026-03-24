@@ -10,6 +10,7 @@ import React from 'react';
 import { AlertTriangle, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { SecurityUser } from '../../types/security';
+import { useTranslation } from 'react-i18next';
 
 interface DeleteConfirmDialogProps {
   /** 삭제 대상 사용자 */
@@ -28,6 +29,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
   onClose,
   isPending,
 }) => {
+  const { t } = useTranslation();
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
@@ -36,7 +38,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
       }}
       role="alertdialog"
       aria-modal="true"
-      aria-label="사용자 삭제 확인"
+      aria-label={t('securityExt.deleteConfirm')}
     >
       <div className="bg-card border border-border rounded-2xl w-[400px] overflow-hidden shadow-2xl">
         <div className="p-6 flex flex-col gap-4">
@@ -46,20 +48,20 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
               <AlertTriangle className="h-5 w-5 text-destructive" />
             </div>
             <div>
-              <h3 className="font-semibold text-foreground">사용자 삭제</h3>
-              <p className="text-sm text-muted-foreground">이 작업은 되돌릴 수 없습니다</p>
+              <h3 className="font-semibold text-foreground">{t('securityExt.deleteUser')}</h3>
+              <p className="text-sm text-muted-foreground">{t('securityExt.deleteIrreversible')}</p>
             </div>
           </div>
           {/* 삭제 대상 안내 */}
           <p className="text-sm text-foreground">
-            <strong>{user.name}</strong> ({user.email}) 사용자를 정말
-            삭제하시겠습니까?
+            {t('securityF.deleteConfirmMessage', { name: user.name, email: user.email })}
+            {t('securityF.mde474ccf')}
           </p>
         </div>
         {/* 푸터 */}
         <div className="flex justify-end gap-3 px-6 py-4 border-t border-border bg-muted/30">
           <Button variant="outline" onClick={onClose}>
-            취소
+            {t('common.cancel')}
           </Button>
           <Button
             variant="destructive"
@@ -67,7 +69,7 @@ export const DeleteConfirmDialog: React.FC<DeleteConfirmDialogProps> = ({
             disabled={isPending}
           >
             {isPending && <Loader2 className="h-4 w-4 mr-1 animate-spin" />}
-            삭제
+            {t('ingestionExt.delete')}
           </Button>
         </div>
       </div>

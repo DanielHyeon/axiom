@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/lib/routes/routes';
 import { useCases } from '@/features/case-dashboard/hooks/useCases';
@@ -6,6 +7,7 @@ import { CaseFilters, type CaseStatusFilter } from '@/features/case-dashboard/co
 import { CaseTable } from '@/features/case-dashboard/components/CaseTable';
 
 export const CaseListPage: React.FC = () => {
+ const { t } = useTranslation();
  const navigate = useNavigate();
  const [statusFilter, setStatusFilter] = useState<CaseStatusFilter>('ALL');
  const { data: cases, isLoading, error } = useCases();
@@ -22,7 +24,7 @@ export const CaseListPage: React.FC = () => {
 
  return (
  <div className="p-6">
- <h1 className="mb-6 text-2xl font-semibold text-sky-300">케이스 목록</h1>
+ <h1 className="mb-6 text-2xl font-semibold text-sky-300">{t('cases.title')}</h1>
 
  <div className="mb-4">
  <CaseFilters status={statusFilter} onStatusChange={setStatusFilter} />
@@ -30,7 +32,7 @@ export const CaseListPage: React.FC = () => {
 
  {error && (
  <div className="mb-4 rounded border border-red-900/50 bg-red-900/20 p-4 text-sm text-red-200">
- 데이터를 불러오는 중 오류가 발생했습니다.
+ {t('cases.errorLoadData')}
  </div>
  )}
 

@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import {
   fetchDocuments,
   fetchDocument,
-  createDocument,
   updateDocument,
   fetchComments,
   addComment,
@@ -18,7 +17,6 @@ import {
   canTransition,
   ACTION_TO_STATUS,
   type Document,
-  type DocumentStatus,
   type ReviewAction,
 } from '../types/document';
 
@@ -83,15 +81,6 @@ export function useDocumentReviewAction(caseId: string, docId: string) {
 
   return useMutation({
     mutationFn: async ({ action, comment }: { action: ReviewAction; comment?: string }) => {
-      // FSM 가드: 현재 상태에서 해당 액션이 가능한지 검증
-      const doc = qc.getQueryData<Document>(keys.detail(caseId, docId));
-      if (doc) {
-        const targetStatus = ACTION_TO_STATUS[action];
-        if (!canTransition(doc.status, targetStatus)) {
-          throw new Error(`'${doc.status}' 상태에서 '${action}' 액션은 허용되지 않습니다`);
-        }
-      }
-
       // review 계열 액션은 기존 API 사용
       const reviewActions: DocumentReviewAction[] = ['approve', 'reject', 'request_changes'];
       if (reviewActions.includes(action as DocumentReviewAction)) {
@@ -107,12 +96,18 @@ export function useDocumentReviewAction(caseId: string, docId: string) {
     },
 
     // 낙관적 업데이트: mutation 시작 시 즉시 UI 반영
+    // FSM 가드를 onMutate에서 실행 — mutationFn보다 먼저 호출되므로
+    // 캐시가 변경되기 전의 원본 상태로 검증할 수 있다
     onMutate: async ({ action }) => {
       await qc.cancelQueries({ queryKey: keys.detail(caseId, docId) });
       const previous = qc.getQueryData<Document>(keys.detail(caseId, docId));
 
+      // FSM 가드: 현재 상태에서 해당 액션이 가능한지 검증
       if (previous) {
         const targetStatus = ACTION_TO_STATUS[action];
+        if (!canTransition(previous.status, targetStatus)) {
+          throw new Error(`'${previous.status}' 상태에서 '${action}' 액션은 허용되지 않습니다`);
+        }
         qc.setQueryData<Document>(keys.detail(caseId, docId), {
           ...previous,
           status: targetStatus,

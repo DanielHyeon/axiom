@@ -11,6 +11,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Link2, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -60,6 +61,7 @@ export const InstanceDetail: React.FC<InstanceDetailProps> = ({
   onClose,
   onRelatedClick,
 }) => {
+  const { t } = useTranslation();
   // 펼침 상태 (긴 값 표시용)
   const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
 
@@ -116,16 +118,16 @@ export const InstanceDetail: React.FC<InstanceDetailProps> = ({
           <div className="flex items-center justify-between mb-3">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
               <Info className="h-3 w-3" />
-              속성
+              {t('objectExplorerExt.properties')}
             </span>
             <span className="text-[11px] text-muted-foreground">
-              {properties.length}개
+              {t('objectExplorerExt.count', { count: properties.length })}
             </span>
           </div>
 
           {properties.length === 0 ? (
             <div className="text-xs text-muted-foreground text-center py-6">
-              속성이 없습니다
+              {t('objectExplorerExt.noProperties')}
             </div>
           ) : (
             <div className="border border-border rounded-lg overflow-hidden divide-y divide-border">
@@ -148,7 +150,7 @@ export const InstanceDetail: React.FC<InstanceDetailProps> = ({
                         className="text-[10px] text-primary hover:underline mt-1"
                         onClick={() => toggleExpand(prop.key)}
                       >
-                        {expandedKeys.has(prop.key) ? '접기' : '더보기'}
+                        {expandedKeys.has(prop.key) ? t('objectExplorerExt.collapse') : t('objectExplorerExt.expand')}
                       </button>
                     )}
                   </div>
@@ -164,10 +166,10 @@ export const InstanceDetail: React.FC<InstanceDetailProps> = ({
             <div className="flex items-center justify-between mb-3">
               <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
                 <Link2 className="h-3 w-3" />
-                관련 인스턴스
+                {t('objectExplorerExt.relatedInstances')}
               </span>
               <span className="text-[11px] text-muted-foreground">
-                {instance.relatedInstances.length}개
+                {t('objectExplorerExt.count', { count: instance.relatedInstances.length })}
               </span>
             </div>
 
@@ -200,22 +202,22 @@ export const InstanceDetail: React.FC<InstanceDetailProps> = ({
         {objectType && (
           <div className="p-4 border-t border-border bg-muted/20">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground block mb-2">
-              Object Type 정보
+              {t('objectExplorerExt.objectTypeInfo')}
             </span>
             <div className="space-y-1.5 text-xs">
               <div className="flex gap-3">
-                <span className="w-14 font-medium text-muted-foreground shrink-0">타입</span>
+                <span className="w-14 font-medium text-muted-foreground shrink-0">{t('objectExplorerExt.typeLabel')}</span>
                 <span className="text-foreground">{objectType.name}</span>
               </div>
               {objectType.description && (
                 <div className="flex gap-3">
-                  <span className="w-14 font-medium text-muted-foreground shrink-0">설명</span>
+                  <span className="w-14 font-medium text-muted-foreground shrink-0">{t('objectExplorerExt.descLabel')}</span>
                   <span className="text-foreground">{objectType.description}</span>
                 </div>
               )}
               {objectType.sourceTable && (
                 <div className="flex gap-3">
-                  <span className="w-14 font-medium text-muted-foreground shrink-0">테이블</span>
+                  <span className="w-14 font-medium text-muted-foreground shrink-0">{t('objectExplorerExt.tableLabel')}</span>
                   <span className="text-foreground font-mono text-primary">
                     {objectType.sourceSchema}.{objectType.sourceTable}
                   </span>

@@ -113,7 +113,7 @@ export function OntologyPage() {
  className="flex items-center gap-2 px-4 py-2.5 border border-border text-[12px] font-medium font-heading rounded hover:bg-muted transition-colors"
  >
  <Wand2 className="h-3.5 w-3.5" />
- 위자드
+ {t('ontologyPage.m7e02c0df')}
  </button>
  <button
  type="button"
