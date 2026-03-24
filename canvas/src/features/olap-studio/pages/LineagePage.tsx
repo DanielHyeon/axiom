@@ -9,6 +9,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { cn } from '@/lib/utils';
 import { GitBranch, ChevronRight, Loader2 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { LineageGraphView } from '../components/LineageGraphView';
 import type { LineageEntity, LineageEdge } from '../components/LineageGraphView';
 
@@ -52,6 +53,7 @@ const TYPE_LABELS: Record<string, string> = {
 // ─── 컴포넌트 ──────────────────────────────────────────────
 
 export function LineagePage() {
+  const { t } = useTranslation();
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
 
   // 리니지 그래프 데이터 로드
@@ -84,10 +86,10 @@ export function LineagePage() {
         <div className="px-3 py-3 border-b border-border">
           <div className="flex items-center gap-2">
             <GitBranch className="h-4 w-4 text-blue-500" />
-            <h2 className="text-[13px] font-semibold font-heading">데이터 리니지</h2>
+            <h2 className="text-[13px] font-semibold font-heading">{t('olapStudioExt.dataLineage')}</h2>
           </div>
           <span className="text-[10px] text-foreground/40 font-mono">
-            {graph?.entities?.length ?? 0}개 엔티티
+            {t('olapStudioF.entityCount', { count: graph?.entities?.length ?? 0 })}
           </span>
         </div>
 
@@ -134,7 +136,7 @@ export function LineagePage() {
       {/* ─── 우측: 영향 분석 패널 (선택 시에만 표시) ──── */}
       {selectedEntityId && impact && (
         <div className="w-[200px] border-l border-border bg-card overflow-y-auto p-3 shrink-0">
-          <h3 className="text-[11px] font-semibold font-heading mb-2">영향 분석</h3>
+          <h3 className="text-[11px] font-semibold font-heading mb-2">{t('olapStudioExt.impactAnalysis')}</h3>
 
           {/* Upstream 목록 */}
           <div className="mb-3">

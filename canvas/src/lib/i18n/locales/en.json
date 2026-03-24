@@ -1389,7 +1389,21 @@
     "pivotEmptyHint": "Run the pivot to see results here",
     "pivotNoResults": "No results",
     "pivotRowCount": "{{count}} rows",
-    "connectionInfo": "Connection Info"
+    "connectionInfo": "Connection Info",
+    "cubeManagement": "Cube Management",
+    "add": "Add",
+    "aiAutoGenerate": "AI Auto-generate",
+    "cancel": "Cancel",
+    "noCubes": "No cubes registered",
+    "publish": "Publish",
+    "validationErrorsTitle": "Validation Errors",
+    "noDimensions": "No dimensions defined",
+    "noMeasures": "No measures defined",
+    "etlPipelines": "ETL Pipelines",
+    "noPipelines": "No pipelines registered",
+    "run": "Run",
+    "noRunHistory": "No run history",
+    "recentRunHistory": "Recent Run History"
   },
   "semanticCatalogExt": {
     "grainId": "Grain ID",
@@ -3409,6 +3423,24 @@
   "nl2sqlExt": {
     "stepsCount": "{{count}} steps",
     "scoreLabel": "Score:",
-    "countLabel": "{{count}}"
+    "countLabel": "{{count}}",
+    "selectDatasourceHint": "Select a datasource to display the schema tree.",
+    "dataAssets": "Data Assets",
+    "loading": "Loading...",
+    "noColumns": "No columns",
+    "dataFetchFailed": "Data fetch failed",
+    "close": "Close",
+    "fetchingData": "Fetching data...",
+    "retry": "Retry",
+    "noData": "No data",
+    "historyLoadError": "Failed to load history.",
+    "noRecentQueries": "No recent queries.",
+    "codeAnalysis": "Code Analysis",
+    "datasource": "Datasource",
+    "contextIncluded": "{{included}}/{{total}} in context",
+    "addRelation": "Add Relation",
+    "cannotGenerateERD": "Cannot generate ERD",
+    "dataPreview": "Data Preview",
+    "addFkRelation": "Add FK Relation"
   }
 }

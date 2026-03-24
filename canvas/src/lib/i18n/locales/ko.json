@@ -1389,7 +1389,21 @@
     "pivotEmptyHint": "피벗을 실행하면 결과가 여기에 표시됩니다",
     "pivotNoResults": "결과가 없습니다",
     "pivotRowCount": "{{count}}행",
-    "connectionInfo": "연결 정보"
+    "connectionInfo": "연결 정보",
+    "cubeManagement": "큐브 관리",
+    "add": "추가",
+    "aiAutoGenerate": "AI 자동생성",
+    "cancel": "취소",
+    "noCubes": "등록된 큐브가 없습니다",
+    "publish": "게시",
+    "validationErrorsTitle": "검증 오류",
+    "noDimensions": "정의된 차원이 없습니다",
+    "noMeasures": "정의된 측정값이 없습니다",
+    "etlPipelines": "ETL 파이프라인",
+    "noPipelines": "등록된 파이프라인이 없습니다",
+    "run": "실행",
+    "noRunHistory": "실행 이력 없음",
+    "recentRunHistory": "최근 실행 이력"
   },
   "semanticCatalogExt": {
     "grainId": "그레인 ID",
@@ -3409,6 +3423,24 @@
   "nl2sqlExt": {
     "stepsCount": "{{count}}단계",
     "scoreLabel": "점수:",
-    "countLabel": "{{count}}건"
+    "countLabel": "{{count}}건",
+    "selectDatasourceHint": "데이터소스를 선택하면 스키마 트리가 표시됩니다.",
+    "dataAssets": "데이터 자산",
+    "loading": "로딩 중...",
+    "noColumns": "컬럼 없음",
+    "dataFetchFailed": "데이터 조회에 실패했습니다",
+    "close": "닫기",
+    "fetchingData": "데이터 조회 중...",
+    "retry": "재시도",
+    "noData": "데이터가 없습니다",
+    "historyLoadError": "이력을 불러올 수 없습니다.",
+    "noRecentQueries": "최근 질의가 없습니다.",
+    "codeAnalysis": "코드분석",
+    "datasource": "데이터소스",
+    "contextIncluded": "{{included}}/{{total}} 컨텍스트 포함",
+    "addRelation": "관계추가",
+    "cannotGenerateERD": "ERD를 생성할 수 없습니다",
+    "dataPreview": "데이터 프리뷰",
+    "addFkRelation": "FK 관계 추가"
   }
 }

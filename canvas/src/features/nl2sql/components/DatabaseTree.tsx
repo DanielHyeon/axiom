@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import type { TableMeta, ColumnMeta } from '../types/nl2sql';
 import type { TreeSelection } from '../types/schema';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -69,6 +70,7 @@ export function DatabaseTree({
   expandedTables,
   onToggleTable,
 }: DatabaseTreeProps) {
+  const { t } = useTranslation();
   // 테이블 클릭: 선택 + 컬럼 로드
   const handleTableClick = useCallback(
     (schema: string, tableName: string) => {
@@ -108,7 +110,7 @@ export function DatabaseTree({
         <TreeHeader />
         <div className="flex-1 flex items-center justify-center px-4">
           <p className="text-xs text-foreground/40 font-mono text-center">
-            데이터소스를 선택하면<br />스키마 트리가 표시됩니다.
+            {t('nl2sqlExt.selectDatasourceHint')}
           </p>
         </div>
       </div>
@@ -145,10 +147,11 @@ export function DatabaseTree({
 
 /** 트리 헤더 */
 function TreeHeader() {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center h-10 px-4 border-b border-border shrink-0">
       <span className="text-[11px] font-semibold text-foreground/50 font-mono uppercase tracking-[1px]">
-        데이터 자산
+        {t('nl2sqlExt.dataAssets')}
       </span>
     </div>
   );
@@ -181,6 +184,7 @@ function SchemaNode({
   expandedTables,
   onToggleTable,
 }: SchemaNodeProps) {
+  const { t } = useTranslation();
   const ChevronIcon = isExpanded ? ChevronDown : ChevronRight;
 
   return (
@@ -266,7 +270,7 @@ function SchemaNode({
                       <div className="flex items-center gap-1.5 px-3 py-1">
                         <Loader2 className="h-2.5 w-2.5 animate-spin text-foreground/30" />
                         <span className="text-[10px] text-foreground/30 font-mono">
-                          로딩 중...
+                          {t('nl2sqlExt.loading')}
                         </span>
                       </div>
                     )}
@@ -276,7 +280,7 @@ function SchemaNode({
                     {!isColumnLoading && columns && columns.length === 0 && (
                       <div className="px-3 py-1">
                         <span className="text-[10px] text-foreground/30 font-mono">
-                          컬럼 없음
+                          {t('nl2sqlExt.noColumns')}
                         </span>
                       </div>
                     )}
