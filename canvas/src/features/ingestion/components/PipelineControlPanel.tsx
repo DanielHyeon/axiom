@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import type { Pipeline } from '../types/ingestion';
 import { PipelineStepViewer } from './PipelineStepViewer';
+import { useTranslation } from 'react-i18next';
 
 interface PipelineControlPanelProps {
   /** 파이프라인 목록 */
@@ -76,6 +77,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
   onDelete,
   onCreate,
 }) => {
+  const { t } = useTranslation();
   // 펼쳐진 파이프라인 ID Set
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -95,10 +97,10 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-blue-500" />
           <h3 className="text-sm font-semibold text-gray-900 font-heading">
-            ETL 파이프라인
+            {t('ingestionExt.etlPipeline')}
           </h3>
           <span className="text-xs text-gray-400 font-mono">
-            {pipelines.length}개
+            {t('ingestionExt.countUnit', { count: pipelines.length })}
           </span>
         </div>
         {onCreate && (
@@ -108,7 +110,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-primary-foreground bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
-            파이프라인 생성
+            {t('ingestionExt.createPipeline')}
           </button>
         )}
       </div>
@@ -117,7 +119,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
       {loading && (
         <div className="flex items-center justify-center py-8 text-gray-400 gap-2">
           <RotateCw className="h-4 w-4 animate-spin" />
-          <span className="text-sm">파이프라인 목록 로딩 중...</span>
+          <span className="text-sm">{t('ingestionExt.loadingPipelines')}</span>
         </div>
       )}
 
@@ -125,14 +127,14 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
       {!loading && pipelines.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-3 border border-dashed border-gray-200 rounded-xl">
           <Zap className="h-8 w-8 opacity-30" />
-          <p className="text-sm">등록된 파이프라인이 없습니다</p>
+          <p className="text-sm">{t('ingestionExt.noPipelines')}</p>
           {onCreate && (
             <button
               type="button"
               onClick={onCreate}
               className="text-sm text-blue-600 hover:underline"
             >
-              첫 번째 파이프라인 생성하기
+              {t('ingestionExt.createFirstPipeline')}
             </button>
           )}
         </div>
@@ -196,20 +198,20 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                         type="button"
                         onClick={() => onStop?.(pipeline.id)}
                         className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
-                        title="중지"
+                        title={t('ingestionExt.stop')}
                       >
                         <Square className="h-3 w-3" />
-                        중지
+                        {t('ingestionExt.stop')}
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => onRun?.(pipeline.id)}
                         className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
-                        title="실행"
+                        title={t('common.run')}
                       >
                         <Play className="h-3 w-3" />
-                        실행
+                        {t('common.run')}
                       </button>
                     )}
                     {onDelete && (
@@ -217,7 +219,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                         type="button"
                         onClick={() => onDelete(pipeline.id)}
                         className="p-1.5 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        title="삭제"
+                        title={t('common.delete')}
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

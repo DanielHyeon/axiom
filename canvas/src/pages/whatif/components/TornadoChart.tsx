@@ -1,6 +1,7 @@
 // src/pages/whatif/components/TornadoChart.tsx
 
 import type { SensitivityData } from '@/features/whatif/types/whatif';
+import { useTranslation } from 'react-i18next';
 import {
  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
@@ -11,6 +12,7 @@ interface TornadoChartProps {
 }
 
 export function TornadoChart({ data, baseValue }: TornadoChartProps) {
+ const { t } = useTranslation();
  // To draw a tornado chart with Recharts, we plot the deviations from the base.
  // We need two bars for each parameter: one for decrease impact, one for increase impact.
  // Recharts stacked bars can work if we separate negative and positive values relative to 0.
@@ -31,10 +33,10 @@ export function TornadoChart({ data, baseValue }: TornadoChartProps) {
 
  return (
  <div className="w-full h-80">
- <h3 className="text-sm font-medium text-foreground/80 mb-4 text-center">민감도 분석 (Tornado Chart)</h3>
+ <h3 className="text-sm font-medium text-foreground/80 mb-4 text-center">{t('whatif.sensitivityAnalysis')}</h3>
  <div className="w-full text-xs text-foreground0 flex justify-between px-12 mb-2">
- <span>◄ 감소 영향</span>
- <span>증가 영향 ►</span>
+ <span>{t('whatif.decreaseImpact')}</span>
+ <span>{t('whatif.increaseImpact')}</span>
  </div>
  <ResponsiveContainer width="100%" height="80%">
  <BarChart

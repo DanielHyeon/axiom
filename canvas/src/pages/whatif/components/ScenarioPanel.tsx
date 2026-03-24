@@ -5,6 +5,7 @@ import { ParameterSlider } from './ParameterSlider';
 import { Button } from '@/components/ui/button';
 import { Play, RotateCcw, Save } from 'lucide-react';
 import { useWhatIfMock } from '@/features/whatif/hooks/useWhatIfMock';
+import { useTranslation } from 'react-i18next';
 
 interface ScenarioPanelProps {
  scenarioId: string;
@@ -12,6 +13,7 @@ interface ScenarioPanelProps {
 }
 
 export function ScenarioPanel({ scenarioId, onRunAnalysis }: ScenarioPanelProps) {
+ const { t } = useTranslation();
  const { parameters, scenarios, updateParameter, updateScenarioStatus } = useWhatIfStore();
  const { runAnalysis: mockRunAnalysis } = useWhatIfMock();
  const runAnalysis = onRunAnalysis ?? mockRunAnalysis;
@@ -29,8 +31,8 @@ export function ScenarioPanel({ scenarioId, onRunAnalysis }: ScenarioPanelProps)
  return (
  <div className="w-80 border-r border-border bg-popover flex flex-col h-full">
  <div className="px-5 py-4 border-b border-border bg-popover">
- <h2 className="font-medium text-sm text-foreground">매개변수 설정</h2>
- <p className="text-xs text-foreground0 mt-1">슬라이더를 조정하여 시뮬레이션 하세요.</p>
+ <h2 className="font-medium text-sm text-foreground">{t('whatif.parameterSettings')}</h2>
+ <p className="text-xs text-foreground0 mt-1">{t('whatif.parameterSettingsHint')}</p>
  </div>
 
  <div className="p-5 flex-1 overflow-y-auto">
@@ -48,10 +50,10 @@ export function ScenarioPanel({ scenarioId, onRunAnalysis }: ScenarioPanelProps)
  <div className="p-4 border-t border-border bg-background flex flex-col gap-2">
  <div className="flex gap-2">
  <Button variant="outline" size="sm" className="flex-1" onClick={handleReset} disabled={isComputing}>
- <RotateCcw size={14} className="mr-1.5" /> <span>초기화</span>
+ <RotateCcw size={14} className="mr-1.5" /> <span>{t('common.reset')}</span>
  </Button>
  <Button variant="outline" size="sm" className="flex-1" disabled={isComputing}>
- <Save size={14} className="mr-1.5" /> <span>저장</span>
+ <Save size={14} className="mr-1.5" /> <span>{t('common.save')}</span>
  </Button>
  </div>
  <Button

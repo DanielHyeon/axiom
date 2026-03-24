@@ -5,6 +5,7 @@ import { DataTable } from '@/components/shared/DataTable';
 import { Badge } from '@/components/ui/badge';
 import { ROUTES } from '@/lib/routes/routes';
 import type { Case } from '../hooks/useCases';
+import { useTranslation } from 'react-i18next';
 
 interface CaseTableProps {
  data: Case[];
@@ -22,6 +23,7 @@ const priorityVariant = (p: Case['priority']) =>
  p === 'CRITICAL' || p === 'HIGH' ? 'destructive' : 'secondary';
 
 export function CaseTable({ data, onRowClick }: CaseTableProps) {
+ const { t } = useTranslation();
  const navigate = useNavigate();
 
  const columns: ColumnDef<Case>[] = [
@@ -73,7 +75,7 @@ export function CaseTable({ data, onRowClick }: CaseTableProps) {
  navigate(ROUTES.DATA.ONTOLOGY_CASE(row.original.id));
  }}
  className="p-1.5 rounded-md text-muted-foreground hover:text-primary hover:bg-muted transition-colors"
- title="온톨로지 보기"
+ title={t('caseDashboardExt.caseTable.viewOntology')}
  >
  <Share2 size={14} />
  </button>

@@ -36,6 +36,7 @@ import {
  ChevronLeft,
  ChevronRight,
 } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 type TabId = 'chart' | 'table' | 'sql' | 'graph';
 
@@ -58,6 +59,7 @@ export function ResultPanel({
  summary,
  metadata,
 }: ResultPanelProps) {
+ const { t } = useTranslation();
  const hasChart = !!chartConfig;
  const [activeTab, setActiveTab] = useState<TabId>(hasChart ? 'chart' : 'table');
  const [sorting, setSorting] = useState<SortingState>([]);
@@ -107,8 +109,8 @@ export function ResultPanel({
  });
 
  const tabs: { id: TabId; label: string; icon: React.ReactNode; disabled?: boolean }[] = [
- { id: 'chart', label: '차트', icon: <BarChart3 className="h-3.5 w-3.5" />, disabled: !hasChart },
- { id: 'table', label: '테이블', icon: <Table2 className="h-3.5 w-3.5" /> },
+ { id: 'chart', label: t('nl2sqlPage.chartTab'), icon: <BarChart3 className="h-3.5 w-3.5" />, disabled: !hasChart },
+ { id: 'table', label: t('nl2sqlPage.tableTab'), icon: <Table2 className="h-3.5 w-3.5" /> },
  { id: 'sql', label: 'SQL', icon: <Code className="h-3.5 w-3.5" /> },
  { id: 'graph', label: 'Graph', icon: <Network className="h-3.5 w-3.5" /> },
  ];
@@ -190,7 +192,7 @@ export function ResultPanel({
  ) : (
  <TableRow>
  <TableCell colSpan={columns.length} className="h-16 text-center text-foreground/60">
- 결과 없음
+ {t('nl2sqlPage.noResult')}
  </TableCell>
  </TableRow>
  )}

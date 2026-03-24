@@ -16,6 +16,7 @@ vi.mock('react-i18next', () => ({
         'olapStudioExt.pivotEmptyHint': '피벗을 실행하면 결과가 여기에 표시됩니다',
         'olapStudioExt.pivotNoResults': '결과가 없습니다',
         'olapStudioExt.csvExport': 'CSV 내보내기',
+        'olapStudioExt.pivotRowCount': '{{count}}행',
         'olapStudioF.rowCountLocale': '{{count}}행',
         'olapStudioF.showingOf': '(표시: {{visible}}/{{total}})',
         'olapStudioF.loadMore': '더 보기 ({{count}}행)',

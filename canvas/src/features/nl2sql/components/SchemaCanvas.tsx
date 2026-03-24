@@ -50,6 +50,7 @@ import { useCanvasPolling } from '../hooks/useCanvasPolling';
 import { useDisplayMode } from '../hooks/useDisplayMode';
 // G8: 데이터 프리뷰 패널
 import { DataPreviewPanel } from './DataPreviewPanel';
+import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -92,6 +93,7 @@ export function SchemaCanvas({
   onNavigateDatasource,
   onRefresh,
 }: SchemaCanvasProps) {
+  const { t } = useTranslation();
   // G1: FK 가시성 상태
   const { visibility, toggle: toggleFkVisibility } = useFkVisibility();
 
@@ -194,7 +196,7 @@ export function SchemaCanvas({
                   : 'text-foreground/30 hover:text-foreground/50'
               )}
             >
-              코드분석
+              {t('nl2sqlExt.codeAnalysis')}
               {availability && (
                 <span className="ml-1 text-[9px] opacity-60">
                   {availability.robo.table_count}
@@ -211,7 +213,7 @@ export function SchemaCanvas({
                   : 'text-foreground/30 hover:text-foreground/50'
               )}
             >
-              데이터소스
+              {t('nl2sqlExt.datasource')}
               {availability && (
                 <span className="ml-1 text-[9px] opacity-60">
                   {availability.text2sql.table_count}
@@ -224,7 +226,7 @@ export function SchemaCanvas({
         {/* 통계 */}
         <div className="flex items-center gap-2 text-[10px] text-foreground/40 font-mono shrink-0 mr-2">
           <Sparkles className="h-3 w-3" />
-          <span>{includedCount}/{tables.length} 컨텍스트 포함</span>
+          <span>{t('nl2sqlExt.contextIncluded', { included: includedCount, total: tables.length })}</span>
         </div>
 
         {/* 테이블 칩 목록 */}
@@ -268,10 +270,10 @@ export function SchemaCanvas({
             type="button"
             onClick={() => setShowCardinalityModal(true)}
             className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-foreground/50 hover:text-foreground/70 transition-colors"
-            title="FK 관계 추가"
+            title={t('nl2sqlExt.addFkRelation')}
           >
             <ArrowLeftRight className="h-3 w-3" />
-            <span>관계추가</span>
+            <span>{t('nl2sqlExt.addRelation')}</span>
           </button>
         </div>
       </div>
@@ -284,7 +286,7 @@ export function SchemaCanvas({
             <MermaidERDRenderer mermaidCode={code} />
           ) : (
             <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-mono">
-              ERD를 생성할 수 없습니다
+              {t('nl2sqlExt.cannotGenerateERD')}
             </div>
           )}
         </div>
@@ -330,6 +332,7 @@ function TableChip({
   onRemove,
   onPreview,
 }: TableChipProps) {
+  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -361,7 +364,7 @@ function TableChip({
         type="button"
         onClick={onPreview}
         className="hover:text-emerald-500 transition-colors"
-        title="데이터 프리뷰"
+        title={t('nl2sqlExt.dataPreview')}
         aria-label={`${rawName} 데이터 프리뷰`}
       >
         <Database className="h-2.5 w-2.5" />

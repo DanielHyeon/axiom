@@ -10,6 +10,7 @@ import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { CPipelineStep, ReactStreamStep } from '@/features/nl2sql/api/oracleNl2sqlApi';
+import { useTranslation } from 'react-i18next';
 
 // ─── 파이프라인 단계 정의 ────────────────────────────────────
 
@@ -53,6 +54,7 @@ function extractCPipelineSteps(steps: ReactStreamStep[]): CPipelineStep[] {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) {
+  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(true);
 
   // c_pipeline 단계만 추출
@@ -115,7 +117,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
           </div>
         </div>
         <Badge variant="secondary" className="text-[10px] font-mono">
-          {pipelineSteps.length}단계
+          {t('nl2sqlExt.stepsCount', { count: pipelineSteps.length })}
         </Badge>
       </button>
 
@@ -148,13 +150,13 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
                 {/* 점수 (있는 경우) */}
                 {step.score != null && (
                   <span className="shrink-0 text-foreground/40">
-                    점수: <strong className="text-foreground/60">{step.score.toFixed(2)}</strong>
+                    {t('nl2sqlExt.scoreLabel')} <strong className="text-foreground/60">{step.score.toFixed(2)}</strong>
                   </span>
                 )}
                 {/* 건수 (있는 경우) */}
                 {step.count != null && (
                   <span className="shrink-0 text-foreground/40">
-                    {step.count}건
+                    {t('nl2sqlExt.countLabel', { count: step.count })}
                   </span>
                 )}
               </div>

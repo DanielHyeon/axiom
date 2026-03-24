@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 export type CaseStatusFilter = 'ALL' | 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'REJECTED';
 export type CaseTypeFilter = 'ALL' | 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -20,20 +21,20 @@ interface CaseFiltersProps {
  onSearchQueryChange?: (v: string) => void;
 }
 
-const STATUS_OPTIONS: { value: CaseStatusFilter; label: string }[] = [
- { value: 'ALL', label: '전체 상태' },
- { value: 'PENDING', label: '대기' },
- { value: 'IN_PROGRESS', label: '진행 중' },
- { value: 'COMPLETED', label: '완료' },
- { value: 'REJECTED', label: '반려' },
+const STATUS_OPTIONS: { value: CaseStatusFilter; labelKey: string }[] = [
+ { value: 'ALL', labelKey: 'caseDashboardExt.status.ALL' },
+ { value: 'PENDING', labelKey: 'caseDashboardExt.status.PENDING' },
+ { value: 'IN_PROGRESS', labelKey: 'caseDashboardExt.status.IN_PROGRESS' },
+ { value: 'COMPLETED', labelKey: 'caseDashboardExt.status.COMPLETED' },
+ { value: 'REJECTED', labelKey: 'caseDashboardExt.status.REJECTED' },
 ];
 
-const TYPE_OPTIONS: { value: CaseTypeFilter; label: string }[] = [
- { value: 'ALL', label: '전체 우선순위' },
- { value: 'CRITICAL', label: '긴급' },
- { value: 'HIGH', label: '높음' },
- { value: 'MEDIUM', label: '중간' },
- { value: 'LOW', label: '낮음' },
+const TYPE_OPTIONS: { value: CaseTypeFilter; labelKey: string }[] = [
+ { value: 'ALL', labelKey: 'caseDashboardExt.priority.ALL' },
+ { value: 'CRITICAL', labelKey: 'caseDashboardExt.priority.CRITICAL' },
+ { value: 'HIGH', labelKey: 'caseDashboardExt.priority.HIGH' },
+ { value: 'MEDIUM', labelKey: 'caseDashboardExt.priority.MEDIUM' },
+ { value: 'LOW', labelKey: 'caseDashboardExt.priority.LOW' },
 ];
 
 export function CaseFilters({
@@ -44,16 +45,17 @@ export function CaseFilters({
  searchQuery = '',
  onSearchQueryChange,
 }: CaseFiltersProps) {
+ const { t } = useTranslation();
  return (
  <div className="flex flex-wrap items-center gap-4">
  <Select value={status} onValueChange={(v) => onStatusChange(v as CaseStatusFilter)}>
  <SelectTrigger className="w-[180px]">
- <SelectValue placeholder="상태" />
+ <SelectValue placeholder={t('caseDashboardExt.statusPlaceholder')} />
  </SelectTrigger>
  <SelectContent>
  {STATUS_OPTIONS.map((opt) => (
  <SelectItem key={opt.value} value={opt.value}>
- {opt.label}
+ {t(opt.labelKey)}
  </SelectItem>
  ))}
  </SelectContent>
@@ -61,12 +63,12 @@ export function CaseFilters({
  {onTypeChange && (
  <Select value={type} onValueChange={(v) => onTypeChange(v as CaseTypeFilter)}>
  <SelectTrigger className="w-[180px]">
- <SelectValue placeholder="우선순위" />
+ <SelectValue placeholder={t('caseDashboardExt.priorityPlaceholder')} />
  </SelectTrigger>
  <SelectContent>
  {TYPE_OPTIONS.map((opt) => (
  <SelectItem key={opt.value} value={opt.value}>
- {opt.label}
+ {t(opt.labelKey)}
  </SelectItem>
  ))}
  </SelectContent>
@@ -77,11 +79,11 @@ export function CaseFilters({
  <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-secondary-foreground" aria-hidden />
  <Input
  type="search"
- placeholder="케이스명 검색..."
+ placeholder={t('caseDashboardExt.searchCase')}
  value={searchQuery}
  onChange={(e) => onSearchQueryChange(e.target.value)}
  className="pl-8 bg-background"
- aria-label="케이스명 검색"
+ aria-label={t('caseDashboardExt.searchCaseAria')}
  />
  </div>
  )}

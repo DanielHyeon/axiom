@@ -4,6 +4,7 @@ import { usePivotConfig } from '@/features/olap/store/usePivotConfig';
 import { DroppableZone } from './DroppableZone';
 import { Button } from '@/components/ui/button';
 import { ArrowLeftRight, Play } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface PivotBuilderProps {
  onRunQuery: () => void;
@@ -11,6 +12,7 @@ interface PivotBuilderProps {
 }
 
 export function PivotBuilder({ onRunQuery, isQuerying }: PivotBuilderProps) {
+ const { t } = useTranslation();
  const { rows, columns, measures, filters, removeFieldFromZone, setRows, setColumns } = usePivotConfig();
 
  const handleSwap = () => {
@@ -24,10 +26,10 @@ export function PivotBuilder({ onRunQuery, isQuerying }: PivotBuilderProps) {
  return (
  <div className="bg-background flex-1 border-r border-border p-6 flex flex-col">
  <div className="flex justify-between items-center mb-6">
- <h2 className="text-sm font-semibold text-foreground">피벗 빌더 (Drag & Drop)</h2>
+ <h2 className="text-sm font-semibold text-foreground">{t('olapPage.pivotBuilder')}</h2>
  <div className="flex gap-2">
  <Button variant="outline" size="sm" onClick={handleSwap} disabled={isQuerying}>
- <ArrowLeftRight size={14} className="mr-1.5" /> 행↔열 전환
+ <ArrowLeftRight size={14} className="mr-1.5" /> {t('olapPage.swapRowCol')}
  </Button>
  <Button
  size="sm"
@@ -35,7 +37,7 @@ export function PivotBuilder({ onRunQuery, isQuerying }: PivotBuilderProps) {
  disabled={!hasRequiredFields || isQuerying}
  className="bg-primary hover:bg-primary/90"
  >
- <Play size={14} className="mr-1.5" /> 분석 실행
+ <Play size={14} className="mr-1.5" /> {t('olapPage.runAnalysis')}
  </Button>
  </div>
  </div>
@@ -48,7 +50,7 @@ export function PivotBuilder({ onRunQuery, isQuerying }: PivotBuilderProps) {
 
  {!hasRequiredFields && (
  <div className="absolute -bottom-8 right-0 text-xs text-warning font-medium">
- 측정값 1개 이상, 행 또는 열 1개 이상 배치하세요.
+ {t('olapPage.requiredFieldsHint')}
  </div>
  )}
  </div>

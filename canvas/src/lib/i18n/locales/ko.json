@@ -168,7 +168,8 @@
       "noDrivers": "Driver / Dimension 노드가 없습니다",
       "noResults": "\"{{query}}\" 검색 결과 없음",
       "evidenceCount": "근거 {{count}}건"
-    }
+    },
+    "impactPathTop": "영향 경로 Top {{count}}"
   },
   "ontology": {
     "title": "Ontology",
@@ -184,6 +185,18 @@
     "caseSelector": {
       "title": "온톨로지를 탐색할 케이스를 선택하세요",
       "noCases": "등록된 케이스가 없습니다."
+    },
+    "nodeDetail": {
+      "selectHint1": "노드를 선택하면",
+      "selectHint2": "상세 정보가 표시됩니다.",
+      "title": "노드 상세",
+      "properties": "속성",
+      "connections": "연결",
+      "findPath": "이 노드로 경로 탐색",
+      "impactAnalysis": "영향 분석"
+    },
+    "pathHighlighter": {
+      "endSearch": "탐색 종료"
     }
   },
   "olap": {
@@ -219,7 +232,8 @@
     },
     "feedLabel": "알림 피드",
     "timelineLabel": "이벤트 타임라인",
-    "rulesLabel": "알림 규칙 설정"
+    "rulesLabel": "알림 규칙 설정",
+    "noEvents": "이벤트가 없습니다."
   },
   "datasource": {
     "erd": {
@@ -273,7 +287,8 @@
   },
   "dataQuality": {
     "title": "데이터 품질",
-    "subtitle": "품질 테스트로 데이터에 대한 신뢰를 구축하세요."
+    "subtitle": "품질 테스트로 데이터에 대한 신뢰를 구축하세요.",
+    "addTestCase": "테스트 케이스 추가"
   },
   "ontologyWizard": {
     "title": "온톨로지 위자드",
@@ -394,7 +409,15 @@
     "toolbox": "도구 상자 (Toolbox)",
     "propertyPanel": "속성 패널 (Property Panel)",
     "selectNodeHint": "캔버스에서 노드를 선택하여 속성을 확인하세요.",
-    "minimapAria": "미니맵: 클릭하면 해당 위치로 뷰 이동"
+    "minimapAria": "미니맵: 클릭하면 해당 위치로 뷰 이동",
+    "basicProperties": "기본 속성",
+    "nodeLabelAria": "노드 라벨",
+    "timeProperties": "시간축 속성",
+    "timePropertiesHint": "예상 소요·SLA·실제 평균 (연동 예정)",
+    "eventLogBinding": "이벤트 로그 바인딩",
+    "eventLogBindingHint": "소스 테이블·타임스탬프·케이스 ID (연동 예정)",
+    "measureBinding": "측정값 바인딩",
+    "measureBindingHint": "연결된 KPI (연동 예정)"
   },
   "workflowEditor": {
     "title": "워크플로 에디터",
@@ -466,7 +489,11 @@
     },
     "canvas": {
       "empty": "워크플로가 비어 있습니다",
-      "emptyHint": "도구 모음에서 노드를 추가하여 워크플로를 구성하세요"
+      "emptyHint": "도구 모음에서 노드를 추가하여 워크플로를 구성하세요",
+      "ariaLabel": "워크플로 캔버스",
+      "zoomIn": "확대",
+      "zoomOut": "축소",
+      "fitAll": "전체 보기"
     },
     "saved": "워크플로가 저장되었습니다.",
     "saveFailed": "저장에 실패했습니다."
@@ -944,8 +971,13 @@
       "all": "전체",
       "searchPlaceholder": "노드 검색...",
       "selectedNodes": "선택된 노드",
-      "noSelection": "아직 노드를 선택하지 않았습니다",
-      "nodeCount": "{{count}}개 노드 선택"
+      "selectedTitle": "선택된 노드",
+      "noSelection": "아래에서 노드를 검색하고 추가하세요.",
+      "nodeCount": "{{count}}개 선택됨",
+      "searchTitle": "노드 검색",
+      "noSearchResults": "검색 결과가 없습니다.",
+      "noAvailableNodes": "선택 가능한 노드가 없습니다.",
+      "nodeDisplayCount": "{{count}}개 노드 표시 중"
     },
     "step3": {
       "title": "인과 관계 발견",
@@ -962,7 +994,13 @@
       "direction": "방향",
       "positive": "양(+)",
       "negative": "음(-)",
-      "skipEventFork": "Event Fork 모드에서 건너뛰기",
+      "skipEventFork": "건너뛰기",
+      "eventForkHint": "Event Fork 모드에서는 인과 관계 분석이 필수가 아닙니다. 분석을 건너뛰고 바로 개입 설정으로 이동할 수 있습니다.",
+      "causalAnalysis": "인과 분석",
+      "targetNodeCount": "{{count}}개 노드 대상",
+      "thresholdHint": "임계값 이상의 신뢰도를 가진 관계만 표시합니다.",
+      "discoveredRelations": "발견된 인과관계",
+      "method": "방법",
       "noRelations": "발견된 인과 관계가 없습니다"
     },
     "step4": {
@@ -973,7 +1011,11 @@
       "selectField": "필드 선택",
       "value": "개입 값",
       "baseline": "기준값",
-      "descriptionLabel": "개입 설명",
+      "descriptionLabel": "설명 (선택)",
+      "descriptionPlaceholder": "개입 설명...",
+      "configuredInterventions": "설정된 개입",
+      "interventionCount": "{{count}}개",
+      "deleteIntervention": "개입 삭제",
       "noInterventions": "개입을 추가해주세요"
     },
     "step5": {
@@ -984,7 +1026,10 @@
       "kpiDelta": "KPI 변화 요약",
       "baselineLabel": "기준",
       "eventTimeline": "이벤트 타임라인",
-      "noResults": "시뮬레이션을 실행하면 결과가 표시됩니다"
+      "noResults": "시뮬레이션을 실행하면 결과가 표시됩니다",
+      "kpiDeltaChart": "KPI 변화량 (%)",
+      "comparing": "비교 중...",
+      "compareScenarios": "{{count}}개 시나리오 비교"
     },
     "mode": {
       "dagPropagation": "DAG 전파",
@@ -1389,7 +1434,21 @@
     "pivotEmptyHint": "피벗을 실행하면 결과가 여기에 표시됩니다",
     "pivotNoResults": "결과가 없습니다",
     "pivotRowCount": "{{count}}행",
-    "connectionInfo": "연결 정보"
+    "connectionInfo": "연결 정보",
+    "cubeManagement": "큐브 관리",
+    "add": "추가",
+    "aiAutoGenerate": "AI 자동생성",
+    "cancel": "취소",
+    "noCubes": "등록된 큐브가 없습니다",
+    "publish": "게시",
+    "validationErrorsTitle": "검증 오류",
+    "noDimensions": "정의된 차원이 없습니다",
+    "noMeasures": "정의된 측정값이 없습니다",
+    "etlPipelines": "ETL 파이프라인",
+    "noPipelines": "등록된 파이프라인이 없습니다",
+    "run": "실행",
+    "noRunHistory": "실행 이력 없음",
+    "recentRunHistory": "최근 실행 이력"
   },
   "semanticCatalogExt": {
     "grainId": "그레인 ID",
@@ -1560,6 +1619,10 @@
   },
   "securityExt": {
     "roleManagement": "역할 관리",
+    "roleManagementDesc": "RBAC 역할 정의 및 리소스별 권한 매트릭스를 관리합니다",
+    "system": "시스템",
+    "permissionMatrix": "권한 매트릭스",
+    "noPermissions": "설정된 권한이 없습니다",
     "resource": {
       "users": "사용자",
       "roles": "역할",
@@ -1582,6 +1645,13 @@
     "loadingRoles": "역할 데이터 로딩 중...",
     "noRoles": "등록된 역할이 없습니다",
     "securityPolicies": "보안 정책",
+    "securityPoliciesDesc": "SQL 쿼리에 적용되는 보안 정책을 관리합니다",
+    "policyBanner": "보안 정책은 Oracle 서비스의 SQL Guard에 의해 쿼리 실행 시 자동 적용됩니다. 백엔드 API 연동 전까지 UI 미리보기로 제공됩니다.",
+    "active": "활성",
+    "inactive": "비활성",
+    "policyRulesJson": "정책 규칙 (JSON)",
+    "cancel": "취소",
+    "save": "저장",
     "policyType": {
       "query_limit": "쿼리 제한",
       "column_mask": "컬럼 마스킹",
@@ -1599,6 +1669,7 @@
     "editPolicy": "정책 수정",
     "priority": "우선순위: {{value}}",
     "auditLog": "감사 로그",
+    "auditLogDesc": "시스템 활동 이력을 조회하고 보안 이벤트를 모니터링합니다",
     "decision": {
       "allowed": "허용",
       "denied": "거부",
@@ -1627,6 +1698,12 @@
     "rewrittenSql": "변환된 SQL",
     "executionTime": "실행 시간",
     "tablePermissions": "테이블 권한",
+    "tablePermissionsDesc": "스키마/테이블별 역할 접근 권한을 관리합니다. 체크박스로 읽기/쓰기 권한을 제어합니다.",
+    "schemaTable": "스키마 / 테이블",
+    "noSearchResults": "검색 결과가 없습니다",
+    "legendRead": "R = 읽기 (Read)",
+    "legendWrite": "W = 쓰기 (Write)",
+    "legendWriteHint": "* 쓰기 활성화 시 읽기가 자동으로 활성화됩니다",
     "tablePermLoadFailed": "테이블 권한 데이터를 불러오는 데 실패했습니다. {{message}}",
     "loadingTablePerms": "테이블 권한 로딩 중...",
     "noTablePerms": "등록된 테이블 권한이 없습니다",
@@ -2185,7 +2262,8 @@
     "ontologyNotLinkedHint": "온톨로지에 매핑하면 그래프 분석과 영향도 분석에 활용됩니다.",
     "ontologyLink": "온톨로지 노드 연결",
     "xAxisLabel": "X축 (카테고리)",
-    "yAxisLabel": "Y축 (값)"
+    "yAxisLabel": "Y축 (값)",
+    "cancelBtn": "취소"
   },
   "ingestionExt": {
     "previewClose": "미리보기 닫기",
@@ -2309,7 +2387,11 @@
       }
     },
     "myWork": "내 할당 업무",
-    "noWorkitems": "할당된 워크아이템이 없습니다."
+    "noWorkitems": "할당된 워크아이템이 없습니다.",
+    "nl2sqlLabel": "NL2SQL",
+    "healthySummary": "{{count}}/{{total}} 정상",
+    "greeting": "안녕하세요, {{name}}님.",
+    "roleWorkCount": "{{role}} · 대기 업무 {{count}}건"
   },
   "dataQualityExt": {
     "totalTests": "전체 테스트",
@@ -2596,7 +2678,22 @@
     "failure": "실패",
     "promptPlaceholder": "생성하고 싶은 코드를 설명하세요...",
     "tableExample": "예: behavior_results",
-    "schemaExample": "예: public"
+    "schemaExample": "예: public",
+    "instanceDataLabel": "인스턴스 데이터 (JSON)",
+    "executing": "실행 중...",
+    "executeBtn": "실행",
+    "autoFixNotice": "코드가 자동 수정되었습니다. ({{count}}회 시도)",
+    "executedCode": "실행된 코드:",
+    "promptLabel": "프롬프트",
+    "languageLabel": "언어",
+    "generating": "생성 중...",
+    "generateBtn": "코드 생성",
+    "saveRunFirst": "먼저 실행 탭에서 Behavior를 실행하세요.",
+    "tableNameLabel": "테이블 이름 *",
+    "schemaNameLabel": "스키마 이름 (선택)",
+    "dataPreview": "데이터 프리뷰",
+    "saving": "저장 중...",
+    "saveBtn": "결과 저장"
   },
   "explorerExt": {
     "properties": "속성",
@@ -3112,7 +3209,21 @@
     "m5839e1b5": ": (err as Error).message || 'SQL 실행에 실패했습니다.';",
     "directSqlHint": "SQL 쿼리를 직접 입력하세요",
     "executionDone": "실행 완료 (결과 없음, {{count}} rows affected)",
-    "waitingForInput": "사용자 입력 대기 중"
+    "waitingForInput": "사용자 입력 대기 중",
+    "unsupportedChartFormat": "차트 렌더링을 지원하지 않는 형식입니다.",
+    "noDatasource": "데이터소스 없음",
+    "selectDatasource": "데이터소스 선택",
+    "sqlExecFailed": "SQL 실행에 실패했습니다.",
+    "sqlExec": "SQL 실행",
+    "executing": "실행 중...",
+    "selectDatasourceFirst": "데이터소스를 먼저 선택하세요.",
+    "executionDoneNoResult": "실행 완료 (결과 없음, {{count}} rows affected)",
+    "queryExecuting": "쿼리 실행 중...",
+    "chartTab": "차트",
+    "tableTab": "테이블",
+    "noResult": "결과 없음",
+    "copySql": "복사",
+    "runSql": "실행"
   },
   "olapPage": {
     "msg064e0768": "에러 배너 닫기",
@@ -3122,7 +3233,11 @@
     "m07a52cff": "여기에 항목을 드롭하세요",
     "mddd664b2": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요.",
     "swapRowCol": "행↔열 전환",
-    "runAnalysis": "분석 실행"
+    "runAnalysis": "분석 실행",
+    "dimensions": "차원 (Dimensions)",
+    "measures": "측정값 (Measures)",
+    "pivotBuilder": "피벗 빌더 (Drag & Drop)",
+    "requiredFieldsHint": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요."
   },
   "ontologyPage": {
     "msg9a0c3deb": "하이라이트.",
@@ -3164,7 +3279,15 @@
     "pathExplore": "이 노드로 경로 탐색",
     "impactAnalysis": "영향 분석",
     "graphSummary": "전체: {{nodes}} nodes, {{relations}} relations",
-    "orphanCount": "고립: {{count}}"
+    "orphanCount": "고립: {{count}}",
+    "relationType": "관계 유형",
+    "addBtn": "추가",
+    "tableView": "테이블",
+    "layerHeader": "레이어",
+    "relationHeader": "관계",
+    "schemaHeader": "스키마",
+    "createdAtHeader": "생성일",
+    "loading": "로딩 중..."
   },
   "processDesignerPage2": {
     "msg6a50e378": "보드가 없습니다",
@@ -3321,5 +3444,111 @@
     "deviationDetail": "{{count}}건 ({{pct}}%)",
     "minutesSuffix": "{{min}}분",
     "frequencyCount": "{{count}}건"
+  },
+  "ingestionExt": {
+    "etlPipeline": "ETL 파이프라인",
+    "countUnit": "{{count}}개",
+    "createPipeline": "파이프라인 생성",
+    "loadingPipelines": "파이프라인 목록 로딩 중...",
+    "noPipelines": "등록된 파이프라인이 없습니다",
+    "createFirstPipeline": "첫 번째 파이프라인 생성하기",
+    "stop": "중지",
+    "noStepInfo": "파이프라인 단계 정보가 없습니다",
+    "inProgress": "진행 중",
+    "uploadFiles": "업로드 파일",
+    "completedCount": "{{completed}}/{{total}} 완료",
+    "failedCount": "({{failed}} 실패)",
+    "clearAll": "전체 삭제",
+    "statusPending": "대기 중",
+    "statusUploading": "업로드 중",
+    "statusProcessing": "처리 중",
+    "statusCompleted": "완료",
+    "statusFailed": "실패",
+    "removeFile": "파일 제거"
+  },
+  "insightExt": {
+    "nodeDetail": "노드 상세",
+    "impactScore": "영향 점수",
+    "scoreBreakdown": "점수 분해",
+    "relatedQueries": "관련 쿼리",
+    "relatedQueriesCount": "({{count}}건)",
+    "noEvidenceQueries": "이 노드에 대한 근거 쿼리가 없습니다",
+    "cannotLoadNode": "노드 데이터를 불러올 수 없습니다",
+    "sqlGraphPlaceholder": "SQL이 실행되면 구조 그래프가 표시됩니다",
+    "analyzingSql": "SQL 구조 분석 중...",
+    "parseFailed": "파싱 실패",
+    "noGraphNodes": "그래프 노드가 없습니다",
+    "score": "점수:",
+    "tables": "테이블:"
+  },
+  "instancePreview": {
+    "panelClose": "패널 닫기",
+    "previewError": "데이터 프리뷰를 불러오지 못했습니다",
+    "loadMoreError": "추가 데이터 로드에 실패했습니다.",
+    "noBinding": "바인딩된 데이터가 없습니다",
+    "connectDatasource": "이 노드에 데이터소스를 연결하세요",
+    "noTableData": "테이블에 데이터가 없습니다",
+    "recordCount": "{{num}}건",
+    "loadMore": "더 보기"
+  },
+  "lineageExt": {
+    "dataLineage": "데이터 리니지",
+    "refresh": "새로고침",
+    "statSource": "소스 테이블",
+    "statTable": "테이블",
+    "statTransform": "변환",
+    "statView": "뷰",
+    "statReport": "리포트",
+    "statDataFlow": "데이터 흐름",
+    "legendSource": "소스",
+    "legendTable": "테이블",
+    "legendColumn": "컬럼",
+    "legendView": "뷰",
+    "legendTransform": "변환",
+    "legendReport": "리포트",
+    "legendAriaLabel": "리니지 범례",
+    "legendDataFlow": "데이터 흐름"
+  },
+  "nl2sqlExt": {
+    "stepsCount": "{{count}}단계",
+    "scoreLabel": "점수:",
+    "countLabel": "{{count}}건",
+    "selectDatasourceHint": "데이터소스를 선택하면 스키마 트리가 표시됩니다.",
+    "dataAssets": "데이터 자산",
+    "loading": "로딩 중...",
+    "noColumns": "컬럼 없음",
+    "dataFetchFailed": "데이터 조회에 실패했습니다",
+    "close": "닫기",
+    "fetchingData": "데이터 조회 중...",
+    "retry": "재시도",
+    "noData": "데이터가 없습니다",
+    "historyLoadError": "이력을 불러올 수 없습니다.",
+    "noRecentQueries": "최근 질의가 없습니다.",
+    "codeAnalysis": "코드분석",
+    "datasource": "데이터소스",
+    "contextIncluded": "{{included}}/{{total}} 컨텍스트 포함",
+    "addRelation": "관계추가",
+    "cannotGenerateERD": "ERD를 생성할 수 없습니다",
+    "dataPreview": "데이터 프리뷰",
+    "addFkRelation": "FK 관계 추가"
+  },
+  "whatif": {
+    "scenario": "시나리오",
+    "npvWacc": "NPV (WACC)",
+    "feasibility": "실현가능성",
+    "parameterSettings": "매개변수 설정",
+    "parameterSettingsHint": "슬라이더를 조정하여 시뮬레이션 하세요.",
+    "sensitivityAnalysis": "민감도 분석 (Tornado Chart)",
+    "decreaseImpact": "◄ 감소 영향",
+    "increaseImpact": "증가 영향 ►"
+  },
+  "dataIngestion": {
+    "title": "데이터 수집",
+    "subtitle": "파일 업로드 및 ETL 파이프라인을 통해 데이터를 수집합니다",
+    "connectionTest": "연결 테스트",
+    "usageGuide": "사용 가이드",
+    "guideStep1": "CSV, JSON, Excel 파일을 드래그하거나 클릭하여 업로드",
+    "guideStep2": "대상 데이터소스를 선택하면 해당 DB로 자동 적재",
+    "guideStep3": "ETL 파이프라인 탭에서 자동화된 수집 파이프라인 관리"
   }
 }

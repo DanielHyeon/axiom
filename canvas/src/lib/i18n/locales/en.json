@@ -168,7 +168,8 @@
       "noDrivers": "No Driver / Dimension nodes found",
       "noResults": "No results for \"{{query}}\"",
       "evidenceCount": "{{count}} evidence(s)"
-    }
+    },
+    "impactPathTop": "Impact Path Top {{count}}"
   },
   "ontology": {
     "title": "Ontology",
@@ -184,6 +185,18 @@
     "caseSelector": {
       "title": "Select a case to explore the ontology",
       "noCases": "No cases registered."
+    },
+    "nodeDetail": {
+      "selectHint1": "Select a node",
+      "selectHint2": "to view details.",
+      "title": "Node Details",
+      "properties": "Properties",
+      "connections": "Connections",
+      "findPath": "Find path to this node",
+      "impactAnalysis": "Impact Analysis"
+    },
+    "pathHighlighter": {
+      "endSearch": "End Search"
     }
   },
   "olap": {
@@ -219,7 +232,8 @@
     },
     "feedLabel": "Alert feed",
     "timelineLabel": "Event timeline",
-    "rulesLabel": "Alert rule settings"
+    "rulesLabel": "Alert rule settings",
+    "noEvents": "No events."
   },
   "datasource": {
     "erd": {
@@ -273,7 +287,8 @@
   },
   "dataQuality": {
     "title": "Data Quality",
-    "subtitle": "Build trust in your data with quality tests."
+    "subtitle": "Build trust in your data with quality tests.",
+    "addTestCase": "Add Test Case"
   },
   "ontologyWizard": {
     "title": "Ontology Wizard",
@@ -394,7 +409,15 @@
     "toolbox": "Toolbox",
     "propertyPanel": "Property Panel",
     "selectNodeHint": "Select a node on the canvas to view properties.",
-    "minimapAria": "Minimap: click to move view to that position"
+    "minimapAria": "Minimap: click to move view to that position",
+    "basicProperties": "Basic Properties",
+    "nodeLabelAria": "Node label",
+    "timeProperties": "Time Properties",
+    "timePropertiesHint": "Expected duration, SLA, actual average (coming soon)",
+    "eventLogBinding": "Event Log Binding",
+    "eventLogBindingHint": "Source table, timestamp, case ID (coming soon)",
+    "measureBinding": "Measure Binding",
+    "measureBindingHint": "Linked KPIs (coming soon)"
   },
   "workflowEditor": {
     "title": "Workflow Editor",
@@ -466,7 +489,11 @@
     },
     "canvas": {
       "empty": "Workflow is empty",
-      "emptyHint": "Add nodes from the toolbar to build your workflow"
+      "emptyHint": "Add nodes from the toolbar to build your workflow",
+      "ariaLabel": "Workflow Canvas",
+      "zoomIn": "Zoom In",
+      "zoomOut": "Zoom Out",
+      "fitAll": "Fit All"
     },
     "saved": "Workflow saved.",
     "saveFailed": "Failed to save."
@@ -944,8 +971,13 @@
       "all": "All",
       "searchPlaceholder": "Search nodes...",
       "selectedNodes": "Selected Nodes",
-      "noSelection": "No nodes selected yet",
-      "nodeCount": "{{count}} nodes selected"
+      "selectedTitle": "Selected Nodes",
+      "noSelection": "Search and add nodes below.",
+      "nodeCount": "{{count}} selected",
+      "searchTitle": "Node Search",
+      "noSearchResults": "No search results.",
+      "noAvailableNodes": "No available nodes.",
+      "nodeDisplayCount": "{{count}} nodes displayed"
     },
     "step3": {
       "title": "Causal Discovery",
@@ -962,7 +994,13 @@
       "direction": "Direction",
       "positive": "Positive (+)",
       "negative": "Negative (-)",
-      "skipEventFork": "Skip in Event Fork mode",
+      "skipEventFork": "Skip",
+      "eventForkHint": "Causal analysis is not required in Event Fork mode. You can skip analysis and proceed directly to intervention settings.",
+      "causalAnalysis": "Causal Analysis",
+      "targetNodeCount": "{{count}} nodes targeted",
+      "thresholdHint": "Only relations with confidence above the threshold are shown.",
+      "discoveredRelations": "Discovered Causal Relations",
+      "method": "Method",
       "noRelations": "No causal relationships found"
     },
     "step4": {
@@ -973,7 +1011,11 @@
       "selectField": "Select Field",
       "value": "Intervention Value",
       "baseline": "Baseline",
-      "descriptionLabel": "Description",
+      "descriptionLabel": "Description (optional)",
+      "descriptionPlaceholder": "Intervention description...",
+      "configuredInterventions": "Configured Interventions",
+      "interventionCount": "{{count}}",
+      "deleteIntervention": "Delete intervention",
       "noInterventions": "Please add an intervention"
     },
     "step5": {
@@ -984,7 +1026,10 @@
       "kpiDelta": "KPI Delta Summary",
       "baselineLabel": "Baseline",
       "eventTimeline": "Event Timeline",
-      "noResults": "Run the simulation to see results"
+      "noResults": "Run the simulation to see results",
+      "kpiDeltaChart": "KPI Delta (%)",
+      "comparing": "Comparing...",
+      "compareScenarios": "Compare {{count}} scenarios"
     },
     "mode": {
       "dagPropagation": "DAG Propagation",
@@ -1389,7 +1434,21 @@
     "pivotEmptyHint": "Run the pivot to see results here",
     "pivotNoResults": "No results",
     "pivotRowCount": "{{count}} rows",
-    "connectionInfo": "Connection Info"
+    "connectionInfo": "Connection Info",
+    "cubeManagement": "Cube Management",
+    "add": "Add",
+    "aiAutoGenerate": "AI Auto-generate",
+    "cancel": "Cancel",
+    "noCubes": "No cubes registered",
+    "publish": "Publish",
+    "validationErrorsTitle": "Validation Errors",
+    "noDimensions": "No dimensions defined",
+    "noMeasures": "No measures defined",
+    "etlPipelines": "ETL Pipelines",
+    "noPipelines": "No pipelines registered",
+    "run": "Run",
+    "noRunHistory": "No run history",
+    "recentRunHistory": "Recent Run History"
   },
   "semanticCatalogExt": {
     "grainId": "Grain ID",
@@ -1560,6 +1619,10 @@
   },
   "securityExt": {
     "roleManagement": "Role Management",
+    "roleManagementDesc": "Manage RBAC role definitions and resource permission matrix",
+    "system": "System",
+    "permissionMatrix": "Permission Matrix",
+    "noPermissions": "No permissions configured",
     "resource": {
       "users": "Users",
       "roles": "Roles",
@@ -1582,6 +1645,13 @@
     "loadingRoles": "Loading role data...",
     "noRoles": "No roles registered",
     "securityPolicies": "Security Policies",
+    "securityPoliciesDesc": "Manage security policies applied to SQL queries",
+    "policyBanner": "Security policies are automatically applied by Oracle service's SQL Guard during query execution. Provided as UI preview until backend API integration.",
+    "active": "Active",
+    "inactive": "Inactive",
+    "policyRulesJson": "Policy Rules (JSON)",
+    "cancel": "Cancel",
+    "save": "Save",
     "policyType": {
       "query_limit": "Query Limit",
       "column_mask": "Column Masking",
@@ -1599,6 +1669,7 @@
     "editPolicy": "Edit policy",
     "priority": "Priority: {{value}}",
     "auditLog": "Audit Logs",
+    "auditLogDesc": "View system activity history and monitor security events",
     "decision": {
       "allowed": "Allowed",
       "denied": "Denied",
@@ -1627,6 +1698,12 @@
     "rewrittenSql": "Rewritten SQL",
     "executionTime": "Execution Time",
     "tablePermissions": "Table Permissions",
+    "tablePermissionsDesc": "Manage role access permissions per schema/table. Use checkboxes to control read/write access.",
+    "schemaTable": "Schema / Table",
+    "noSearchResults": "No search results",
+    "legendRead": "R = Read",
+    "legendWrite": "W = Write",
+    "legendWriteHint": "* Enabling write automatically enables read",
     "tablePermLoadFailed": "Failed to load table permissions. {{message}}",
     "loadingTablePerms": "Loading table permissions...",
     "noTablePerms": "No table permissions registered",
@@ -2185,7 +2262,8 @@
     "ontologyNotLinkedHint": "Map to ontology to leverage graph analysis and impact analysis.",
     "ontologyLink": "Link Ontology Node",
     "xAxisLabel": "X-Axis (Category)",
-    "yAxisLabel": "Y-Axis (Value)"
+    "yAxisLabel": "Y-Axis (Value)",
+    "cancelBtn": "Cancel"
   },
   "ingestionExt": {
     "previewClose": "Close preview",
@@ -2309,7 +2387,11 @@
       }
     },
     "myWork": "My Work",
-    "noWorkitems": "No assigned workitems."
+    "noWorkitems": "No assigned workitems.",
+    "nl2sqlLabel": "NL2SQL",
+    "healthySummary": "{{count}}/{{total}} Healthy",
+    "greeting": "Hello, {{name}}.",
+    "roleWorkCount": "{{role}} · {{count}} pending tasks"
   },
   "dataQualityExt": {
     "totalTests": "Total Tests",
@@ -2596,7 +2678,22 @@
     "failure": "Failed",
     "promptPlaceholder": "Describe the code you want to generate...",
     "tableExample": "e.g. behavior_results",
-    "schemaExample": "e.g. public"
+    "schemaExample": "e.g. public",
+    "instanceDataLabel": "Instance Data (JSON)",
+    "executing": "Executing...",
+    "executeBtn": "Execute",
+    "autoFixNotice": "Code auto-fixed. ({{count}} attempts)",
+    "executedCode": "Executed code:",
+    "promptLabel": "Prompt",
+    "languageLabel": "Language",
+    "generating": "Generating...",
+    "generateBtn": "Generate Code",
+    "saveRunFirst": "Run a Behavior in the Execute tab first.",
+    "tableNameLabel": "Table Name *",
+    "schemaNameLabel": "Schema Name (optional)",
+    "dataPreview": "Data Preview",
+    "saving": "Saving...",
+    "saveBtn": "Save Result"
   },
   "explorerExt": {
     "properties": "Properties",
@@ -3112,7 +3209,21 @@
     "m5839e1b5": ": (err as Error).message || 'SQL 실행에 실패했습니다.';",
     "directSqlHint": "Enter SQL query directly",
     "executionDone": "Execution complete (no results, {{count}} rows affected)",
-    "waitingForInput": "Waiting for user input"
+    "waitingForInput": "Waiting for user input",
+    "unsupportedChartFormat": "Unsupported chart format.",
+    "noDatasource": "No datasource",
+    "selectDatasource": "Select datasource",
+    "sqlExecFailed": "SQL execution failed.",
+    "sqlExec": "Execute SQL",
+    "executing": "Executing...",
+    "selectDatasourceFirst": "Please select a datasource first.",
+    "executionDoneNoResult": "Execution complete (no results, {{count}} rows affected)",
+    "queryExecuting": "Executing query...",
+    "chartTab": "Chart",
+    "tableTab": "Table",
+    "noResult": "No results",
+    "copySql": "Copy",
+    "runSql": "Run"
   },
   "olapPage": {
     "msg064e0768": "에러 배너 닫기",
@@ -3122,7 +3233,11 @@
     "m07a52cff": "여기에 항목을 드롭하세요",
     "mddd664b2": "측정값 1개 이상, 행 또는 열 1개 이상 배치하세요.",
     "swapRowCol": "Swap Rows/Cols",
-    "runAnalysis": "Run Analysis"
+    "runAnalysis": "Run Analysis",
+    "dimensions": "Dimensions",
+    "measures": "Measures (Values)",
+    "pivotBuilder": "Pivot Builder (Drag & Drop)",
+    "requiredFieldsHint": "Place at least 1 measure and 1 row or column."
   },
   "ontologyPage": {
     "msg9a0c3deb": "하이라이트.",
@@ -3164,7 +3279,15 @@
     "pathExplore": "Explore path to this node",
     "impactAnalysis": "Impact Analysis",
     "graphSummary": "Total: {{nodes}} nodes, {{relations}} relations",
-    "orphanCount": "Orphaned: {{count}}"
+    "orphanCount": "Orphaned: {{count}}",
+    "relationType": "Relation Type",
+    "addBtn": "Add",
+    "tableView": "Table",
+    "layerHeader": "Layer",
+    "relationHeader": "Relation",
+    "schemaHeader": "Schema",
+    "createdAtHeader": "Created",
+    "loading": "Loading..."
   },
   "processDesignerPage2": {
     "msg6a50e378": "보드가 없습니다",
@@ -3321,5 +3444,111 @@
     "deviationDetail": "{{count}} cases ({{pct}}%)",
     "minutesSuffix": "{{min}} min",
     "frequencyCount": "{{count}} cases"
+  },
+  "ingestionExt": {
+    "etlPipeline": "ETL Pipeline",
+    "countUnit": "{{count}}",
+    "createPipeline": "Create Pipeline",
+    "loadingPipelines": "Loading pipelines...",
+    "noPipelines": "No pipelines registered",
+    "createFirstPipeline": "Create your first pipeline",
+    "stop": "Stop",
+    "noStepInfo": "No pipeline step information",
+    "inProgress": "In Progress",
+    "uploadFiles": "Upload Files",
+    "completedCount": "{{completed}}/{{total}} completed",
+    "failedCount": "({{failed}} failed)",
+    "clearAll": "Clear All",
+    "statusPending": "Pending",
+    "statusUploading": "Uploading",
+    "statusProcessing": "Processing",
+    "statusCompleted": "Completed",
+    "statusFailed": "Failed",
+    "removeFile": "Remove file"
+  },
+  "insightExt": {
+    "nodeDetail": "Node Detail",
+    "impactScore": "Impact Score",
+    "scoreBreakdown": "Score Breakdown",
+    "relatedQueries": "Related Queries",
+    "relatedQueriesCount": "({{count}})",
+    "noEvidenceQueries": "No evidence queries for this node",
+    "cannotLoadNode": "Unable to load node data",
+    "sqlGraphPlaceholder": "Structure graph will appear when SQL is executed",
+    "analyzingSql": "Analyzing SQL structure...",
+    "parseFailed": "Parse Failed",
+    "noGraphNodes": "No graph nodes",
+    "score": "Score:",
+    "tables": "Tables:"
+  },
+  "instancePreview": {
+    "panelClose": "Close panel",
+    "previewError": "Failed to load data preview",
+    "loadMoreError": "Failed to load additional data.",
+    "noBinding": "No bound data",
+    "connectDatasource": "Connect a datasource to this node",
+    "noTableData": "No data in table",
+    "recordCount": "{{num}} records",
+    "loadMore": "Load More"
+  },
+  "lineageExt": {
+    "dataLineage": "Data Lineage",
+    "refresh": "Refresh",
+    "statSource": "Source Tables",
+    "statTable": "Tables",
+    "statTransform": "Transforms",
+    "statView": "Views",
+    "statReport": "Reports",
+    "statDataFlow": "Data Flows",
+    "legendSource": "Source",
+    "legendTable": "Table",
+    "legendColumn": "Column",
+    "legendView": "View",
+    "legendTransform": "Transform",
+    "legendReport": "Report",
+    "legendAriaLabel": "Lineage Legend",
+    "legendDataFlow": "Data Flow"
+  },
+  "nl2sqlExt": {
+    "stepsCount": "{{count}} steps",
+    "scoreLabel": "Score:",
+    "countLabel": "{{count}}",
+    "selectDatasourceHint": "Select a datasource to display the schema tree.",
+    "dataAssets": "Data Assets",
+    "loading": "Loading...",
+    "noColumns": "No columns",
+    "dataFetchFailed": "Data fetch failed",
+    "close": "Close",
+    "fetchingData": "Fetching data...",
+    "retry": "Retry",
+    "noData": "No data",
+    "historyLoadError": "Failed to load history.",
+    "noRecentQueries": "No recent queries.",
+    "codeAnalysis": "Code Analysis",
+    "datasource": "Datasource",
+    "contextIncluded": "{{included}}/{{total}} in context",
+    "addRelation": "Add Relation",
+    "cannotGenerateERD": "Cannot generate ERD",
+    "dataPreview": "Data Preview",
+    "addFkRelation": "Add FK Relation"
+  },
+  "whatif": {
+    "scenario": "Scenario",
+    "npvWacc": "NPV (WACC)",
+    "feasibility": "Feasibility",
+    "parameterSettings": "Parameter Settings",
+    "parameterSettingsHint": "Adjust sliders to run simulation.",
+    "sensitivityAnalysis": "Sensitivity Analysis (Tornado Chart)",
+    "decreaseImpact": "◄ Decrease Impact",
+    "increaseImpact": "Increase Impact ►"
+  },
+  "dataIngestion": {
+    "title": "Data Ingestion",
+    "subtitle": "Collect data via file uploads and ETL pipelines",
+    "connectionTest": "Connection Test",
+    "usageGuide": "Usage Guide",
+    "guideStep1": "Drag or click to upload CSV, JSON, or Excel files",
+    "guideStep2": "Select a target datasource for automatic loading",
+    "guideStep3": "Manage automated ingestion pipelines in the ETL tab"
   }
 }

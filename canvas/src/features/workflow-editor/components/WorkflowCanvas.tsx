@@ -270,18 +270,18 @@ export function WorkflowCanvas() {
         ref={containerRef}
         className="w-full h-full"
         role="img"
-        aria-label="워크플로 캔버스"
+        aria-label={t('workflowEditor.canvas.ariaLabel')}
       />
 
       {/* 줌 컨트롤 오버레이 */}
       <div className="absolute bottom-3 right-3 flex flex-col gap-1 bg-card/80 backdrop-blur-sm border border-border rounded-lg p-1">
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} title="확대">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomIn} title={t('workflowEditor.canvas.zoomIn')}>
           <ZoomIn className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} title="축소">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={zoomOut} title={t('workflowEditor.canvas.zoomOut')}>
           <ZoomOut className="h-3.5 w-3.5" />
         </Button>
-        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitAll} title="전체 보기">
+        <Button variant="ghost" size="icon" className="h-7 w-7" onClick={fitAll} title={t('workflowEditor.canvas.fitAll')}>
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
       </div>

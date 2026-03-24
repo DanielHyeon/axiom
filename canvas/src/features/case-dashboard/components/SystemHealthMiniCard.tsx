@@ -6,6 +6,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { coreApi } from '@/lib/api/clients';
 import { Activity } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 
 interface ServiceStatus {
   name: string;
@@ -37,6 +38,7 @@ const statusColor: Record<string, string> = {
 };
 
 export function SystemHealthMiniCard() {
+  const { t } = useTranslation();
   const { data: services = [] } = useQuery({
     queryKey: ['system-health'],
     queryFn: fetchServiceHealth,
@@ -49,7 +51,7 @@ export function SystemHealthMiniCard() {
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-3">
         <Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        <h3 className="text-sm font-medium">시스템 상태</h3>
+        <h3 className="text-sm font-medium">{t('caseDashboardExt.systemHealth')}</h3>
       </div>
       <div className="grid grid-cols-3 gap-2">
         {services.map((svc) => (
@@ -61,7 +63,7 @@ export function SystemHealthMiniCard() {
         ))}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {healthyCount}/{services.length} 정상
+        {t('caseDashboardExt.healthySummary', { count: healthyCount, total: services.length })}
       </p>
     </div>
   );
