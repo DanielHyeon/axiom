@@ -20,7 +20,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { etlPipelines, type ETLPipeline, type ETLRun } from '../api/olapStudioApi';
-import { useTranslation } from 'react-i18next';
 
 // ─── 상태 배지 색상 매핑 ─────────────────────────────────
 
@@ -43,7 +42,6 @@ const RUN_STATUS_STYLE: Record<string, string> = {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function EtlPipelinesPage() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -103,14 +101,14 @@ export function EtlPipelinesPage() {
         <div className="flex items-center gap-2">
           <GitBranch className="h-4 w-4 text-purple-500" />
           <h1 className="text-[14px] font-semibold font-heading">
-            {t('olapStudio.etl.title')}
+            ETL 파이프라인
           </h1>
           <span className="text-[11px] text-foreground/40 font-mono">
-            {t('olapStudioF.pipelineListCount', { count: pipelines.length })}
+            {pipelines.length}개
           </span>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> {t('common.add')}
+          <Plus className="h-3 w-3 mr-1" /> 추가
         </Button>
       </div>
 
@@ -119,32 +117,32 @@ export function EtlPipelinesPage() {
         <div className="px-6 py-4 bg-purple-50/30 border-b border-border space-y-3">
           <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('mvExt.colName')}</Label>
+              <Label className="text-[11px] font-mono">이름</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('olapStudioExt.pipelineName')}
+                placeholder="파이프라인 이름"
                 className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('dataQualityExt.detailLabels.type')}</Label>
+              <Label className="text-[11px] font-mono">유형</Label>
               <select
                 value={formType}
                 onChange={(e) => setFormType(e.target.value)}
                 className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
               >
-                <option value="FULL">{t('olapStudioExt.fullLoad')}</option>
-                <option value="INCREMENTAL">{t('olapStudioExt.incrementalLoad')}</option>
-                <option value="SNAPSHOT">{t('olapStudioExt.snapshot')}</option>
+                <option value="FULL">전체 적재</option>
+                <option value="INCREMENTAL">증분 적재</option>
+                <option value="SNAPSHOT">스냅샷</option>
               </select>
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('objectExplorerExt.descLabel')}</Label>
+              <Label className="text-[11px] font-mono">설명</Label>
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
-                placeholder={t('olapStudioExt.descriptionOpt')}
+                placeholder="설명 (선택)"
                 className="text-[12px] font-mono"
               />
             </div>
@@ -155,7 +153,7 @@ export function EtlPipelinesPage() {
               size="sm"
               onClick={() => setShowForm(false)}
             >
-              {t('common.cancel')}
+              취소
             </Button>
             <Button
               size="sm"
@@ -165,7 +163,7 @@ export function EtlPipelinesPage() {
               {createMut.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                {t('olapStudioF.m1bfb7f83')}
+                '생성'
               )}
             </Button>
           </div>
@@ -184,7 +182,7 @@ export function EtlPipelinesPage() {
           <div className="text-center py-12">
             <GitBranch className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
             <p className="text-[12px] text-foreground/40 font-mono">
-              {t('ingestionExt.noPipelines')}
+              등록된 파이프라인이 없습니다
             </p>
           </div>
         )}
@@ -237,7 +235,7 @@ function PipelineRow({
         <button
           onClick={onToggle}
           className="text-foreground/30 hover:text-foreground/60 transition-colors"
-          aria-label={isExpanded ? t('olapStudioExt.foldHistory') : t('olapStudioExt.expandHistory')}
+          aria-label={isExpanded ? '실행 이력 접기' : '실행 이력 펼치기'}
         >
           {isExpanded ? (
             <ChevronDown className="h-4 w-4" />
@@ -288,7 +286,7 @@ function PipelineRow({
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
             <>
-              <Play className="h-3 w-3 mr-1" /> {t('common.run')}
+              <Play className="h-3 w-3 mr-1" /> 실행
             </>
           )}
         </Button>
@@ -299,12 +297,12 @@ function PipelineRow({
         <div className="border-t border-border px-4 py-3 bg-muted/50/50">
           {runs.length === 0 ? (
             <p className="text-[10px] text-foreground/30 font-mono">
-              {t('olapStudioF.ma449501e')}
+              실행 이력 없음
             </p>
           ) : (
             <div className="space-y-1.5">
               <p className="text-[10px] text-foreground/40 font-mono font-medium mb-2">
-                {t('olapStudioF.mf21fb6ec')}
+                최근 실행 이력
               </p>
               {runs.map((run) => (
                 <RunItem key={run.id} run={run} />

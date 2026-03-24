@@ -6,7 +6,6 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Trash2, Play } from 'lucide-react';
@@ -22,7 +21,6 @@ interface DmnTableEditorProps {
 }
 
 export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: DmnTableEditorProps) {
-  const { t } = useTranslation();
   const [hitPolicy, setHitPolicy] = useState<HitPolicy>(table.hitPolicy);
   const [columns, setColumns] = useState<DmnColumn[]>(table.columns);
   const [rules, setRules] = useState<DmnRule[]>(table.rules);
@@ -81,7 +79,7 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
         <div className="flex items-center gap-3">
           <HitPolicySelector value={hitPolicy} onChange={setHitPolicy} />
           <Button onClick={handleSave} disabled={isSaving} size="sm">
-            {isSaving ? t('dmn.saving') : t('common.save')}
+            {isSaving ? '저장 중...' : '저장'}
           </Button>
         </div>
       </div>
@@ -98,7 +96,7 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
                   colSpan={inputCols.length}
                   className="px-3 py-1.5 text-center text-xs font-medium text-primary bg-primary/5 border-r border-border"
                 >
-                  {t('dmn.inputHeader')}
+                  조건 (Input)
                 </th>
               )}
               {outputCols.length > 0 && (
@@ -106,7 +104,7 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
                   colSpan={outputCols.length}
                   className="px-3 py-1.5 text-center text-xs font-medium text-success bg-success/5"
                 >
-                  {t('dmn.outputHeader')}
+                  결과 (Output)
                 </th>
               )}
               <th className="w-10 bg-muted" />
@@ -143,7 +141,7 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
                       value={rule.cells[col.id] ?? ''}
                       onChange={(e) => updateCell(rule.id, col.id, e.target.value)}
                       className="h-7 text-xs border-0 bg-transparent focus:bg-card"
-                      placeholder={col.kind === 'input' ? t('dmn.inputPlaceholder') : t('dmn.outputPlaceholder')}
+                      placeholder={col.kind === 'input' ? '조건...' : '결과...'}
                     />
                   </td>
                 ))}
@@ -152,7 +150,7 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
                     type="button"
                     onClick={() => removeRule(rule.id)}
                     className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                    aria-label={t('dmn.deleteRule', { index: idx + 1 })}
+                    aria-label={`규칙 ${idx + 1} 삭제`}
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -165,13 +163,13 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
 
       {/* 규칙 추가 버튼 */}
       <Button variant="outline" size="sm" onClick={addRule} className="gap-1">
-        <Plus className="h-3.5 w-3.5" /> {t('dmn.addRule')}
+        <Plus className="h-3.5 w-3.5" /> 규칙 추가
       </Button>
 
       {/* 테스트 실행 패널 */}
       <div className="border border-border rounded-lg p-4 bg-card">
         <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-          <Play className="h-4 w-4" /> {t('dmn.testRun')}
+          <Play className="h-4 w-4" /> 테스트 실행
         </h3>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {inputCols.map((col) => (
@@ -188,12 +186,12 @@ export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: 
         </div>
         <div className="flex items-center gap-3 mt-3">
           <Button size="sm" onClick={handleTest} className="gap-1">
-            <Play className="h-3.5 w-3.5" /> {t('common.run')}
+            <Play className="h-3.5 w-3.5" /> 실행
           </Button>
           {testResult && (
             <div className="text-sm">
-              <span className="text-muted-foreground">{t('dmn.matchCount')}: </span>
-              <span className="font-medium">{testResult.matchedRules.length}{t('dmn.matchUnit')}</span>
+              <span className="text-muted-foreground">매칭: </span>
+              <span className="font-medium">{testResult.matchedRules.length}건</span>
               {Object.entries(testResult.outputs).map(([k, v]) => (
                 <span key={k} className="ml-3">
                   <span className="text-muted-foreground">{k}: </span>

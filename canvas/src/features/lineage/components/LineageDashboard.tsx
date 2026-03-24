@@ -13,20 +13,18 @@ import { LineageGraph } from './LineageGraph';
 import { LineageNodeDetail } from './LineageNodeDetail';
 import { LineageLegend } from './LineageLegend';
 import { LINEAGE_NODE_STYLES } from '../types/lineage';
-import { useTranslation } from 'react-i18next';
 
 /** 통계 카드 항목 */
 const STAT_CARDS = [
-  { key: 'sourceCount' as const, label: t('mvExt.sourceTable'), color: LINEAGE_NODE_STYLES.source.color },
-  { key: 'tableCount' as const, label: t('olapExt.chartTable'), color: LINEAGE_NODE_STYLES.table.color },
-  { key: 'transformCount' as const, label: t('lineageExt.dashboard.transform'), color: LINEAGE_NODE_STYLES.transform.color },
-  { key: 'viewCount' as const, label: t('lineageExt.dashboard.view'), color: LINEAGE_NODE_STYLES.view.color },
-  { key: 'reportCount' as const, label: t('lineageExt.dashboard.report'), color: LINEAGE_NODE_STYLES.report.color },
-  { key: 'edgeCount' as const, label: t('lineageExt.dataFlowLabel'), color: '#F59E0B' },
+  { key: 'sourceCount' as const, label: '소스 테이블', color: LINEAGE_NODE_STYLES.source.color },
+  { key: 'tableCount' as const, label: '테이블', color: LINEAGE_NODE_STYLES.table.color },
+  { key: 'transformCount' as const, label: '변환', color: LINEAGE_NODE_STYLES.transform.color },
+  { key: 'viewCount' as const, label: '뷰', color: LINEAGE_NODE_STYLES.view.color },
+  { key: 'reportCount' as const, label: '리포트', color: LINEAGE_NODE_STYLES.report.color },
+  { key: 'edgeCount' as const, label: '데이터 흐름', color: '#F59E0B' },
 ] as const;
 
 export function LineageDashboard() {
-  const { t } = useTranslation();
   // 전체 개요 쿼리
   const { isLoading: overviewLoading, refetch: refetchOverview } = useLineageOverview();
 
@@ -58,14 +56,14 @@ export function LineageDashboard() {
   return (
     <div className="flex h-full flex-col bg-background">
       {/* ── 헤더 ── */}
-      <header className="flex flex-wrap items-center justify-between gap-2 md:gap-3 border-b border-border bg-card px-4 md:px-6 py-3 md:py-4">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-card px-6 py-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-base md:text-lg font-semibold text-foreground">
-            {t('olapStudioExt.dataLineage')}
+          <h2 className="text-lg font-semibold text-foreground">
+            데이터 리니지
           </h2>
         </div>
 
-        <div className="flex items-center gap-2 md:gap-3">
+        <div className="flex items-center gap-3">
           {/* 검색 */}
           <LineageSearchBar onNodeSelect={handleSearchSelect} />
 
@@ -74,30 +72,30 @@ export function LineageDashboard() {
             onClick={handleRefresh}
             disabled={isLoading}
             className="flex items-center gap-1.5 rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label={t('lineageExt.refresh')}
+            aria-label="새로고침"
           >
             <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{t('lineageExt.refresh')}</span>
+            <span className="hidden sm:inline">새로고침</span>
           </button>
         </div>
       </header>
 
       {/* ── 통계 바 ── */}
       {stats && (
-        <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3 border-b border-border bg-card px-4 md:px-6 py-2 md:py-3">
+        <div className="flex gap-3 border-b border-border bg-card px-6 py-3">
           {STAT_CARDS.map(({ key, label, color }) => (
             <div
               key={key}
-              className="flex flex-col items-center rounded-xl border border-border/60 bg-muted/20 p-2 md:p-3"
+              className="flex flex-1 flex-col items-center rounded-xl border border-border/60 bg-muted/20 p-3"
               style={{
                 background: `linear-gradient(135deg, ${color}15 0%, ${color}05 100%)`,
                 borderColor: `${color}30`,
               }}
             >
-              <span className="text-lg md:text-xl font-bold leading-none" style={{ color }}>
+              <span className="text-xl font-bold leading-none" style={{ color }}>
                 {stats[key]}
               </span>
-              <span className="mt-0.5 md:mt-1 text-[10px] md:text-[11px] uppercase tracking-wider text-muted-foreground">
+              <span className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground">
                 {label}
               </span>
             </div>
@@ -106,7 +104,7 @@ export function LineageDashboard() {
       )}
 
       {/* ── 필터 도구 모음 ── */}
-      <div className="border-b border-border bg-card px-4 md:px-6 py-2 md:py-2.5">
+      <div className="border-b border-border bg-card px-6 py-2.5">
         <LineageFilter />
       </div>
 

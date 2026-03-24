@@ -14,7 +14,6 @@ import { useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { Copy, Check, Upload, Download, Eye, Edit3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useTranslation } from 'react-i18next';
 
 // ─── Props ────────────────────────────────────────────────
 
@@ -40,7 +39,6 @@ export function MondrianXmlEditor({
   onUpload,
   onValidate,
 }: MondrianXmlEditorProps) {
-  const { t } = useTranslation();
   const [mode, setMode] = useState<'edit' | 'preview'>('edit');
   const [copied, setCopied] = useState(false);
 
@@ -97,7 +95,7 @@ export function MondrianXmlEditor({
                 : 'text-foreground/30',
             )}
           >
-            <Edit3 className="h-3 w-3" /> {t('olapStudioExt.edit')}
+            <Edit3 className="h-3 w-3" /> 편집
           </button>
           <button
             type="button"
@@ -109,7 +107,7 @@ export function MondrianXmlEditor({
                 : 'text-foreground/30',
             )}
           >
-            <Eye className="h-3 w-3" /> {t('olapStudioExt.preview')}
+            <Eye className="h-3 w-3" /> 미리보기
           </button>
         </div>
 
@@ -121,7 +119,7 @@ export function MondrianXmlEditor({
             onClick={handleFileUpload}
             className="h-6 text-[10px] px-2"
           >
-            <Upload className="h-3 w-3 mr-1" /> {t('olapStudioExt.upload')}
+            <Upload className="h-3 w-3 mr-1" /> 업로드
           </Button>
           <Button
             variant="ghost"
@@ -130,7 +128,7 @@ export function MondrianXmlEditor({
             disabled={!value}
             className="h-6 text-[10px] px-2"
           >
-            <Download className="h-3 w-3 mr-1" /> {t('olapStudioExt.download')}
+            <Download className="h-3 w-3 mr-1" /> 다운로드
           </Button>
           <Button
             variant="ghost"
@@ -152,7 +150,7 @@ export function MondrianXmlEditor({
               disabled={!value}
               className="h-6 text-[10px] px-2"
             >
-              {t('olapStudioExt.validate')}
+              검증
             </Button>
           )}
         </div>
@@ -166,20 +164,20 @@ export function MondrianXmlEditor({
             onChange={(e) => onChange(e.target.value)}
             readOnly={readOnly}
             className="w-full h-full resize-none p-3 text-[11px] font-mono leading-relaxed bg-card text-muted-foreground focus:outline-none"
-            placeholder={t('olapStudioExt.xmlPlaceholder')}
+            placeholder="Mondrian XML을 입력하거나 파일을 업로드하세요..."
             spellCheck={false}
           />
         ) : (
           <pre className="w-full h-full overflow-auto p-3 text-[11px] font-mono leading-relaxed bg-card text-muted-foreground">
-            {value || t('olapStudioExt.noContent')}
+            {value || '내용이 없습니다'}
           </pre>
         )}
       </div>
 
       {/* ─── 상태 바 ──────────────────────────────────── */}
       <div className="flex items-center gap-4 px-3 py-1 bg-muted text-[9px] text-muted-foreground font-mono shrink-0">
-        <span>{t('olapStudioExt.charCount', { count: value.length.toLocaleString() })}</span>
-        <span>{t('olapStudioExt.lineCount', { count: value.split('\n').length })}</span>
+        <span>{value.length.toLocaleString()} 문자</span>
+        <span>{value.split('\n').length} 줄</span>
         <span>XML</span>
       </div>
     </div>

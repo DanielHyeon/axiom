@@ -27,7 +27,7 @@ const NODE_TYPE_COLORS: Record<OntologyNodeType, string> = {
 
 /** 노드 타입 필터 목록 */
 const NODE_TYPE_FILTERS: { value: OntologyNodeType | null; label: string }[] = [
-  { value: null, label: t('dataQualityExt.dateRanges.all') },
+  { value: null, label: '전체' },
   { value: 'KPI', label: 'KPI' },
   { value: 'Measure', label: 'Measure' },
   { value: 'Process', label: 'Process' },
@@ -39,23 +39,23 @@ const NODE_TYPE_FILTERS: { value: OntologyNodeType | null; label: string }[] = [
  * 실제로는 Synapse API에서 로드하지만, 백엔드 미구현 시 폴백으로 사용
  */
 const SAMPLE_NODES: OntologyNode[] = [
-  { id: 'kpi_oee', name: t('whatifWizardF.msgb1789363'), type: 'KPI', description: t('whatifWizardF.msgb8ce3928') },
-  { id: 'kpi_throughput', name: 'Throughput Rate', type: 'KPI', description: t('whatifWizardF.msgef558311') },
-  { id: 'kpi_defect', name: 'Defect Rate', type: 'KPI', description: t('whatifExt.mockLabels.defect_rate') },
-  { id: 'kpi_downtime', name: 'Downtime', type: 'KPI', description: t('whatifWizardF.msg98e0488c') },
-  { id: 'msr_availability', name: 'Availability', type: 'Measure', description: t('whatifWizardF.msge824bd46') },
-  { id: 'msr_performance', name: 'Performance', type: 'Measure', description: t('whatifWizardF.msgb04457a4') },
-  { id: 'msr_quality', name: 'Quality', type: 'Measure', description: t('whatifWizardF.msg7676a4c3') },
-  { id: 'msr_cycle_time', name: 'Cycle Time', type: 'Measure', description: t('whatifExt.mockLabels.cycle_time') },
-  { id: 'msr_mtbf', name: 'MTBF', type: 'Measure', description: t('whatifWizardF.msg79cbdf5b') },
-  { id: 'prc_assembly', name: 'Assembly', type: 'Process', description: t('whatifWizardF.msg0d5a3817') },
-  { id: 'prc_inspection', name: 'Inspection', type: 'Process', description: t('whatifWizardF.msgb9ed0727') },
-  { id: 'prc_packaging', name: 'Packaging', type: 'Process', description: t('whatifWizardF.msgf387bd44') },
-  { id: 'prc_maintenance', name: 'Maintenance', type: 'Process', description: t('whatifWizardF.msgc3dd8a31') },
-  { id: 'rsc_machine_a', name: 'Machine A', type: 'Resource', description: t('whatifWizardF.msg2509c530') },
-  { id: 'rsc_robot_01', name: 'Robot 01', type: 'Resource', description: t('whatifWizardF.msgbb20b221') },
-  { id: 'rsc_operator', name: 'Operator Team', type: 'Resource', description: t('whatifWizardF.msg8554049c') },
-  { id: 'rsc_material', name: 'Raw Material', type: 'Resource', description: t('whatifWizardF.msg0a940a99') },
+  { id: 'kpi_oee', name: 'OEE (종합설비효율)', type: 'KPI', description: '설비 가용률 x 성능 x 품질' },
+  { id: 'kpi_throughput', name: 'Throughput Rate', type: 'KPI', description: '단위 시간당 생산량' },
+  { id: 'kpi_defect', name: 'Defect Rate', type: 'KPI', description: '불량률' },
+  { id: 'kpi_downtime', name: 'Downtime', type: 'KPI', description: '가동 중단 시간' },
+  { id: 'msr_availability', name: 'Availability', type: 'Measure', description: '설비 가용률' },
+  { id: 'msr_performance', name: 'Performance', type: 'Measure', description: '성능 효율' },
+  { id: 'msr_quality', name: 'Quality', type: 'Measure', description: '품질률' },
+  { id: 'msr_cycle_time', name: 'Cycle Time', type: 'Measure', description: '사이클 타임' },
+  { id: 'msr_mtbf', name: 'MTBF', type: 'Measure', description: '평균 고장 간격' },
+  { id: 'prc_assembly', name: 'Assembly', type: 'Process', description: '조립 공정' },
+  { id: 'prc_inspection', name: 'Inspection', type: 'Process', description: '검사 공정' },
+  { id: 'prc_packaging', name: 'Packaging', type: 'Process', description: '포장 공정' },
+  { id: 'prc_maintenance', name: 'Maintenance', type: 'Process', description: '유지보수' },
+  { id: 'rsc_machine_a', name: 'Machine A', type: 'Resource', description: '주력 생산 설비' },
+  { id: 'rsc_robot_01', name: 'Robot 01', type: 'Resource', description: '로봇 팔 #1' },
+  { id: 'rsc_operator', name: 'Operator Team', type: 'Resource', description: '운영 인력' },
+  { id: 'rsc_material', name: 'Raw Material', type: 'Resource', description: '원자재' },
 ];
 
 export function Step2DataSelect() {
@@ -113,12 +113,12 @@ export function Step2DataSelect() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Database className="w-5 h-5 text-primary" />
-          {t('whatifWizard.step2.title')}
+          {t('whatifWizard.step2.title', '데이터 선택')}
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
           {t(
             'whatifWizard.step2.description',
-            t('whatifWizardF.step2Description'),
+            '시뮬레이션에 포함할 온톨로지 노드를 선택하세요.',
           )}
         </p>
       </div>
@@ -128,17 +128,17 @@ export function Step2DataSelect() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">
-              {t('whatifWizard.step2.selectedTitle')}
+              {t('whatifWizard.step2.selectedTitle', '선택된 노드')}
             </CardTitle>
             <Badge variant="secondary" className="text-xs">
-              {t('whatifWizardF.selectedCountBadge', { count: selectedNodes.length })}
+              {selectedNodes.length}개 선택됨
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           {selectedNodes.length === 0 ? (
             <p className="text-sm text-muted-foreground py-4 text-center">
-              {t('whatifWizardF.m86fb7735')}
+              아래에서 노드를 검색하고 추가하세요.
             </p>
           ) : (
             <div className="flex flex-wrap gap-2">
@@ -157,7 +157,7 @@ export function Step2DataSelect() {
                     type="button"
                     onClick={() => removeNode(node.id)}
                     className="ml-0.5 p-0.5 rounded hover:bg-black/10 dark:hover:bg-card/10 transition-colors"
-                    aria-label={t('whatifWizardF.removeNode', { name: node.name })}
+                    aria-label={`${node.name} 제거`}
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -173,7 +173,7 @@ export function Step2DataSelect() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Search className="w-4 h-4" />
-            {t('whatifWizard.step2.searchTitle')}
+            {t('whatifWizard.step2.searchTitle', '노드 검색')}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -181,7 +181,7 @@ export function Step2DataSelect() {
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder={t('whatifWizard.step2.searchPlaceholder')}
+              placeholder={t('whatifWizard.step2.searchPlaceholder', '노드 이름 또는 ID로 검색...')}
               value={localQuery}
               onChange={(e) => handleSearch(e.target.value)}
               className="pl-9"
@@ -209,8 +209,8 @@ export function Step2DataSelect() {
             {filteredNodes.length === 0 ? (
               <p className="text-sm text-muted-foreground py-4 text-center">
                 {localQuery.trim()
-                  ? t('explorerExt.noSearchResults')
-                  : t('whatifWizardF.mcfcaf18d')}
+                  ? '검색 결과가 없습니다.'
+                  : '선택 가능한 노드가 없습니다.'}
               </p>
             ) : (
               filteredNodes.map((node) => (
@@ -250,7 +250,7 @@ export function Step2DataSelect() {
 
           {/* 검색 결과 수 */}
           <p className="text-xs text-muted-foreground text-right">
-            {t('whatifWizardF.nodesShowing', { count: filteredNodes.length })}
+            {filteredNodes.length}개 노드 표시 중
           </p>
         </CardContent>
       </Card>

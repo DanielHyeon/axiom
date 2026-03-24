@@ -5,7 +5,6 @@
  * 테이블명/스키마명을 파라미터로 전달하여 백엔드에서 안전하게 쿼리를 생성한다.
  */
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import { X, Database, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -50,10 +49,10 @@ async function fetchPreviewData(
 ): Promise<PreviewData> {
   // 입력값 안전성 검증 — SQL 인젝션 방지 (C1 수정)
   if (!SAFE_IDENTIFIER.test(tableName)) {
-    throw new Error(t('nl2sqlF.invalidTableName', { name: tableName }));
+    throw new Error(`유효하지 않은 테이블명: ${tableName}`);
   }
   if (schema && !SAFE_IDENTIFIER.test(schema)) {
-    throw new Error(t('nl2sqlF.invalidSchemaName', { name: schema }));
+    throw new Error(`유효하지 않은 스키마명: ${schema}`);
   }
 
   // 파라미터 기반 프리뷰 요청 — 백엔드에서 쿼리를 안전하게 생성
@@ -81,7 +80,6 @@ export function DataPreviewPanel({
   datasource,
   onClose,
 }: DataPreviewPanelProps) {
-  const { t } = useTranslation();
   const [data, setData] = useState<PreviewData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -98,7 +96,7 @@ export function DataPreviewPanel({
         if (!cancelled) setData(result);
       })
       .catch((err) => {
-        if (!cancelled) setError(err?.message || t('dataPreview.fetchFailed'));
+        if (!cancelled) setError(err?.message || '데이터 조회에 실패했습니다');
       })
       .finally(() => {
         if (!cancelled) setIsLoading(false);
@@ -117,14 +115,14 @@ export function DataPreviewPanel({
             {tableName}
           </span>
           <span className="text-[10px] text-foreground/40 font-mono shrink-0">
-            {t('dataPreview.preview')}
+            프리뷰
           </span>
         </div>
         <button
           type="button"
           onClick={onClose}
           className="p-1 rounded hover:bg-muted transition-colors"
-          aria-label={t('dataPreview.close')}
+          aria-label="닫기"
         >
           <X className="h-3.5 w-3.5 text-foreground/40" />
         </button>
@@ -137,7 +135,7 @@ export function DataPreviewPanel({
           <div className="flex flex-col items-center justify-center py-12 gap-2">
             <Loader2 className="h-5 w-5 text-foreground/30 animate-spin" />
             <span className="text-[11px] text-foreground/40 font-mono">
-              {t('dataPreview.fetching')}
+              데이터 조회 중...
             </span>
           </div>
         )}
@@ -155,7 +153,7 @@ export function DataPreviewPanel({
               onClick={() => setRetryCount((c) => c + 1)}
               className="mt-2 text-[10px]"
             >
-              {t('workflowEditor.policy.retryCount')}
+              재시도
             </Button>
           </div>
         )}
@@ -166,8 +164,8 @@ export function DataPreviewPanel({
             {/* 행 수 표시 */}
             <div className="px-4 py-1.5 bg-muted/50 border-b border-border text-[9px] text-foreground/40 font-mono">
               {data.rowCount > 10
-                ? t('dataPreview.topRows', { total: data.rowCount.toLocaleString() })
-                : t('dataPreview.rowCount', { count: data.rows.length })}
+                ? `상위 10행 / 전체 ${data.rowCount.toLocaleString()}행`
+                : `${data.rows.length}행`}
             </div>
 
             <table className="w-full text-[10px] font-mono">
@@ -213,7 +211,7 @@ export function DataPreviewPanel({
             {/* 빈 데이터 */}
             {data.rows.length === 0 && (
               <div className="py-8 text-center text-[11px] text-foreground/30 font-mono">
-                {t('common.noData')}
+                데이터가 없습니다
               </div>
             )}
           </div>

@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   RefreshCw,
   ShieldCheck,
@@ -27,23 +26,23 @@ import type { Permission, PermissionAction } from '../types/security';
 // ---------------------------------------------------------------------------
 
 const RESOURCE_LABEL: Record<string, string> = {
-  users: t('caseDashboardExt.defaultUser'),
-  roles: t('securityExt.roleCol'),
-  cases: t('securityExt.resource.cases'),
-  documents: t('securityExt.resource.documents'),
-  ontology: t('domainExt.ontologyTab'),
-  datasources: t('securityExt.resource.datasources'),
-  queries: t('securityExt.resource.queries'),
-  settings: t('securityExt.resource.settings'),
-  audit: t('securityExt.resource.audit'),
-  processes: t('securityExt.resource.processes'),
+  users: '사용자',
+  roles: '역할',
+  cases: '케이스',
+  documents: '문서',
+  ontology: '온톨로지',
+  datasources: '데이터소스',
+  queries: '쿼리',
+  settings: '설정',
+  audit: '감사',
+  processes: '프로세스',
 };
 
 const ACTION_LABEL: Record<PermissionAction, string> = {
-  read: t('securityExt.permission.read'),
-  write: t('securityExt.permission.write'),
-  delete: t('ingestionExt.delete'),
-  admin: t('securityExt.permission.admin'),
+  read: '읽기',
+  write: '쓰기',
+  delete: '삭제',
+  admin: '관리',
 };
 
 const ALL_ACTIONS: PermissionAction[] = ['read', 'write', 'delete', 'admin'];
@@ -53,7 +52,6 @@ const ALL_ACTIONS: PermissionAction[] = ['read', 'write', 'delete', 'admin'];
 // ---------------------------------------------------------------------------
 
 export const RoleManagementPanel: React.FC = () => {
-  const { t } = useTranslation();
   const { data: roles = [], isLoading, isError, error, refetch } = useRoles();
   const [expandedRole, setExpandedRole] = useState<string | null>(null);
 
@@ -76,9 +74,9 @@ export const RoleManagementPanel: React.FC = () => {
       {/* 툴바 */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">{t('securityExt.roleManagement')}</h2>
+          <h2 className="text-lg font-semibold text-foreground">역할 관리</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            {t('securityF.md8a146a8')}
+            RBAC 역할 정의 및 리소스별 권한 매트릭스를 관리합니다
           </p>
         </div>
         <Button
@@ -88,7 +86,7 @@ export const RoleManagementPanel: React.FC = () => {
           disabled={isLoading}
         >
           <RefreshCw className={`h-4 w-4 mr-1 ${isLoading ? 'animate-spin' : ''}`} />
-          {t('datasourceExt.refreshBtn')}
+          새로고침
         </Button>
       </div>
 
@@ -96,7 +94,7 @@ export const RoleManagementPanel: React.FC = () => {
       {isError && (
         <div className="flex items-center gap-2 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
           <AlertTriangle className="h-4 w-4 shrink-0" />
-          <span>{t('securityF.msge7644db6')}</span>
+          <span>역할 데이터를 불러오는 데 실패했습니다. {(error as Error)?.message}</span>
         </div>
       )}
 
@@ -104,7 +102,7 @@ export const RoleManagementPanel: React.FC = () => {
       {isLoading && !isError && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-sm">{t('securityExt.loadingRoles')}</span>
+          <span className="text-sm">역할 데이터 로딩 중...</span>
         </div>
       )}
 
@@ -112,7 +110,7 @@ export const RoleManagementPanel: React.FC = () => {
       {!isLoading && !isError && roles.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-muted-foreground gap-3">
           <ShieldCheck className="h-10 w-10" />
-          <p className="font-medium">{t('securityExt.noRoles')}</p>
+          <p className="font-medium">등록된 역할이 없습니다</p>
         </div>
       )}
 
@@ -143,7 +141,7 @@ export const RoleManagementPanel: React.FC = () => {
                         <h3 className="font-semibold text-foreground">{role.name}</h3>
                         {role.is_system && (
                           <Badge variant="secondary" className="text-[10px] px-1.5 py-0">
-                            {t('settingsSystem.title')}
+                            시스템
                           </Badge>
                         )}
                       </div>
@@ -162,7 +160,7 @@ export const RoleManagementPanel: React.FC = () => {
                     </div>
                     {/* 권한 수 */}
                     <Badge variant="outline" className="text-[10px]">
-                      {t('securityF.permissionCount', { count: role.permissions.length })}
+                      {role.permissions.length}개 권한
                     </Badge>
                     {isExpanded ? (
                       <ChevronDown className="h-4 w-4 text-muted-foreground" />
@@ -176,7 +174,7 @@ export const RoleManagementPanel: React.FC = () => {
                 {isExpanded && (
                   <div className="border-t border-border px-5 py-4 bg-muted/20">
                     <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
-                      {t('securityF.m651813e0')}
+                      권한 매트릭스
                     </h4>
                     {/* 매트릭스 테이블 */}
                     <div className="overflow-x-auto">
@@ -184,7 +182,7 @@ export const RoleManagementPanel: React.FC = () => {
                         <thead>
                           <tr className="border-b border-border">
                             <th className="text-left py-2 pr-4 text-xs font-medium text-muted-foreground">
-                              {t('securityExt.resourceCol')}
+                              리소스
                             </th>
                             {ALL_ACTIONS.map((action) => (
                               <th
@@ -219,7 +217,7 @@ export const RoleManagementPanel: React.FC = () => {
                                 colSpan={ALL_ACTIONS.length + 1}
                                 className="py-4 text-center text-muted-foreground text-xs"
                               >
-                                {t('securityF.mc7f1a5b9')}
+                                설정된 권한이 없습니다
                               </td>
                             </tr>
                           )}

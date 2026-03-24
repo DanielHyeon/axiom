@@ -13,7 +13,6 @@ import { X, ChevronDown, Database, Loader2 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useTranslation } from 'react-i18next';
 import {
   Table,
   TableHeader,
@@ -81,7 +80,7 @@ export function DataPreviewPanel({
         const result = await getSampleData(nodeId, requestLimit, schema, table);
         setData(result);
       } catch {
-        toast.error(t('instancePreview.loadFailed'));
+        toast.error('데이터 프리뷰를 불러오지 못했습니다');
         setData(null);
       }
     },
@@ -103,7 +102,7 @@ export function DataPreviewPanel({
       await fetchData(newLimit);
       setLimit(newLimit);
     } catch {
-      toast.error(t('instancePreview.loadMoreFailed'));
+      toast.error('추가 데이터 로드에 실패했습니다.');
     } finally {
       setLoadingMore(false);
     }
@@ -123,14 +122,14 @@ export function DataPreviewPanel({
           <span className="text-sm font-semibold truncate">{nodeName}</span>
           {data && (
             <Badge variant="secondary" className="text-[10px] shrink-0">
-              {t('instancePreviewF.totalCount', { count: data.total_count.toLocaleString() })}
+              {data.total_count.toLocaleString()}건
             </Badge>
           )}
         </div>
         <button
           onClick={onClose}
           className="text-foreground/40 hover:text-foreground shrink-0 ml-2"
-          aria-label={t('instancePreview.closePanel')}
+          aria-label="패널 닫기"
         >
           <X className="h-4 w-4" />
         </button>
@@ -149,8 +148,8 @@ export function DataPreviewPanel({
         {!loading && !data && (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/30 gap-2">
             <Database className="h-8 w-8" />
-            <p className="text-sm">{t('instancePreview.noBinding')}</p>
-            <p className="text-xs text-foreground/20">{t('instancePreview.noBindingHint')}</p>
+            <p className="text-sm">바인딩된 데이터가 없습니다</p>
+            <p className="text-xs text-foreground/20">이 노드에 데이터소스를 연결하세요</p>
           </div>
         )}
 
@@ -158,7 +157,7 @@ export function DataPreviewPanel({
         {!loading && data && data.preview.length === 0 && (
           <div className="flex flex-col items-center justify-center py-16 text-foreground/30 gap-2">
             <Database className="h-8 w-8" />
-            <p className="text-sm">{t('instancePreview.emptyTable')}</p>
+            <p className="text-sm">테이블에 데이터가 없습니다</p>
           </div>
         )}
 
@@ -221,7 +220,7 @@ export function DataPreviewPanel({
                   ) : (
                     <ChevronDown className="h-3 w-3" />
                   )}
-                  {t('common.showMore')}
+                  더 보기
                 </Button>
               </div>
             )}

@@ -5,7 +5,6 @@ import { X, BarChart3, FileSearch, Loader2, TrendingUp, Layers, Target, GitMerge
 import { Button } from '@/components/ui/button';
 import type { GraphNode, CompactEvidence } from '../types/insight';
 import { formatScore, scoreColor, formatBreakdownValue } from '../utils/scoreCalculator';
-import { useTranslation } from 'react-i18next';
 
 interface NodeDetailPanelProps {
  nodeId: string | null;
@@ -16,14 +15,14 @@ interface NodeDetailPanelProps {
 }
 
 const BREAKDOWN_LABELS: Record<string, string> = {
- usage: t('insightExt.scoreLabels.usage'),
- kpi_connection: t('insightExt.scoreLabels.kpi_connection'),
- centrality: t('insightExt.scoreLabels.centrality'),
- discriminative: t('insightExt.scoreLabels.discriminative'),
- volatility: t('insightExt.scoreLabels.volatility'),
- cardinality_adjust: t('insightExt.scoreLabels.cardinality_adjust'),
- sample_size_guard: t('insightExt.scoreLabels.sample_size_guard'),
- cooccur_with_kpi: t('insightExt.scoreLabels.cooccur_with_kpi'),
+ usage: '사용 빈도',
+ kpi_connection: 'KPI 연결성',
+ centrality: '중심성',
+ discriminative: '판별력',
+ volatility: '변동성',
+ cardinality_adjust: '카디널리티 보정',
+ sample_size_guard: '표본수 보정',
+ cooccur_with_kpi: 'KPI 동시출현',
 };
 
 const NODE_TYPE_LABEL: Record<string, string> = {
@@ -68,7 +67,7 @@ export function NodeDetailPanel({
  <div className="flex items-center justify-between px-4 py-3 border-b border-border">
  <div className="flex items-center gap-2">
  <BarChart3 className="h-4 w-4 text-primary" />
- <span className="text-sm font-medium text-foreground">{t('insightExt.nodeDetail')}</span>
+ <span className="text-sm font-medium text-foreground">노드 상세</span>
  </div>
  <Button
  variant="ghost"
@@ -114,7 +113,7 @@ export function NodeDetailPanel({
  {graphNode.score != null && (
  <div className="rounded-lg border border-border bg-muted/30 p-3">
  <div className="text-[10px] text-foreground0 uppercase tracking-wider mb-1">
- {t('insightF.maecf80a7')}
+ 영향 점수
  </div>
  <div className={`text-2xl font-bold ${scoreColor(graphNode.score)}`}>
  {formatScore(graphNode.score)}
@@ -125,7 +124,7 @@ export function NodeDetailPanel({
  {/* Score breakdown (from node.meta) */}
  {hasBreakdown && (
  <div>
- <div className="text-xs font-medium text-foreground/80 mb-2">{t('insightExt.scoreBreakdown')}</div>
+ <div className="text-xs font-medium text-foreground/80 mb-2">점수 분해</div>
  <div className="space-y-1.5">
  {Object.entries(breakdown!).map(([key, value]) => {
  if (typeof value !== 'number') return null;
@@ -164,9 +163,9 @@ export function NodeDetailPanel({
  <div>
  <div className="flex items-center gap-2 text-xs font-medium text-foreground/80 mb-2">
  <FileSearch className="h-3 w-3" />
- {t('insightF.mced48349')}
+ 관련 쿼리
  {evidence && evidence.length > 0 && (
- <span className="text-muted-foreground">{t('insightF.msg967ec7ac')}</span>
+ <span className="text-muted-foreground">({evidence.length}건)</span>
  )}
  </div>
 
@@ -187,7 +186,7 @@ export function NodeDetailPanel({
  </div>
  {Array.isArray(ev.tables) && ev.tables.length > 0 && (
  <div className="text-[10px] text-muted-foreground">
- {t('insightF.tableLabel')}{' '}
+ 테이블:{' '}
  {(ev.tables as Array<{ name?: string } | string>)
  .map((t) => (typeof t === 'string' ? t : t.name ?? ''))
  .filter(Boolean)
@@ -209,7 +208,7 @@ export function NodeDetailPanel({
  </div>
  ) : (
  <div className="text-[10px] text-muted-foreground italic py-2">
- {t('insightF.m3f7002f5')}
+ 이 노드에 대한 근거 쿼리가 없습니다
  </div>
  )}
  </div>
@@ -218,7 +217,7 @@ export function NodeDetailPanel({
 
  {!loading && !graphNode && (
  <div className="text-xs text-foreground0 text-center py-8">
- {t('insightF.m77a34fe3')}
+ 노드 데이터를 불러올 수 없습니다
  </div>
  )}
  </div>

@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
  useReactTable,
  getCoreRowModel,
@@ -108,8 +107,8 @@ export function ResultPanel({
  });
 
  const tabs: { id: TabId; label: string; icon: React.ReactNode; disabled?: boolean }[] = [
- { id: 'chart', label: t('domainExt.chartTab'), icon: <BarChart3 className="h-3.5 w-3.5" />, disabled: !hasChart },
- { id: 'table', label: t('olapExt.chartTable'), icon: <Table2 className="h-3.5 w-3.5" /> },
+ { id: 'chart', label: '차트', icon: <BarChart3 className="h-3.5 w-3.5" />, disabled: !hasChart },
+ { id: 'table', label: '테이블', icon: <Table2 className="h-3.5 w-3.5" /> },
  { id: 'sql', label: 'SQL', icon: <Code className="h-3.5 w-3.5" /> },
  { id: 'graph', label: 'Graph', icon: <Network className="h-3.5 w-3.5" /> },
  ];
@@ -191,7 +190,7 @@ export function ResultPanel({
  ) : (
  <TableRow>
  <TableCell colSpan={columns.length} className="h-16 text-center text-foreground/60">
- {t('schemaSearch.noResults')}
+ 결과 없음
  </TableCell>
  </TableRow>
  )}

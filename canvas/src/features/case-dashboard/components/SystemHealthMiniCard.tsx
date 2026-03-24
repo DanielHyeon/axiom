@@ -6,7 +6,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { coreApi } from '@/lib/api/clients';
 import { Activity } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface ServiceStatus {
   name: string;
@@ -38,11 +37,10 @@ const statusColor: Record<string, string> = {
 };
 
 export function SystemHealthMiniCard() {
-  const { t } = useTranslation();
   const { data: services = [] } = useQuery({
     queryKey: ['system-health'],
     queryFn: fetchServiceHealth,
-    {t('caseDashboardF.m51c78934')}
+    refetchInterval: 30_000, // 30초마다 갱신
   });
 
   const healthyCount = services.filter((s) => s.status === 'healthy').length;
@@ -51,9 +49,9 @@ export function SystemHealthMiniCard() {
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-3">
         <Activity className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        <h3 className="text-sm font-medium">{t('caseDashboardExt.systemHealth')}</h3>
+        <h3 className="text-sm font-medium">시스템 상태</h3>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      <div className="grid grid-cols-3 gap-2">
         {services.map((svc) => (
           <div key={svc.name} className="flex items-center gap-1.5">
             <div className={`h-2 w-2 rounded-full ${statusColor[svc.status] ?? 'bg-muted'}`}
@@ -63,7 +61,7 @@ export function SystemHealthMiniCard() {
         ))}
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        {t('caseDashboardF.healthyCount', { healthy: healthyCount, total: services.length })}
+        {healthyCount}/{services.length} 정상
       </p>
     </div>
   );

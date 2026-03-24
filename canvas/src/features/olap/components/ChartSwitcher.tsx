@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 import {
  BarChart,
  Bar,
@@ -28,8 +27,7 @@ interface ChartSwitcherProps {
 }
 
 /** Table/Bar/Line/Pie 전환, 데이터 유지 */
-export function ChartSwitcher({
-  viewType, onViewChange, headers, data, tableComponent }: ChartSwitcherProps) {
+export function ChartSwitcher({ viewType, onViewChange, headers, data, tableComponent }: ChartSwitcherProps) {
  const chartData = data.map((row) => {
  const obj: Record<string, unknown> = {};
  headers.forEach((h, i) => {
@@ -53,7 +51,7 @@ export function ChartSwitcher({
  viewType === view ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground hover:text-foreground'
  }`}
  >
- {view === 'table' ? t('olapExt.chartTable') : view === 'bar' ? t('olapExt.chartBar') : view === 'line' ? t('olapExt.chartLine') : t('olapExt.chartPie')}
+ {view === 'table' ? '테이블' : view === 'bar' ? '막대' : view === 'line' ? '선' : '파이'}
  </button>
  ))}
  </div>

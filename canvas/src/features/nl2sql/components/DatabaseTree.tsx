@@ -9,7 +9,6 @@
  */
 
 import { useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   ChevronRight,
@@ -108,8 +107,8 @@ export function DatabaseTree({
       <div className="flex flex-col h-full bg-card">
         <TreeHeader />
         <div className="flex-1 flex items-center justify-center px-4">
-          <p className="text-xs text-foreground/40 font-mono text-center whitespace-pre-line">
-            {t('databaseTree.emptyHint')}
+          <p className="text-xs text-foreground/40 font-mono text-center">
+            데이터소스를 선택하면<br />스키마 트리가 표시됩니다.
           </p>
         </div>
       </div>
@@ -146,11 +145,10 @@ export function DatabaseTree({
 
 /** 트리 헤더 */
 function TreeHeader() {
-  const { t } = useTranslation();
   return (
     <div className="flex items-center h-10 px-4 border-b border-border shrink-0">
       <span className="text-[11px] font-semibold text-foreground/50 font-mono uppercase tracking-[1px]">
-        {t('databaseTree.header')}
+        데이터 자산
       </span>
     </div>
   );
@@ -183,7 +181,6 @@ function SchemaNode({
   expandedTables,
   onToggleTable,
 }: SchemaNodeProps) {
-  const { t } = useTranslation();
   const ChevronIcon = isExpanded ? ChevronDown : ChevronRight;
 
   return (
@@ -235,7 +232,7 @@ function SchemaNode({
                       onToggleTable?.(table.name);
                     }}
                     className="p-0.5 hover:bg-black/5 rounded shrink-0"
-                    aria-label={t('databaseTree.toggleColumns', { name: table.name, action: isTableExpanded ? 'collapse' : 'expand' })}
+                    aria-label={`${table.name} 컬럼 ${isTableExpanded ? '접기' : '펼치기'}`}
                   >
                     {isTableExpanded ? (
                       <ChevronDown className="h-2.5 w-2.5 text-foreground/40" />
@@ -269,7 +266,7 @@ function SchemaNode({
                       <div className="flex items-center gap-1.5 px-3 py-1">
                         <Loader2 className="h-2.5 w-2.5 animate-spin text-foreground/30" />
                         <span className="text-[10px] text-foreground/30 font-mono">
-                          {t('databaseTree.loading')}
+                          로딩 중...
                         </span>
                       </div>
                     )}
@@ -279,7 +276,7 @@ function SchemaNode({
                     {!isColumnLoading && columns && columns.length === 0 && (
                       <div className="px-3 py-1">
                         <span className="text-[10px] text-foreground/30 font-mono">
-                          {t('databaseTree.noColumns')}
+                          컬럼 없음
                         </span>
                       </div>
                     )}

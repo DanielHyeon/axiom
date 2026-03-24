@@ -21,7 +21,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cubes, type Cube, type CubeDetail } from '../api/olapStudioApi';
-import { useTranslation } from 'react-i18next';
 
 // ─── 상태 배지 스타일 ─────────────────────────────────────
 
@@ -34,7 +33,6 @@ const CUBE_STATUS_STYLE: Record<string, string> = {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function CubeManagementPage() {
-  const { t } = useTranslation();
   const qc = useQueryClient();
   const [showForm, setShowForm] = useState(false);
   const [formName, setFormName] = useState('');
@@ -119,35 +117,35 @@ export function CubeManagementPage() {
       <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
         <div className="flex items-center gap-2">
           <Box className="h-4 w-4 text-amber-500" />
-          <h1 className="text-[14px] font-semibold font-heading">{t('olapStudio.cubes.title')}</h1>
+          <h1 className="text-[14px] font-semibold font-heading">큐브 관리</h1>
           <span className="text-[11px] text-foreground/40 font-mono">
-            {t('olapStudioF.cubeListCount', { count: cubeList.length })}
+            {cubeList.length}개
           </span>
         </div>
         <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> {t('common.add')}
+          <Plus className="h-3 w-3 mr-1" /> 추가
         </Button>
       </div>
 
       {/* 생성 폼 */}
       {showForm && (
         <div className="px-6 py-4 bg-amber-50/30 border-b border-border space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-3">
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('mvExt.colName')}</Label>
+              <Label className="text-[11px] font-mono">이름</Label>
               <Input
                 value={formName}
                 onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('olapStudioExt.cubeName')}
+                placeholder="큐브 이름"
                 className="text-[12px] font-mono"
               />
             </div>
             <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('objectExplorerExt.descLabel')}</Label>
+              <Label className="text-[11px] font-mono">설명</Label>
               <Input
                 value={formDesc}
                 onChange={(e) => setFormDesc(e.target.value)}
-                placeholder={t('olapStudioExt.descriptionOpt')}
+                placeholder="설명 (선택)"
                 className="text-[12px] font-mono"
               />
             </div>
@@ -160,7 +158,7 @@ export function CubeManagementPage() {
                   className="rounded border-border"
                 />
                 <span className="text-[11px] font-mono text-foreground/60">
-                  {t('olapStudioF.mdbed573d')}
+                  AI 자동생성
                 </span>
               </label>
             </div>
@@ -171,7 +169,7 @@ export function CubeManagementPage() {
               size="sm"
               onClick={() => setShowForm(false)}
             >
-              {t('common.cancel')}
+              취소
             </Button>
             <Button
               size="sm"
@@ -181,7 +179,7 @@ export function CubeManagementPage() {
               {createMut.isPending ? (
                 <Loader2 className="h-3 w-3 animate-spin" />
               ) : (
-                {t('olapStudioF.m1bfb7f83')}
+                '생성'
               )}
             </Button>
           </div>
@@ -200,7 +198,7 @@ export function CubeManagementPage() {
           <div className="text-center py-12">
             <Box className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
             <p className="text-[12px] text-foreground/40 font-mono">
-              {t('olapStudio.cubes.noCubes')}
+              등록된 큐브가 없습니다
             </p>
           </div>
         )}
@@ -255,7 +253,7 @@ function CubeCard({
       role="button"
       tabIndex={0}
       onKeyDown={(e) => e.key === 'Enter' && onSelect()}
-      aria-label={t('olapStudioF.cubeDetailLabel', { name: cube.name })}
+      aria-label={`큐브 ${cube.name} 상세 보기`}
     >
       {/* 헤더: 이름 + 상태 */}
       <div className="flex items-start justify-between mb-2">
@@ -285,7 +283,7 @@ function CubeCard({
       {/* AI 생성 표시 */}
       {cube.ai_generated && (
         <div className="flex items-center gap-1 text-[9px] text-purple-500 font-mono mb-2">
-          <Sparkles className="h-2.5 w-2.5" /> {t('olapStudioF.aiAutoGenerate')}
+          <Sparkles className="h-2.5 w-2.5" /> AI 자동생성
         </div>
       )}
 
@@ -293,7 +291,7 @@ function CubeCard({
       {validationErrors && validationErrors.length > 0 && (
         <div className="flex items-start gap-1 text-[9px] text-red-400 font-mono mb-2">
           <AlertTriangle className="h-2.5 w-2.5 mt-0.5 shrink-0" />
-          <span>{t('olapStudioF.msg9d3d9396')}</span>
+          <span>{validationErrors.length}개 검증 오류</span>
         </div>
       )}
 
@@ -323,7 +321,7 @@ function CubeCard({
           ) : (
             <CheckCircle className="h-3 w-3" />
           )}
-          {t('olapStudioExt.validate')}
+          검증
         </button>
 
         {/* 게시 버튼 — VALIDATED 상태에서만 활성 */}
@@ -342,7 +340,7 @@ function CubeCard({
           ) : (
             <Upload className="h-3 w-3" />
           )}
-          {t('olapStudio.cubes.publish')}
+          게시
         </button>
       </div>
     </div>
@@ -380,7 +378,7 @@ function CubeDetailView({
         <button
           onClick={onBack}
           className="text-foreground/40 hover:text-foreground/70 transition-colors"
-          aria-label={t('olapStudioExt.backToList')}
+          aria-label="목록으로 돌아가기"
         >
           <ArrowLeft className="h-4 w-4" />
         </button>
@@ -404,7 +402,7 @@ function CubeDetailView({
             disabled={isValidating || cube.cube_status === 'PUBLISHED'}
           >
             {isValidating ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <CheckCircle className="h-3 w-3 mr-1" />}
-            {t('olapStudioExt.validate')}
+            검증
           </Button>
           <Button
             size="sm"
@@ -412,7 +410,7 @@ function CubeDetailView({
             disabled={isPublishing || cube.cube_status !== 'VALIDATED'}
           >
             {isPublishing ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Upload className="h-3 w-3 mr-1" />}
-            {t('olapStudio.cubes.publish')}
+            게시
           </Button>
         </div>
       </div>
@@ -430,7 +428,7 @@ function CubeDetailView({
         {validationErrors.length > 0 && (
           <div className="border border-red-200 rounded-lg p-3 bg-red-50/50 space-y-1">
             <p className="text-[11px] font-semibold text-red-600 font-heading flex items-center gap-1">
-              <AlertTriangle className="h-3 w-3" /> {t('olapStudioF.validationErrors')}
+              <AlertTriangle className="h-3 w-3" /> 검증 오류
             </p>
             {validationErrors.map((err, i) => (
               <p key={i} className="text-[10px] text-red-500 font-mono">
@@ -443,20 +441,20 @@ function CubeDetailView({
         {/* 차원 목록 */}
         <section>
           <h2 className="text-[12px] font-semibold font-heading mb-2 text-foreground/70">
-            {t('olapStudioF.dimensionsCount', { count: cube.dimensions.length })}
+            차원 ({cube.dimensions.length})
           </h2>
           {cube.dimensions.length === 0 ? (
             <p className="text-[10px] text-foreground/30 font-mono">
-              {t('olapStudioF.m0cc96919')}
+              정의된 차원이 없습니다
             </p>
           ) : (
             <div className="border border-border rounded-lg overflow-hidden">
               <table className="w-full text-[11px] font-mono">
                 <thead>
                   <tr className="bg-muted/50 text-foreground/50">
-                    <th className="text-left px-3 py-1.5 font-medium">{t('mvExt.colName')}</th>
-                    <th className="text-left px-3 py-1.5 font-medium">{t('domainExt.fieldEditor.sourceColumn')}</th>
-                    <th className="text-left px-3 py-1.5 font-medium">{t('olapStudioExt.hierarchy')}</th>
+                    <th className="text-left px-3 py-1.5 font-medium">이름</th>
+                    <th className="text-left px-3 py-1.5 font-medium">소스 컬럼</th>
+                    <th className="text-left px-3 py-1.5 font-medium">계층</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -476,20 +474,20 @@ function CubeDetailView({
         {/* 측정값 목록 */}
         <section>
           <h2 className="text-[12px] font-semibold font-heading mb-2 text-foreground/70">
-            {t('olapStudioF.measuresCount', { count: cube.measures.length })}
+            측정값 ({cube.measures.length})
           </h2>
           {cube.measures.length === 0 ? (
             <p className="text-[10px] text-foreground/30 font-mono">
-              {t('olapStudioF.mc0563a27')}
+              정의된 측정값이 없습니다
             </p>
           ) : (
             <div className="border border-border rounded-lg overflow-hidden">
               <table className="w-full text-[11px] font-mono">
                 <thead>
                   <tr className="bg-muted/50 text-foreground/50">
-                    <th className="text-left px-3 py-1.5 font-medium">{t('mvExt.colName')}</th>
-                    <th className="text-left px-3 py-1.5 font-medium">{t('dataQualityExt.detailLabels.expression')}</th>
-                    <th className="text-left px-3 py-1.5 font-medium">{t('olapStudioExt.aggregation')}</th>
+                    <th className="text-left px-3 py-1.5 font-medium">이름</th>
+                    <th className="text-left px-3 py-1.5 font-medium">표현식</th>
+                    <th className="text-left px-3 py-1.5 font-medium">집계</th>
                   </tr>
                 </thead>
                 <tbody>

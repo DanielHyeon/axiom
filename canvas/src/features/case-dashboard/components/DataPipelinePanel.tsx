@@ -7,7 +7,6 @@ import { useQuery } from '@tanstack/react-query';
 import { weaverApi } from '@/lib/api/clients';
 import { Database, RefreshCw } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { useTranslation } from 'react-i18next';
 
 interface DatasourceStatus {
   name: string;
@@ -33,14 +32,13 @@ async function fetchDatasourceStatus(): Promise<DatasourceStatus[]> {
 }
 
 const statusBadge: Record<string, { variant: 'default' | 'secondary' | 'destructive' | 'outline'; label: string }> = {
-  connected: { variant: 'default', label: t('caseDashboardExt.pipeline.status.connected') },
-  syncing: { variant: 'secondary', label: t('caseDashboardExt.pipeline.status.syncing') },
-  error: { variant: 'destructive', label: t('ontologyWizardExt.statusBadge.error') },
-  idle: { variant: 'outline', label: t('ontologyWizardExt.statusBadge.pending') },
+  connected: { variant: 'default', label: '연결됨' },
+  syncing: { variant: 'secondary', label: '동기화중' },
+  error: { variant: 'destructive', label: '오류' },
+  idle: { variant: 'outline', label: '대기' },
 };
 
 export function DataPipelinePanel() {
-  const { t } = useTranslation();
   const { data: sources = [] } = useQuery({
     queryKey: ['datasource-status'],
     queryFn: fetchDatasourceStatus,
@@ -51,11 +49,11 @@ export function DataPipelinePanel() {
     <div className="rounded-lg border border-border bg-card p-4">
       <div className="flex items-center gap-2 mb-3">
         <Database className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        <h3 className="text-sm font-medium">{t('caseDashboardExt.pipeline.title')}</h3>
+        <h3 className="text-sm font-medium">데이터 파이프라인</h3>
       </div>
 
       {sources.length === 0 ? (
-        <p className="text-xs text-muted-foreground">{t('caseDashboardExt.pipeline.noSources')}</p>
+        <p className="text-xs text-muted-foreground">연결된 데이터소스가 없습니다</p>
       ) : (
         <div className="space-y-2">
           {sources.slice(0, 5).map((ds) => {
@@ -72,7 +70,7 @@ export function DataPipelinePanel() {
             );
           })}
           {sources.length > 5 && (
-            <p className="text-xs text-muted-foreground">{t('caseDashboardF.msg12e1acae')}</p>
+            <p className="text-xs text-muted-foreground">외 {sources.length - 5}개</p>
           )}
         </div>
       )}

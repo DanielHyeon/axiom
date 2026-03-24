@@ -7,7 +7,6 @@
  */
 
 import React, { useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   Play,
   Square,
@@ -41,16 +40,16 @@ interface PipelineControlPanelProps {
 function statusBadge(status: Pipeline['status']): { label: string; className: string } {
   switch (status) {
     case 'running':
-      return { label: t('ingestionExt.pipelineStatus.running'), className: 'bg-blue-100 text-blue-700' };
+      return { label: '실행 중', className: 'bg-blue-100 text-blue-700' };
     case 'paused':
-      return { label: t('ingestionExt.pipelineStatus.paused'), className: 'bg-amber-100 text-amber-700' };
+      return { label: '일시정지', className: 'bg-amber-100 text-amber-700' };
     case 'completed':
-      return { label: t('ontologyWizardExt.statusBadge.complete'), className: 'bg-green-100 text-green-700' };
+      return { label: '완료', className: 'bg-green-100 text-green-700' };
     case 'failed':
-      return { label: t('behaviorExt.failure'), className: 'bg-red-100 text-red-700' };
+      return { label: '실패', className: 'bg-red-100 text-red-700' };
     case 'idle':
     default:
-      return { label: t('ontologyWizardExt.statusBadge.pending'), className: 'bg-gray-100 text-gray-600' };
+      return { label: '대기', className: 'bg-gray-100 text-gray-600' };
   }
 }
 
@@ -60,10 +59,10 @@ function formatRelativeTime(isoString?: string): string {
   try {
     const date = new Date(isoString);
     const diff = Date.now() - date.getTime();
-    if (diff < 60000) return t('ingestionF.justNow');
-    if (diff < 3600000) return t('ingestionF.minutesAgo', { min: Math.floor(diff / 60000) });
-    if (diff < 86400000) return t('ingestionF.hoursAgo', { hours: Math.floor(diff / 3600000) });
-    return t('ingestionF.daysAgo', { days: Math.floor(diff / 86400000) });
+    if (diff < 60000) return '방금 전';
+    if (diff < 3600000) return `${Math.floor(diff / 60000)}분 전`;
+    if (diff < 86400000) return `${Math.floor(diff / 3600000)}시간 전`;
+    return `${Math.floor(diff / 86400000)}일 전`;
   } catch {
     return isoString;
   }
@@ -77,7 +76,6 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
   onDelete,
   onCreate,
 }) => {
-  const { t } = useTranslation();
   // 펼쳐진 파이프라인 ID Set
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
@@ -97,10 +95,10 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
         <div className="flex items-center gap-2">
           <Zap className="h-4 w-4 text-blue-500" />
           <h3 className="text-sm font-semibold text-gray-900 font-heading">
-            {t('olapStudio.etl.title')}
+            ETL 파이프라인
           </h3>
           <span className="text-xs text-gray-400 font-mono">
-            {t('ingestionF.pipelineCount', { count: pipelines.length })}
+            {pipelines.length}개
           </span>
         </div>
         {onCreate && (
@@ -110,7 +108,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
             className="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-medium text-primary-foreground bg-blue-600 rounded-md hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-3.5 w-3.5" />
-            {t('ingestionF.mfd77e3e2')}
+            파이프라인 생성
           </button>
         )}
       </div>
@@ -119,7 +117,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
       {loading && (
         <div className="flex items-center justify-center py-8 text-gray-400 gap-2">
           <RotateCw className="h-4 w-4 animate-spin" />
-          <span className="text-sm">{t('ingestionExt.loadingPipelines')}</span>
+          <span className="text-sm">파이프라인 목록 로딩 중...</span>
         </div>
       )}
 
@@ -127,14 +125,14 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
       {!loading && pipelines.length === 0 && (
         <div className="flex flex-col items-center justify-center py-12 text-gray-400 gap-3 border border-dashed border-gray-200 rounded-xl">
           <Zap className="h-8 w-8 opacity-30" />
-          <p className="text-sm">{t('ingestionExt.noPipelines')}</p>
+          <p className="text-sm">등록된 파이프라인이 없습니다</p>
           {onCreate && (
             <button
               type="button"
               onClick={onCreate}
               className="text-sm text-blue-600 hover:underline"
             >
-              {t('ingestionF.ma39efdd6')}
+              첫 번째 파이프라인 생성하기
             </button>
           )}
         </div>
@@ -160,7 +158,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                     type="button"
                     onClick={() => toggleExpand(pipeline.id)}
                     className="p-1 rounded text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-                    aria-label={isExpanded ? t('objectExplorerExt.collapsePanel') : t('ingestionExt.expand')}
+                    aria-label={isExpanded ? '접기' : '펼치기'}
                   >
                     {isExpanded ? (
                       <ChevronUp className="h-4 w-4" />
@@ -198,20 +196,20 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                         type="button"
                         onClick={() => onStop?.(pipeline.id)}
                         className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-md hover:bg-red-100 transition-colors"
-                        title={t('ingestionExt.stop')}
+                        title="중지"
                       >
                         <Square className="h-3 w-3" />
-                        {t('ingestionExt.stop')}
+                        중지
                       </button>
                     ) : (
                       <button
                         type="button"
                         onClick={() => onRun?.(pipeline.id)}
                         className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-medium text-green-700 bg-green-50 border border-green-200 rounded-md hover:bg-green-100 transition-colors"
-                        title={t('behaviorExt.tabs.execute')}
+                        title="실행"
                       >
                         <Play className="h-3 w-3" />
-                        {t('behaviorExt.tabs.execute')}
+                        실행
                       </button>
                     )}
                     {onDelete && (
@@ -219,7 +217,7 @@ export const PipelineControlPanel: React.FC<PipelineControlPanelProps> = ({
                         type="button"
                         onClick={() => onDelete(pipeline.id)}
                         className="p-1.5 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                        title={t('ingestionExt.delete')}
+                        title="삭제"
                       >
                         <Trash2 className="h-3.5 w-3.5" />
                       </button>

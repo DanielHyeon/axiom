@@ -14,7 +14,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import type { PipelineStep } from '../types/ingestion';
-import { useTranslation } from 'react-i18next';
 
 interface PipelineStepViewerProps {
   /** 파이프라인 단계 목록 */
@@ -23,10 +22,10 @@ interface PipelineStepViewerProps {
 
 /** 단계 유형별 한글 라벨 */
 const STEP_LABELS: Record<string, string> = {
-  extract: t('ingestionExt.pipelineSteps.extract'),
-  transform: t('ingestionExt.pipelineSteps.transform'),
-  load: t('ingestionExt.pipelineSteps.load'),
-  validate: t('ingestionExt.pipelineSteps.validate'),
+  extract: '추출 (Extract)',
+  transform: '변환 (Transform)',
+  load: '적재 (Load)',
+  validate: '검증 (Validate)',
 };
 
 /** 상태별 아이콘 */
@@ -71,11 +70,10 @@ function formatDuration(ms?: number): string {
 export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
   steps,
 }) => {
-  const { t } = useTranslation();
   if (steps.length === 0) {
     return (
       <p className="text-sm text-gray-400 text-center py-4">
-        {t('ingestionF.m13923bab')}
+        파이프라인 단계 정보가 없습니다
       </p>
     );
   }
@@ -104,7 +102,7 @@ export const PipelineStepViewer: React.FC<PipelineStepViewerProps> = ({
                 </span>
                 {step.status === 'running' && (
                   <span className="inline-flex items-center px-1.5 py-0.5 text-[10px] font-medium bg-blue-100 text-blue-700 rounded">
-                    {t('ontologyWizardExt.statusBadge.in_progress')}
+                    진행 중
                   </span>
                 )}
               </div>

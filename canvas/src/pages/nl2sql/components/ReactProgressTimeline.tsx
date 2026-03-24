@@ -71,7 +71,7 @@ function extractSummary(step: ReactStreamStep): string {
  case 'error':
    return String(d.message ?? '').slice(0, 60);
  case 'needs_user_input':
-   return t('nl2sqlPage.waitingForInput');
+   return '사용자 입력 대기 중';
  default:
    return '';
  }

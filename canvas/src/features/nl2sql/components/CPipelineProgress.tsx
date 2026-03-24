@@ -6,7 +6,6 @@
  * 클릭으로 세부 정보를 접고 펼칠 수 있다.
  */
 import { useState, useMemo } from 'react';
-import { useTranslation } from 'react-i18next';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -15,10 +14,10 @@ import type { CPipelineStep, ReactStreamStep } from '@/features/nl2sql/api/oracl
 // ─── 파이프라인 단계 정의 ────────────────────────────────────
 
 /** 파이프라인 단계별 한글 이름 및 스타일 */
-const PHASE_CONFIG: Record<string, { labelKey: string; color: string; bgColor: string; lightBg: string }> = {
-  exploration: { labelKey: 'cPipeline.exploration', color: 'text-blue-600', bgColor: 'bg-blue-500', lightBg: 'bg-blue-50' },
-  convergence: { labelKey: 'cPipeline.convergence', color: 'text-amber-600', bgColor: 'bg-amber-500', lightBg: 'bg-amber-50' },
-  escape: { labelKey: 'cPipeline.escape', color: 'text-green-600', bgColor: 'bg-green-500', lightBg: 'bg-green-50' },
+const PHASE_CONFIG: Record<string, { label: string; color: string; bgColor: string; lightBg: string }> = {
+  exploration: { label: '탐색', color: 'text-blue-600', bgColor: 'bg-blue-500', lightBg: 'bg-blue-50' },
+  convergence: { label: '수렴', color: 'text-amber-600', bgColor: 'bg-amber-500', lightBg: 'bg-amber-50' },
+  escape: { label: '탈출', color: 'text-green-600', bgColor: 'bg-green-500', lightBg: 'bg-green-50' },
 };
 
 /** 파이프라인 단계 순서 */
@@ -54,7 +53,6 @@ function extractCPipelineSteps(steps: ReactStreamStep[]): CPipelineStep[] {
 // ─── 컴포넌트 ─────────────────────────────────────────────
 
 export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) {
-  const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(true);
 
   // c_pipeline 단계만 추출
@@ -109,7 +107,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
                       isPending && 'text-gray-400',
                     )}
                   >
-                    {t(config.labelKey)}
+                    {config.label}
                   </span>
                 </div>
               );
@@ -117,7 +115,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
           </div>
         </div>
         <Badge variant="secondary" className="text-[10px] font-mono">
-          {t('cPipeline.stepsCount', { count: pipelineSteps.length })}
+          {pipelineSteps.length}단계
         </Badge>
       </button>
 
@@ -126,7 +124,7 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
         <div className="border-t border-border px-3 py-2 space-y-1.5">
           {pipelineSteps.map((step, idx) => {
             const config = PHASE_CONFIG[step.phase] ?? {
-              labelKey: step.phase,
+              label: step.phase,
               color: 'text-foreground/60',
               bgColor: 'bg-gray-400',
             };
@@ -150,13 +148,13 @@ export function CPipelineProgress({ steps, isRunning }: CPipelineProgressProps) 
                 {/* 점수 (있는 경우) */}
                 {step.score != null && (
                   <span className="shrink-0 text-foreground/40">
-                    {t('cPipeline.score')}: <strong className="text-foreground/60">{step.score.toFixed(2)}</strong>
+                    점수: <strong className="text-foreground/60">{step.score.toFixed(2)}</strong>
                   </span>
                 )}
                 {/* 건수 (있는 경우) */}
                 {step.count != null && (
                   <span className="shrink-0 text-foreground/40">
-                    {t('cPipeline.count', { count: step.count })}
+                    {step.count}건
                   </span>
                 )}
               </div>

@@ -48,7 +48,7 @@ export function PathComparisonPanel({
  <div className="rounded-lg border border-border bg-card/50 p-3">
  <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground mb-2">
  <Route className="h-3 w-3" />
- {t('insightF.topPaths', { count: topPaths.length })}
+ 영향 경로 Top {topPaths.length}
  </div>
 
  <div className="space-y-1.5">

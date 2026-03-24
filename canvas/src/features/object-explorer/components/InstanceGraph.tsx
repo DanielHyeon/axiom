@@ -12,7 +12,6 @@
  */
 
 import React, { useRef, useEffect, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import cytoscape, { type Core, type ElementDefinition } from 'cytoscape';
 import { ZoomIn, ZoomOut, RotateCcw, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -65,7 +64,6 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
   onToggleCollapse,
   className,
 }) => {
-  const { t } = useTranslation();
   const containerRef = useRef<HTMLDivElement>(null);
   const cyRef = useRef<Core | null>(null);
 
@@ -228,7 +226,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
       cy.destroy();
       cyRef.current = null;
     };
-  {t('objExplorerF.m81fd29e3')}
+  }, [instance, collapsed, getColor]); // onNodeClick 의도적 제외
 
   // 줌 컨트롤
   const zoomIn = useCallback(() => cyRef.current?.zoom(cyRef.current.zoom() * 1.3), []);
@@ -244,7 +242,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
           size="icon"
           className="h-7 w-7"
           onClick={onToggleCollapse}
-          title={t('objectExplorerExt.openGraphPanel')}
+          title="그래프 패널 열기"
         >
           <Maximize2 className="h-3.5 w-3.5" />
         </Button>
@@ -262,7 +260,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
         )}
         style={{ minHeight: 200 }}
       >
-        {t('objectExplorerExt.selectInstanceForGraph')}
+        인스턴스를 선택하면 관계 그래프가 표시됩니다
       </div>
     );
   }
@@ -277,7 +275,7 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
         )}
         style={{ minHeight: 200 }}
       >
-        {t('objectExplorerExt.noRelatedInstances')}
+        관련 인스턴스가 없습니다
       </div>
     );
   }
@@ -302,20 +300,20 @@ export const InstanceGraph: React.FC<InstanceGraphProps> = ({
       {/* 툴바 */}
       <div className="flex items-center justify-between px-3 py-1.5 border-b border-border">
         <span className="text-[11px] font-semibold text-foreground">
-          {t('objectExplorerExt.relationGraph')}
+          관계 그래프
         </span>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title={t('objectExplorerExt.zoomIn')}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomIn} title="확대">
             <ZoomIn className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title={t('objectExplorerExt.zoomOut')}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={zoomOut} title="축소">
             <ZoomOut className="h-3 w-3" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title={t('objectExplorerExt.viewAll')}>
+          <Button variant="ghost" size="icon" className="h-6 w-6" onClick={fitAll} title="전체 보기">
             <RotateCcw className="h-3 w-3" />
           </Button>
           {onToggleCollapse && (
-            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title={t('objectExplorerExt.collapsePanel')}>
+            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={onToggleCollapse} title="접기">
               <Minimize2 className="h-3 w-3" />
             </Button>
           )}

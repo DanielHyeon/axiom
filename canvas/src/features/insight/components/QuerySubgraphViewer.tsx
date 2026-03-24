@@ -7,7 +7,6 @@ import dagre from 'cytoscape-dagre';
 import { Loader2, Network, AlertCircle } from 'lucide-react';
 import { postQuerySubgraph } from '../api/insightApi';
 import type { GraphData } from '../types/insight';
-import { useTranslation } from 'react-i18next';
 import {
  toCytoscapeElements,
  getLayoutConfig,
@@ -26,7 +25,6 @@ interface QuerySubgraphViewerProps {
 }
 
 export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
-  const { t } = useTranslation();
  const containerRef = useRef<HTMLDivElement>(null);
  const cyRef = useRef<cytoscape.Core | null>(null);
 
@@ -60,7 +58,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  const msg =
  err?.response?.data?.error_message ??
  err?.message ??
- {t('insightF.md0b0f59d')}
+ 'SQL 서브그래프 생성 실패';
  setError(msg);
  })
  .finally(() => {
@@ -111,7 +109,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Network className="h-10 w-10 mb-3 opacity-30" />
- <p className="text-sm">{t('insightExt.sqlHint')}</p>
+ <p className="text-sm">SQL이 실행되면 구조 그래프가 표시됩니다</p>
  </div>
  );
  }
@@ -120,7 +118,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Loader2 className="h-8 w-8 animate-spin mb-3" />
- <p className="text-sm">{t('insightF.msgb6b9a971')}</p>
+ <p className="text-sm">SQL 구조 분석 중...</p>
  </div>
  );
  }
@@ -129,7 +127,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <AlertCircle className="h-8 w-8 mb-3 text-destructive/60" />
- <p className="text-sm text-destructive mb-2">{t('insightExt.parseFailed')}</p>
+ <p className="text-sm text-destructive mb-2">파싱 실패</p>
  <p className="text-xs text-muted-foreground text-center max-w-xs">{error}</p>
  </div>
  );
@@ -139,7 +137,7 @@ export function QuerySubgraphViewer({ sql }: QuerySubgraphViewerProps) {
  return (
  <div className="flex flex-col items-center justify-center min-h-[200px] text-foreground0">
  <Network className="h-10 w-10 mb-3 opacity-30" />
- <p className="text-sm">{t('insightExt.noGraphNodes')}</p>
+ <p className="text-sm">그래프 노드가 없습니다</p>
  </div>
  );
  }

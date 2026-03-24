@@ -16,9 +16,9 @@ import type { DQSubTab } from '@/features/data-quality/store/useDQStore';
 
 // 서브탭 정의
 const TABS: { key: DQSubTab; label: string }[] = [
-  { key: 'test-cases', label: t('dataQualityExt.incidentCols.testCase') },
-  { key: 'incidents', label: t('dataQualityPage.msg713cda17') },
-  { key: 'trend', label: t('dataQualityPage.msg1c176610') },
+  { key: 'test-cases', label: '테스트 케이스' },
+  { key: 'incidents', label: '인시던트' },
+  { key: 'trend', label: '추이' },
 ];
 
 export function DataQualityPage() {
@@ -27,19 +27,19 @@ export function DataQualityPage() {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex-1 flex flex-col overflow-y-auto px-4 md:px-6 lg:px-8 py-4 md:py-6 gap-4 md:gap-6 max-w-7xl mx-auto w-full">
+      <div className="flex-1 flex flex-col overflow-y-auto px-8 py-6 gap-6 max-w-7xl mx-auto w-full">
         {/* 헤더 */}
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-0">
+        <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
               <ShieldCheck className="text-primary" size={20} aria-hidden />
             </div>
             <div>
-              <h1 className="text-xl md:text-2xl font-bold text-foreground">
-                {t('dataQuality.title')}
+              <h1 className="text-2xl font-bold text-foreground">
+                {t('dataQuality.title', '데이터 품질')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {t('dataQuality.subtitle')}
+                {t('dataQuality.subtitle', '품질 테스트로 데이터에 대한 신뢰를 구축하세요.')}
               </p>
             </div>
           </div>
@@ -49,7 +49,7 @@ export function DataQualityPage() {
             className="flex items-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground text-sm font-medium rounded-md hover:bg-primary/90 transition-colors"
           >
             <Plus size={16} />
-            {t('dataQualityExt.addTestCase')}
+            테스트 케이스 추가
           </button>
         </div>
 

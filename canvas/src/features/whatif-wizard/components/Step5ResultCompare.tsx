@@ -78,7 +78,7 @@ function KpiDeltaCard({ summary }: { summary: KpiDeltaSummary }) {
 
       {/* 베이스라인 */}
       <p className="text-[10px] text-muted-foreground mt-1">
-        {t('whatifWizard.step5.baselineLabel')}: {summary.baseline.toFixed(2)}
+        기준: {summary.baseline.toFixed(2)}
       </p>
     </div>
   );
@@ -157,50 +157,50 @@ export function Step5ResultCompare() {
   return (
     <div className="space-y-6 max-w-5xl">
       {/* 헤더 */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base md:text-lg font-semibold flex items-center gap-2">
+          <h3 className="text-lg font-semibold flex items-center gap-2">
             <BarChart3 className="w-5 h-5 text-primary" />
-            {t('whatifWizard.step5.title')}
+            {t('whatifWizard.step5.title', '결과 비교')}
           </h3>
-          <p className="text-xs md:text-sm text-muted-foreground mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             {t(
               'whatifWizard.step5.description',
-              t('whatifWizardF.step5Description'),
+              '시뮬레이션 결과를 확인하고 시나리오를 비교합니다.',
             )}
           </p>
         </div>
 
         {/* 시뮬레이션 모드 표시 */}
         <Badge variant="outline" className="text-xs">
-          {simulationMode === 'dag' ? t('whatifWizard.mode.dagPropagation') : t('whatifWizard.mode.eventFork')}
+          {simulationMode === 'dag' ? 'DAG 전파' : 'Event Fork'}
         </Badge>
       </div>
 
       {/* 시뮬레이션 실행 버튼 */}
       <Card>
         <CardContent className="py-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium">
-                {scenarioName || t('whatifWizardF.simulationFallback')}
+                {scenarioName || '시뮬레이션'}
               </p>
               <p className="text-xs text-muted-foreground">
                 {simulationMode === 'dag'
-                  ? t('whatifWizardF.m3a55eeca')
-                  : t('whatifWizardF.m9419e4eb')}
+                  ? '인과 DAG를 통해 개입 효과를 전파합니다.'
+                  : '이벤트 스트림을 포크하여 시뮬레이션합니다.'}
               </p>
             </div>
             <Button onClick={handleRun} disabled={isSimulating}>
               {isSimulating ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  {t('dataQualityExt.running')}
+                  실행 중...
                 </>
               ) : (
                 <>
                   <Play className="w-4 h-4 mr-2" />
-                  {t('whatifExt.simulation.run')}
+                  시뮬레이션 실행
                 </>
               )}
             </Button>
@@ -222,7 +222,7 @@ export function Step5ResultCompare() {
           {kpiDeltaSummaries.length > 0 && (
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle className="text-sm">{t('whatifWizard.step5.kpiDelta')}</CardTitle>
+                <CardTitle className="text-sm">KPI 변화 요약</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -235,7 +235,7 @@ export function Step5ResultCompare() {
           )}
 
           {/* KPI 델타 바 차트 */}
-          <KPIDeltaChart data={kpiDeltaSummaries} title={t('whatifWizardF.msg7fc34049')}/>
+          <KPIDeltaChart data={kpiDeltaSummaries} title="KPI 변화량 (%)"/>
 
           {/* Event Fork 모드: 이벤트 타임라인 */}
           {simulationMode === 'event-fork' && latestEvents.length > 0 && (
@@ -243,7 +243,7 @@ export function Step5ResultCompare() {
               <CardHeader className="pb-3">
                 <CardTitle className="text-sm flex items-center gap-2">
                   <Clock className="w-4 h-4" />
-                  {t('whatifWizard.step5.eventTimeline')}
+                  이벤트 타임라인
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -268,10 +268,10 @@ export function Step5ResultCompare() {
                 {isComparing ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    {t('whatifWizardF.mdc324ab6')}
+                    비교 중...
                   </>
                 ) : (
-                  t('whatifWizardF.scenarioComparison', { count: completedBranches.length })
+                  `${completedBranches.length}개 시나리오 비교`
                 )}
               </Button>
 
@@ -288,7 +288,7 @@ export function Step5ResultCompare() {
         <div className="flex flex-col items-center py-12 text-center">
           <BarChart3 className="w-10 h-10 text-muted-foreground/30 mb-3" />
           <p className="text-sm text-muted-foreground">
-            {t('whatifWizardF.m2721fef5')}
+            시뮬레이션을 실행하면 결과가 여기에 표시됩니다.
           </p>
         </div>
       )}

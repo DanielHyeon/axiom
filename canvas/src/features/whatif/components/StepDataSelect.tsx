@@ -10,26 +10,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Database, Info } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 import { useWhatIfWizardStore } from '../store/useWhatIfWizardStore';
 
 /** 온톨로지 노드 목록 (추후 Synapse API에서 로드) */
 const AVAILABLE_NODES = [
   {
     id: 'node_costs',
-    nameKey: 'whatifExt.mockNodes.costData',
+    name: '원가 데이터',
     layer: 'Measure',
     fields: ['cost_index', 'material_cost', 'labor_cost'],
   },
   {
     id: 'node_production',
-    nameKey: 'whatifExt.mockNodes.productionData',
+    name: '생산 데이터',
     layer: 'Process',
     fields: ['throughput', 'cycle_time', 'batch_size'],
   },
   {
     id: 'node_quality',
-    nameKey: 'whatifExt.mockNodes.qualityMetrics',
+    name: '품질 지표',
     layer: 'Measure',
     fields: ['defect_rate', 'rework_rate', 'scrap_rate'],
   },
@@ -41,13 +40,13 @@ const AVAILABLE_NODES = [
   },
   {
     id: 'node_maintenance',
-    nameKey: 'whatifExt.mockNodes.maintenanceData',
+    name: '정비 데이터',
     layer: 'Resource',
     fields: ['mtbf', 'mttr', 'maintenance_cost'],
   },
   {
     id: 'node_inventory',
-    nameKey: 'whatifExt.mockNodes.inventoryData',
+    name: '재고 데이터',
     layer: 'Resource',
     fields: ['raw_material_stock', 'wip_level', 'finished_goods'],
   },
@@ -62,7 +61,6 @@ const LAYER_COLORS: Record<string, string> = {
 };
 
 export function StepDataSelect() {
-  const { t } = useTranslation();
   const {
     dateRange,
     setDateRange,
@@ -87,10 +85,10 @@ export function StepDataSelect() {
       <div>
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Database className="w-5 h-5 text-primary" />
-          {t('whatifExt.dataSelect.title')}
+          데이터 소스 및 기간 선택
         </h3>
         <p className="text-sm text-muted-foreground mt-1">
-          {t('whatifExt.dataSelect.description')}
+          인과 분석에 사용할 데이터 범위와 온톨로지 노드를 선택합니다.
         </p>
       </div>
 
@@ -99,13 +97,13 @@ export function StepDataSelect() {
         <CardHeader className="pb-3">
           <CardTitle className="text-sm flex items-center gap-2">
             <Calendar className="w-4 h-4" />
-            {t('whatifExt.dataSelect.analysisPeriod')}
+            분석 기간
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex items-center gap-4">
             <div className="space-y-1 flex-1">
-              <Label htmlFor="date-from">{t('whatifExt.dataSelect.startDate')}</Label>
+              <Label htmlFor="date-from">시작일</Label>
               <Input
                 id="date-from"
                 type="date"
@@ -117,7 +115,7 @@ export function StepDataSelect() {
             </div>
             <span className="text-muted-foreground mt-6">~</span>
             <div className="space-y-1 flex-1">
-              <Label htmlFor="date-to">{t('whatifExt.dataSelect.endDate')}</Label>
+              <Label htmlFor="date-to">종료일</Label>
               <Input
                 id="date-to"
                 type="date"
@@ -131,7 +129,8 @@ export function StepDataSelect() {
           <div className="flex items-start gap-2 mt-3 p-2 rounded-md bg-muted/50">
             <Info className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
             <p className="text-xs text-muted-foreground">
-              {t('whatifExt.dataSelect.dateHint')}
+              기간을 지정하지 않으면 전체 데이터를 사용합니다.
+              데이터가 많을수록 인과 분석의 정확도가 높아집니다.
             </p>
           </div>
         </CardContent>
@@ -142,9 +141,9 @@ export function StepDataSelect() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="text-sm">
-              {t('whatifExt.dataSelect.targetNodes')}{' '}
+              분석 대상 노드{' '}
               <span className="text-muted-foreground font-normal">
-                ({selectedNodes.length}/{AVAILABLE_NODES.length} {t('whatifExt.dataSelect.selected')})
+                ({selectedNodes.length}/{AVAILABLE_NODES.length} 선택)
               </span>
             </CardTitle>
             <button
@@ -152,7 +151,7 @@ export function StepDataSelect() {
               onClick={handleSelectAll}
               className="text-xs text-primary hover:underline"
             >
-              {allSelected ? t('whatifExt.dataSelect.deselectAll') : t('whatifExt.dataSelect.selectAll')}
+              {allSelected ? '전체 해제' : '전체 선택'}
             </button>
           </div>
         </CardHeader>
@@ -179,7 +178,7 @@ export function StepDataSelect() {
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="text-sm font-medium">{t(node.nameKey)}</span>
+                      <span className="text-sm font-medium">{node.name}</span>
                       <Badge
                         variant="outline"
                         className={`text-[10px] px-1.5 py-0 ${

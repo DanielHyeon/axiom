@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import type { UploadFile } from '../types/ingestion';
 import { formatFileSize } from '../hooks/useFileUpload';
-import { useTranslation } from 'react-i18next';
 
 interface UploadProgressProps {
   /** 업로드 파일 목록 */
@@ -45,11 +44,11 @@ function StatusIcon({ status }: { status: UploadFile['status'] }) {
 /** 상태 텍스트 */
 function statusLabel(status: UploadFile['status']): string {
   switch (status) {
-    case 'pending': return t('ingestionExt.status.pending');
-    case 'uploading': return t('ingestionExt.status.uploading');
-    case 'processing': return t('ingestionExt.status.processing');
-    case 'completed': return t('ingestionExt.status.completed');
-    case 'failed': return t('ingestionExt.status.failed');
+    case 'pending': return '대기 중';
+    case 'uploading': return '업로드 중';
+    case 'processing': return '처리 중';
+    case 'completed': return '완료';
+    case 'failed': return '실패';
     default: return '';
   }
 }
@@ -74,7 +73,6 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
   onRemove,
   onClearAll,
 }) => {
-  const { t } = useTranslation();
   if (files.length === 0) return null;
 
   // 전체 통계
@@ -88,11 +86,11 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
       <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-gray-900 font-heading">
-            {t('ingestionF.m7a40f57d')}
+            업로드 파일
           </span>
           <span className="text-xs text-gray-500 font-mono">
-            {t('ingestionF.completedCount', { completed, total })}
-            {failed > 0 && <span className="text-red-500 ml-1">{t('ingestionF.msg489c6c9b')}</span>}
+            {completed}/{total} 완료
+            {failed > 0 && <span className="text-red-500 ml-1">({failed} 실패)</span>}
           </span>
         </div>
         {onClearAll && (
@@ -100,9 +98,9 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
             type="button"
             onClick={onClearAll}
             className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-            title={t('ingestionExt.clearAll')}
+            title="전체 삭제"
           >
-            {t('ingestionExt.clearAll')}
+            전체 삭제
           </button>
         )}
       </div>
@@ -162,8 +160,8 @@ export const UploadProgress: React.FC<UploadProgressProps> = ({
                 type="button"
                 onClick={() => onRemove(file.id)}
                 className="p-1 rounded text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
-                title={t('ingestionExt.removeFile')}
-                aria-label={t('ingestionF.removeFile', { name: file.name })}
+                title="파일 제거"
+                aria-label={`${file.name} 제거`}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>

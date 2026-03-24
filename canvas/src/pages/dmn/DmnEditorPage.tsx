@@ -12,10 +12,8 @@ import { DmnTableEditor } from '@/features/dmn/components/DmnTableEditor';
 import { useDmnTables, useDmnTable, useUpdateDmnTable, useExecuteDmnTest } from '@/features/dmn/hooks/useDmnTable';
 import type { DmnTestResult } from '@/features/dmn/types/dmn';
 import { TableProperties, Plus } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 export function DmnEditorPage() {
-  const { t } = useTranslation();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const { data: tables = [], isLoading } = useDmnTables();
   const { data: selectedTable } = useDmnTable(selectedId ?? '');
@@ -23,20 +21,20 @@ export function DmnEditorPage() {
   const testMutation = useExecuteDmnTest(selectedId ?? '');
   const [testResult, setTestResult] = useState<DmnTestResult | null>(null);
 
-  if (isLoading) return <LoadingSpinner size="lg" label={t('dmnPage.msg6aac1d65')} />;
+  if (isLoading) return <LoadingSpinner size="lg" label="결정 테이블 로딩 중" />;
 
   return (
     <div className="flex h-full">
       {/* 좌측: 테이블 목록 */}
       <div className="w-64 shrink-0 border-r border-border bg-card overflow-auto p-4">
         <div className="flex items-center justify-between mb-4">
-          <h1 className="text-sm font-semibold">{t('dmnPage.msga1cccbce')}</h1>
-          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label={t('dmnPage.msgc0c432db')}>
+          <h1 className="text-sm font-semibold">결정 테이블</h1>
+          <Button variant="ghost" size="sm" className="h-7 w-7 p-0" aria-label="새 테이블">
             <Plus className="h-4 w-4" />
           </Button>
         </div>
         {tables.length === 0 ? (
-          <p className="text-xs text-muted-foreground">{t('dmnPage.msg276bfb18')}</p>
+          <p className="text-xs text-muted-foreground">테이블이 없습니다</p>
         ) : (
           <div className="space-y-1">
             {tables.map((t) => (
@@ -53,7 +51,7 @@ export function DmnEditorPage() {
                 </div>
                 <div className="flex items-center gap-1 mt-1">
                   <Badge variant="outline" className="text-[10px] h-4">{t.hitPolicy}</Badge>
-                  <span className="text-[10px] text-muted-foreground">{t('dmnPage.msgfe4f0893')}</span>
+                  <span className="text-[10px] text-muted-foreground">{t.rules.length}규칙</span>
                 </div>
               </button>
             ))}
@@ -65,8 +63,8 @@ export function DmnEditorPage() {
       <div className="flex-1 overflow-auto p-6">
         {!selectedTable ? (
           <EmptyState
-            title={t('dmnPage.selectTable')}
-            message={t('dmnPage.msg03a7a072')}
+            title="결정 테이블을 선택하세요"
+            message="좌측 목록에서 테이블을 클릭하면 편집할 수 있습니다"
           />
         ) : (
           <DmnTableEditor

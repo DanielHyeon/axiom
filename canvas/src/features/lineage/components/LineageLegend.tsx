@@ -4,24 +4,22 @@
  */
 
 import { LINEAGE_NODE_STYLES, type LineageNodeType } from '../types/lineage';
-import { useTranslation } from 'react-i18next';
 
 const LEGEND_ITEMS: { type: LineageNodeType; label: string }[] = [
-  { type: 'source', label: t('lineageExt.nodeStyles.source') },
-  { type: 'table', label: t('olapExt.chartTable') },
-  { type: 'column', label: t('lineageExt.nodeStyles.column') },
-  { type: 'view', label: t('lineageExt.dashboard.view') },
-  { type: 'transform', label: t('lineageExt.dashboard.transform') },
-  { type: 'report', label: t('lineageExt.dashboard.report') },
+  { type: 'source', label: '소스' },
+  { type: 'table', label: '테이블' },
+  { type: 'column', label: '컬럼' },
+  { type: 'view', label: '뷰' },
+  { type: 'transform', label: '변환' },
+  { type: 'report', label: '리포트' },
 ];
 
 export function LineageLegend() {
-  const { t } = useTranslation();
   return (
     <div
       className="absolute top-4 right-4 z-10 rounded-xl border border-border bg-card p-3.5 shadow-lg min-w-[150px]"
       role="region"
-      aria-label={t('lineageExt.legendAria')}
+      aria-label="리니지 범례"
     >
       {/* 제목 */}
       <p className="mb-2.5 text-xs font-bold text-foreground tracking-wide">
@@ -49,7 +47,7 @@ export function LineageLegend() {
         <span className="inline-block w-6 h-0.5 bg-muted-foreground relative">
           <span className="absolute -right-1.5 -top-[5px] text-xs">&rarr;</span>
         </span>
-        <span>{t('lineageExt.dataFlowLabel')}</span>
+        <span>데이터 흐름</span>
       </div>
     </div>
   );

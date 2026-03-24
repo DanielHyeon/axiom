@@ -10,7 +10,6 @@ import { AlertCircle, Clock, Hash, ChevronDown, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { exportToCsv } from '@/lib/csvExport';
 import type { PivotResult } from '../hooks/usePivot';
-import { useTranslation } from 'react-i18next';
 
 // ─── 상수 ───────────────────────────────────────────────
 
@@ -27,7 +26,6 @@ interface PivotResultGridProps {
 // ─── 컴포넌트 ────────────────────────────────────────────
 
 export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
-  const { t } = useTranslation();
   // 페이지네이션 — 표시할 행 수 관리
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
@@ -74,7 +72,7 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
   if (!result) {
     return (
       <div className="flex items-center justify-center py-12 text-[11px] text-muted-foreground font-mono">
-        {t('olapStudioExt.pivotEmptyHint')}
+        피벗을 실행하면 결과가 여기에 표시됩니다
       </div>
     );
   }
@@ -96,11 +94,11 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1">
             <Hash className="h-3 w-3" />
-            {t('olapStudioF.rowCountLocale', { count: result.row_count.toLocaleString() })}
+            {result.row_count.toLocaleString()}행
           </span>
           {totalRows > PAGE_SIZE && (
             <span className="text-foreground/30">
-              {t('olapStudioF.showingOf', { visible: visibleRows.length.toLocaleString(), total: totalRows.toLocaleString() })}
+              (표시: {visibleRows.length.toLocaleString()}/{totalRows.toLocaleString()})
             </span>
           )}
           <span className="flex items-center gap-1">
@@ -114,7 +112,7 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
           size="sm"
           className="h-6 text-xs gap-1"
           onClick={handleExportCsv}
-          aria-label={t('olapStudioExt.csvExport')}
+          aria-label="CSV 내보내기"
         >
           <Download className="h-3 w-3" />
           CSV
@@ -162,7 +160,7 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
         {/* 빈 결과 */}
         {result.rows.length === 0 && (
           <div className="py-8 text-center text-[11px] text-muted-foreground font-mono">
-            {t('olapStudioExt.pivotNoResults')}
+            결과가 없습니다
           </div>
         )}
 
@@ -176,8 +174,8 @@ export function PivotResultGrid({ result, isLoading }: PivotResultGridProps) {
               className="h-7 text-[10px] font-mono text-foreground/50 hover:text-foreground/70 gap-1"
             >
               <ChevronDown className="h-3 w-3" />
-              {t('olapStudioF.loadMore', { count: Math.min(PAGE_SIZE, remainingCount).toLocaleString() })}
-              {remainingCount > PAGE_SIZE && t('olapStudioF.remainingRows', { count: remainingCount.toLocaleString() })})
+              더 보기 ({Math.min(PAGE_SIZE, remainingCount).toLocaleString()}행
+              {remainingCount > PAGE_SIZE && ` / 남은 ${remainingCount.toLocaleString()}행`})
             </Button>
           </div>
         )}

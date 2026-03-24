@@ -1,4 +1,3 @@
-import { useTranslation } from 'react-i18next';
 export interface ScenarioComparisonRow {
  scenario_id: string;
  scenario_name: string;
@@ -11,8 +10,7 @@ interface ScenarioComparisonProps {
 }
 
 /** 복수 시나리오 열 비교 테이블. NPV·실현가능성 등 지표를 시나리오별로 나란히 표시. */
-export function ScenarioComparison({
-  items }: ScenarioComparisonProps) {
+export function ScenarioComparison({ items }: ScenarioComparisonProps) {
  if (items.length === 0) return null;
 
  return (
@@ -20,9 +18,9 @@ export function ScenarioComparison({
  <table className="w-full text-sm text-left">
  <thead className="bg-muted text-foreground/80">
  <tr>
- <th className="p-3">{t('cases.detail.scenarios')}</th>
+ <th className="p-3">시나리오</th>
  <th className="p-3">NPV (WACC)</th>
- <th className="p-3">{t('whatifPage.msgcf66a878')}</th>
+ <th className="p-3">실현가능성</th>
  </tr>
  </thead>
  <tbody className="bg-card text-foreground">

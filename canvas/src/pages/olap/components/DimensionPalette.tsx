@@ -4,21 +4,19 @@ import { usePivotConfig } from '@/features/olap/store/usePivotConfig';
 import type { CubeDefinition } from '@/features/olap/types/olap';
 import { DraggableItem } from './DraggableItem';
 import { Database } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface DimensionPaletteProps {
  cube: CubeDefinition | null;
 }
 
-export function DimensionPalette({
-  cube }: DimensionPaletteProps) {
+export function DimensionPalette({ cube }: DimensionPaletteProps) {
  const { rows, columns, measures, filters } = usePivotConfig();
 
  if (!cube) {
  return (
  <div className="w-64 border-r border-border bg-popover p-4 flex flex-col items-center justify-center text-muted-foreground">
  <Database size={32} className="mb-2 opacity-30" />
- <p className="text-sm">{t('olapPage.selectCube')}</p>
+ <p className="text-sm">큐브를 선택하세요</p>
  </div>
  );
  }
@@ -42,7 +40,7 @@ export function DimensionPalette({
  <div className="flex-1 overflow-y-auto p-4 space-y-6">
  <div>
  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
- {t('olapStudioF.m78b740cf')}
+ 차원 (Dimensions)
  <span className="text-muted-foreground font-normal">{cube.dimensions.length}</span>
  </h4>
  <div className="space-y-1">
@@ -59,7 +57,7 @@ export function DimensionPalette({
 
  <div>
  <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
- {t('olapStudioExt.measuresLabel')}
+ 측정값 (Measures)
  <span className="text-muted-foreground font-normal">{cube.measures.length}</span>
  </h4>
  <div className="space-y-1">

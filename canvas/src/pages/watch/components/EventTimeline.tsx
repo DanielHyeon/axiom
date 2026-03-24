@@ -1,13 +1,11 @@
 import type { Alert } from '@/features/watch/types/watch';
-import { useTranslation } from 'react-i18next';
 
 interface EventTimelineProps {
  events: Alert[];
  onMarkAsRead?: (id: string) => void;
 }
 
-export function EventTimeline({
-  events, onMarkAsRead }: EventTimelineProps) {
+export function EventTimeline({ events, onMarkAsRead }: EventTimelineProps) {
  const sorted = [...events].sort(
  (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
  );
@@ -54,7 +52,7 @@ export function EventTimeline({
  ))}
  </ul>
  {sorted.length === 0 && (
- <div className="py-8 text-center text-foreground0 text-sm">{t('watchPage.msgf425f417')}</div>
+ <div className="py-8 text-center text-foreground0 text-sm">이벤트가 없습니다.</div>
  )}
  </div>
  );

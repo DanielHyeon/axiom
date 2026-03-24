@@ -19,7 +19,6 @@
  */
 
 import { useMemo, useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
 import { cn } from '@/lib/utils';
 import {
   Eye,
@@ -57,7 +56,7 @@ import { DataPreviewPanel } from './DataPreviewPanel';
 export interface CanvasTable {
   tableName: string;
   schema: string;
-  {t('nl2sqlF.me57f2c15')}
+  datasource?: string;  // 데이터소스 이름
   columns: ColumnMeta[];
   /** NL2SQL LLM 컨텍스트 포함 여부 */
   includedInContext: boolean;
@@ -93,7 +92,6 @@ export function SchemaCanvas({
   onNavigateDatasource,
   onRefresh,
 }: SchemaCanvasProps) {
-  const { t } = useTranslation();
   // G1: FK 가시성 상태
   const { visibility, toggle: toggleFkVisibility } = useFkVisibility();
 
@@ -196,7 +194,7 @@ export function SchemaCanvas({
                   : 'text-foreground/30 hover:text-foreground/50'
               )}
             >
-              {t('schemaCanvas.codeAnalysis')}
+              코드분석
               {availability && (
                 <span className="ml-1 text-[9px] opacity-60">
                   {availability.robo.table_count}
@@ -213,7 +211,7 @@ export function SchemaCanvas({
                   : 'text-foreground/30 hover:text-foreground/50'
               )}
             >
-              {t('schemaCanvas.datasourceMode')}
+              데이터소스
               {availability && (
                 <span className="ml-1 text-[9px] opacity-60">
                   {availability.text2sql.table_count}
@@ -226,7 +224,7 @@ export function SchemaCanvas({
         {/* 통계 */}
         <div className="flex items-center gap-2 text-[10px] text-foreground/40 font-mono shrink-0 mr-2">
           <Sparkles className="h-3 w-3" />
-          <span>{includedCount}/{tables.length} {t('schemaCanvas.contextIncluded')}</span>
+          <span>{includedCount}/{tables.length} 컨텍스트 포함</span>
         </div>
 
         {/* 테이블 칩 목록 */}
@@ -255,14 +253,14 @@ export function SchemaCanvas({
             type="button"
             onClick={toggleDisplayMode}
             className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-foreground/50 hover:text-foreground/70 transition-colors"
-            title={displayMode === 'physical' ? t('schemaCanvas.switchToLogical') : t('schemaCanvas.switchToPhysical')}
+            title={displayMode === 'physical' ? '논리명으로 전환' : '물리명으로 전환'}
           >
             {displayMode === 'physical' ? (
               <ToggleLeft className="h-3 w-3" />
             ) : (
               <ToggleRight className="h-3 w-3 text-blue-500" />
             )}
-            <span>{displayMode === 'physical' ? t('schemaCanvas.physicalName') : t('schemaCanvas.logicalName')}</span>
+            <span>{displayMode === 'physical' ? '물리명' : '논리명'}</span>
           </button>
 
           {/* G2: 관계 추가 버튼 */}
@@ -270,10 +268,10 @@ export function SchemaCanvas({
             type="button"
             onClick={() => setShowCardinalityModal(true)}
             className="flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-mono text-foreground/50 hover:text-foreground/70 transition-colors"
-            title={t('schemaCanvas.addRelationTitle')}
+            title="FK 관계 추가"
           >
             <ArrowLeftRight className="h-3 w-3" />
-            <span>{t('schemaCanvas.addRelation')}</span>
+            <span>관계추가</span>
           </button>
         </div>
       </div>
@@ -286,7 +284,7 @@ export function SchemaCanvas({
             <MermaidERDRenderer mermaidCode={code} />
           ) : (
             <div className="flex items-center justify-center h-full text-foreground/30 text-[11px] font-mono">
-              {t('schemaCanvas.erdError')}
+              ERD를 생성할 수 없습니다
             </div>
           )}
         </div>
@@ -332,7 +330,6 @@ function TableChip({
   onRemove,
   onPreview,
 }: TableChipProps) {
-  const { t } = useTranslation();
   return (
     <div
       className={cn(
@@ -347,8 +344,8 @@ function TableChip({
         type="button"
         onClick={onToggleContext}
         className="hover:opacity-70 transition-opacity"
-        title={includedInContext ? t('schemaCanvas.excludeContext') : t('schemaCanvas.includeContext')}
-        aria-label={t('schemaCanvas.contextLabel', { name: rawName, action: includedInContext ? t('common.delete') : t('common.add') })}
+        title={includedInContext ? 'NL2SQL 컨텍스트에서 제외' : 'NL2SQL 컨텍스트에 포함'}
+        aria-label={`${rawName} 컨텍스트 ${includedInContext ? '제외' : '포함'}`}
       >
         {includedInContext ? (
           <Eye className="h-3 w-3" />
@@ -364,8 +361,8 @@ function TableChip({
         type="button"
         onClick={onPreview}
         className="hover:text-emerald-500 transition-colors"
-        title={t('schemaCanvas.dataPreview')}
-        aria-label={t('schemaCanvas.dataPreviewLabel', { name: rawName })}
+        title="데이터 프리뷰"
+        aria-label={`${rawName} 데이터 프리뷰`}
       >
         <Database className="h-2.5 w-2.5" />
       </button>
@@ -375,7 +372,7 @@ function TableChip({
         type="button"
         onClick={onRemove}
         className="hover:text-red-500 transition-colors"
-        aria-label={t('schemaCanvas.removeLabel', { name: rawName })}
+        aria-label={`${rawName} 제거`}
       >
         <X className="h-2.5 w-2.5" />
       </button>
