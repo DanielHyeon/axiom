@@ -3,19 +3,20 @@
  * 번호가 매겨진 원형과 연결선으로 위자드 진행 상태를 시각화
  */
 import { Check } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import type { WizardStep } from '../types/wizard';
 
-/** 단계 정의 */
-const STEPS: Array<{ key: WizardStep; label: string }> = [
-  { key: 'INPUT', label: '입력' },
-  { key: 'GENERATING', label: '생성 중' },
-  { key: 'REVIEW', label: '검토' },
-  { key: 'COMPLETE', label: '완료' },
+/** 단계 키 목록 — 라벨은 t()로 런타임 조회 */
+const STEP_KEYS: Array<{ key: WizardStep; i18nKey: string }> = [
+  { key: 'INPUT', i18nKey: 'ontologyWizardExt.steps.input' },
+  { key: 'GENERATING', i18nKey: 'ontologyWizardExt.steps.generating' },
+  { key: 'REVIEW', i18nKey: 'ontologyWizardExt.steps.review' },
+  { key: 'COMPLETE', i18nKey: 'ontologyWizardExt.steps.complete' },
 ];
 
 /** 단계 키 → 순서 번호 (1부터 시작) */
 function stepIndex(step: WizardStep): number {
-  return STEPS.findIndex((s) => s.key === step);
+  return STEP_KEYS.findIndex((s) => s.key === step);
 }
 
 interface StepIndicatorProps {
@@ -23,11 +24,12 @@ interface StepIndicatorProps {
 }
 
 export function StepIndicator({ currentStep }: StepIndicatorProps) {
+  const { t } = useTranslation();
   const currentIdx = stepIndex(currentStep);
 
   return (
     <div className="flex items-center justify-center w-full px-4 py-2">
-      {STEPS.map((s, i) => {
+      {STEP_KEYS.map((s, i) => {
         const isCompleted = i < currentIdx;
         const isActive = i === currentIdx;
 
@@ -58,12 +60,12 @@ export function StepIndicator({ currentStep }: StepIndicatorProps) {
                       : 'text-muted-foreground'
                 }`}
               >
-                {s.label}
+                {t(s.i18nKey)}
               </span>
             </div>
 
             {/* 연결선 (마지막 요소 제외) */}
-            {i < STEPS.length - 1 && (
+            {i < STEP_KEYS.length - 1 && (
               <div
                 className={`
                   w-16 h-0.5 mx-2 transition-colors duration-300

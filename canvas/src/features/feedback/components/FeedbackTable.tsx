@@ -118,8 +118,11 @@ export function FeedbackTable({
             {pagination && pagination.total_pages > 1 && (
               <div className="flex items-center justify-between mt-4">
                 <span className="text-xs text-muted-foreground font-mono">
-                  {pagination.total_count}건 중 {(page - 1) * pagination.page_size + 1}-
-                  {Math.min(page * pagination.page_size, pagination.total_count)}
+                  {t('feedbackExt.paginationInfo', {
+                    total: pagination.total_count,
+                    from: (page - 1) * pagination.page_size + 1,
+                    to: Math.min(page * pagination.page_size, pagination.total_count),
+                  })}
                 </span>
                 <div className="flex items-center gap-1">
                   <Button

@@ -3,6 +3,7 @@
 // 트리/리스트 대체 뷰 — 캔버스와 병렬로 프로세스 모델을 트리 구조로 열람 (설계 §10.1)
 
 import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import type { CanvasItem, Connection } from '../types/processDesigner';
 import { NODE_CONFIGS, CONNECTION_CONFIGS } from '../utils/nodeConfig';
 
@@ -22,6 +23,7 @@ interface TreeNode {
 }
 
 export function TreeView({ items, connections, selectedItemIds, onSelectItem, onFocusCanvas }: TreeViewProps) {
+ const { t } = useTranslation();
  const itemMap = useMemo(() => new Map(items.map((it) => [it.id, it])), [items]);
 
  // Build tree: contextBoxes → children, orphan nodes at root
@@ -80,7 +82,7 @@ export function TreeView({ items, connections, selectedItemIds, onSelectItem, on
  <div
  className="flex-1 overflow-auto text-sm"
  role="tree"
- aria-label="프로세스 모델 트리 뷰"
+ aria-label={t('processDesignerExt.treeViewAria')}
  >
  {tree.domains.map((domain) => (
  <DomainTreeItem
@@ -112,7 +114,7 @@ export function TreeView({ items, connections, selectedItemIds, onSelectItem, on
 
  {items.length === 0 && (
  <div className="p-4 text-center text-foreground0 text-xs">
- 캔버스에 노드를 추가하면 여기에 표시됩니다.
+ {t('processDesignerExt.treeViewEmpty')}
  </div>
  )}
  </div>
@@ -132,6 +134,7 @@ function DomainTreeItem({
  onSelectItem: (id: string) => void;
  onFocusCanvas: (id: string) => void;
 }) {
+ const { t } = useTranslation();
  const [expanded, setExpanded] = useState(true);
  const selected = selectedItemIds.includes(domain.item.id);
 
@@ -178,7 +181,7 @@ function DomainTreeItem({
  ))}
  {domain.children.length === 0 && (
  <div className="pl-8 py-1 text-[10px] text-muted-foreground italic">
- 하위 노드 없음
+ {t('processDesignerExt.noChildNodes')}
  </div>
  )}
  </div>

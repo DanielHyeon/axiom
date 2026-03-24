@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, RotateCcw, ChevronRight, Package } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,7 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
   onSelect,
   onReset,
 }) => {
+  const { t } = useTranslation();
   // 필터 텍스트
   const [filterText, setFilterText] = useState('');
   // 펼침 상태
@@ -80,14 +82,14 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <h3 className="text-sm font-semibold text-foreground flex items-center gap-2">
           <Search className="h-4 w-4 text-muted-foreground" />
-          오브젝트 탐색기
+          {t('objectExplorerExt.title')}
         </h3>
         <Button
           variant="outline"
           size="icon"
           className="h-7 w-7"
           onClick={onReset}
-          title="초기화"
+          title={t('objectExplorerExt.reset')}
         >
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
@@ -98,7 +100,7 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
         <Input
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Object Type 필터..."
+          placeholder={t('objectExplorerExt.filterPlaceholder')}
           className="h-8 text-xs"
         />
       </div>
@@ -109,7 +111,7 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
           Object Types
         </span>
         <span className="text-[11px] text-muted-foreground">
-          {filteredTypes.length}개
+          {t('objectExplorerExt.count', { count: filteredTypes.length })}
         </span>
       </div>
 
@@ -119,14 +121,14 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
         {isLoading && (
           <div className="flex flex-col items-center justify-center py-8 text-muted-foreground text-xs gap-2">
             <div className="h-5 w-5 border-2 border-muted-foreground/30 border-t-primary rounded-full animate-spin" />
-            <span>로딩 중...</span>
+            <span>{t('objectExplorerExt.loading')}</span>
           </div>
         )}
 
         {/* 빈 상태 */}
         {!isLoading && filteredTypes.length === 0 && (
           <div className="text-center py-8 text-muted-foreground text-xs">
-            Object Type이 없습니다
+            {t('objectExplorerExt.noObjectTypes')}
           </div>
         )}
 
@@ -175,7 +177,7 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
                   )}
                   <div>
                     <span className="text-[10px] font-semibold text-muted-foreground block mb-1.5">
-                      필드 ({type.fields?.length ?? 0})
+                      {t('objectExplorerExt.fields', { count: type.fields?.length ?? 0 })}
                     </span>
                     <div className="flex flex-wrap gap-1">
                       {type.fields?.slice(0, 6).map((f) => (
@@ -189,7 +191,7 @@ export const ObjectTypeSelector: React.FC<ObjectTypeSelectorProps> = ({
                       ))}
                       {(type.fields?.length ?? 0) > 6 && (
                         <span className="px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                          +{(type.fields?.length ?? 0) - 6}개
+                          {t('objectExplorerExt.moreFields', { count: (type.fields?.length ?? 0) - 6 })}
                         </span>
                       )}
                     </div>

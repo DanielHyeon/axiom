@@ -4,21 +4,17 @@
  * 테스트 레벨 선택 → 테이블 선택 → 테스트 유형 선택 → 생성
  */
 import { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Search, Pencil } from 'lucide-react';
 import { useDQStore } from '../store/useDQStore';
 import { useCreateDQRule } from '../hooks/useDQMetrics';
 import type { DQRuleType, TestLevel, DQSeverity } from '../types/data-quality';
 
-// 테스트 유형 정의
-const TEST_TYPES: { id: DQRuleType; name: string; description: string }[] = [
-  { id: 'not_null', name: 'Null 체크', description: '컬럼 값이 NULL이 아닌지 검증합니다.' },
-  { id: 'unique', name: 'Unique 체크', description: '컬럼 값의 유일성을 검증합니다.' },
-  { id: 'range', name: 'Range 체크', description: '컬럼 값이 지정된 범위 내에 있는지 검증합니다.' },
-  { id: 'regex', name: 'Format 체크', description: '컬럼 값이 지정된 정규식 패턴에 맞는지 검증합니다.' },
-  { id: 'custom_sql', name: 'Custom SQL', description: '커스텀 SQL 쿼리가 0행을 반환하는지 검증합니다.' },
-];
+// 테스트 유형 ID 목록 — 라벨/설명은 t()로 런타임 조회
+const TEST_TYPE_IDS: DQRuleType[] = ['not_null', 'unique', 'range', 'regex', 'custom_sql'];
 
 export function DQTestRunner() {
+  const { t } = useTranslation();
   const { showCreateDialog, setShowCreateDialog } = useDQStore();
   const createRule = useCreateDQRule();
 
@@ -33,13 +29,22 @@ export function DQTestRunner() {
   const [severity, setSeverity] = useState<DQSeverity>('warning');
 
   // 테스트 유형 필터링
+  const testTypes = useMemo(() =>
+    TEST_TYPE_IDS.map((id) => ({
+      id,
+      name: t(`dataQualityExt.testTypes.${id}`),
+      description: t(`dataQualityExt.testTypes.${id}_desc`),
+    })),
+    [t],
+  );
+
   const filteredTypes = useMemo(() => {
-    if (!testTypeSearch) return TEST_TYPES;
+    if (!testTypeSearch) return testTypes;
     const q = testTypeSearch.toLowerCase();
-    return TEST_TYPES.filter(
-      (t) => t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q),
+    return testTypes.filter(
+      (tt) => tt.name.toLowerCase().includes(q) || tt.description.toLowerCase().includes(q),
     );
-  }, [testTypeSearch]);
+  }, [testTypeSearch, testTypes]);
 
   // 초기화
   const resetForm = () => {
@@ -85,7 +90,7 @@ export function DQTestRunner() {
       >
         {/* 헤더 */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-border">
-          <h2 className="text-lg font-semibold text-foreground">테스트 케이스 추가</h2>
+          <h2 className="text-lg font-semibold text-foreground">{t('dataQualityExt.addTestCase')}</h2>
           <button type="button" onClick={() => setShowCreateDialog(false)} className="p-1 rounded hover:bg-muted">
             <X size={20} className="text-muted-foreground" />
           </button>
@@ -98,7 +103,7 @@ export function DQTestRunner() {
             {/* 1. 테스트 레벨 */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                테스트 레벨 <span className="text-destructive">*</span>
+                {t('dataQualityExt.testLevel')} <span className="text-destructive">*</span>
               </label>
               <div className="grid grid-cols-3 gap-3">
                 {(['table', 'column', 'custom'] as TestLevel[]).map((lv) => (
@@ -113,10 +118,10 @@ export function DQTestRunner() {
                     }`}
                   >
                     <p className="text-sm font-semibold text-primary">
-                      {lv === 'table' ? '테이블 레벨' : lv === 'column' ? '컬럼 레벨' : '커스텀'}
+                      {lv === 'table' ? t('dataQualityExt.levelTable') : lv === 'column' ? t('dataQualityExt.levelColumn') : t('dataQualityExt.levelCustom')}
                     </p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {lv === 'table' ? '테이블에 적용' : lv === 'column' ? '컬럼에 적용' : 'SQL 직접 작성'}
+                      {lv === 'table' ? t('dataQualityExt.levelTableDesc') : lv === 'column' ? t('dataQualityExt.levelColumnDesc') : t('dataQualityExt.levelCustomDesc')}
                     </p>
                     {level === lv && (
                       <div className="absolute top-2 right-2 w-5 h-5 bg-primary rounded-full flex items-center justify-center">
@@ -131,7 +136,7 @@ export function DQTestRunner() {
             {/* 2. 테스트 이름 */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                테스트 이름 <span className="text-destructive">*</span>
+                {t('dataQualityExt.testName')} <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
@@ -145,7 +150,7 @@ export function DQTestRunner() {
             {/* 3. 테이블 선택 */}
             <div className="space-y-2">
               <label className="text-sm font-medium text-foreground">
-                테이블 <span className="text-destructive">*</span>
+                {t('dataQualityExt.table')} <span className="text-destructive">*</span>
               </label>
               <input
                 type="text"
@@ -159,7 +164,7 @@ export function DQTestRunner() {
             {/* 4. 컬럼 (레벨이 column일 때) */}
             {level === 'column' && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">컬럼</label>
+                <label className="text-sm font-medium text-foreground">{t('dataQualityExt.column')}</label>
                 <input
                   type="text"
                   value={columnName}
@@ -172,7 +177,7 @@ export function DQTestRunner() {
 
             {/* 5. 심각도 */}
             <div className="space-y-2">
-              <label className="text-sm font-medium text-foreground">심각도</label>
+              <label className="text-sm font-medium text-foreground">{t('dataQualityExt.severity')}</label>
               <div className="flex gap-2">
                 {(['critical', 'warning', 'info'] as DQSeverity[]).map((s) => (
                   <button
@@ -199,7 +204,7 @@ export function DQTestRunner() {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <label className="text-sm font-medium text-foreground">
-                  테스트 유형 <span className="text-destructive">*</span>
+                  {t('dataQualityExt.testType')} <span className="text-destructive">*</span>
                 </label>
                 <button
                   type="button"
@@ -207,7 +212,7 @@ export function DQTestRunner() {
                   className="flex items-center gap-1 text-xs text-primary hover:underline"
                 >
                   <Pencil size={12} />
-                  커스텀 SQL
+                  {t('dataQualityExt.customSql')}
                 </button>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 bg-secondary border border-primary rounded-md">
@@ -216,24 +221,24 @@ export function DQTestRunner() {
                   type="text"
                   value={testTypeSearch}
                   onChange={(e) => setTestTypeSearch(e.target.value)}
-                  placeholder="테스트 유형 검색"
+                  placeholder={t('dataQualityExt.searchTestType')}
                   className="flex-1 bg-transparent border-none text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
                 />
               </div>
               <div className="max-h-48 overflow-y-auto border border-border rounded-md bg-secondary">
-                {filteredTypes.map((t) => (
+                {filteredTypes.map((tt) => (
                   <button
-                    key={t.id}
+                    key={tt.id}
                     type="button"
-                    onClick={() => setTestType(t.id)}
+                    onClick={() => setTestType(tt.id)}
                     className={`w-full text-left px-4 py-3 border-b border-border last:border-b-0 transition-colors ${
-                      testType === t.id ? 'bg-primary/10' : 'hover:bg-muted'
+                      testType === tt.id ? 'bg-primary/10' : 'hover:bg-muted'
                     }`}
                   >
-                    <p className={`text-sm font-medium ${testType === t.id ? 'text-primary' : 'text-foreground'}`}>
-                      {t.name}
+                    <p className={`text-sm font-medium ${testType === tt.id ? 'text-primary' : 'text-foreground'}`}>
+                      {tt.name}
                     </p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{t.description}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{tt.description}</p>
                   </button>
                 ))}
               </div>
@@ -242,7 +247,7 @@ export function DQTestRunner() {
             {/* 7. 커스텀 SQL (custom_sql 타입일 때) */}
             {testType === 'custom_sql' && (
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">SQL 표현식</label>
+                <label className="text-sm font-medium text-foreground">{t('dataQualityExt.sqlExpression')}</label>
                 <textarea
                   value={expression}
                   onChange={(e) => setExpression(e.target.value)}
@@ -258,23 +263,20 @@ export function DQTestRunner() {
           <aside className="p-5 bg-muted/30 border-l border-border overflow-y-auto">
             <div className="space-y-4">
               <div className="pl-3 border-l-2 border-primary">
-                <h4 className="text-sm font-semibold text-foreground mb-1">테스트 유형</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-1">{t('dataQualityExt.guideTitle')}</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  데이터 품질 요구사항에 맞는 테스트 유형을 선택하세요. 테이블/컬럼 레벨에 따라 사용 가능한 유형이 달라집니다.
+                  {t('dataQualityExt.guideDesc')}
                 </p>
                 <ul className="mt-2 space-y-1 text-xs text-muted-foreground list-disc list-inside">
-                  <li>값 유효성 검사</li>
-                  <li>유일성 체크</li>
-                  <li>Null 체크</li>
-                  <li>패턴 매칭</li>
-                  <li>범위 검증</li>
-                  <li>커스텀 SQL</li>
+                  {(t('dataQualityExt.guideChecks', { returnObjects: true }) as string[]).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
                 </ul>
               </div>
               <div className="pl-3 border-l-2 border-primary">
-                <h4 className="text-sm font-semibold text-foreground mb-1">이름 규칙</h4>
+                <h4 className="text-sm font-semibold text-foreground mb-1">{t('dataQualityExt.nameRuleTitle')}</h4>
                 <p className="text-xs text-muted-foreground leading-relaxed">
-                  고유한 테스트 이름을 지정하세요. 문자로 시작하고, 문자/숫자/밑줄만 사용 가능합니다.
+                  {t('dataQualityExt.nameRuleDesc')}
                 </p>
               </div>
             </div>
@@ -288,7 +290,7 @@ export function DQTestRunner() {
             onClick={() => setShowCreateDialog(false)}
             className="px-4 py-2 text-sm rounded-md border border-border text-muted-foreground hover:bg-muted transition-colors"
           >
-            취소
+            {t('common.cancel')}
           </button>
           <button
             type="button"
@@ -296,7 +298,7 @@ export function DQTestRunner() {
             disabled={!testType || !tableName || !name || createRule.isPending}
             className="px-4 py-2 text-sm rounded-md bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {createRule.isPending ? '생성 중...' : '생성'}
+            {createRule.isPending ? t('dataQualityExt.creating') : t('common.confirm')}
           </button>
         </div>
       </div>

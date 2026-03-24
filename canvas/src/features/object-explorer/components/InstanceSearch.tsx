@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Search, ArrowUpDown } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -36,6 +37,7 @@ export const InstanceSearch: React.FC<InstanceSearchProps> = ({
   onSearch,
   objectTypeName,
 }) => {
+  const { t } = useTranslation();
   // Enter 키 핸들러
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -61,8 +63,8 @@ export const InstanceSearch: React.FC<InstanceSearchProps> = ({
           onKeyDown={handleKeyDown}
           placeholder={
             objectTypeName
-              ? `${objectTypeName} 인스턴스 검색...`
-              : '인스턴스 검색...'
+              ? t('objectExplorerExt.searchWithType', { name: objectTypeName })
+              : t('objectExplorerExt.searchPlaceholder')
           }
           className="h-8 pl-8 text-xs"
         />
@@ -74,7 +76,7 @@ export const InstanceSearch: React.FC<InstanceSearchProps> = ({
         size="icon"
         className="h-8 w-8 shrink-0"
         onClick={toggleSortOrder}
-        title={`정렬: ${filter.sortOrder === 'asc' ? '오름차순' : '내림차순'}`}
+        title={t('objectExplorerExt.sortLabel', { order: filter.sortOrder === 'asc' ? t('objectExplorerExt.sortAsc') : t('objectExplorerExt.sortDesc') })}
       >
         <ArrowUpDown className="h-3.5 w-3.5" />
       </Button>
