@@ -93,6 +93,31 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials | None = De
     payload = decode_token(credentials.credentials)
     if payload.get("type") == "refresh":
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Use access token")
+
+    # ── 토큰 블랙리스트 검사 (Feature Flag로 활성화) ──
+    # FF_TOKEN_BLACKLIST=true 일 때만 Redis 블랙리스트를 확인한다.
+    # 로그아웃·계정 정지·비밀번호 변경 시 즉시 토큰을 무효화하기 위함.
+    from shared.utils.feature_flags import is_enabled
+    if is_enabled("TOKEN_BLACKLIST"):
+        from shared.auth.token_blacklist import TokenBlacklist
+        try:
+            from shared.events.safe_publish import get_redis_client  # 공유 Redis 클라이언트
+            redis_client = get_redis_client()
+        except (ImportError, ConnectionError):
+            # Redis 미설정 시 블랙리스트 건너뛰기 (fail-open)
+            redis_client = None
+        if redis_client is not None:
+            blacklist = TokenBlacklist(redis_client)
+            if await blacklist.is_revoked(
+                jti=payload.get("jti", ""),
+                user_id=payload["sub"],
+                issued_at=payload.get("iat", 0),
+            ):
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="Token revoked",
+                )
+
     tenant_id = payload["tenant_id"]
     header_tenant = get_current_tenant_id()
     if header_tenant and header_tenant != "default" and header_tenant != tenant_id:

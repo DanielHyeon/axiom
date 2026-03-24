@@ -59,16 +59,25 @@ app.add_middleware(
     expose_headers=["X-Request-Id", "X-Response-Time"],
 )
 
-app.add_middleware(RequestIdMiddleware)
+# 미들웨어 등록 순서 (Starlette: 마지막 추가 = 가장 바깥쪽 실행)
+# 실행 순서: RequestId → AccessLog → Prometheus → SecurityHeaders → RateLimit → Tenant → handler
 app.add_middleware(TenantMiddleware)
 app.add_middleware(RateLimitMiddleware)
 
-# 보안 헤더 — CSP Report-Only (Phase 1)
 from shared.middleware.security_headers import SecurityHeadersMiddleware  # noqa: E402
 app.add_middleware(
     SecurityHeadersMiddleware,
     allowed_connect_src="'self' http://localhost:9001 http://localhost:9002 http://localhost:9003 http://localhost:9004 http://localhost:9005 http://localhost:9100",
 )
+
+from shared.middleware.prometheus import setup_prometheus  # noqa: E402
+_metrics_collector = setup_prometheus(app, service_name="core")
+
+from shared.middleware.access_log import AccessLogMiddleware  # noqa: E402
+app.add_middleware(AccessLogMiddleware, service_name="core")
+
+# RequestId를 가장 마지막에 추가 → 가장 바깥쪽에서 실행 → 모든 내부 미들웨어가 request_id 사용 가능
+app.add_middleware(RequestIdMiddleware)
 
 app.include_router(health.router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
@@ -87,13 +96,13 @@ app.include_router(pm_definition_router, prefix="/api/v1", dependencies=[Depends
 app.include_router(pm_relation_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(pm_transition_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 # Phase 4 Sprint 12: 보안 정책 + 감사 로그
-app.include_router(security_policies_router)
-app.include_router(audit_router)
+app.include_router(security_policies_router, dependencies=[Depends(get_current_user)])
+app.include_router(audit_router, dependencies=[Depends(get_current_user)])
 # Phase 5 Sprint 15: DAG 알림 + 이벤트 탐지
-app.include_router(alert_dag_router)
-app.include_router(event_detection_router)
+app.include_router(alert_dag_router, dependencies=[Depends(get_current_user)])
+app.include_router(event_detection_router, dependencies=[Depends(get_current_user)])
 # Sprint 3: 관리자용 감사 로그 + AI 사용량 API
-app.include_router(admin_audit_router)
+app.include_router(admin_audit_router, dependencies=[Depends(get_current_user)])
 
 
 @app.on_event("startup")
