@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import {
   fetchDocuments,
   fetchDocument,
-  createDocument,
   updateDocument,
   fetchComments,
   addComment,
@@ -18,7 +17,6 @@ import {
   canTransition,
   ACTION_TO_STATUS,
   type Document,
-  type DocumentStatus,
   type ReviewAction,
 } from '../types/document';
 

@@ -22,7 +22,7 @@ interface DmnTableEditorProps {
 
 export function DmnTableEditor({ table, onSave, onTest, testResult, isSaving }: DmnTableEditorProps) {
   const [hitPolicy, setHitPolicy] = useState<HitPolicy>(table.hitPolicy);
-  const [columns, setColumns] = useState<DmnColumn[]>(table.columns);
+  const [columns, _setColumns] = useState<DmnColumn[]>(table.columns);
   const [rules, setRules] = useState<DmnRule[]>(table.rules);
   const [testInputs, setTestInputs] = useState<Record<string, string>>({});
 

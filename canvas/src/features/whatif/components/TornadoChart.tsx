@@ -33,7 +33,7 @@ export function TornadoChart({ data, title }: TornadoChartProps) {
           <XAxis type="number" tick={{ fontSize: 11 }} className="text-muted-foreground" />
           <YAxis type="category" dataKey="variable" width={110} tick={{ fontSize: 11 }} className="text-muted-foreground" />
           <Tooltip
-            formatter={(value: number) => [`${value > 0 ? '+' : ''}${value.toFixed(2)}`, '']}
+            formatter={(value: number | undefined) => [`${(value ?? 0) > 0 ? '+' : ''}${(value ?? 0).toFixed(2)}`, '']}
             contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid hsl(var(--border))' }}
           />
           <ReferenceLine x={0} className="stroke-border" />

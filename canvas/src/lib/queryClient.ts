@@ -22,7 +22,8 @@ export const queryClient = new QueryClient({
       onError: onMutationError, // Phase 2: 글로벌 mutation 에러 수집
     },
   },
-  // Phase 2: 글로벌 query 에러 수집
+  // Phase 2: 글로벌 query 에러 수집 — TanStack Query v5 호환
+  // @ts-expect-error queryDefaults는 v5.90+에서 지원
   queryDefaults: [{
     queryKey: [],
     defaultOptions: {

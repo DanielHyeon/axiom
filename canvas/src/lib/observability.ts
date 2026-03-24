@@ -88,6 +88,7 @@ export function onMutationError(error: unknown): void {
 /** Web Vitals 메트릭 수집 */
 async function initWebVitals(): Promise<void> {
   try {
+    // @ts-expect-error web-vitals는 선택 의존성 — 미설치 시 catch로 폴백
     const { onCLS, onFID, onLCP } = await import('web-vitals');
     const report = (metric: { name: string; value: number }) => {
       if (import.meta.env.DEV) {
