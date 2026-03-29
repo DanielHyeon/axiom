@@ -401,7 +401,7 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       id: table.name,
       caption: table.name,
       color: getTableColor(table),
-      size: 35,
+      size: 25,
     }));
 
     // NVL 엣지 생성 — FK 관계
@@ -431,6 +431,21 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     // 선택 상태 초기화
     setSelectedNodeId(null);
     setLayoutDone(false);
+
+    // onLayoutDone 콜백이 호출되지 않는 경우를 위한 폴백 타이머
+    // (노드가 적거나 레이아웃이 즉시 완료될 때 콜백 누락 가능)
+    const fallbackTimer = setTimeout(() => {
+      setLayoutDone(true);
+      // 뷰포트 맞춤
+      const allNodeIds = nvl.getNodes().map((n) => n.id);
+      if (allNodeIds.length > 0) {
+        try {
+          nvl.fit(allNodeIds, { animated: false });
+        } catch { /* nvl이 이미 destroy된 경우 무시 */ }
+      }
+    }, 2000);
+
+    return () => clearTimeout(fallbackTimer);
   }, [tables]);
 
   // ─── 리사이즈 옵저버 ───────────────────────────────────────
