@@ -65,7 +65,7 @@ export interface MultiLayerCallbacks {
 /** synapseApi에서 baseURL 추출 (스트리밍용) */
 function getSynapseBaseUrl(): string {
   const defaults = synapseApi.defaults;
-  return (defaults.baseURL ?? 'http://localhost:9003').replace(/\/$/, '');
+  return (defaults.baseURL ?? '/proxy/synapse').replace(/\/$/, '');
 }
 
 // ─── 서버 응답 → 프론트 타입 변환 ───

@@ -9,22 +9,14 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-# Build-time API URLs (Docker: browser → host ports)
-ARG VITE_CORE_URL=http://localhost:19002
-ARG VITE_SYNAPSE_URL=http://localhost:19003
-ARG VITE_VISION_URL=http://localhost:19100
-ARG VITE_WEAVER_URL=http://localhost:19001
-ARG VITE_ORACLE_URL=http://localhost:19004
-ARG VITE_OLAP_STUDIO_URL=http://localhost:19005
-ENV VITE_CORE_URL=$VITE_CORE_URL
-ENV VITE_SYNAPSE_URL=$VITE_SYNAPSE_URL
-ENV VITE_VISION_URL=$VITE_VISION_URL
-ENV VITE_WEAVER_URL=$VITE_WEAVER_URL
-ENV VITE_ORACLE_URL=$VITE_ORACLE_URL
-ENV VITE_OLAP_STUDIO_URL=$VITE_OLAP_STUDIO_URL
-
-# Copy source and build
+# Copy source and Docker-specific env (Nginx 리버스 프록시용 상대 경로)
 COPY . .
+COPY .env.docker .env.production.local
+
+# Vite 빌드 시 .env.production.local이 최우선 적용되어
+# VITE_*_URL이 /proxy/core 등 상대 경로로 번들에 포함된다.
+# 이렇게 하면 브라우저가 Nginx를 거쳐 백엔드에 접근하므로
+# CORS 문제와 경로 불일치 문제가 모두 해결된다.
 RUN npx vite build
 
 # Production Stage (Nginx)
@@ -33,7 +25,7 @@ FROM nginx:alpine
 # Copy compiled Vite bundle to Nginx html directory
 COPY --from=builder /app/dist /usr/share/nginx/html
 
-# SPA fallback: serve index.html for all client-side routes
+# SPA fallback + API 리버스 프록시 설정
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose standard web port

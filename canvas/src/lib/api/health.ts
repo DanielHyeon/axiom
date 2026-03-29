@@ -3,15 +3,16 @@
  * 헬스 엔드포인트는 인증 없이 호출 가능하다고 가정.
  */
 
+// Nginx/Vite 프록시 경유 상대 경로 폴백
 const FALLBACKS: Record<string, string> = {
-    VITE_CORE_URL: 'http://localhost:9002',
-    VITE_VISION_URL: 'http://localhost:9003',
-    VITE_ORACLE_URL: 'http://localhost:9004',
+    VITE_CORE_URL: '/proxy/core',
+    VITE_VISION_URL: '/proxy/vision',
+    VITE_ORACLE_URL: '/proxy/oracle',
 };
 
 const getBaseUrl = (key: string): string => {
     const url = import.meta.env[key];
-    if (!url) return FALLBACKS[key] ?? 'http://localhost:8000';
+    if (!url) return FALLBACKS[key] ?? '/proxy/core';
     return (url as string).replace(/\/$/, '');
 };
 

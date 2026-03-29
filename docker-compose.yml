@@ -240,21 +240,19 @@ services:
     restart: unless-stopped
 
   # Frontend (Canvas UI)
+  # Nginx가 /proxy/* 경로를 Docker 내부 서비스로 리버스 프록시한다.
+  # VITE_*_URL은 .env.docker 파일에서 상대 경로(/proxy/core 등)로 설정되어
+  # 빌드 시 번들에 포함된다. 브라우저 → Nginx → 백엔드 순서로 요청이 전달된다.
   canvas-ui:
     build:
       context: ./canvas
       dockerfile: Dockerfile
-      args:
-        VITE_CORE_URL: http://localhost:19002
-        VITE_WEAVER_URL: http://localhost:19001
-        VITE_SYNAPSE_URL: http://localhost:19003
-        VITE_VISION_URL: http://localhost:19100
-        VITE_ORACLE_URL: http://localhost:19004
-        VITE_OLAP_STUDIO_URL: http://localhost:19005
     ports:
       - "15174:80"
     depends_on:
       - core-svc
       - vision-svc
       - weaver-svc
+      - oracle-svc
+      - synapse-svc
       - olap-studio

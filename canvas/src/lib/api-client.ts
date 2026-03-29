@@ -4,7 +4,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 // Configure overarching Backend communication routes
 export const apiClient: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+    baseURL: import.meta.env.VITE_API_URL || '/proxy/core',
     timeout: 10000,
     headers: {
         'Content-Type': 'application/json',

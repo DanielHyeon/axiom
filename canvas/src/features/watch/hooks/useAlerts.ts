@@ -102,7 +102,8 @@ export function useAlerts() {
             return () => clearInterval(interval);
         } else {
             const token = useAuthStore.getState().accessToken;
-            const baseUrl = import.meta.env.VITE_CORE_URL ?? 'http://localhost:9002';
+            // Nginx/Vite 프록시 경유 상대 경로 (CORS 문제 회피)
+            const baseUrl = import.meta.env.VITE_CORE_URL ?? '/proxy/core';
             if (!token) return;
 
             const onAlert = (data: Record<string, unknown>) => {

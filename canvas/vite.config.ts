@@ -34,6 +34,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/proxy\/synapse/, ''),
       },
+      '/proxy/vision': {
+        target: 'http://localhost:9100',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/proxy\/vision/, ''),
+      },
       // OLAP Studio Gateway 프록시 — /api/gateway/olap/* → olap-studio:9005/*
       '/api/gateway/olap': {
         target: 'http://localhost:9005',

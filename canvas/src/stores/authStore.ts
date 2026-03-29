@@ -18,7 +18,8 @@ interface AuthState {
 
 let refreshInFlight: Promise<string> | null = null;
 
-const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:9002').replace(/\/$/, '');
+// Nginx/Vite 프록시 경유 상대 경로 (CORS 문제 회피)
+const coreBaseUrl = (import.meta.env.VITE_CORE_URL || '/proxy/core').replace(/\/$/, '');
 
 export const useAuthStore = create<AuthState>()(
     persist(

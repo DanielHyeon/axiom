@@ -115,9 +115,10 @@ export interface ExtractMetadataCallbacks {
   onError?: (data: { message?: string; code?: string }) => void;
 }
 
+// Nginx/Vite 프록시 경유 상대 경로 (CORS 문제 회피)
 function getWeaverBaseUrl(): string {
   const u = import.meta.env.VITE_WEAVER_URL;
-  if (!u) return 'http://localhost:8001';
+  if (!u) return '/proxy/weaver';
   return String(u).replace(/\/$/, '');
 }
 

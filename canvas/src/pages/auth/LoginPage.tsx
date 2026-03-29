@@ -20,7 +20,8 @@ interface LoginResponse {
   user?: Partial<User>;
 }
 
-const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:9002').replace(/\/$/, '');
+// Nginx/Vite 프록시 경유 상대 경로 (CORS 문제 회피)
+const coreBaseUrl = (import.meta.env.VITE_CORE_URL || '/proxy/core').replace(/\/$/, '');
 const authFallbackMock = import.meta.env.VITE_AUTH_FALLBACK_MOCK !== 'false';
 
 /** Docker/개발용 테스트 계정 (Core SEED_DEV_USER=1 시 생성) */
