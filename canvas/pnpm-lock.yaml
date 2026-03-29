@@ -26,6 +26,9 @@ importers:
       '@neo4j-nvl/interaction-handlers':
         specifier: ^1.1.0
         version: 1.1.0(neo4j-driver@6.0.1)
+      '@neo4j-nvl/layout-workers':
+        specifier: ^1.1.0
+        version: 1.1.0
       '@radix-ui/react-checkbox':
         specifier: ^1.3.3
         version: 1.3.3(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
