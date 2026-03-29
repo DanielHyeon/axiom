@@ -39,13 +39,13 @@ services:
       timeout: 10s
       retries: 10
 
-  # Axiom Services
+  # Axiom Services — 19xxx 포트 대역 사용 (9xxx 충돌 방지)
   synapse-svc:
     build:
-      context: ./services/synapse
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: synapse/Dockerfile
     ports:
-      - "9003:8003"
+      - "19003:8003"
     environment:
       - NEO4J_URI=bolt://neo4j-db:7687
       - NEO4J_USER=neo4j
@@ -66,10 +66,10 @@ services:
 
   vision-svc:
     build:
-      context: ./services/vision
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: vision/Dockerfile
     ports:
-      - "9100:8000"
+      - "19100:8000"
     environment:
       - REDIS_URL=redis://redis-bus:6379
       - CORE_EVENT_BUS=redis
@@ -92,10 +92,10 @@ services:
 
   core-svc:
     build:
-      context: ./services/core
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: core/Dockerfile
     ports:
-      - "9002:8002"
+      - "19002:8002"
     environment:
       - DATABASE_URL=postgresql+asyncpg://arkos:arkos@postgres-db:5432/insolvency_os
       - DATABASE_SCHEMA=core
@@ -121,16 +121,16 @@ services:
 
   weaver-svc:
     build:
-      context: ./services/weaver
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: weaver/Dockerfile
     ports:
-      - "9001:8001"
+      - "19001:8001"
     environment:
       - SYNAPSE_BASE_URL=http://synapse-svc:8003
       - WEAVER_METADATA_PG_MODE=1
       - POSTGRES_DSN=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
       - REDIS_URL=redis://redis-bus:6379/0
-      - WEAVER_CORS_ALLOWED_ORIGINS=http://localhost:5174,http://localhost:3000,https://app.axiom.kr,https://canvas.axiom.kr
+      - WEAVER_CORS_ALLOWED_ORIGINS=http://localhost:15174,http://localhost:5174,http://localhost:3000,https://app.axiom.kr,https://canvas.axiom.kr
       - WEAVER_INSIGHT_SERVICE_TOKEN=axiom-insight-svc-token-dev
     depends_on:
       redis-bus:
@@ -152,10 +152,10 @@ services:
 
   oracle-svc:
     build:
-      context: ./services/oracle
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: oracle/Dockerfile
     ports:
-      - "9004:8004"
+      - "19004:8004"
     environment:
       - SYNAPSE_API_URL=http://synapse-svc:8003
       - CORE_API_URL=http://core-svc:8002
@@ -188,7 +188,7 @@ services:
       dockerfile: Dockerfile
     container_name: axiom-twin
     ports:
-      - "9006:8006"
+      - "19006:8006"
     environment:
       - DATABASE_URL=postgresql+asyncpg://arkos:arkos@postgres-db:5432/insolvency_os
       - DATABASE_SCHEMA=twin
@@ -211,11 +211,11 @@ services:
   # OLAP Studio 서비스
   olap-studio:
     build:
-      context: ./services/olap-studio
-      dockerfile: Dockerfile
+      context: ./services
+      dockerfile: olap-studio/Dockerfile
     container_name: axiom-olap-studio
     ports:
-      - "9005:8000"
+      - "19005:8000"
     environment:
       - DATABASE_URL=postgresql://arkos:arkos@postgres-db:5432/insolvency_os
       - NEO4J_URI=bolt://neo4j-db:7687
@@ -245,13 +245,14 @@ services:
       context: ./canvas
       dockerfile: Dockerfile
       args:
-        VITE_CORE_URL: http://localhost:9002
-        VITE_WEAVER_URL: http://localhost:9001
-        VITE_VISION_URL: http://localhost:9003
-        VITE_ORACLE_URL: http://localhost:9004
-        VITE_OLAP_STUDIO_URL: http://localhost:9005
+        VITE_CORE_URL: http://localhost:19002
+        VITE_WEAVER_URL: http://localhost:19001
+        VITE_SYNAPSE_URL: http://localhost:19003
+        VITE_VISION_URL: http://localhost:19100
+        VITE_ORACLE_URL: http://localhost:19004
+        VITE_OLAP_STUDIO_URL: http://localhost:19005
     ports:
-      - "5174:80" # 브라우저: http://localhost:5174 → Core API: http://localhost:8002
+      - "15174:80"
     depends_on:
       - core-svc
       - vision-svc

@@ -2,12 +2,13 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install dependencies (Caching layer)
-COPY requirements.txt .
+COPY shared/ /app/shared/
+RUN pip install --no-cache-dir -e /app/shared
+
+COPY vision/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy application source
-COPY . .
+COPY vision/ .
 RUN pip install --no-cache-dir -e .
 
 # Expose FastAPI default port

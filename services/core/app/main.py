@@ -50,8 +50,9 @@ app.add_middleware(
         "https://app.axiom.ai",
         "https://*.axiom.ai",
         "http://localhost:3000",
-        "http://localhost:5173",  # Docker canvas-ui
-        "http://localhost:5174",  # Docker canvas-ui (포트 충돌 회피)
+        "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:15174",  # Docker compose 19xxx 대역
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH"],

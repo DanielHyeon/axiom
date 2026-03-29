@@ -7,10 +7,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev libxslt1-dev gcc && \
     rm -rf /var/lib/apt/lists/*
 
-COPY pyproject.toml .
+COPY shared/ /app/shared/
+RUN pip install --no-cache-dir -e /app/shared
+
+COPY olap-studio/pyproject.toml .
 RUN pip install --no-cache-dir .
 
-COPY . .
+COPY olap-studio/ .
 
 EXPOSE 8000
 

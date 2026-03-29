@@ -2,10 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# 공통 shared 모듈 설치
+COPY shared/ /app/shared/
+RUN pip install --no-cache-dir -e /app/shared
+
+COPY synapse/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY . .
+COPY synapse/ .
 RUN pip install --no-cache-dir -e .
 
 EXPOSE 8003

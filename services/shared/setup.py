@@ -13,9 +13,11 @@ setup(
     version="0.1.0",
     description="Axiom 플랫폼 전 서비스 공통 라이브러리",
     packages=find_packages(),
-    python_requires=">=3.12",
+    python_requires=">=3.11",
     install_requires=[
         "fastapi>=0.100.0",
         "pydantic>=2.0.0",
+        "structlog>=24.0.0",
+        "python-multipart>=0.0.9",
     ],
 )
