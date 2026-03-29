@@ -2,13 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Database, CheckCircle2, XCircle, Plus, TestTubeDiagonal, Trash2, Share2 } from 'lucide-react';
+import { Database, CheckCircle2, XCircle, Plus, TestTubeDiagonal, Trash2, Share2, Network } from 'lucide-react';
 import { useDatasources } from '@/features/datasource/hooks/useDatasources';
 import type { DatasourceCreatePayload } from '@/features/datasource/api/weaverDatasourceApi';
 import { datasourceFormSchema, type DatasourceFormValues } from '@/features/datasource/schemas/datasourceFormSchema';
 import { SchemaExplorer } from '@/features/datasource/components/SchemaExplorer';
 import { SyncProgress } from '@/features/datasource/components/SyncProgress';
 import { ERDiagramPanel } from '@/features/datasource/components/ERDiagramPanel';
+import { NVLSchemaGraph } from '@/features/datasource/components/NVLSchemaGraph';
+import { useERDData } from '@/features/datasource/hooks/useERDData';
 import { Input } from '@/components/ui/input';
 import { ErrorState } from '@/shared/components/ErrorState';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -18,8 +20,8 @@ import { useTranslation } from 'react-i18next';
 /** 데이터소스별 연결 테스트 결과 (인라인 표시용) */
 type TestResult = { status: 'ok' | 'fail'; message: string };
 
-/** 하단 탭 타입: 스키마 탐색 또는 ERD 시각화 */
-type BottomTab = 'schema' | 'erd';
+/** 하단 탭 타입: 스키마 탐색, ERD 시각화, 또는 NVL 그래프 */
+type BottomTab = 'schema' | 'erd' | 'graph';
 
 /** 데이터소스 관리 페이지. Weaver API 연동. */
 export const DatasourcePage: React.FC = () => {
@@ -28,6 +30,9 @@ export const DatasourcePage: React.FC = () => {
  const [testResultByDs, setTestResultByDs] = useState<Record<string, TestResult>>({});
  const [selectedDsName, setSelectedDsName] = useState<string | null>(null);
  const [bottomTab, setBottomTab] = useState<BottomTab>('schema');
+
+ // Graph 탭에서 사용할 ERD 데이터 (테이블 + FK 관계 정보)
+ const { tables: erdTables, isLoading: erdLoading } = useERDData(selectedDsName);
 
  const {
  register,
@@ -345,10 +350,22 @@ export const DatasourcePage: React.FC = () => {
    <Share2 className="h-3 w-3" />
    ERD
   </button>
+  <button
+   type="button"
+   onClick={() => setBottomTab('graph')}
+   className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading transition-colors ${
+    bottomTab === 'graph'
+     ? 'text-foreground font-semibold border-b-2 border-red-600'
+     : 'text-foreground/60 hover:text-muted-foreground'
+   }`}
+  >
+   <Network className="h-3 w-3" />
+   Graph
+  </button>
  </div>
 
  {/* 탭 컨텐츠 */}
- {bottomTab === 'schema' ? (
+ {bottomTab === 'schema' && (
   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
    <div className="space-y-3">
     <h3 className="text-sm font-semibold text-foreground font-heading">{t('datasourcePage.msg8ddaaeaa')}</h3>
@@ -363,13 +380,41 @@ export const DatasourcePage: React.FC = () => {
     <SyncProgress selectedDsName={selectedDsName} onComplete={refetch} />
    </div>
   </div>
- ) : (
+ )}
+ {bottomTab === 'erd' && (
   <div className="border border-border rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
    {selectedDsName ? (
     <ERDiagramPanel datasourceId={selectedDsName} />
    ) : (
     <div className="flex flex-col items-center justify-center h-full min-h-[480px] text-foreground/60 gap-3">
      <Share2 className="h-8 w-8 opacity-30" />
+     <p className="text-sm">{t('datasourcePage.whenDatasourceSelected')}</p>
+     <p className="text-xs">{t('datasourcePage.msgabe20b08')}</p>
+    </div>
+   )}
+  </div>
+ )}
+ {bottomTab === 'graph' && (
+  <div className="border border-border rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
+   {selectedDsName ? (
+    erdLoading && erdTables.length === 0 ? (
+     <div className="flex items-center justify-center min-h-[480px] text-foreground/60 text-sm">
+      <div className="flex items-center gap-2">
+       <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
+       {t('datasource.graph.loading', '스키마 데이터 로딩 중...')}
+      </div>
+     </div>
+    ) : erdTables.length === 0 ? (
+     <div className="flex flex-col items-center justify-center min-h-[480px] text-foreground/60 gap-3">
+      <Database className="h-8 w-8 opacity-30" />
+      <p className="text-sm">{t('datasource.erd.noTables', '테이블이 없습니다.')}</p>
+     </div>
+    ) : (
+     <NVLSchemaGraph tables={erdTables} />
+    )
+   ) : (
+    <div className="flex flex-col items-center justify-center h-full min-h-[480px] text-foreground/60 gap-3">
+     <Network className="h-8 w-8 opacity-30" />
      <p className="text-sm">{t('datasourcePage.whenDatasourceSelected')}</p>
      <p className="text-xs">{t('datasourcePage.msgabe20b08')}</p>
     </div>
