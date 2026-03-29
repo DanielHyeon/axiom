@@ -3,7 +3,7 @@
  */
 
 import { useRef, useCallback, useEffect } from 'react';
-import { Search, Download, RotateCw, Table, Link, Columns3 } from 'lucide-react';
+import { Search, Download, RotateCw, Table, Link, Columns3, Maximize2, Minimize2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
 import type { ERDStats, ERDFilter } from '../types/erd';
@@ -16,6 +16,10 @@ interface ERDToolbarProps {
   onDownloadSvg: () => void;
   onRefresh: () => void;
   isLoading: boolean;
+  /** 전체화면 토글 콜백 */
+  onToggleFullscreen?: () => void;
+  /** 현재 전체화면 여부 */
+  isFullscreen?: boolean;
 }
 
 /** 최대 테이블 수 옵션 */
@@ -28,6 +32,8 @@ export function ERDToolbar({
   onDownloadSvg,
   onRefresh,
   isLoading,
+  onToggleFullscreen,
+  isFullscreen = false,
 }: ERDToolbarProps) {
   const { t } = useTranslation();
   // 디바운스 타이머를 ref로 관리 (불필요한 리렌더 방지 + 클린업 보장)
@@ -139,6 +145,17 @@ export function ERDToolbar({
         >
           <Download className="h-3.5 w-3.5" />
         </button>
+        {/* 전체화면 토글 */}
+        {onToggleFullscreen && (
+          <button
+            type="button"
+            onClick={onToggleFullscreen}
+            className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors"
+            title={isFullscreen ? t('datasourceExt.exitFullscreen', '전체화면 종료') : t('datasourceExt.enterFullscreen', '전체화면')}
+          >
+            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          </button>
+        )}
       </div>
     </div>
   );

@@ -40,6 +40,13 @@ export interface TableMeta {
 // 컬럼 메타데이터
 // ──────────────────────────────────────
 
+/** Oracle Meta API — FK 참조 정보 */
+export interface ColumnForeignKey {
+  target_table: string;
+  target_column: string;
+  relationship?: string; // 예: "MANY_TO_ONE"
+}
+
 /** Oracle Meta API — 컬럼 한 개의 메타데이터 */
 export interface ColumnMeta {
   name: string;
@@ -49,6 +56,8 @@ export interface ColumnMeta {
   is_primary_key: boolean;
   description: string | null;
   has_vector: boolean;
+  /** FK 참조 목록 — 백엔드가 빈 배열을 반환하더라도 타입 안전성 유지 */
+  foreign_keys?: ColumnForeignKey[];
 }
 
 // ──────────────────────────────────────

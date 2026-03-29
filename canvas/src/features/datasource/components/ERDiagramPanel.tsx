@@ -3,7 +3,7 @@
  * DatasourcePage의 ERD 탭에서 사용.
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useERDData } from '../hooks/useERDData';
 import { generateMermaidERCode, getConnectedTables } from '../utils/mermaidCodeGen';
@@ -28,6 +28,28 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
   const { t } = useTranslation();
   const { tables, isLoading, error, refetch } = useERDData(datasourceId);
   const [filter, setFilter] = useState<ERDFilter>(DEFAULT_FILTER);
+
+  // 전체화면 상태 관리
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  /** 전체화면 토글 — CSS 오버레이 방식 (Fullscreen API 대비 호환성 우수) */
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => !prev);
+  }, []);
+
+  // ESC 키로 전체화면 종료
+  useEffect(() => {
+    if (!isFullscreen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsFullscreen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isFullscreen]);
   // 필터 적용된 테이블 목록
   const filteredTables = useMemo(() => {
     let result = tables;
@@ -123,7 +145,14 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div
+      ref={containerRef}
+      className={`flex flex-col ${
+        isFullscreen
+          ? 'fixed inset-0 z-50 bg-background'
+          : 'h-full'
+      }`}
+    >
       {/* 툴바 */}
       <ERDToolbar
         filter={filter}
@@ -132,6 +161,8 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
         onDownloadSvg={handleDownloadSvg}
         onRefresh={() => refetch()}
         isLoading={isLoading}
+        onToggleFullscreen={handleToggleFullscreen}
+        isFullscreen={isFullscreen}
       />
 
       {/* ERD 렌더링 영역 */}
