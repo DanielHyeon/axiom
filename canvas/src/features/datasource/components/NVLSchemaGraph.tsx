@@ -13,6 +13,7 @@
  */
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import NVL from '@neo4j-nvl/base';
 import type { Node as NvlNode, Relationship as NvlRelationship } from '@neo4j-nvl/base';
@@ -22,7 +23,7 @@ import {
   PanInteraction,
   ZoomInteraction,
 } from '@neo4j-nvl/interaction-handlers';
-import { X, Table2, Key, ArrowRight, Maximize } from 'lucide-react';
+import { X, Table2, Key, ArrowRight, Maximize, Maximize2, Minimize2 } from 'lucide-react';
 import type { Layout } from '@neo4j-nvl/base';
 import type { ERDTableInfo } from '@/shared/types/schema';
 
@@ -247,6 +248,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
   const [layoutDone, setLayoutDone] = useState(false);
   /** 현재 그래프 레이아웃 모드 */
   const [currentLayout, setCurrentLayout] = useState<Layout>('forceDirected');
+  /** 전체화면 모드 */
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   // 스키마별 색상 매핑 (컴포넌트 스코프 — 모듈 싱글톤 방지)
   const schemaColorMap = useMemo(() => buildSchemaColorMap(tables), [tables]);
@@ -315,8 +318,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       to: edge.to,
       caption: edge.caption,
       color: '#9CA3AB',
-      width: 2,
-      captionSize: 5,
+      width: 1,
+      captionSize: 2,   // 관계 캡션 높이 (작을수록 글자 작음)
     }));
 
     // NVL 초기화 — 생성자 시그니처: new NVL(frame, nodes, rels, options, callbacks)
@@ -539,6 +542,26 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     setZoomLevel(Math.round(nvl.getScale() * 100));
   }, []);
 
+  // ─── 전체화면 토글 + ESC 키 ──────────────────────────────────
+  const handleToggleFullscreen = useCallback(() => {
+    setIsFullscreen((prev) => !prev);
+    // 전체화면 전환 후 NVL 리사이즈 트리거
+    setTimeout(() => {
+      try { nvlRef.current?.restart(undefined, true); } catch { /* */ }
+      setTimeout(() => {
+        const ids = nvlRef.current?.getNodes().map(n => n.id) ?? [];
+        if (ids.length > 0) try { nvlRef.current?.fit(ids, { animated: false }); } catch { /* */ }
+      }, 300);
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    if (!isFullscreen) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsFullscreen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isFullscreen]);
+
   // ─── 빈 상태 처리 ──────────────────────────────────────────
 
   if (tables.length === 0) {
@@ -551,8 +574,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
 
   // ─── 렌더링 ────────────────────────────────────────────────
 
-  return (
-    <div className="relative w-full h-full overflow-hidden bg-card">
+  const graphContent = (
+    <div className={`relative overflow-hidden bg-card ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-screen' : 'w-full h-full'}`}>
       {/* NVL 렌더링 컨테이너 — position:relative 필수!
           NVL은 내부적으로 position:absolute canvas를 생성하므로
           컨테이너가 positioned element여야 canvas가 올바르게 배치된다. */}
@@ -615,6 +638,16 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
         >
           <Maximize className="h-3 w-3" />
         </button>
+        {/* 전체화면 토글 */}
+        <button
+          type="button"
+          onClick={handleToggleFullscreen}
+          className="px-1.5 py-1 text-foreground/60 hover:text-foreground transition-colors border-l border-border"
+          title={isFullscreen ? '전체화면 종료' : '전체화면'}
+          aria-label={isFullscreen ? '전체화면 종료' : '전체화면'}
+        >
+          {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
+        </button>
       </div>
 
       {/* 통계 뱃지 — 좌상단 */}
@@ -664,4 +697,10 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       )}
     </div>
   );
+
+  // 전체화면일 때 Portal로 body에 렌더링 (부모 overflow 탈출)
+  if (isFullscreen) {
+    return createPortal(graphContent, document.body);
+  }
+  return graphContent;
 }
