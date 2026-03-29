@@ -4,6 +4,7 @@
  */
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { useERDData } from '../hooks/useERDData';
 import { generateMermaidERCode, getConnectedTables } from '../utils/mermaidCodeGen';
@@ -144,12 +145,13 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     );
   }
 
-  return (
+  // ERD 내용물 — 전체화면/인라인 양쪽에서 동일하게 사용
+  const erdContent = (
     <div
       ref={containerRef}
       className={`flex flex-col ${
         isFullscreen
-          ? 'fixed inset-0 z-50 bg-background'
+          ? 'fixed inset-0 z-[9999] bg-background'
           : 'h-full'
       }`}
     >
@@ -166,9 +168,16 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
       />
 
       {/* ERD 렌더링 영역 */}
-      <div className="flex-1 overflow-hidden" data-erd-svg-container>
+      <div className="flex-1 overflow-auto" data-erd-svg-container>
         <MermaidERDRenderer mermaidCode={code} />
       </div>
     </div>
   );
+
+  // 전체화면일 때 Portal로 body에 직접 렌더링 (부모 overflow-hidden 탈출)
+  if (isFullscreen) {
+    return createPortal(erdContent, document.body);
+  }
+
+  return erdContent;
 }
