@@ -382,7 +382,7 @@ export const DatasourcePage: React.FC = () => {
   </div>
  )}
  {bottomTab === 'erd' && (
-  <div className="border border-border rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
+  <div className="border border-border rounded-lg overflow-hidden h-[600px]">
    {selectedDsName ? (
     <ERDiagramPanel datasourceId={selectedDsName} />
    ) : (
@@ -395,7 +395,7 @@ export const DatasourcePage: React.FC = () => {
   </div>
  )}
  {bottomTab === 'graph' && (
-  <div className="border border-border rounded-lg overflow-hidden" style={{ minHeight: 480 }}>
+  <div className="border border-border rounded-lg overflow-hidden h-[600px]">
    {selectedDsName ? (
     erdLoading && erdTables.length === 0 ? (
      <div className="flex items-center justify-center min-h-[480px] text-foreground/60 text-sm">

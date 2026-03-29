@@ -186,9 +186,9 @@ const CYTOSCAPE_STYLE: cytoscape.StylesheetStyle[] = [
       'border-color': '#E5E5E5',
       shape: 'round-rectangle',
 
-      // 크기 — 내용에 맞게 자동 조절
-      width: 'label',
-      height: 'label',
+      // 크기 — data 속성에서 계산된 값 사용 (label deprecated 대체)
+      width: 'data(nodeWidth)',
+      height: 'data(nodeHeight)',
       'padding-top': '12px' as any,
       'padding-bottom': '12px' as any,
       'padding-left': '14px' as any,
@@ -374,16 +374,28 @@ export function CytoscapeERDRenderer({
     const relations = extractRelations(tables);
 
     // 노드 생성 — 각 테이블이 하나의 노드
-    const nodes: cytoscape.ElementDefinition[] = tables.map((table) => ({
-      group: 'nodes' as const,
-      data: {
-        id: table.name.toLowerCase(),
-        label: buildNodeLabel(table),
-        tableName: table.name,
-        schema: table.schema || '',
-        columnCount: table.columns.length,
-      },
-    }));
+    // 노드 크기를 라벨 줄 수 기반으로 계산 (width: 'label' deprecated 대체)
+    const nodes: cytoscape.ElementDefinition[] = tables.map((table) => {
+      const label = buildNodeLabel(table);
+      const lines = label.split('\n');
+      const maxLineLen = Math.max(...lines.map((l) => l.length));
+      // 문자 폭 6px 기준 + 좌우 패딩 28px
+      const nodeWidth = Math.max(maxLineLen * 6.5 + 28, 120);
+      // 줄 높이 14px + 상하 패딩 24px
+      const nodeHeight = lines.length * 14 + 24;
+      return {
+        group: 'nodes' as const,
+        data: {
+          id: table.name.toLowerCase(),
+          label,
+          tableName: table.name,
+          schema: table.schema || '',
+          columnCount: table.columns.length,
+          nodeWidth,
+          nodeHeight,
+        },
+      };
+    });
 
     // 엣지 생성 — FK 관계
     const edges: cytoscape.ElementDefinition[] = relations.map((rel, idx) => ({
