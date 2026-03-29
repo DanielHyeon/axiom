@@ -126,7 +126,7 @@ export function MermaidERDRenderer({ mermaidCode, onRendered }: MermaidERDRender
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 overflow-hidden bg-card"
+      className="relative w-full h-full overflow-hidden bg-card"
       onWheel={handleWheel}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
