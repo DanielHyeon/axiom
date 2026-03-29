@@ -1,14 +1,19 @@
 /**
- * ERD 메인 패널 — 데이터 로딩 + 필터 적용 + Mermaid 렌더링 조합.
+ * ERD 메인 패널 — 데이터 로딩 + 필터 적용 + Cytoscape 인터랙티브 ERD 렌더링.
  * DatasourcePage의 ERD 탭에서 사용.
+ *
+ * v2: MermaidERDRenderer → CytoscapeERDRenderer 교체
+ *     - 개별 노드 드래그 지원
+ *     - 이미지 다운로드는 Cytoscape cy.png() 사용
  */
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import type cytoscape from 'cytoscape';
 import { useERDData } from '../hooks/useERDData';
-import { generateMermaidERCode, getConnectedTables } from '../utils/mermaidCodeGen';
-import { MermaidERDRenderer } from './MermaidERDRenderer';
+import { getConnectedTables } from '../utils/mermaidCodeGen';
+import { CytoscapeERDRenderer, countERDRelations } from './CytoscapeERDRenderer';
 import { ERDToolbar } from './ERDToolbar';
 import type { ERDFilter, ERDStats } from '../types/erd';
 import { Database } from 'lucide-react';
@@ -33,6 +38,12 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
   // 전체화면 상태 관리
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Cytoscape 인스턴스 참조 — SVG/PNG 내보내기에 사용
+  const cyInstanceRef = useRef<cytoscape.Core | null>(null);
+  const handleCyInit = useCallback((cy: cytoscape.Core) => {
+    cyInstanceRef.current = cy;
+  }, []);
 
   /** 전체화면 토글 — CSS 오버레이 방식 (Fullscreen API 대비 호환성 우수) */
   const handleToggleFullscreen = useCallback(() => {
@@ -78,30 +89,46 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     return result;
   }, [tables, filter]);
 
-  // Mermaid 코드 + 통계 생성
-  const { code, stats } = useMemo(() => {
+  // ERD 통계 계산 (Cytoscape 렌더러에서 관계 수 추출)
+  const stats = useMemo<ERDStats>(() => {
     if (filteredTables.length === 0) {
-      return { code: '', stats: { tables: 0, relationships: 0, columns: 0 } as ERDStats };
+      return { tables: 0, relationships: 0, columns: 0 };
     }
-    return generateMermaidERCode(filteredTables);
+    const totalColumns = filteredTables.reduce((sum, t) => sum + t.columns.length, 0);
+    const relationships = countERDRelations(filteredTables);
+    return { tables: filteredTables.length, relationships, columns: totalColumns };
   }, [filteredTables]);
 
-  // SVG 다운로드
+  // 이미지 다운로드 — Cytoscape cy.png() 사용 (고해상도 2x)
   const handleDownloadSvg = useCallback(() => {
-    // Mermaid 렌더러 내부의 SVG 엘리먼트 찾기
-    const container = document.querySelector('[data-erd-svg-container]');
-    const svg = container?.querySelector('svg');
-    if (!svg) return;
+    const cy = cyInstanceRef.current;
+    if (!cy) return;
 
-    const serializer = new XMLSerializer();
-    const svgString = serializer.serializeToString(svg);
-    const blob = new Blob([svgString], { type: 'image/svg+xml' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `erd-${datasourceId}-${new Date().toISOString().slice(0, 10)}.svg`;
-    a.click();
-    URL.revokeObjectURL(url);
+    // PNG base64 데이터 URL 생성 (전체 그래프, 2배 스케일, 흰 배경)
+    const pngData = (cy as any).png({
+      full: true,
+      scale: 2,
+      bg: '#FFFFFF',
+      output: 'blob',
+    });
+
+    // cy.png()은 output:'blob'이 아닌 경우 base64 문자열 반환
+    // output:'blob' 미지원 시 base64로 폴백
+    if (pngData instanceof Blob) {
+      const url = URL.createObjectURL(pngData);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `erd-${datasourceId}-${new Date().toISOString().slice(0, 10)}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      // base64 data URL (기본 반환 형식)
+      const dataUrl = (cy as any).png({ full: true, scale: 2, bg: '#FFFFFF' }) as string;
+      const a = document.createElement('a');
+      a.href = dataUrl;
+      a.download = `erd-${datasourceId}-${new Date().toISOString().slice(0, 10)}.png`;
+      a.click();
+    }
   }, [datasourceId]);
 
   // 에러 상태
@@ -163,8 +190,11 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
           isFullscreen={isFullscreen}
         />
         {/* 전체화면: 남은 영역 전부 ERD에 할당 */}
-        <div className="flex-1 min-h-0 overflow-auto" data-erd-svg-container>
-          <MermaidERDRenderer mermaidCode={code} />
+        <div className="flex-1 min-h-0 overflow-hidden" data-erd-svg-container>
+          <CytoscapeERDRenderer
+            tables={filteredTables}
+            onCyInit={handleCyInit}
+          />
         </div>
       </div>,
       document.body,
@@ -184,8 +214,11 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
         onToggleFullscreen={handleToggleFullscreen}
         isFullscreen={isFullscreen}
       />
-      <div className="flex-1 min-h-0 overflow-auto" data-erd-svg-container>
-        <MermaidERDRenderer mermaidCode={code} />
+      <div className="flex-1 min-h-0 overflow-hidden" data-erd-svg-container>
+        <CytoscapeERDRenderer
+          tables={filteredTables}
+          onCyInit={handleCyInit}
+        />
       </div>
     </div>
   );
