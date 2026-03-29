@@ -8,7 +8,6 @@
  */
 
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type cytoscape from 'cytoscape';
 import { useERDData } from '../hooks/useERDData';
@@ -45,18 +44,27 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     cyInstanceRef.current = cy;
   }, []);
 
-  /** 전체화면 토글 — CSS 오버레이 방식 (Fullscreen API 대비 호환성 우수) */
+  /** 전체화면 토글 — CSS 오버레이 방식 (같은 DOM 유지, Cytoscape 캔버스 분리 방지) */
   const handleToggleFullscreen = useCallback(() => {
     setIsFullscreen((prev) => !prev);
+    // 전체화면 전환 후 Cytoscape 캔버스 리사이즈 트리거
+    requestAnimationFrame(() => {
+      cyInstanceRef.current?.resize();
+      cyInstanceRef.current?.fit();
+    });
   }, []);
 
-  // ESC 키로 전체화면 종료
+  // ESC 키로 전체화면 종료 + Cytoscape 리사이즈
   useEffect(() => {
     if (!isFullscreen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setIsFullscreen(false);
+        requestAnimationFrame(() => {
+          cyInstanceRef.current?.resize();
+          cyInstanceRef.current?.fit();
+        });
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -172,38 +180,17 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     );
   }
 
-  // 전체화면일 때 Portal로 body에 직접 렌더링 (부모 overflow-hidden 탈출)
-  if (isFullscreen) {
-    return createPortal(
-      <div
-        ref={containerRef}
-        className="fixed inset-0 z-[9999] flex flex-col bg-background w-screen h-screen"
-      >
-        <ERDToolbar
-          filter={filter}
-          onFilterChange={setFilter}
-          stats={stats}
-          onDownloadSvg={handleDownloadSvg}
-          onRefresh={() => refetch()}
-          isLoading={isLoading}
-          onToggleFullscreen={handleToggleFullscreen}
-          isFullscreen={isFullscreen}
-        />
-        {/* 전체화면: 남은 영역 전부 ERD에 할당 */}
-        <div className="flex-1 min-h-0 overflow-hidden" data-erd-svg-container>
-          <CytoscapeERDRenderer
-            tables={filteredTables}
-            onCyInit={handleCyInit}
-          />
-        </div>
-      </div>,
-      document.body,
-    );
-  }
-
-  // 인라인 모드
+  // CSS-only 전체화면: Portal 대신 같은 DOM 노드에 fixed 스타일 적용
+  // Cytoscape 캔버스가 원래 컨테이너에 바인딩되어 있으므로 DOM 이동 없이 CSS만 변경
   return (
-    <div ref={containerRef} className="flex flex-col h-full">
+    <div
+      ref={containerRef}
+      className={`flex flex-col ${
+        isFullscreen
+          ? 'fixed inset-0 z-[9999] w-screen h-screen bg-background'
+          : 'h-full'
+      }`}
+    >
       <ERDToolbar
         filter={filter}
         onFilterChange={setFilter}

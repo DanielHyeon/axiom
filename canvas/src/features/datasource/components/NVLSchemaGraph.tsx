@@ -13,7 +13,6 @@
  */
 
 import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
-import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import NVL from '@neo4j-nvl/base';
 import type { Node as NvlNode, Relationship as NvlRelationship } from '@neo4j-nvl/base';
@@ -555,9 +554,22 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     }, 100);
   }, []);
 
+  // ESC 키로 전체화면 종료 + NVL 리사이즈 트리거
   useEffect(() => {
     if (!isFullscreen) return;
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setIsFullscreen(false); };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsFullscreen(false);
+        // ESC로 종료 시에도 NVL 리사이즈 보장
+        setTimeout(() => {
+          try { nvlRef.current?.restart(undefined, true); } catch { /* */ }
+          setTimeout(() => {
+            const ids = nvlRef.current?.getNodes().map(n => n.id) ?? [];
+            if (ids.length > 0) try { nvlRef.current?.fit(ids, { animated: false }); } catch { /* */ }
+          }, 300);
+        }, 100);
+      }
+    };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [isFullscreen]);
@@ -698,9 +710,7 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     </div>
   );
 
-  // 전체화면일 때 Portal로 body에 렌더링 (부모 overflow 탈출)
-  if (isFullscreen) {
-    return createPortal(graphContent, document.body);
-  }
+  // CSS-only 전체화면: Portal 없이 같은 DOM에 fixed 스타일만 적용
+  // NVL 캔버스가 containerRef에 바인딩되어 있으므로 DOM 이동하면 캔버스가 끊어짐
   return graphContent;
 }
