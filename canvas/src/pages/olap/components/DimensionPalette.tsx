@@ -1,79 +1,87 @@
-// src/pages/olap/components/DimensionPalette.tsx
-
+/**
+ * DimensionPalette — OLAP 피벗 좌측 차원/측정값 팔레트
+ *
+ * .pen 디자인 사양:
+ * - 220px 너비, 오른쪽 border, 16px 패딩, 12px gap
+ * - "Dimensions" 제목: Sora 12px semibold
+ * - 드래그 가능한 칩: 32px 높이, 흰색 bg, 6px radius, border
+ *   아이콘(파란색 12px) + 텍스트 Geist 12px
+ * - "Measures" 제목: Sora 12px semibold
+ * - 측정값 칩: 같은 스타일, 녹색 아이콘(hash)
+ */
 import { usePivotConfig } from '@/features/olap/store/usePivotConfig';
 import type { CubeDefinition } from '@/features/olap/types/olap';
 import { DraggableItem } from './DraggableItem';
 import { Database } from 'lucide-react';
-import { useTranslation } from 'react-i18next';
 
 interface DimensionPaletteProps {
- cube: CubeDefinition | null;
+  cube: CubeDefinition | null;
+}
+
+/** 차원에 사용할 아이콘 이름 매핑 (디자인의 calendar, map-pin, box 패턴) */
+const DIMENSION_ICONS: Record<string, string> = {
+  date: 'calendar',
+  time: 'calendar',
+  region: 'map-pin',
+  location: 'map-pin',
+  geography: 'map-pin',
+  product: 'box',
+  category: 'box',
+};
+
+/** 차원 이름으로 아이콘 결정 */
+export function getDimensionIcon(name: string): string {
+  const lower = name.toLowerCase();
+  for (const [key, icon] of Object.entries(DIMENSION_ICONS)) {
+    if (lower.includes(key)) return icon;
+  }
+  return 'box'; // 기본 아이콘
 }
 
 export function DimensionPalette({ cube }: DimensionPaletteProps) {
- const { t } = useTranslation();
- const { rows, columns, measures, filters } = usePivotConfig();
+  const { rows, columns, measures: usedMeasures, filters } = usePivotConfig();
 
- if (!cube) {
- return (
- <div className="w-64 border-r border-border bg-popover p-4 flex flex-col items-center justify-center text-muted-foreground">
- <Database size={32} className="mb-2 opacity-30" />
- <p className="text-sm">{t('olapPage.selectCube')}</p>
- </div>
- );
- }
+  // 큐브 미선택 시 빈 상태
+  if (!cube) {
+    return (
+      <div className="flex flex-col items-center justify-center w-[220px] p-4 border-r border-border bg-card">
+        <Database size={32} className="mb-2 text-text-placeholder" />
+        <p className="text-xs text-text-placeholder">큐브를 선택하세요</p>
+      </div>
+    );
+  }
 
- // Determine which fields are already in use
- const inUseDimensions = new Set([
- ...rows.map(r => r.id),
- ...columns.map(c => c.id),
- ...filters.map(f => f.dimensionId)
- ]);
+  // 이미 사용 중인 차원/측정값
+  const inUseDimensions = new Set([
+    ...rows.map((r) => r.id),
+    ...columns.map((c) => c.id),
+    ...filters.map((f) => f.dimensionId),
+  ]);
+  const inUseMeasures = new Set(usedMeasures.map((m) => m.id));
 
- const inUseMeasures = new Set(measures.map(m => m.id));
+  return (
+    <div className="flex flex-col w-[220px] p-4 gap-3 border-r border-border bg-card overflow-y-auto shrink-0">
+      {/* 차원 섹션 제목 */}
+      <h4 className="font-heading text-xs font-semibold text-foreground">
+        Dimensions
+      </h4>
 
- return (
- <div className="w-64 border-r border-border bg-popover flex flex-col">
- <div className="p-4 border-b border-border bg-popover">
- <h3 className="font-medium text-sm text-foreground">{cube.name}</h3>
- <p className="text-xs text-muted-foreground mt-1">{cube.description}</p>
- </div>
+      {cube.dimensions
+        .filter((dim) => !inUseDimensions.has(dim.id))
+        .map((dim) => (
+          <DraggableItem key={dim.id} item={dim} type="dimension" />
+        ))}
 
- <div className="flex-1 overflow-y-auto p-4 space-y-6">
- <div>
- <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
- {t('olapPage.dimensions')}
- <span className="text-muted-foreground font-normal">{cube.dimensions.length}</span>
- </h4>
- <div className="space-y-1">
- {cube.dimensions.map(dim => (
- <DraggableItem
- key={dim.id}
- item={dim}
- type="dimension"
- disabled={inUseDimensions.has(dim.id)}
- />
- ))}
- </div>
- </div>
+      {/* 측정값 섹션 제목 */}
+      <h4 className="font-heading text-xs font-semibold text-foreground mt-2">
+        Measures
+      </h4>
 
- <div>
- <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3 flex items-center justify-between">
- {t('olapPage.measures')}
- <span className="text-muted-foreground font-normal">{cube.measures.length}</span>
- </h4>
- <div className="space-y-1">
- {cube.measures.map(meas => (
- <DraggableItem
- key={meas.id}
- item={meas}
- type="measure"
- disabled={inUseMeasures.has(meas.id)}
- />
- ))}
- </div>
- </div>
- </div>
- </div>
- );
+      {cube.measures
+        .filter((m) => !inUseMeasures.has(m.id))
+        .map((meas) => (
+          <DraggableItem key={meas.id} item={meas} type="measure" />
+        ))}
+    </div>
+  );
 }

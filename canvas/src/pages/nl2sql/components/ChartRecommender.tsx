@@ -56,19 +56,19 @@ export function ChartRecommender({ data, config }: ChartRecommenderProps) {
  <ResponsiveContainer width="100%" height="85%">
  {chart_type === 'bar' ? (
  <BarChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
- <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
- <XAxis dataKey={innerConfig.x_column} stroke="#999" fontSize={12} />
- <YAxis stroke="#999" fontSize={12} />
- <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E5E5E5' }} />
- <Bar dataKey={innerConfig.y_column} fill="#DC2626" radius={[4, 4, 0, 0]} />
+ <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+ <XAxis dataKey={innerConfig.x_column} stroke="hsl(var(--text-placeholder))" fontSize={12} />
+ <YAxis stroke="hsl(var(--text-placeholder))" fontSize={12} />
+ <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} />
+ <Bar dataKey={innerConfig.y_column} fill="hsl(var(--accent-red))" radius={[4, 4, 0, 0]} />
  </BarChart>
  ) : chart_type === 'line' ? (
  <LineChart data={chartData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
- <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
- <XAxis dataKey={innerConfig.x_column} stroke="#999" fontSize={12} />
- <YAxis stroke="#999" fontSize={12} />
- <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E5E5E5' }} />
- <Line type="monotone" dataKey={innerConfig.y_column} stroke="#DC2626" strokeWidth={2} />
+ <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+ <XAxis dataKey={innerConfig.x_column} stroke="hsl(var(--text-placeholder))" fontSize={12} />
+ <YAxis stroke="hsl(var(--text-placeholder))" fontSize={12} />
+ <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} />
+ <Line type="monotone" dataKey={innerConfig.y_column} stroke="hsl(var(--accent-red))" strokeWidth={2} />
  </LineChart>
  ) : chart_type === 'pie' ? (
  <PieChart>
@@ -86,15 +86,15 @@ export function ChartRecommender({ data, config }: ChartRecommenderProps) {
  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
  ))}
  </Pie>
- <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E5E5E5' }} />
+ <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} />
  </PieChart>
  ) : chart_type === 'scatter' ? (
  <ScatterChart margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
- <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
- <XAxis dataKey={innerConfig.x_column} stroke="#999" fontSize={12} name={innerConfig.x_label || innerConfig.x_column} />
- <YAxis dataKey={innerConfig.y_column} stroke="#999" fontSize={12} name={innerConfig.y_label || innerConfig.y_column} />
- <Tooltip contentStyle={{ backgroundColor: '#fff', borderColor: '#E5E5E5' }} cursor={{ strokeDasharray: '3 3' }} />
- <Scatter data={chartData} fill="#DC2626" />
+ <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+ <XAxis dataKey={innerConfig.x_column} stroke="hsl(var(--text-placeholder))" fontSize={12} name={innerConfig.x_label || innerConfig.x_column} />
+ <YAxis dataKey={innerConfig.y_column} stroke="hsl(var(--text-placeholder))" fontSize={12} name={innerConfig.y_label || innerConfig.y_column} />
+ <Tooltip contentStyle={{ backgroundColor: 'hsl(var(--card))', borderColor: 'hsl(var(--border))' }} cursor={{ strokeDasharray: '3 3' }} />
+ <Scatter data={chartData} fill="hsl(var(--accent-red))" />
  </ScatterChart>
  ) : (
  <div className="flex items-center justify-center h-full text-foreground/60 text-sm font-mono">

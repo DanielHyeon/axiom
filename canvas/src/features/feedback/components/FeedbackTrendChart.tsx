@@ -42,7 +42,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
         ) : (
           <ResponsiveContainer width="100%" height={280}>
             <AreaChart data={data} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#E5E5E5" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
               <XAxis
                 dataKey="date"
                 tick={{ fontSize: 11, fontFamily: 'IBM Plex Mono' }}
@@ -58,7 +58,7 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
                   fontSize: 12,
                   fontFamily: 'IBM Plex Mono',
                   borderRadius: 8,
-                  border: '1px solid #E5E5E5',
+                  border: '1px solid hsl(var(--border))',
                 }}
               />
               <Legend
@@ -69,8 +69,8 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
                 dataKey="positive"
                 name={t('feedback.trend.positive')}
                 stackId="1"
-                stroke="#22c55e"
-                fill="#22c55e"
+                stroke="hsl(var(--accent-green))"
+                fill="hsl(var(--accent-green))"
                 fillOpacity={0.3}
               />
               <Area
@@ -78,8 +78,8 @@ export function FeedbackTrendChart({ data, isLoading }: FeedbackTrendChartProps)
                 dataKey="negative"
                 name={t('feedback.trend.negative')}
                 stackId="1"
-                stroke="#ef4444"
-                fill="#ef4444"
+                stroke="hsl(var(--destructive))"
+                fill="hsl(var(--destructive))"
                 fillOpacity={0.3}
               />
               <Area

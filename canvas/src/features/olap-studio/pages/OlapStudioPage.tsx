@@ -1,318 +1,205 @@
 /**
- * OlapStudioPage — OLAP Studio 피벗 분석 페이지.
+ * OlapStudioPage — OLAP Studio 피벗 분석 페이지 (리디자인)
  *
- * 좌측: 큐브 선택 + 차원/측정값 목록 (클릭으로 추가)
- * 중앙: PivotBuilder (4개 드롭 영역) + PivotResultGrid
- * 하단: SQL 미리보기
+ * .pen 디자인 사양:
+ * - 레이아웃: 수직
+ * - Body 내 탭 바: Models | Cubes | Pivot | NL2SQL
+ *   - 활성 탭: 하단 border 2px primary, Geist 13px semibold
+ * - Body: 24px 패딩, 48px 좌우, 16px gap
+ * - Model Cards: 가로 행, 동일 너비, 16px gap
+ *   - 흰색 카드, 12px radius, 20px padding, 12px gap
+ *   - 이름: Sora 14px semibold, 설명: Geist 12px secondary, 상태 배지
+ *
+ * 백엔드 API 연동:
+ * - GET /api/gateway/olap/cubes — 큐브 목록
+ * - GET /api/gateway/olap/data-sources — 모델(데이터소스) 목록
  */
-import { useMemo, useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
+import { Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  BarChart3,
-  Play,
-  Eye,
-  Loader2,
-  ChevronDown,
-  ChevronRight,
-  Rows3,
-  Columns3,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { usePivot } from '../hooks/usePivot';
-import { PivotBuilder } from '../components/PivotBuilder';
-import { PivotResultGrid } from '../components/PivotResultGrid';
-import { PivotSqlPreview } from '../components/PivotSqlPreview';
-import { cubes } from '../api/olapStudioApi';
+import { cubes as cubesApi, dataSources } from '../api/olapStudioApi';
 
-// ─── 메인 페이지 ─────────────────────────────────────────
+// 하위 탭 페이지 (지연 로딩 대신 직접 import — 같은 feature 안이므로)
+import { CubeManagementPage } from './CubeManagementPage';
 
-/** 차원 목록 형식 — dimension 이름 + 하위 레벨 배열 */
-interface DimEntry {
-  dimension: string;
-  levels: string[];
+/** 내부 피벗 탭 — 기존 OlapStudioPage 피벗 UI를 재사용 */
+const PivotTab = lazy(() =>
+  import('./OlapStudioPivotTab').then((m) => ({ default: m.OlapStudioPivotTab })),
+);
+
+// ── 탭 정의 ──
+type TabId = 'models' | 'cubes' | 'pivot' | 'nl2sql';
+
+interface TabDef {
+  id: TabId;
+  label: string;
 }
 
-/** 측정값 목록 형식 */
-interface MeasureEntry {
-  name: string;
-  aggregator: string;
+const TABS: TabDef[] = [
+  { id: 'models', label: 'Models' },
+  { id: 'cubes', label: 'Cubes' },
+  { id: 'pivot', label: 'Pivot' },
+  { id: 'nl2sql', label: 'NL2SQL' },
+];
+
+// ── 상태 배지 색상 ──
+function StatusBadge({ status }: { status: string }) {
+  const lower = status.toLowerCase();
+  const isPublished = lower === 'published' || lower === 'active';
+  const isDraft = lower === 'draft';
+
+  return (
+    <span
+      className={cn(
+        'inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold',
+        isPublished && 'bg-status-success text-status-success-foreground',
+        isDraft && 'bg-status-warning text-status-warning-foreground',
+        !isPublished && !isDraft && 'bg-gray-100 text-gray-600',
+      )}
+    >
+      {status}
+    </span>
+  );
 }
 
 export function OlapStudioPage() {
   const { t } = useTranslation();
-  const pivot = usePivot();
-  const [showSql, setShowSql] = useState(false);
-  const [expandedDim, setExpandedDim] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<TabId>('models');
 
-  // 선택된 큐브의 상세 정보 (차원 + 측정값) 동적 로드
-  const cubeDetail = useQuery({
-    queryKey: ['olap', 'cubes', pivot.selectedCubeId, 'detail'],
-    queryFn: () => cubes.get(pivot.selectedCubeId!),
-    enabled: !!pivot.selectedCubeId,
+  // 데이터소스(= 모델) 목록 조회
+  const modelsQuery = useQuery({
+    queryKey: ['olap-studio', 'models'],
+    queryFn: dataSources.list,
+    staleTime: 60_000,
   });
 
-  // API 응답에서 차원 목록 변환: dimension_name 기준으로 그룹핑
-  const dimensions = useMemo<DimEntry[]>(() => {
-    if (!cubeDetail.data?.dimensions) return [];
-    const dimMap = new Map<string, string[]>();
-    // display_order 기준 정렬 후 그룹핑
-    const sorted = [...cubeDetail.data.dimensions].sort(
-      (a, b) => (a.hierarchy_level ?? 0) - (b.hierarchy_level ?? 0),
-    );
-    for (const d of sorted) {
-      const dimName = d.source_column?.split('.')[0] || d.name;
-      if (!dimMap.has(dimName)) dimMap.set(dimName, []);
-      dimMap.get(dimName)!.push(d.name);
-    }
-    return Array.from(dimMap.entries()).map(([dimension, levels]) => ({
-      dimension,
-      levels,
-    }));
-  }, [cubeDetail.data?.dimensions]);
-
-  // API 응답에서 측정값 목록 변환
-  const measures = useMemo<MeasureEntry[]>(() => {
-    if (!cubeDetail.data?.measures) return [];
-    return cubeDetail.data.measures.map((m) => ({
-      name: m.name,
-      aggregator: m.aggregation_type,
-    }));
-  }, [cubeDetail.data?.measures]);
+  // 큐브 목록 조회
+  const cubesQuery = useQuery({
+    queryKey: ['olap-studio', 'cubes'],
+    queryFn: cubesApi.list,
+    staleTime: 60_000,
+  });
 
   return (
-    <div className="flex h-full">
-      {/* ─── 좌측 패널: 큐브 선택 + 필드 목록 ──────────── */}
-      <div className="w-[240px] border-r border-border flex flex-col shrink-0 bg-card">
-        {/* 큐브 선택 드롭다운 */}
-        <div className="px-3 py-3 border-b border-border">
-          <label className="text-[10px] text-foreground/50 font-mono mb-1 block">
-            {t('olapStudioExt.selectCube')}
-          </label>
-          <select
-            value={pivot.selectedCubeId || ''}
-            onChange={(e) => {
-              const cube = pivot.cubeList.data?.find((c) => c.id === e.target.value);
-              if (cube) pivot.selectCube(cube);
-            }}
-            className="w-full rounded border border-border bg-card px-2 py-1.5 text-[11px] font-mono"
-            aria-label={t('olapStudioExt.selectCube')}
-          >
-            <option value="">{t('olapStudioExt.selectPlaceholder')}</option>
-            {(pivot.cubeList.data || [])
-              .filter((c) => c.cube_status === 'PUBLISHED')
-              .map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-          </select>
-        </div>
-
-        {/* 차원 + 측정값 목록 */}
-        <div className="flex-1 overflow-y-auto">
-          {/* 차원 섹션 헤더 */}
-          <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-b border-border">
-            {t('olapStudioF.m78b740cf')}
-          </div>
-
-          {/* 큐브 미선택 또는 로딩 중 안내 */}
-          {!pivot.selectedCubeId && (
-            <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
-              {t('olapPage.selectCube')}
-            </div>
-          )}
-          {pivot.selectedCubeId && cubeDetail.isLoading && (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="h-4 w-4 animate-spin text-foreground/30" />
-            </div>
-          )}
-          {pivot.selectedCubeId && !cubeDetail.isLoading && dimensions.length === 0 && (
-            <div className="px-3 py-4 text-[10px] text-foreground/30 font-mono text-center">
-              {t('olapStudioF.m63004a8e')}
-            </div>
-          )}
-
-          {/* 차원 목록 — 아코디언으로 레벨 펼침 */}
-          {dimensions.map((dim) => (
-            <div key={dim.dimension}>
-              <button
-                type="button"
-                onClick={() =>
-                  setExpandedDim(expandedDim === dim.dimension ? null : dim.dimension)
-                }
-                className="flex items-center gap-1.5 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors"
-                aria-expanded={expandedDim === dim.dimension}
-              >
-                {expandedDim === dim.dimension ? (
-                  <ChevronDown className="h-3 w-3 text-foreground/30" />
-                ) : (
-                  <ChevronRight className="h-3 w-3 text-foreground/30" />
-                )}
-                <span className="text-foreground/70">{dim.dimension}</span>
-              </button>
-
-              {/* 펼쳐진 레벨 목록 — 행/열 추가 버튼 */}
-              {expandedDim === dim.dimension && (
-                <div className="pl-7 pb-1">
-                  {dim.levels.map((level) => (
-                    <div key={level} className="flex items-center gap-1 py-0.5">
-                      <span className="text-[10px] text-foreground/50 font-mono flex-1">
-                        {level}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => pivot.addRow({ dimension: dim.dimension, level })}
-                        className="p-0.5 rounded hover:bg-blue-50 text-blue-400"
-                        title={t('olapStudioExt.addToRows')}
-                        aria-label={t('olapStudioF.addToRows', { name: level })}
-                      >
-                        <Rows3 className="h-2.5 w-2.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => pivot.addColumn({ dimension: dim.dimension, level })}
-                        className="p-0.5 rounded hover:bg-purple-50 text-purple-400"
-                        title={t('olapStudioExt.addToCols')}
-                        aria-label={t('olapStudioF.addToCols', { name: level })}
-                      >
-                        <Columns3 className="h-2.5 w-2.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-
-          {/* 측정값 섹션 헤더 */}
-          <div className="px-3 py-2 text-[10px] text-foreground/40 font-mono font-medium border-y border-border mt-2">
-            {t('olapStudioExt.measuresLabel')}
-          </div>
-
-          {/* 측정값 목록 — 클릭으로 추가 */}
-          {measures.map((m) => (
+    <div className="flex flex-col h-full bg-background">
+      {/* 탭 바 — Body 영역 상단 */}
+      <div className="flex items-center gap-0 px-12 border-b border-border bg-card shrink-0">
+        {TABS.map((tab) => {
+          const isActive = tab.id === activeTab;
+          return (
             <button
-              key={m.name}
+              key={tab.id}
               type="button"
-              onClick={() => pivot.addMeasure(m)}
-              className="flex items-center gap-2 w-full text-left px-3 py-1.5 text-[11px] font-mono hover:bg-muted transition-colors"
-              aria-label={t('olapStudioF.addMeasure', { name: m.name })}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                'px-4 py-3 text-[13px] transition-colors relative',
+                isActive
+                  ? 'font-semibold text-black'
+                  : 'font-normal text-text-placeholder hover:text-text-tertiary',
+              )}
             >
-              <BarChart3 className="h-3 w-3 text-emerald-400" />
-              <span className="text-foreground/70">{m.name}</span>
-              <span className="ml-auto text-[9px] text-foreground/30">{m.aggregator}</span>
+              {tab.label}
+              {/* 활성 탭 하단 2px 인디케이터 */}
+              {isActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+              )}
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* ─── 중앙 + 하단 영역 ─────────────────────────── */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* 상단 바 — 타이틀 + 액션 버튼 */}
-        <div className="flex items-center gap-2 px-4 h-10 border-b border-border bg-muted/50 shrink-0">
-          <BarChart3 className="h-4 w-4 text-blue-500" />
-          <h1 className="text-[14px] font-semibold font-heading">OLAP Studio</h1>
-          {pivot.selectedCubeName && (
-            <span className="text-[11px] text-foreground/40 font-mono">
-              {pivot.selectedCubeName}
-            </span>
-          )}
+      {/* Body — 24px 상하 패딩, 48px 좌우 패딩, 16px gap */}
+      <div className="flex-1 overflow-y-auto px-12 py-6">
+        {/* Models 탭 */}
+        {activeTab === 'models' && (
+          <ModelsTabContent
+            models={modelsQuery.data ?? []}
+            isLoading={modelsQuery.isLoading}
+          />
+        )}
 
-          <div className="ml-auto flex items-center gap-2">
-            {/* SQL 미리보기 버튼 */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                pivot.preview();
-                setShowSql(true);
-              }}
-              disabled={pivot.isPreviewing || pivot.config.measures.length === 0}
-              className="text-[11px]"
-            >
-              {pivot.isPreviewing ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <Eye className="h-3 w-3 mr-1" />
-              )}
-              {t('olapStudioF.meb375f35')}
-            </Button>
+        {/* Cubes 탭 */}
+        {activeTab === 'cubes' && <CubeManagementPage />}
 
-            {/* 실행 버튼 */}
-            <Button
-              size="sm"
-              onClick={() => pivot.execute()}
-              disabled={pivot.isExecuting || pivot.config.measures.length === 0}
-              className="text-[11px]"
-            >
-              {pivot.isExecuting ? (
-                <Loader2 className="h-3 w-3 animate-spin mr-1" />
-              ) : (
-                <Play className="h-3 w-3 mr-1" />
-              )}
-              {t('behaviorExt.tabs.execute')}
-            </Button>
+        {/* Pivot 탭 */}
+        {activeTab === 'pivot' && (
+          <Suspense fallback={<LoadingFallback />}>
+            <PivotTab />
+          </Suspense>
+        )}
+
+        {/* NL2SQL 탭 — 추후 구현 */}
+        {activeTab === 'nl2sql' && (
+          <div className="flex items-center justify-center h-64 text-text-placeholder text-sm">
+            NL2SQL 탐색형 질의 (준비 중)
           </div>
-        </div>
-
-        {/* PivotBuilder — 4개 드롭 영역 */}
-        <PivotBuilder
-          rows={pivot.config.rows}
-          columns={pivot.config.columns}
-          measures={pivot.config.measures}
-          filters={pivot.config.filters}
-          onRemoveRow={pivot.removeRow}
-          onRemoveColumn={pivot.removeColumn}
-          onRemoveMeasure={pivot.removeMeasure}
-          onRemoveFilter={pivot.removeFilter}
-        />
-
-        {/* 결과 / SQL 프리뷰 — 탭 전환 */}
-        <div className="flex-1 flex flex-col border-t border-border min-h-0">
-          {/* 탭 헤더 */}
-          <div className="flex items-center gap-0.5 px-4 pt-1 bg-muted/50 border-b border-border shrink-0">
-            <button
-              type="button"
-              onClick={() => setShowSql(false)}
-              className={cn(
-                'px-3 py-1 text-[10px] font-mono rounded-t transition-colors',
-                !showSql
-                  ? 'bg-card border border-b-0 border-border text-foreground/70 font-medium'
-                  : 'text-foreground/30 hover:text-foreground/50',
-              )}
-              aria-selected={!showSql}
-              role="tab"
-            >
-              {t('whatifWizard.step3.target')}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowSql(true)}
-              className={cn(
-                'px-3 py-1 text-[10px] font-mono rounded-t transition-colors',
-                showSql
-                  ? 'bg-card border border-b-0 border-border text-foreground/70 font-medium'
-                  : 'text-foreground/30 hover:text-foreground/50',
-              )}
-              aria-selected={showSql}
-              role="tab"
-            >
-              SQL
-            </button>
-          </div>
-
-          {/* 탭 내용 */}
-          <div className="flex-1 min-h-0" role="tabpanel">
-            {showSql ? (
-              <PivotSqlPreview sql={pivot.previewSql} isLoading={pivot.isPreviewing} />
-            ) : (
-              <PivotResultGrid result={pivot.result} isLoading={pivot.isExecuting} />
-            )}
-          </div>
-        </div>
+        )}
       </div>
+    </div>
+  );
+}
+
+// ── Models 탭 콘텐츠 ──
+
+interface ModelCardData {
+  id: string;
+  name: string;
+  source_type: string;
+  is_active: boolean;
+  last_health_status: string | null;
+}
+
+function ModelsTabContent({
+  models,
+  isLoading,
+}: {
+  models: ModelCardData[];
+  isLoading: boolean;
+}) {
+  if (isLoading) return <LoadingFallback />;
+
+  if (models.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-64 text-text-placeholder text-sm">
+        등록된 모델(데이터소스)이 없습니다.
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex gap-4 flex-wrap">
+      {models.map((m) => (
+        <div
+          key={m.id}
+          className={cn(
+            'flex-1 min-w-[280px] max-w-[50%]',
+            // 카드: 흰색, 12px radius, 20px padding, 12px gap, 1px border
+            'bg-card rounded-xl p-5 border border-border',
+            'flex flex-col gap-3',
+          )}
+        >
+          {/* 모델 이름: Sora 14px semibold */}
+          <h3 className="font-heading text-sm font-semibold text-foreground">
+            {m.name}
+          </h3>
+          {/* 설명: Geist 12px secondary */}
+          <p className="text-xs text-text-secondary">
+            {m.source_type}
+          </p>
+          {/* 상태 배지 */}
+          <StatusBadge status={m.is_active ? 'Published' : 'Draft'} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function LoadingFallback() {
+  return (
+    <div className="flex items-center justify-center h-32">
+      <Loader2 className="animate-spin text-text-placeholder" size={20} />
     </div>
   );
 }

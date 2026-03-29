@@ -1,232 +1,220 @@
-// src/pages/olap/OlapPivotPage.tsx
-
+/**
+ * OlapPivotPage — OLAP 피벗 분석 페이지
+ *
+ * .pen 디자인 사양:
+ * - 레이아웃: 좌우 수평 분할
+ * - LEFT: DimensionPalette (220px, 오른쪽 border)
+ * - RIGHT: 피벗 영역 (fill, 16px 패딩, 16px gap)
+ *   - Drop Zones row: 3개 동일 컬럼
+ *   - Pivot Grid: 흰색 카드, 8px radius, border
+ *     - 헤더 행: 36px, surface bg, 컬럼 라벨 우측 정렬
+ *     - 데이터 행: 36px, JetBrains Mono 12px, 우측 정렬, 색상(green/red)
+ */
 import { useState } from 'react';
 import {
- DndContext,
- type DragEndEvent,
- useSensor,
- useSensors,
- PointerSensor,
- KeyboardSensor,
- closestCenter,
- DragOverlay,
- type DragStartEvent
+  DndContext,
+  type DragEndEvent,
+  useSensor,
+  useSensors,
+  PointerSensor,
+  KeyboardSensor,
+  closestCenter,
+  DragOverlay,
+  type DragStartEvent,
 } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { usePivotConfig } from '@/features/olap/store/usePivotConfig';
 import { useOlapVision } from '@/features/olap/hooks/useOlapVision';
-import { DrilldownBreadcrumb } from '@/features/olap/components/DrilldownBreadcrumb';
-import { ChartSwitcher, type ChartViewType } from '@/features/olap/components/ChartSwitcher';
 import { DimensionPalette } from './components/DimensionPalette';
 import { PivotBuilder } from './components/PivotBuilder';
 import { DraggableItem } from './components/DraggableItem';
-import { DataTable } from '@/components/shared/DataTable';
 import type { Dimension, Measure } from '@/features/olap/types/olap';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { useTranslation } from 'react-i18next';
-import { Loader2, Download, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 
 export function OlapPivotPage() {
- const { t } = useTranslation();
- const {
- cubeId, setCubeId, addFieldToZone,
- clearAll
- } = usePivotConfig();
- const { cubes, executeQuery, isQuerying, queryResult, error } = useOlapVision();
- const activeCube = cubes.find(c => c.id === cubeId) || null;
+  const { t } = useTranslation();
+  const { cubeId, setCubeId, addFieldToZone, clearAll } = usePivotConfig();
+  const { cubes, executeQuery, isQuerying, queryResult, error } = useOlapVision();
+  const activeCube = cubes.find((c) => c.id === cubeId) || null;
 
- const [activeItem, setActiveItem] = useState<{ item: Dimension | Measure, type: 'dimension' | 'measure' } | null>(null);
- const [chartViewType, setChartViewType] = useState<ChartViewType>('table');
- // 에러 배너 닫기 상태
- const [errorDismissed, setErrorDismissed] = useState(false);
+  // 드래그 오버레이용 상태
+  const [activeItem, setActiveItem] = useState<{
+    item: Dimension | Measure;
+    type: 'dimension' | 'measure';
+  } | null>(null);
 
- // Auto-run query if config changes and valid? We use explicit "run query" button as per spec.
+  // DnD 센서 설정
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
 
- const sensors = useSensors(
- useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
- useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
- );
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveItem(event.active.data.current as typeof activeItem);
+  };
 
- const handleDragStart = (event: DragStartEvent) => {
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- setActiveItem(event.active.data.current as any);
- };
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveItem(null);
+    const { active, over } = event;
+    if (!over) return;
 
- const handleDragEnd = (event: DragEndEvent) => {
- setActiveItem(null);
- const { active, over } = event;
+    const activeData = active.data.current;
+    const zone = over.id as string;
 
- if (!over) return;
+    // 드롭 존에 놓인 경우
+    if (zone === 'rows' || zone === 'columns' || zone === 'measures') {
+      // 타입 검증: 차원은 rows/columns만, 측정값은 measures만
+      if (activeData?.type === 'dimension' && zone === 'measures') return;
+      if (activeData?.type === 'measure' && zone !== 'measures') return;
 
- const activeData = active.data.current;
+      if (activeData?.item) {
+        addFieldToZone(zone as 'rows' | 'columns' | 'measures', activeData.item);
+      }
+    }
+  };
 
- // Dropped over a zone
- if (over.id === 'rows' || over.id === 'columns' || over.id === 'measures' || over.id === 'filters') {
- const zoneId = over.id as 'rows' | 'columns' | 'measures' | 'filters';
+  // 쿼리 실행
+  const handleRunQuery = () => {
+    const config = usePivotConfig.getState();
+    executeQuery(config);
+  };
 
- // Validate drop rules
- if (activeData?.type === 'dimension' && zoneId === 'measures') return;
- if (activeData?.type === 'measure' && zoneId !== 'measures') return;
+  // 결과 데이터를 그리드 형태로 변환
+  const headers = queryResult?.headers ?? [];
+  const rows = queryResult?.data ?? [];
 
- if (activeData?.item) {
- addFieldToZone(zoneId, activeData.item);
- }
- }
- // Reordering inside a zone (Sortable)
- else {
- // Logic for reordering if dropping onto another sortable item
- const activeZone = String(active.id).split('-')[0];
- const overZone = String(over.id).split('-')[0];
+  return (
+    <div className="flex h-[calc(100vh-4rem)] bg-background text-foreground overflow-hidden">
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
+        {/* 좌측: 차원/측정값 팔레트 */}
+        <DimensionPalette cube={activeCube} />
 
- if (activeZone === overZone && ['rows', 'columns', 'measures', 'filters'].includes(activeZone)) {
- // Need to find indices in the corresponding state array
- // A robust DnD implementation tracks local sortable list state. 
- // For simplicity here, we assume it's appended by drop if cross-zone is tricky
- // This is a minimal mock implementation.
- }
- }
- };
+        {/* 우측: 피벗 영역 */}
+        <div className="flex-1 flex flex-col gap-4 p-4 overflow-hidden">
+          {/* 큐브 선택 드롭다운 (팔레트 위가 아니라 피벗 영역 상단) */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="w-64">
+              <Select
+                value={cubeId || ''}
+                onValueChange={(val) => {
+                  clearAll();
+                  setCubeId(val);
+                }}
+              >
+                <SelectTrigger className="h-8 bg-card border-border text-xs">
+                  <SelectValue placeholder={t('olap.selectCube')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {cubes.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
- const handleRunQuery = () => {
- // 새 쿼리 실행 시 이전 에러 배너 닫기 상태 초기화
- setErrorDismissed(false);
- const config = usePivotConfig.getState();
- executeQuery(config);
- };
+          {/* Drop Zones (3열) + 실행 버튼 */}
+          <PivotBuilder onRunQuery={handleRunQuery} isQuerying={isQuerying} />
 
- // Convert array data to TanStack table columns
- const tableColumns = queryResult?.headers.map((h, i) => ({
- accessorKey: `col_${i}`,
- header: h
- })) || [];
+          {/* 피벗 그리드 — 흰색 카드, 8px radius, border */}
+          <div className="flex-1 rounded-lg bg-card border border-border overflow-auto">
+            {/* 로딩 상태 */}
+            {isQuerying && (
+              <div className="flex items-center justify-center h-full">
+                <Loader2 className="animate-spin text-accent-blue" size={24} />
+                <span className="ml-2 text-sm text-text-secondary">{t('olap.aggregating')}</span>
+              </div>
+            )}
 
- const tableData = queryResult?.data.map((row) => {
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
- const obj: any = {};
- row.forEach((cell, i) => {
- obj[`col_${i}`] = cell;
- });
- return obj;
- }) || [];
+            {/* 에러 상태 */}
+            {error && !isQuerying && (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-sm text-red-500">{error}</p>
+              </div>
+            )}
 
- return (
- <div className="flex flex-col h-[calc(100vh-4rem)] bg-background text-foreground">
+            {/* 결과 그리드 */}
+            {queryResult && !isQuerying && !error && (
+              <table className="w-full border-collapse">
+                {/* 헤더 행: 36px, surface bg, 컬럼 라벨 */}
+                <thead>
+                  <tr className="bg-muted h-9">
+                    {headers.map((h, i) => (
+                      <th
+                        key={i}
+                        className={[
+                          'px-4 text-[11px] font-semibold text-text-secondary whitespace-nowrap',
+                          i === 0 ? 'text-left' : 'text-right',
+                        ].join(' ')}
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((row, ri) => (
+                    <tr
+                      key={ri}
+                      className="h-9 border-b border-border last:border-b-0"
+                    >
+                      {row.map((cell, ci) => {
+                        // 숫자 셀: 색상 적용 (양수=green, 음수=red)
+                        const isFirstCol = ci === 0;
+                        const numVal = typeof cell === 'number' ? cell : parseFloat(String(cell));
+                        const isNumber = !isFirstCol && !isNaN(numVal);
+                        let textColor = 'text-foreground';
+                        if (isNumber && String(cell).includes('-')) {
+                          textColor = 'text-destructive'; // 빨강 — 다크모드 대응
+                        }
 
- {/* Top Header Controls */}
- <div className="h-14 border-b border-border bg-background px-6 flex items-center justify-between shrink-0">
- <div className="flex items-center gap-4">
- <h1 className="font-semibold flex items-center gap-2">
- <span className="text-xl">📊</span> {t('olap.title')}
- </h1>
- <div className="h-6 w-px bg-muted" />
- <div className="w-64">
- <Select
- value={cubeId || ''}
- onValueChange={(val) => { clearAll(); setCubeId(val); }}
- >
- <SelectTrigger className="h-8 bg-card border-border text-sm">
- <SelectValue placeholder={t('olap.selectCube')} />
- </SelectTrigger>
- <SelectContent>
- {cubes.map(c => (
- <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
- ))}
- </SelectContent>
- </Select>
- </div>
- </div>
- </div>
+                        return (
+                          <td
+                            key={ci}
+                            className={[
+                              'px-4 whitespace-nowrap',
+                              isFirstCol
+                                ? 'text-xs font-medium text-foreground'
+                                : `text-xs font-mono ${textColor} text-right`,
+                            ].join(' ')}
+                          >
+                            {cell == null ? '' : String(cell)}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
 
- {/* Main Body Layout */}
- <div className="flex flex-1 overflow-hidden">
- <DndContext
- sensors={sensors}
- collisionDetection={closestCenter}
- onDragStart={handleDragStart}
- onDragEnd={handleDragEnd}
- >
- {/* Left Palette */}
- <DimensionPalette cube={activeCube} />
+            {/* 빈 상태 */}
+            {!queryResult && !error && !isQuerying && (
+              <div className="flex items-center justify-center h-full">
+                <p className="text-sm text-text-placeholder italic">{t('olap.emptyHint')}</p>
+              </div>
+            )}
+          </div>
+        </div>
 
- {/* Middle Builder & Right Result */}
- <div className="flex-1 flex flex-col relative w-full overflow-hidden">
- {/* Top half: Builder */}
- <PivotBuilder onRunQuery={handleRunQuery} isQuerying={isQuerying} />
-
- {/* Bottom half: Results */}
- <div className="flex-[1.5] bg-popover p-6 relative overflow-y-auto">
- <div className="flex justify-between items-end mb-4">
- <h3 className="text-sm font-semibold text-foreground/80">{t('olap.analysisResult')}</h3>
- {queryResult && (
- <div className="flex items-center gap-4">
- <span className="text-xs text-foreground0">
- {t('olap.queryTime', { time: queryResult.executionTimeMs })} • {t('olap.rowCount', { count: queryResult.data.length })}
- </span>
- <Button variant="outline" size="sm" className="h-7 text-xs">
- <Download size={12} className="mr-1" /> {t('olap.csvExport')}
- </Button>
- </div>
- )}
- </div>
-
- <div className="mb-2">
- <DrilldownBreadcrumb />
- </div>
-
- {isQuerying ? (
- <div className="absolute inset-0 bg-sidebar/40 backdrop-blur-sm z-10 flex flex-col items-center justify-center">
- <Loader2 className="animate-spin text-primary mb-2" size={32} />
- <p className="text-sm text-foreground/80">{t('olap.aggregating')}</p>
- </div>
- ) : null}
-
- {error && !errorDismissed && (
- <div className="bg-red-950/30 border border-red-900/50 rounded-md p-4 mt-2 flex items-start justify-between gap-2">
- <p className="text-sm text-destructive font-medium">{error}</p>
- <button
-   type="button"
-   onClick={() => setErrorDismissed(true)}
-   className="shrink-0 p-0.5 rounded text-destructive/60 hover:text-destructive transition-colors"
-   aria-label={t('olapPage.msg064e0768')}
- >
-   <X className="h-4 w-4" />
- </button>
- </div>
- )}
-
- {queryResult && !error && (
- <ChartSwitcher
- viewType={chartViewType}
- onViewChange={setChartViewType}
- headers={queryResult.headers}
- data={queryResult.data}
- tableComponent={
- <div className="border border-border rounded-md overflow-hidden bg-card">
- <DataTable columns={tableColumns} data={tableData} />
- </div>
- }
- />
- )}
-
- {!queryResult && !error && !isQuerying && (
- <div className="h-32 flex items-center justify-center text-muted-foreground text-sm italic">
- {t('olap.emptyHint')}
- </div>
- )}
- </div>
- </div>
-
- <DragOverlay>
- {activeItem ? (
- <div className="opacity-90 scale-105 pointer-events-none">
- <DraggableItem item={activeItem.item} type={activeItem.type} />
- </div>
- ) : null}
- </DragOverlay>
-
- </DndContext>
- </div>
- </div>
- );
+        {/* 드래그 오버레이 */}
+        <DragOverlay>
+          {activeItem ? (
+            <div className="opacity-90 scale-105 pointer-events-none">
+              <DraggableItem item={activeItem.item} type={activeItem.type} />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
 }

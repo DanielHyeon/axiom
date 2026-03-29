@@ -2,6 +2,7 @@
 @import "./styles/tokens.css";
 
 @theme {
+  /* ── 기본 색상 토큰 (Tailwind v4 CSS-first 패턴) ── */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
   --color-card: hsl(var(--card));
@@ -22,14 +23,53 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
+
+  /* ── 사이드바 토큰 ── */
   --color-sidebar: hsl(var(--sidebar));
   --color-sidebar-foreground: hsl(var(--sidebar-foreground));
   --color-sidebar-border: hsl(var(--sidebar-border));
   --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  /* ── 텍스트 시맨틱 토큰 (용도별로 쓰는 글자 색상) ── */
+  --color-text-primary: hsl(var(--text-primary));
+  --color-text-secondary: hsl(var(--text-secondary));
+  --color-text-tertiary: hsl(var(--text-tertiary));
+  --color-text-placeholder: hsl(var(--text-placeholder));
+  --color-text-on-dark: hsl(var(--text-on-dark));
+
+  /* ── 배경 시맨틱 토큰 (용도별로 쓰는 배경 색상) ── */
+  --color-bg: hsl(var(--bg));
+  --color-bg-surface: hsl(var(--bg-surface));
+  --color-bg-card: hsl(var(--bg-card));
+  --color-bg-sidebar: hsl(var(--bg-sidebar));
+
+  /* ── 포인트 컬러 (고정값, 테마 무관 강조색) ── */
+  --color-accent-blue: hsl(var(--accent-blue));
+  --color-accent-green: hsl(var(--accent-green));
+  --color-accent-red: hsl(var(--accent-red));
+
+  /* ── 상태 색상 (배지/배너/알림에 쓰는 연한 배경 + 진한 텍스트) ── */
+  --color-status-success: hsl(var(--status-success));
+  --color-status-success-foreground: hsl(var(--status-success-foreground));
+  --color-status-warning: hsl(var(--status-warning));
+  --color-status-warning-foreground: hsl(var(--status-warning-foreground));
+  --color-status-error: hsl(var(--status-error));
+  --color-status-error-foreground: hsl(var(--status-error-foreground));
+  --color-status-info: hsl(var(--status-info));
+  --color-status-info-foreground: hsl(var(--status-info-foreground));
+
+  /* ── 유틸리티 ── */
+  --color-black: hsl(var(--black));
+  --color-white: hsl(var(--white));
   --radius-default: var(--radius);
 
-  /* Phase 5: 폰트 패밀리 토큰 — font-heading, font-mono 매핑 */
+  /* ── 폰트 패밀리 토큰 (.pen 디자인 기준: Sora/Geist/JetBrains Mono/IBM Plex Mono) ── */
   --font-heading: 'Sora', 'Geist', system-ui, sans-serif;
+  --font-secondary: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
 }
 

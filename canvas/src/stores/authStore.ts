@@ -18,7 +18,7 @@ interface AuthState {
 
 let refreshInFlight: Promise<string> | null = null;
 
-const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:8000').replace(/\/$/, '');
+const coreBaseUrl = (import.meta.env.VITE_CORE_URL || 'http://localhost:9002').replace(/\/$/, '');
 
 export const useAuthStore = create<AuthState>()(
     persist(

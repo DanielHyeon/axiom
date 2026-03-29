@@ -139,6 +139,7 @@ async def startup_event():
                     title="[Demo] 제조업 프로세스 분석",
                     status="IN_PROGRESS",
                     priority="HIGH",
+                    assignee="admin@local.axiom",
                 ))
                 await session.commit()
 

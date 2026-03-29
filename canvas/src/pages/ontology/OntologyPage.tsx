@@ -260,7 +260,8 @@ export function OntologyPage() {
 
 function CaseSelector({ onSelect }: { onSelect: (caseId: string) => void }) {
  const { t } = useTranslation();
- const { data: cases, isLoading } = useCases();
+ const { data: casesData, isLoading } = useCases();
+ const cases = casesData?.items;
 
  return (
  <div className="flex flex-col items-center justify-center h-full text-foreground/60 gap-4">

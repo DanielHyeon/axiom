@@ -1,370 +1,176 @@
 /**
- * EtlPipelinesPage -- ETL 파이프라인 관리.
+ * EtlPipelinesPage — ETL 파이프라인 관리 (디자인 리뉴얼)
  *
- * 파이프라인 목록, 생성, 실행, 실행 이력 조회를 제공한다.
- * 상태: DRAFT(회색) / READY(파랑) / DEPLOYED(초록) / ERROR(빨강)
- * 실행 상태: QUEUED(노랑) / RUNNING(파랑 스피너) / SUCCEEDED(초록) / FAILED(빨강)
+ * .pen 디자인 매칭:
+ * - 수직 레이아웃, 24px 상하 패딩, 48px 좌우, 16px 갭
+ * - 파이프라인 카드: 가로 fill, 흰 배경, 12px radius, 20px 패딩, 16px 갭
+ *   - 활성(선택) 파이프라인: 2px primary(#FF8400) border
+ *   - 아이콘: 40x40, 컬러 배경, 8px radius
+ *   - 정보 열: 이름 Geist 14px medium + 설명 Geist 11px
+ *   - 상태 배지: Success=초록, Failed=빨강
+ *
+ * 백엔드 연동: 기존 olapStudioApi.ts etlPipelines 재사용
  */
+
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { cn } from '@/lib/utils';
-import {
-  GitBranch,
-  Plus,
-  Play,
-  ChevronDown,
-  ChevronRight,
-  Loader2,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Play, X, Loader2 } from 'lucide-react';
 import { etlPipelines, type ETLPipeline, type ETLRun } from '../api/olapStudioApi';
 import { useTranslation } from 'react-i18next';
 
-// ─── 상태 배지 색상 매핑 ─────────────────────────────────
+// ── 상태별 스타일 매핑 (디자인 기준: Success=초록, Failed=빨강) ──
 
-/** 파이프라인 상태에 따른 배지 스타일 */
-const PIPELINE_STATUS_STYLE: Record<string, string> = {
-  DRAFT: 'bg-gray-100 text-gray-500',
-  READY: 'bg-blue-50 text-blue-600',
-  DEPLOYED: 'bg-green-50 text-green-600',
-  ERROR: 'bg-red-50 text-red-500',
-};
+interface StatusStyle {
+  /** 아이콘 배경색 */
+  iconBg: string;
+  /** 아이콘 색상 */
+  iconColor: string;
+  /** 배지 배경색 */
+  badgeBg: string;
+  /** 배지 텍스트색 */
+  badgeColor: string;
+  /** 표시 텍스트 */
+  label: string;
+  /** 아이콘 컴포넌트 */
+  Icon: React.ElementType;
+}
 
-/** 실행 상태에 따른 배지 스타일 */
-const RUN_STATUS_STYLE: Record<string, string> = {
-  QUEUED: 'bg-yellow-50 text-yellow-600',
-  RUNNING: 'bg-blue-50 text-blue-600',
-  SUCCEEDED: 'bg-green-50 text-green-600',
-  FAILED: 'bg-red-50 text-red-500',
-};
-
-// ─── 컴포넌트 ─────────────────────────────────────────────
+/** 파이프라인 status → 표시 스타일 */
+function getStatusStyle(status: string): StatusStyle {
+  const s = status.toUpperCase();
+  if (s === 'DEPLOYED' || s === 'READY' || s === 'SUCCEEDED') {
+    // 성공 — 다크모드 대응 CSS 변수 사용
+    return {
+      iconBg: 'hsl(var(--status-success))',
+      iconColor: 'hsl(var(--status-success-foreground))',
+      badgeBg: 'hsl(var(--status-success))',
+      badgeColor: 'hsl(var(--status-success-foreground))',
+      label: 'Success',
+      Icon: Play,
+    };
+  }
+  if (s === 'ERROR' || s === 'FAILED') {
+    // 에러 — 다크모드 대응 CSS 변수 사용
+    return {
+      iconBg: 'hsl(var(--status-error))',
+      iconColor: 'hsl(var(--status-error-foreground))',
+      badgeBg: 'hsl(var(--status-error))',
+      badgeColor: 'hsl(var(--status-error-foreground))',
+      label: 'Failed',
+      Icon: X,
+    };
+  }
+  // 기본(DRAFT, RUNNING 등) — 다크모드 대응 CSS 변수 사용
+  return {
+    iconBg: 'hsl(var(--bg-surface))',
+    iconColor: 'hsl(var(--text-secondary))',
+    badgeBg: 'hsl(var(--bg-surface))',
+    badgeColor: 'hsl(var(--text-secondary))',
+    label: status,
+    Icon: Play,
+  };
+}
 
 export function EtlPipelinesPage() {
   const { t } = useTranslation();
   const qc = useQueryClient();
-  const [showForm, setShowForm] = useState(false);
-  const [formName, setFormName] = useState('');
-  const [formDesc, setFormDesc] = useState('');
-  const [formType, setFormType] = useState('FULL');
-  // 행 확장 상태 — 실행 이력을 볼 파이프라인 ID
-  const [expandedId, setExpandedId] = useState<string | null>(null);
 
-  // 목록 조회
+  // 선택된 (활성) 파이프라인 ID
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // 파이프라인 목록 조회
   const { data: pipelines = [], isLoading } = useQuery({
     queryKey: ['olap', 'etl-pipelines'],
     queryFn: etlPipelines.list,
   });
 
-  // 생성
-  const createMut = useMutation({
-    mutationFn: () =>
-      etlPipelines.create({
-        name: formName,
-        description: formDesc,
-        pipeline_type: formType,
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['olap', 'etl-pipelines'] });
-      setShowForm(false);
-      setFormName('');
-      setFormDesc('');
-    },
-  });
-
   // 수동 실행
   const runMut = useMutation({
     mutationFn: etlPipelines.run,
-    onSuccess: (_data, pipelineId) => {
-      // 실행 이력 갱신 + 확장 열기
-      qc.invalidateQueries({ queryKey: ['olap', 'etl-runs', pipelineId] });
-      setExpandedId(pipelineId);
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['olap', 'etl-pipelines'] });
     },
   });
 
-  // 실행 이력 조회 — 확장된 파이프라인에 대해서만
-  const { data: runs = [] } = useQuery({
-    queryKey: ['olap', 'etl-runs', expandedId],
-    queryFn: () => etlPipelines.listRuns(expandedId!),
-    enabled: !!expandedId,
-  });
-
-  /** 행 토글 — 동일 ID면 접기, 다른 ID면 열기 */
-  const handleToggleExpand = (id: string) => {
-    setExpandedId((prev) => (prev === id ? null : id));
-  };
-
   return (
-    <div className="flex flex-col h-full">
-      {/* 헤더 */}
-      <div className="flex items-center justify-between px-6 h-12 border-b border-border bg-muted/50 shrink-0">
-        <div className="flex items-center gap-2">
-          <GitBranch className="h-4 w-4 text-purple-500" />
-          <h1 className="text-[14px] font-semibold font-heading">
-            {t('olapStudioExt.etlPipelines')}
-          </h1>
-          <span className="text-[11px] text-foreground/40 font-mono">
-            {t('olapStudioF.pipelineListCount', { count: pipelines.length })}
-          </span>
-        </div>
-        <Button size="sm" onClick={() => setShowForm(!showForm)}>
-          <Plus className="h-3 w-3 mr-1" /> {t('olapStudioExt.add')}
-        </Button>
-      </div>
-
-      {/* 생성 폼 */}
-      {showForm && (
-        <div className="px-6 py-4 bg-purple-50/30 border-b border-border space-y-3">
-          <div className="grid grid-cols-3 gap-3">
-            <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('olapStudioExt.name')}</Label>
-              <Input
-                value={formName}
-                onChange={(e) => setFormName(e.target.value)}
-                placeholder={t('olapStudioExt.pipelineName')}
-                className="text-[12px] font-mono"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('olapStudioExt.type')}</Label>
-              <select
-                value={formType}
-                onChange={(e) => setFormType(e.target.value)}
-                className="w-full rounded border border-border bg-card px-2 py-1.5 text-[12px] font-mono"
-              >
-                <option value="FULL">{t('olapStudioExt.fullLoad')}</option>
-                <option value="INCREMENTAL">{t('olapStudioExt.incrementalLoad')}</option>
-                <option value="SNAPSHOT">{t('olapStudioExt.snapshot')}</option>
-              </select>
-            </div>
-            <div className="space-y-1">
-              <Label className="text-[11px] font-mono">{t('olapStudioExt.description')}</Label>
-              <Input
-                value={formDesc}
-                onChange={(e) => setFormDesc(e.target.value)}
-                placeholder={t('olapStudioExt.descriptionOpt')}
-                className="text-[12px] font-mono"
-              />
-            </div>
-          </div>
-          <div className="flex justify-end gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowForm(false)}
-            >
-              {t('olapStudioExt.cancel')}
-            </Button>
-            <Button
-              size="sm"
-              onClick={() => createMut.mutate()}
-              disabled={!formName.trim()}
-            >
-              {createMut.isPending ? (
-                <Loader2 className="h-3 w-3 animate-spin" />
-              ) : (
-                '생성'
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {/* 파이프라인 목록 */}
-      <div className="flex-1 overflow-y-auto p-6">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* 본문 — 24px 상하, 48px 좌우, 16px 갭 */}
+      <div className="flex flex-col flex-1 min-h-0 gap-4 px-12 py-6 overflow-y-auto">
+        {/* 로딩 상태 */}
         {isLoading && (
-          <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-5 w-5 animate-spin text-foreground/30" />
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="h-5 w-5 animate-spin text-text-placeholder" />
           </div>
         )}
 
+        {/* 빈 상태 */}
         {!isLoading && pipelines.length === 0 && (
-          <div className="text-center py-12">
-            <GitBranch className="h-8 w-8 text-foreground/15 mx-auto mb-3" />
-            <p className="text-[12px] text-foreground/40 font-mono">
-              {t('olapStudioExt.noPipelines')}
+          <div className="flex flex-col items-center justify-center py-16 gap-2">
+            <p className="text-sm text-text-placeholder">
+              {t('olapStudioExt.noPipelines', '등록된 파이프라인이 없습니다.')}
             </p>
           </div>
         )}
 
-        <div className="space-y-2">
-          {pipelines.map((pl) => (
-            <PipelineRow
+        {/* 파이프라인 카드 목록 */}
+        {pipelines.map((pl) => {
+          const isActive = activeId === pl.id;
+          const style = getStatusStyle(pl.status);
+          const IconComp = style.Icon;
+
+          return (
+            <button
+              type="button"
               key={pl.id}
-              pipeline={pl}
-              isExpanded={expandedId === pl.id}
-              onToggle={() => handleToggleExpand(pl.id)}
-              onRun={() => runMut.mutate(pl.id)}
-              isRunning={runMut.isPending}
-              runs={expandedId === pl.id ? runs : []}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── 파이프라인 행 ────────────────────────────────────────
-
-interface PipelineRowProps {
-  pipeline: ETLPipeline;
-  isExpanded: boolean;
-  onToggle: () => void;
-  onRun: () => void;
-  isRunning: boolean;
-  runs: ETLRun[];
-}
-
-function PipelineRow({
-  pipeline,
-  isExpanded,
-  onToggle,
-  onRun,
-  isRunning,
-  runs,
-}: PipelineRowProps) {
-  const { t } = useTranslation();
-  const statusStyle =
-    PIPELINE_STATUS_STYLE[pipeline.status] ?? 'bg-gray-100 text-gray-500';
-
-  return (
-    <div className="border border-border rounded-lg bg-card">
-      {/* 메인 행 */}
-      <div className="flex items-center gap-3 px-4 py-3">
-        {/* 확장 토글 */}
-        <button
-          onClick={onToggle}
-          className="text-foreground/30 hover:text-foreground/60 transition-colors"
-          aria-label={isExpanded ? '실행 이력 접기' : '실행 이력 펼치기'}
-        >
-          {isExpanded ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
-          )}
-        </button>
-
-        {/* 파이프라인 정보 */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-semibold font-heading truncate">
-              {pipeline.name}
-            </span>
-            <span
-              className={cn(
-                'text-[9px] px-1.5 py-0.5 rounded font-mono shrink-0',
-                statusStyle,
-              )}
+              onClick={() => setActiveId(isActive ? null : pl.id)}
+              className={[
+                'flex items-center gap-4 w-full rounded-xl bg-white p-5 text-left transition-all',
+                isActive
+                  ? 'border-2 border-primary'
+                  : 'border border-border hover:border-muted-foreground',
+              ].join(' ')}
             >
-              {pipeline.status}
-            </span>
-          </div>
-          {pipeline.description && (
-            <p className="text-[10px] text-foreground/40 font-mono truncate mt-0.5">
-              {pipeline.description}
-            </p>
-          )}
-        </div>
+              {/* 아이콘 — 40x40, 컬러 배경, 8px radius */}
+              <div
+                className="flex items-center justify-center w-10 h-10 rounded-lg shrink-0"
+                style={{ backgroundColor: style.iconBg }}
+              >
+                <IconComp
+                  className="h-4 w-4"
+                  style={{ color: style.iconColor }}
+                />
+              </div>
 
-        {/* 유형 */}
-        <span className="text-[10px] text-foreground/40 font-mono shrink-0">
-          {pipeline.pipeline_type}
-        </span>
+              {/* 정보 열 — 이름 + 설명 */}
+              <div className="flex flex-col gap-0.5 flex-1 min-w-0">
+                {/* 이름 — Geist 14px medium */}
+                <span className="text-sm font-medium text-foreground truncate">
+                  {pl.name}
+                </span>
+                {/* 설명 — Geist 11px secondary */}
+                {pl.description && (
+                  <span className="text-[11px] text-text-secondary truncate">
+                    {pl.description}
+                  </span>
+                )}
+              </div>
 
-        {/* 실행 버튼 */}
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={(e) => {
-            e.stopPropagation();
-            onRun();
-          }}
-          disabled={isRunning}
-          className="shrink-0"
-        >
-          {isRunning ? (
-            <Loader2 className="h-3 w-3 animate-spin" />
-          ) : (
-            <>
-              <Play className="h-3 w-3 mr-1" /> {t('olapStudioExt.run')}
-            </>
-          )}
-        </Button>
+              {/* 상태 배지 */}
+              <div
+                className="shrink-0 rounded px-2.5 py-1"
+                style={{ backgroundColor: style.badgeBg }}
+              >
+                <span
+                  className="text-[10px] font-semibold"
+                  style={{ color: style.badgeColor }}
+                >
+                  {style.label}
+                </span>
+              </div>
+            </button>
+          );
+        })}
       </div>
-
-      {/* 확장: 실행 이력 */}
-      {isExpanded && (
-        <div className="border-t border-border px-4 py-3 bg-muted/50/50">
-          {runs.length === 0 ? (
-            <p className="text-[10px] text-foreground/30 font-mono">
-              {t('olapStudioExt.noRunHistory')}
-            </p>
-          ) : (
-            <div className="space-y-1.5">
-              <p className="text-[10px] text-foreground/40 font-mono font-medium mb-2">
-                {t('olapStudioExt.recentRunHistory')}
-              </p>
-              {runs.map((run) => (
-                <RunItem key={run.id} run={run} />
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
-// ─── 실행 이력 아이템 ─────────────────────────────────────
-
-function RunItem({ run }: { run: ETLRun }) {
-  const statusStyle =
-    RUN_STATUS_STYLE[run.run_status] ?? 'bg-gray-100 text-gray-500';
-
-  return (
-    <div className="flex items-center gap-3 text-[10px] font-mono">
-      {/* 상태 배지 */}
-      <span
-        className={cn(
-          'px-1.5 py-0.5 rounded shrink-0 inline-flex items-center gap-1',
-          statusStyle,
-        )}
-      >
-        {run.run_status === 'RUNNING' && (
-          <Loader2 className="h-2.5 w-2.5 animate-spin" />
-        )}
-        {run.run_status}
-      </span>
-
-      {/* 트리거 유형 */}
-      <span className="text-foreground/30">{run.trigger_type}</span>
-
-      {/* 행 읽기/쓰기 */}
-      <span className="text-foreground/40">
-        {run.rows_read.toLocaleString()}R / {run.rows_written.toLocaleString()}W
-      </span>
-
-      {/* 시작 시각 */}
-      {run.started_at && (
-        <span className="text-foreground/30 ml-auto">
-          {new Date(run.started_at).toLocaleString('ko-KR', {
-            month: '2-digit',
-            day: '2-digit',
-            hour: '2-digit',
-            minute: '2-digit',
-          })}
-        </span>
-      )}
-
-      {/* 에러 메시지 — 실패 시에만 */}
-      {run.error_message && (
-        <span className="text-red-400 truncate max-w-[200px]" title={run.error_message}>
-          {run.error_message}
-        </span>
-      )}
     </div>
   );
 }

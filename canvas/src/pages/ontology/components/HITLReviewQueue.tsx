@@ -138,7 +138,7 @@ export function HITLReviewQueue({
  </div>
  )}
 
- <div className="divide-y divide-[#E5E5E5]">
+ <div className="divide-y divide-border">
  {items.map((item) => {
  const isActioning = actioningId === item.id;
  const showComment = commentId === item.id;

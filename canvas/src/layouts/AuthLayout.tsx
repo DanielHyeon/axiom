@@ -1,12 +1,14 @@
 import { Outlet } from 'react-router-dom';
 
+/**
+ * 인증 레이아웃 — 로그인/회원가입 페이지를 감싸는 전체 화면 컨테이너
+ * 자식 페이지(LoginPage)가 split-panel 레이아웃을 직접 그리므로
+ * 여기서는 화면 전체를 채우는 래퍼만 제공한다.
+ */
 export const AuthLayout = () => {
- return (
- <div className="min-h-screen bg-card flex items-center justify-center text-primary-foreground px-4 sm:px-6">
- <main className="w-full max-w-sm sm:max-w-md p-4 sm:p-6 bg-muted rounded-lg shadow-xl">
- <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center">Axiom Canvas</h1>
- <Outlet />
- </main>
- </div>
- );
+  return (
+    <div className="min-h-screen w-full">
+      <Outlet />
+    </div>
+  );
 };

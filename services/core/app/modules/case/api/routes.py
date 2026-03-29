@@ -7,6 +7,7 @@ GET /api/v1/cases/activities — 최근 활동 (core_case_activity, tenant 또�
 GET /api/v1/cases/{case_id}/info — 개별 케이스 조회 (Vision case_financial 전용).
 POST /api/v1/cases/:caseId/documents/:docId/review — 문서 리뷰 영속 (core_document_review).
 """
+import re
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -21,12 +22,19 @@ from app.models.base_models import Case, CaseActivity, DocumentReview
 router = APIRouter(prefix="/cases", tags=["cases"])
 
 
+def _escape_like(value: str) -> str:
+    """SQL LIKE 와일드카드(%, _, \\) 이스케이프 — ILIKE 주입 방지."""
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
 class CaseItem(BaseModel):
     id: str
     title: str
     status: str
     priority: str
+    assignee: str | None = None
     createdAt: str
+    updatedAt: str | None = None
     dueDate: str | None = None
 
 
@@ -48,20 +56,28 @@ class ActivitiesResponse(BaseModel):
 @router.get("", response_model=CaseListResponse)
 async def list_cases(
     status: str | None = Query(None, description="필터: PENDING, IN_PROGRESS, COMPLETED, REJECTED"),
+    search: str | None = Query(None, description="제목 검색 (ILIKE)"),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """케이스 목록. tenant_id는 JWT 기준. core_case 테이블 조회."""
+    """케이스 목록. tenant_id는 JWT 기준. core_case 테이블 조회. search로 제목 필터링."""
     tenant_id = current_user.get("tenant_id") or "default"
     count_q = select(func.count()).select_from(Case).where(Case.tenant_id == tenant_id)
     if status:
         count_q = count_q.where(Case.status == status)
+    if search:
+        # 와일드카드 이스케이프 적용하여 ILIKE 주입 방지
+        safe_search = _escape_like(search)
+        count_q = count_q.where(Case.title.ilike(f"%{safe_search}%"))
     total = (await db.execute(count_q)).scalar() or 0
     q = select(Case).where(Case.tenant_id == tenant_id)
     if status:
         q = q.where(Case.status == status)
+    if search:
+        safe_search = _escape_like(search)
+        q = q.where(Case.title.ilike(f"%{safe_search}%"))
     q = q.order_by(Case.created_at.desc()).offset(offset).limit(limit)
     rows = (await db.execute(q)).scalars().all()
     items = [
@@ -70,7 +86,9 @@ async def list_cases(
             title=r.title,
             status=r.status,
             priority=r.priority,
+            assignee=r.assignee,
             createdAt=r.created_at.isoformat() if r.created_at else "",
+            updatedAt=r.updated_at.isoformat() if r.updated_at else None,
             dueDate=r.due_date.isoformat() if r.due_date else None,
         )
         for r in rows
@@ -193,7 +211,8 @@ async def list_case_activities(
     current_user: dict = Depends(get_current_user),
     db: AsyncSession = Depends(get_session),
 ):
-    """최근 활동 타임라인. core_case_activity 조회."""
+    """최근 활동 타임라인. core_case_activity 조회.
+    NOTE: /{case_id} 보다 먼저 선언해야 "activities"가 case_id로 매칭되지 않는다."""
     tenant_id = current_user.get("tenant_id") or "default"
     q = select(CaseActivity).where(CaseActivity.tenant_id == tenant_id)
     if case_id:
@@ -209,6 +228,43 @@ async def list_case_activities(
         for r in rows
     ]
     return ActivitiesResponse(items=items)
+
+
+class CaseDetailResponse(BaseModel):
+    """케이스 상세 — 모든 필드 포함."""
+    id: str
+    title: str
+    status: str
+    priority: str
+    assignee: str | None = None
+    createdAt: str
+    updatedAt: str | None = None
+    dueDate: str | None = None
+
+
+@router.get("/{case_id}", response_model=CaseDetailResponse)
+async def get_case_detail(
+    case_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """케이스 상세 조회 — Canvas CaseDetailPage 전용."""
+    tenant_id = current_user.get("tenant_id") or "default"
+    row = (await db.execute(
+        select(Case).where(Case.id == case_id, Case.tenant_id == tenant_id)
+    )).scalar_one_or_none()
+    if not row:
+        raise HTTPException(status_code=404, detail="Case not found")
+    return CaseDetailResponse(
+        id=row.id,
+        title=row.title,
+        status=row.status,
+        priority=row.priority,
+        assignee=row.assignee,
+        createdAt=row.created_at.isoformat() if row.created_at else "",
+        updatedAt=row.updated_at.isoformat() if row.updated_at else None,
+        dueDate=row.due_date.isoformat() if row.due_date else None,
+    )
 
 
 # --- 문서 리뷰 (Phase D: Canvas documentReviewApi 계약) ---

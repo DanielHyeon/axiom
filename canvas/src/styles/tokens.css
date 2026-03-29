@@ -1,68 +1,161 @@
 @layer base {
   :root {
-    /* ── Design System: Axiom Light Theme ── */
-    --background: 0 0% 98%;           /* #FAFAFA */
-    --foreground: 0 0% 7%;            /* #111111 */
-    --card: 0 0% 100%;                /* #FFFFFF */
-    --card-foreground: 0 0% 7%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 7%;
-    --muted: 0 0% 96%;                /* #F5F5F5 — bg-surface */
-    --muted-foreground: 0 0% 37%;     /* #5E5E5E — text-secondary */
-    --accent: 0 0% 96%;
-    --accent-foreground: 0 0% 7%;
-    --primary: 31 100% 50%;           /* #FF8400 — orange primary */
-    --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 91%;            /* #E7E8E5 */
-    --secondary-foreground: 0 0% 7%;
-    --destructive: 0 72% 51%;         /* #DC2626 — accent-red */
-    --success: 142 71% 45%;           /* #22C55E — accent-green */
-    --warning: 31 100% 50%;
-    --border: 0 0% 90%;               /* #E5E5E5 */
-    --input: 0 0% 90%;                /* #E5E5E5 */
-    --ring: 0 0% 40%;
+    /* ── 디자인 시스템: Axiom 라이트 테마 (.pen 디자인 파일 기준) ── */
+
+    /* 기본 배경/전경 색상 */
+    --background: 72 10% 95%;           /* #F2F3F0 — .pen Light */
+    --foreground: 0 0% 7%;              /* #111111 */
+
+    /* 카드 (흰색 표면) */
+    --card: 0 0% 100%;                  /* #FFFFFF */
+    --card-foreground: 0 0% 7%;         /* #111111 */
+
+    /* 팝오버 */
+    --popover: 0 0% 100%;              /* #FFFFFF */
+    --popover-foreground: 0 0% 7%;     /* #111111 */
+
+    /* 음소거(Muted) — 보조 배경색 */
+    --muted: 72 10% 95%;               /* #F2F3F0 */
+    --muted-foreground: 0 0% 40%;      /* #666666 — .pen 디자인 값 */
+
+    /* 강조(Accent) — 호버/선택 배경 */
+    --accent: 72 10% 95%;              /* #F2F3F0 */
+    --accent-foreground: 0 0% 7%;      /* #111111 */
+
+    /* 주색상 (오렌지) */
+    --primary: 31 100% 50%;            /* #FF8400 */
+    --primary-foreground: 0 0% 7%;     /* #111111 */
+
+    /* 보조색 */
+    --secondary: 72 4% 90%;            /* #E7E8E5 */
+    --secondary-foreground: 0 0% 7%;   /* #111111 */
+
+    /* 위험/성공/경고 */
+    --destructive: 12 82% 47%;         /* #D93C15 — .pen 디자인 값 */
+    --success: 142 71% 45%;            /* #22C55E */
+    --warning: 31 100% 50%;            /* #FF8400 */
+
+    /* 테두리/입력/포커스 링 */
+    --border: 72 2% 79%;               /* #CBCCC9 — .pen 디자인 값 */
+    --input: 72 2% 79%;                /* #CBCCC9 — .pen 디자인 값 */
+    --ring: 0 0% 40%;                  /* #666666 */
+
+    /* 기본 설정값 */
     --radius: 0.25rem;
+
+    /* ── 폰트 패밀리 (.pen 디자인 기준) ── */
     --font-sans: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
     --font-heading: 'Sora', 'Geist', system-ui, sans-serif;
+    --font-secondary: 'Geist', 'Inter', system-ui, -apple-system, sans-serif;
     --font-mono: 'JetBrains Mono', 'IBM Plex Mono', ui-monospace, monospace;
-    /* ── Sidebar: Pure black per design ── */
-    --sidebar: 0 0% 0%;               /* #000000 */
-    --sidebar-foreground: 0 0% 70%;   /* #B3B3B3 — icons on black */
-    --sidebar-border: 0 0% 10%;
-    --sidebar-accent: 0 0% 12%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-primary: 0 0% 0%;
-    --sidebar-primary-foreground: 0 0% 98%;
+
+    /* ── 텍스트 색상 토큰 (디자인 파일에서 가져온 값) ── */
+    --text-primary: 0 0% 0%;           /* #000000 — 가장 진한 본문 텍스트 */
+    --text-secondary: 0 0% 37%;        /* #5E5E5E — 보조 텍스트 */
+    --text-tertiary: 0 0% 40%;         /* #666666 — 3순위 텍스트 */
+    --text-placeholder: 0 0% 60%;      /* #999999 — 입력 필드 플레이스홀더 */
+    --text-on-dark: 0 0% 98%;          /* #FAFAFA — 어두운 배경 위 텍스트 */
+
+    /* ── 배경 토큰 (용도별 시맨틱 이름) ── */
+    --bg: 0 0% 98%;                    /* #FAFAFA — 최상위 배경 */
+    --bg-surface: 0 0% 96%;            /* #F5F5F5 — 표면(카드 아래) 배경 */
+    --bg-card: 0 0% 100%;             /* #FFFFFF — 카드 배경 */
+    --bg-sidebar: 0 0% 0%;            /* #000000 — 사이드바 배경 */
+
+    /* ── 포인트 컬러 (고정, 테마 무관) ── */
+    --accent-blue: 217 91% 60%;        /* #3B82F6 — 정보/링크 파란색 */
+    --accent-green: 142 71% 45%;       /* #22C55E — 성공 초록색 */
+    --accent-red: 0 72% 51%;           /* #DC2626 — 오류 빨간색 */
+
+    /* ── 상태 배경색 (배지/배너에 사용하는 연한 톤) ── */
+    --status-success: 130 14% 88%;              /* #DFE6E1 */
+    --status-success-foreground: 140 100% 15%;  /* #004D1A */
+    --status-warning: 38 28% 85%;               /* #E9E3D8 */
+    --status-warning-foreground: 31 100% 25%;   /* #804200 */
+    --status-error: 12 16% 88%;                 /* #E5DCDA */
+    --status-error-foreground: 12 100% 27%;     /* #8C1C00 */
+    --status-info: 240 14% 88%;                 /* #DFDFE6 */
+    --status-info-foreground: 240 100% 20%;     /* #000066 */
+
+    /* ── 사이드바 (.pen 디자인 파일 기준) ── */
+    --sidebar: 72 4% 90%;              /* #E7E8E5 — .pen Light sidebar */
+    --sidebar-foreground: 0 0% 40%;    /* #666666 */
+    --sidebar-border: 72 2% 79%;       /* #CBCCC9 */
+    --sidebar-accent: 72 2% 79%;       /* #CBCCC9 */
+    --sidebar-accent-foreground: 240 6% 10%;   /* #18181b */
+    --sidebar-primary: 240 6% 10%;     /* #18181b */
+    --sidebar-primary-foreground: 0 0% 98%;    /* #fafafa */
+    --sidebar-ring: 240 4% 46%;        /* #71717a */
+
+    /* ── 유틸리티 색상 ── */
+    --black: 0 0% 0%;                  /* #000000 */
+    --white: 0 0% 100%;               /* #FFFFFF */
   }
 
   .dark {
-    --background: 0 0% 7%;
-    --foreground: 0 0% 100%;
-    --card: 0 0% 10%;
-    --card-foreground: 0 0% 100%;
-    --popover: 0 0% 10%;
-    --popover-foreground: 0 0% 100%;
-    --muted: 0 0% 18%;
-    --muted-foreground: 80 2% 72%;
-    --accent: 0 0% 7%;
-    --accent-foreground: 80 11% 95%;
-    --primary: 31 100% 50%;
-    --primary-foreground: 0 0% 7%;
-    --secondary: 0 0% 18%;
-    --secondary-foreground: 0 0% 100%;
-    --destructive: 12 100% 60%;
-    --success: 142 71% 45%;
-    --warning: 31 100% 50%;
-    --border: 0 0% 18%;
-    --input: 0 0% 18%;
-    --ring: 0 0% 40%;
-    --sidebar: 240 6% 10%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-border: 0 0% 16%;
-    --sidebar-accent: 240 7% 17%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-primary: 240 6% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
+    /* ── 디자인 시스템: Axiom 다크 테마 (.pen 디자인 파일 기준) ── */
+
+    --background: 0 0% 7%;             /* #111111 */
+    --foreground: 0 0% 100%;           /* #FFFFFF */
+
+    --card: 0 0% 10%;                  /* #1A1A1A */
+    --card-foreground: 0 0% 100%;      /* #FFFFFF */
+
+    --popover: 0 0% 10%;              /* #1A1A1A */
+    --popover-foreground: 0 0% 100%;  /* #FFFFFF */
+
+    --muted: 0 0% 18%;                /* #2E2E2E */
+    --muted-foreground: 72 1% 72%;    /* #B8B9B6 — .pen Dark 디자인 값 */
+
+    --accent: 0 0% 7%;                /* #111111 */
+    --accent-foreground: 72 10% 95%;  /* #F2F3F0 */
+
+    --primary: 31 100% 50%;           /* #FF8400 */
+    --primary-foreground: 0 0% 7%;    /* #111111 */
+
+    --secondary: 0 0% 18%;            /* #2E2E2E */
+    --secondary-foreground: 0 0% 100%; /* #FFFFFF */
+
+    --destructive: 12 100% 60%;       /* #FF5C33 — .pen Dark */
+    --success: 142 71% 45%;           /* #22C55E */
+    --warning: 31 100% 50%;           /* #FF8400 */
+
+    --border: 0 0% 18%;               /* #2E2E2E */
+    --input: 0 0% 18%;                /* #2E2E2E */
+    --ring: 0 0% 40%;                 /* #666666 */
+
+    /* 텍스트 — 다크 모드에서는 muted-foreground 참조 */
+    --text-primary: 0 0% 100%;        /* #FFFFFF */
+    --text-secondary: 0 0% 70%;       /* 밝은 회색 */
+    --text-tertiary: 0 0% 40%;        /* var(--muted-foreground) 대응 */
+    --text-placeholder: 0 0% 45%;     /* 플레이스홀더 (다크) */
+    --text-on-dark: 0 0% 98%;         /* #FAFAFA */
+
+    /* 배경 — 다크 모드 표면 */
+    --bg: 0 0% 7%;                    /* #111111 */
+    --bg-surface: 0 0% 10%;           /* #1A1A1A */
+    --bg-card: 0 0% 10%;              /* #1A1A1A */
+    --bg-sidebar: 0 0% 0%;            /* #000000 */
+
+    /* 상태 배경색 — 다크 모드 */
+    --status-success: 130 14% 15%;              /* #222924 */
+    --status-success-foreground: 140 100% 85%;  /* #B6FFCE */
+    --status-warning: 25 47% 11%;               /* #291C0F */
+    --status-warning-foreground: 31 100% 50%;   /* #FF8400 */
+    --status-error: 12 50% 9%;                  /* #24100B */
+    --status-error-foreground: 12 100% 60%;     /* #FF5C33 */
+    --status-info: 240 14% 15%;                 /* #222229 */
+    --status-info-foreground: 240 100% 85%;     /* #B2B2FF */
+
+    /* 사이드바 — 다크 모드 (.pen 기준) */
+    --sidebar: 240 6% 10%;            /* #18181b */
+    --sidebar-foreground: 0 0% 98%;   /* #fafafa */
+    --sidebar-border: 0 0% 20%;         /* ~#333 — #ffffff1a 위 #18181b 배경에서의 합성색 */
+    --sidebar-accent: 240 5% 17%;     /* #2a2a30 */
+    --sidebar-accent-foreground: 0 0% 98%; /* #fafafa */
+    --sidebar-primary: 240 6% 10%;    /* #18181b */
+    --sidebar-primary-foreground: 0 0% 98%; /* #fafafa */
+    --sidebar-ring: 240 4% 46%;       /* #71717a */
   }
 
   a:focus-visible,
