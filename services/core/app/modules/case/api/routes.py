@@ -267,6 +267,75 @@ async def get_case_detail(
     )
 
 
+# --- 문서 CRUD (Canvas documentApi 계약) ---
+
+
+class DocumentItem(BaseModel):
+    """문서 목록/상세 응답 모델."""
+    id: str
+    name: str
+    type: str = "document"
+    status: str = "draft"
+    size: str | None = None
+    createdAt: str | None = None
+    updatedAt: str | None = None
+
+
+class DocumentListResponse(BaseModel):
+    items: list[DocumentItem]
+    total: int
+
+
+@router.get("/{case_id}/documents", response_model=DocumentListResponse)
+async def list_case_documents(
+    case_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """케이스에 연결된 문서 목록 조회. document_review 테이블에서 유니크 document_id를 반환."""
+    result = await db.execute(
+        select(DocumentReview)
+        .where(DocumentReview.case_id == case_id)
+        .order_by(DocumentReview.created_at.desc())
+    )
+    reviews = result.scalars().all()
+    items = [
+        DocumentItem(
+            id=r.document_id,
+            name=f"Document {r.document_id[:8]}",
+            status=r.status or "draft",
+            createdAt=r.created_at.isoformat() if r.created_at else None,
+        )
+        for r in reviews
+    ]
+    return DocumentListResponse(items=items, total=len(items))
+
+
+@router.get("/{case_id}/documents/{doc_id}")
+async def get_case_document(
+    case_id: str,
+    doc_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncSession = Depends(get_session),
+):
+    """문서 상세 조회."""
+    result = await db.execute(
+        select(DocumentReview).where(
+            DocumentReview.case_id == case_id,
+            DocumentReview.document_id == doc_id,
+        )
+    )
+    row = result.scalar_one_or_none()
+    if not row:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return DocumentItem(
+        id=row.document_id,
+        name=f"Document {row.document_id[:8]}",
+        status=row.status or "draft",
+        createdAt=row.created_at.isoformat() if row.created_at else None,
+    )
+
+
 # --- 문서 리뷰 (Phase D: Canvas documentReviewApi 계약) ---
 
 class DocumentReviewRequest(BaseModel):

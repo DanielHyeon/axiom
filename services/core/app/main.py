@@ -86,6 +86,9 @@ app.include_router(users_router, prefix="/api/v1", dependencies=[Depends(get_cur
 app.include_router(cases_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(process_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(watch_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
+# SSE stream은 query param JWT로 인증하므로 라우터 레벨 인증 면제
+from app.modules.watch.api.routes import stream_router as watch_stream_router
+app.include_router(watch_stream_router, prefix="/api/v1")
 app.include_router(agent_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(gateway_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])
 app.include_router(events_router, prefix="/api/v1", dependencies=[Depends(get_current_user)])

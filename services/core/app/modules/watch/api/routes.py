@@ -3,18 +3,23 @@ import json
 from collections import defaultdict
 from datetime import datetime, timezone
 
+import jwt
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import AsyncSessionLocal, get_session
 from app.core.middleware import get_current_tenant_id
 from app.models.base_models import WatchAlert
 from app.modules.watch.application.watch_service import WatchDomainError, WatchService
 
 router = APIRouter(prefix="/watches", tags=["watches"])
+
+# SSE stream은 Authorization 헤더를 보낼 수 없으므로 별도 라우터로 분리 (인증 면제)
+stream_router = APIRouter(prefix="/watches", tags=["watches-stream"])
 
 _stream_counts: dict[str, int] = defaultdict(int)
 _stream_lock = asyncio.Lock()
@@ -258,17 +263,28 @@ async def read_all_alerts(user_id: str | None = None, db: AsyncSession = Depends
         raise HTTPException(status_code=500, detail="Internal Server Error")
 
 
-@router.get("/stream")
+@stream_router.get("/stream")
 async def watch_stream(
     request: Request,
     token: str | None = None,
 ):
+    """SSE 스트림 — EventSource는 Authorization 헤더를 보낼 수 없으므로
+    query param으로 JWT를 받아 직접 디코딩한다."""
     if not token or not token.strip():
         raise HTTPException(
             status_code=401,
             detail={"code": "UNAUTHORIZED", "message": "token query param is required for SSE"},
         )
-    tenant_id = get_current_tenant_id()
+    # JWT 토큰에서 tenant_id 추출 (TenantMiddleware 우회)
+    try:
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=["HS256"])
+        tenant_id = payload.get("tenant_id")
+        if not tenant_id:
+            raise HTTPException(status_code=401, detail="tenant_id not in token")
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
     async with _stream_lock:
         if _stream_counts[tenant_id] >= _MAX_STREAMS_PER_TENANT:
             raise HTTPException(
