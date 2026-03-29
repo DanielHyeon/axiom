@@ -12,7 +12,7 @@
  * - 더블클릭 시 연결된 노드 강조
  */
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import NVL from '@neo4j-nvl/base';
 import type { Node as NvlNode, Relationship as NvlRelationship } from '@neo4j-nvl/base';
@@ -26,6 +26,7 @@ import { X, Table2, Key, ArrowRight } from 'lucide-react';
 import type { ERDTableInfo } from '@/shared/types/schema';
 
 // ─── 테이블 노드 컬러 팔레트 ─────────────────────────────────
+// 주의: schemaColorMap은 아래 getTableColor 내부에서 useMemo를 통해 관리
 const TABLE_COLORS = [
   '#E35A5C', // Rose red
   '#3B82F6', // Blue
@@ -39,21 +40,21 @@ const TABLE_COLORS = [
   '#6366F1', // Indigo
 ];
 
-/** 스키마 이름별 색상 매핑 캐시 */
-const schemaColorMap = new Map<string, string>();
-let nextColorIndex = 0;
-
 /**
- * 테이블의 스키마를 기준으로 일관된 색상을 반환한다.
- * 동일 스키마의 테이블은 같은 색상을 사용한다.
+ * 테이블 목록에서 스키마별 색상 매핑을 생성하는 순수 함수.
+ * useMemo에서 호출하여 컴포넌트 스코프에서 관리한다.
  */
-function getTableColor(table: ERDTableInfo): string {
-  const schemaKey = (table.schema || 'default').toLowerCase();
-  if (!schemaColorMap.has(schemaKey)) {
-    schemaColorMap.set(schemaKey, TABLE_COLORS[nextColorIndex % TABLE_COLORS.length]);
-    nextColorIndex++;
+function buildSchemaColorMap(tables: ERDTableInfo[]): Map<string, string> {
+  const map = new Map<string, string>();
+  let idx = 0;
+  for (const table of tables) {
+    const key = (table.schema || 'default').toLowerCase();
+    if (!map.has(key)) {
+      map.set(key, TABLE_COLORS[idx % TABLE_COLORS.length]);
+      idx++;
+    }
   }
-  return schemaColorMap.get(schemaKey)!;
+  return map;
 }
 
 // ─── FK 관계 추출 유틸 ───────────────────────────────────────
@@ -232,34 +233,68 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
   /** 레이아웃 완료 여부 */
   const [layoutDone, setLayoutDone] = useState(false);
 
-  // 엣지 데이터 계산 (테이블 변경 시)
-  const edgesData = extractEdges(tables);
+  // 스키마별 색상 매핑 (컴포넌트 스코프 — 모듈 싱글톤 방지)
+  const schemaColorMap = useMemo(() => buildSchemaColorMap(tables), [tables]);
+
+  // 엣지 데이터 계산 (테이블 변경 시 — useMemo로 중복 호출 방지)
+  const edgesData = useMemo(() => extractEdges(tables), [tables]);
 
   // 선택된 테이블 정보 조회
   const selectedTable = selectedNodeId
     ? tables.find((t) => t.name === selectedNodeId) ?? null
     : null;
 
+  // onNodeSelect 콜백을 ref로 안정화 — useEffect 의존성에서 제외하여
+  // 콜백 변경만으로 NVL 인스턴스가 재생성되는 것을 방지
+  const onNodeSelectRef = useRef(onNodeSelect);
+  useEffect(() => {
+    onNodeSelectRef.current = onNodeSelect;
+  }, [onNodeSelect]);
+
   // ─── NVL: tables가 변경될 때마다 인스턴스를 재생성 ────────────
-  // 초기화 시 데이터를 바로 전달하여 렌더링 보장
+  // React 19 StrictMode 대응: 이전 인스턴스의 잔여 DOM 자식을 정리 후 재생성
+  // ResizeObserver도 NVL 인스턴스와 같은 수명주기로 관리
 
   useEffect(() => {
     const container = containerRef.current;
-    if (!container) return;
-    if (container.clientWidth === 0 || container.clientHeight === 0) return;
-    if (tables.length === 0) return;
+    if (!container || tables.length === 0) return;
 
-    // 엣지 추출
-    const edges = extractEdges(tables);
+    // ── StrictMode 대응: 이전 NVL 인스턴스가 남긴 DOM 잔여물 제거 ──
+    // React 19 StrictMode는 개발 모드에서 effect를 두 번 실행한다.
+    // 첫 번째 destroy()가 컨테이너 내부 canvas를 제거하지만,
+    // NVL이 설정한 인라인 style/속성이 남아 두 번째 초기화에 영향을 줄 수 있다.
+    // 따라서 컨테이너 자식을 모두 제거하고 NVL이 추가한 속성을 초기화한다.
+    while (container.firstChild) {
+      container.removeChild(container.firstChild);
+    }
+    container.removeAttribute('instanceId');
+    container.removeAttribute('data-testid');
+    container.removeAttribute('role');
+    container.removeAttribute('aria-label');
+    container.removeAttribute('aria-describedby');
+    // NVL이 추가하는 인라인 style 초기화 (height, outline 등)
+    container.style.removeProperty('height');
+    container.style.removeProperty('outline');
 
-    // NVL 노드/엣지 생성
+    // ── 컨테이너 크기 확인 — 0이면 초기화 불가 ──
+    // requestAnimationFrame으로 레이아웃 완료 후 측정하여 정확성 보장
+    const rect = container.getBoundingClientRect();
+    if (rect.width === 0 || rect.height === 0) {
+      console.warn('[NVLSchemaGraph] 컨테이너 크기 0 — NVL 초기화 건너뜀', rect);
+      return;
+    }
+
+    // ── 취소 플래그 — StrictMode cleanup에서 비동기 콜백 무효화 ──
+    let cancelled = false;
+
+    // NVL 노드/엣지 생성 — edgesData/schemaColorMap은 useMemo로 안정화됨
     const nodes: NvlNode[] = tables.map((table) => ({
       id: table.name,
       caption: table.name,
-      color: getTableColor(table),
+      color: schemaColorMap.get((table.schema || 'default').toLowerCase()) || TABLE_COLORS[0],
       size: 25,
     }));
-    const relationships: NvlRelationship[] = edges.map((edge) => ({
+    const relationships: NvlRelationship[] = edgesData.map((edge) => ({
       id: edge.id,
       from: edge.from,
       to: edge.to,
@@ -269,23 +304,30 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       captionSize: 10,
     }));
 
-    // NVL 초기화 — KAIR 패턴: callbacks는 5번째 인자로 전달해야 동작함
-    setLayoutDone(false);
+    // NVL 초기화 — 생성자 시그니처: new NVL(frame, nodes, rels, options, callbacks)
+    // 참고: layoutDone은 cleanup 함수에서 false로 초기화됨 (effect 내 직접 setState 금지)
+
+    // NVL 옵션 — KAIR 프로젝트와 동일한 설정
+    // layoutOptions의 커스텀 속성(iterations, nodeRepulsion 등)은
+    // NvlOptions 타입에 정의되지 않지만, 내부 CoseBilkent 레이아웃 엔진이
+    // 실제로 소비한다. KAIR에서 검증된 값을 그대로 사용한다.
+    // NVL 옵션 — KAIR 프로젝트와 동일한 설정 (코드 리뷰 반영)
+    // panOnClick/zoomOnClick은 NvlOptions 타입에 없지만 런타임이 소비함
     const nvlOptions = {
       disableTelemetry: true,
-      disableWebWorkers: true,      // KAIR과 동일 — Web Worker 비활성화
+      disableWebWorkers: true,
       initialZoom: 1.0,
       renderer: 'canvas' as const,
       layout: 'forceDirected' as const,
       minZoom: 0.05,
       maxZoom: 5,
       allowDynamicMinZoom: true,
+      panOnClick: false,        // 클릭 시 자동 이동 비활성화
+      zoomOnClick: false,       // 클릭 시 자동 줌 비활성화
       nodeCaptionFontSize: 12,
       nodeCaptionColor: '#333333',
       relationshipLabelFontSize: 10,
       relationshipWidth: 2,
-      panOnClick: false,
-      zoomOnClick: false,
       layoutOptions: {
         iterations: 150,
         animationDuration: 0,
@@ -295,35 +337,47 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
         nodeRepulsion: 800,
         linkDistance: 100,
         gravity: 0.05,
-      },
-    };
-    // callbacks는 반드시 5번째 인자 (NVL 생성자 시그니처: frame, nodes, rels, options, callbacks)
+        updateLayoutOnChange: false,  // updateElementsInGraph 시 레이아웃 재계산 방지
+        updateOnDrag: false,
+        updateOnClick: false,
+        physics: { enabled: false },  // 초기 레이아웃 후 물리 시뮬 중지
+      } as Record<string, unknown>,
+    } as Record<string, unknown>;
+
+    // callbacks는 반드시 5번째 인자로 전달해야 동작함
     const nvlCallbacks = {
       onLayoutDone: () => {
+        // StrictMode cleanup 이후 호출되면 무시
+        if (cancelled) return;
         setLayoutDone(true);
-        const allIds = nvl.getNodes().map((n: NvlNode) => n.id);
-        if (allIds.length > 0) {
-          nvl.fit(allIds, { animated: false });
+        try {
+          const allIds = nvl.getNodes().map((n: NvlNode) => n.id);
+          if (allIds.length > 0) {
+            nvl.fit(allIds, { animated: false });
+          }
+          setZoomLevel(Math.round(nvl.getScale() * 100));
+        } catch {
+          // destroy된 인스턴스에서 호출될 경우 무시
         }
-        setZoomLevel(Math.round(nvl.getScale() * 100));
       },
-      onError: (err: unknown) => console.error('[NVLSchemaGraph] NVL 오류:', err),
+      onError: (err: Error) => console.error('[NVLSchemaGraph] NVL 오류:', err.message, err),
     };
+
     const nvl = new NVL(container, nodes, relationships, nvlOptions, nvlCallbacks);
     nvlRef.current = nvl;
 
-    // 인터랙션 핸들러
+    // ── 인터랙션 핸들러 ──
     const click = new ClickInteraction(nvl, { selectOnClick: true });
     click.updateCallback('onNodeClick', (node) => {
       setSelectedNodeId((prev) => {
         const v = prev === node.id ? null : node.id;
-        onNodeSelect?.(v);
+        onNodeSelectRef.current?.(v);
         return v;
       });
     });
     click.updateCallback('onCanvasClick', () => {
       setSelectedNodeId(null);
-      onNodeSelect?.(null);
+      onNodeSelectRef.current?.(null);
       nvl.deselectAll();
     });
     click.updateCallback('onNodeDoubleClick', (node) => {
@@ -357,17 +411,34 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     zoom.updateCallback('onZoom', (v) => setZoomLevel(Math.round(v * 100)));
     interactionsRef.current = [click, drag, pan, zoom];
 
-    // 폴백 타이머 (onLayoutDone 미호출 대비)
+    // ── 폴백 타이머 (onLayoutDone 미호출 대비) ──
     const fallback = setTimeout(() => {
+      if (cancelled) return;
       setLayoutDone(true);
       try {
         const ids = nvl.getNodes().map((n) => n.id);
         if (ids.length > 0) nvl.fit(ids, { animated: false });
+        setZoomLevel(Math.round(nvl.getScale() * 100));
       } catch { /* destroy 후 호출 방지 */ }
     }, 3000);
 
+    // ── ResizeObserver — NVL 인스턴스와 동일 수명주기로 관리 ──
+    // 별도 useEffect를 사용하면 StrictMode에서 stale 참조 문제 발생 가능
+    const ro = new ResizeObserver(() => {
+      if (cancelled) return;
+      try {
+        nvl.restart(undefined, true);
+      } catch {
+        // destroy된 인스턴스에서 호출될 경우 무시
+      }
+    });
+    ro.observe(container);
+
+    // ── 정리 함수 ──
     return () => {
+      cancelled = true;
       clearTimeout(fallback);
+      ro.disconnect();
       for (const i of interactionsRef.current) i.destroy();
       interactionsRef.current = [];
       nvl.destroy();
@@ -375,22 +446,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       setLayoutDone(false);
       setSelectedNodeId(null);
     };
-  }, [tables, onNodeSelect]);
-
-  // ─── 리사이즈 옵저버 ───────────────────────────────────────
-
-  useEffect(() => {
-    const container = containerRef.current;
-    const nvl = nvlRef.current;
-    if (!container || !nvl) return;
-
-    const ro = new ResizeObserver(() => {
-      // NVL은 내부적으로 컨테이너 크기를 감지하지만, 수동 트리거로 보정
-      nvl.restart(undefined, true);
-    });
-    ro.observe(container);
-    return () => ro.disconnect();
-  }, []);
+    // onNodeSelect는 ref로 안정화, schemaColorMap/edgesData는 tables에서 파생 (useMemo)
+  }, [tables, schemaColorMap, edgesData]);
 
   // ─── 줌 컨트롤 핸들러 ──────────────────────────────────────
 
@@ -427,8 +484,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     );
     nvl.deselectAll();
     setSelectedNodeId(null);
-    onNodeSelect?.(null);
-  }, [onNodeSelect]);
+    onNodeSelectRef.current?.(null);
+  }, []);
 
   // ─── 빈 상태 처리 ──────────────────────────────────────────
 
@@ -444,10 +501,12 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
 
   return (
     <div className="relative w-full h-full overflow-hidden bg-card">
-      {/* NVL 렌더링 컨테이너 */}
+      {/* NVL 렌더링 컨테이너 — position:relative 필수!
+          NVL은 내부적으로 position:absolute canvas를 생성하므로
+          컨테이너가 positioned element여야 canvas가 올바르게 배치된다. */}
       <div
         ref={containerRef}
-        className="w-full h-full"
+        className="relative w-full h-full"
         role="application"
         aria-label={`스키마 그래프. 테이블 ${tables.length}개, 관계 ${edgesData.length}개 표시.`}
       />
