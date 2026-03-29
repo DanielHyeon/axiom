@@ -340,10 +340,10 @@ export const DatasourcePage: React.FC = () => {
   </button>
   <button
    type="button"
-   onClick={() => setBottomTab('erd')}
+   onClick={() => { setBottomTab('erd'); setTimeout(() => document.getElementById('viz-tab-content')?.scrollIntoView({ behavior: 'smooth' }), 50); }}
    className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading transition-colors ${
     bottomTab === 'erd'
-     ? 'text-foreground font-semibold border-b-2 border-red-600'
+     ? 'text-foreground font-semibold border-b-2 border-primary'
      : 'text-foreground/60 hover:text-muted-foreground'
    }`}
   >
@@ -352,10 +352,10 @@ export const DatasourcePage: React.FC = () => {
   </button>
   <button
    type="button"
-   onClick={() => setBottomTab('graph')}
+   onClick={() => { setBottomTab('graph'); setTimeout(() => document.getElementById('viz-tab-graph')?.scrollIntoView({ behavior: 'smooth' }), 50); }}
    className={`flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-heading transition-colors ${
     bottomTab === 'graph'
-     ? 'text-foreground font-semibold border-b-2 border-red-600'
+     ? 'text-foreground font-semibold border-b-2 border-primary'
      : 'text-foreground/60 hover:text-muted-foreground'
    }`}
   >
@@ -382,7 +382,7 @@ export const DatasourcePage: React.FC = () => {
   </div>
  )}
  {bottomTab === 'erd' && (
-  <div className="border border-border rounded-lg overflow-hidden h-[600px]">
+  <div id="viz-tab-content" className="border border-border rounded-lg overflow-hidden h-[600px]">
    {selectedDsName ? (
     <ERDiagramPanel datasourceId={selectedDsName} />
    ) : (
@@ -395,7 +395,7 @@ export const DatasourcePage: React.FC = () => {
   </div>
  )}
  {bottomTab === 'graph' && (
-  <div className="border border-border rounded-lg overflow-hidden h-[600px]">
+  <div id="viz-tab-graph" className="border border-border rounded-lg overflow-hidden h-[600px]">
    {selectedDsName ? (
     erdLoading && erdTables.length === 0 ? (
      <div className="flex items-center justify-center min-h-[480px] text-foreground/60 text-sm">

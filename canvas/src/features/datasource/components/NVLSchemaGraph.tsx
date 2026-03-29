@@ -311,38 +311,36 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     // layoutOptions의 커스텀 속성(iterations, nodeRepulsion 등)은
     // NvlOptions 타입에 정의되지 않지만, 내부 CoseBilkent 레이아웃 엔진이
     // 실제로 소비한다. KAIR에서 검증된 값을 그대로 사용한다.
-    // NVL 옵션 — KAIR 프로젝트와 동일한 설정 (코드 리뷰 반영)
-    // panOnClick/zoomOnClick은 NvlOptions 타입에 없지만 런타임이 소비함
-    const nvlOptions = {
+    // NVL 옵션 — KAIR 프로젝트와 100% 동일한 설정 (any 캐스트로 타입 문제 우회)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const nvlOptions: any = {
       disableTelemetry: true,
       disableWebWorkers: true,
       initialZoom: 1.0,
-      renderer: 'canvas' as const,
-      layout: 'forceDirected' as const,
-      minZoom: 0.05,
-      maxZoom: 5,
-      allowDynamicMinZoom: true,
-      panOnClick: false,        // 클릭 시 자동 이동 비활성화
-      zoomOnClick: false,       // 클릭 시 자동 줌 비활성화
-      nodeCaptionFontSize: 12,
+      renderer: 'canvas',
+      relationshipLabelFontSize: 7,
+      relationshipWidth: 1.5,
+      nodeCaptionFontSize: 11,
       nodeCaptionColor: '#333333',
-      relationshipLabelFontSize: 10,
-      relationshipWidth: 2,
+      panOnClick: false,
+      zoomOnClick: false,
+      layout: 'forceDirected',
       layoutOptions: {
         iterations: 150,
         animationDuration: 0,
         disableAnimation: true,
+        updateLayoutOnChange: false,
         separateComponents: true,
         componentSpacing: 200,
+        componentArrangement: 'grid',
         nodeRepulsion: 800,
-        linkDistance: 100,
+        linkDistance: 80,
         gravity: 0.05,
-        updateLayoutOnChange: false,  // updateElementsInGraph 시 레이아웃 재계산 방지
+        physics: { enabled: false },
         updateOnDrag: false,
         updateOnClick: false,
-        physics: { enabled: false },  // 초기 레이아웃 후 물리 시뮬 중지
-      } as Record<string, unknown>,
-    } as Record<string, unknown>;
+      },
+    };
 
     // callbacks는 반드시 5번째 인자로 전달해야 동작함
     const nvlCallbacks = {
@@ -365,6 +363,15 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
 
     const nvl = new NVL(container, nodes, relationships, nvlOptions, nvlCallbacks);
     nvlRef.current = nvl;
+
+    // 레이아웃 완료 후 fit 보장 (onLayoutDone 미호출 대비)
+    setTimeout(() => {
+      if (cancelled) return;
+      const ids = nvl.getNodes().map(n => n.id);
+      if (ids.length > 0) {
+        try { nvl.fit(ids, { animated: false }); } catch { /* */ }
+      }
+    }, 500);
 
     // ── 인터랙션 핸들러 ──
     const click = new ClickInteraction(nvl, { selectOnClick: true });
