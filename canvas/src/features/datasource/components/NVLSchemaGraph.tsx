@@ -240,171 +240,25 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     ? tables.find((t) => t.name === selectedNodeId) ?? null
     : null;
 
-  // ─── NVL 인스턴스 초기화 & 정리 ─────────────────────────────
+  // ─── NVL: tables가 변경될 때마다 인스턴스를 재생성 ────────────
+  // 초기화 시 데이터를 바로 전달하여 렌더링 보장
 
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-
-    // 컨테이너 크기가 0이면 NVL 초기화 지연
     if (container.clientWidth === 0 || container.clientHeight === 0) return;
+    if (tables.length === 0) return;
 
-    // NVL 콜백 — 레이아웃 완료 시 뷰포트 맞춤
-    const callbacks: ExternalCallbacks = {
-      onLayoutDone: () => {
-        setLayoutDone(true);
-        const nvl = nvlRef.current;
-        if (nvl) {
-          // 모든 노드를 뷰포트에 맞춤
-          const allNodeIds = nvl.getNodes().map((n) => n.id);
-          if (allNodeIds.length > 0) {
-            nvl.fit(allNodeIds, { animated: false });
-          }
-          setZoomLevel(Math.round(nvl.getScale() * 100));
-        }
-      },
-      onError: (error) => {
-        console.error('[NVLSchemaGraph] NVL 오류:', error);
-      },
-    };
-
-    // NVL 인스턴스 생성
-    const nvl = new NVL(container, [], [], {
-      disableTelemetry: true,
-      initialZoom: 1.0,
-      renderer: 'canvas',
-      layout: 'forceDirected',
-      minZoom: 0.05,
-      maxZoom: 5,
-      allowDynamicMinZoom: true,
-      callbacks,
-    });
-
-    nvlRef.current = nvl;
-
-    // ─── 인터랙션 핸들러 등록 ───────────────────────────────
-
-    // 클릭 인터랙션: 노드 선택 + 하이라이트
-    const clickInteraction = new ClickInteraction(nvl, {
-      selectOnClick: true,
-    });
-
-    // 노드 클릭 콜백 등록
-    clickInteraction.updateCallback('onNodeClick', (node) => {
-      const nodeId = node.id;
-      setSelectedNodeId((prev) => {
-        const newVal = prev === nodeId ? null : nodeId;
-        onNodeSelect?.(newVal);
-        return newVal;
-      });
-    });
-
-    // 캔버스 빈 공간 클릭 → 선택 해제
-    clickInteraction.updateCallback('onCanvasClick', () => {
-      setSelectedNodeId(null);
-      onNodeSelect?.(null);
-      // 모든 노드 선택 해제
-      nvl.deselectAll();
-    });
-
-    // 노드 더블클릭 → 연결된 노드 하이라이트
-    clickInteraction.updateCallback('onNodeDoubleClick', (node) => {
-      const allNodes = nvl.getNodes();
-      const allRels = nvl.getRelationships();
-      // 이 노드와 연결된 관계 찾기
-      const connectedRelIds = new Set<string>();
-      const connectedNodeIds = new Set<string>([node.id]);
-
-      for (const rel of allRels) {
-        if (rel.from === node.id || rel.to === node.id) {
-          connectedRelIds.add(rel.id);
-          connectedNodeIds.add(rel.from);
-          connectedNodeIds.add(rel.to);
-        }
-      }
-
-      // 연결된 노드/엣지만 활성화, 나머지는 비활성화
-      const updatedNodes: NvlNode[] = allNodes.map((n) => ({
-        ...n,
-        disabled: !connectedNodeIds.has(n.id),
-        activated: connectedNodeIds.has(n.id),
-      }));
-      const updatedRels: NvlRelationship[] = allRels.map((r) => ({
-        ...r,
-        disabled: !connectedRelIds.has(r.id),
-      }));
-
-      nvl.updateElementsInGraph(updatedNodes, updatedRels);
-    });
-
-    // 캔버스 더블클릭 → 하이라이트 해제 (전체 활성화)
-    clickInteraction.updateCallback('onCanvasDoubleClick', () => {
-      const allNodes = nvl.getNodes();
-      const allRels = nvl.getRelationships();
-      nvl.updateElementsInGraph(
-        allNodes.map((n) => ({ ...n, disabled: false, activated: false })),
-        allRels.map((r) => ({ ...r, disabled: false })),
-      );
-    });
-
-    // 드래그, 팬, 줌 인터랙션
-    const dragInteraction = new DragNodeInteraction(nvl);
-    const panInteraction = new PanInteraction(nvl);
-    const zoomInteraction = new ZoomInteraction(nvl);
-
-    // 줌 변경 시 레벨 업데이트
-    zoomInteraction.updateCallback('onZoom', (zoomValue) => {
-      setZoomLevel(Math.round(zoomValue * 100));
-    });
-
-    interactionsRef.current = [clickInteraction, dragInteraction, panInteraction, zoomInteraction];
-
-    // 정리 함수
-    return () => {
-      // 인터랙션 핸들러 정리
-      for (const interaction of interactionsRef.current) {
-        interaction.destroy();
-      }
-      interactionsRef.current = [];
-
-      // NVL 인스턴스 정리
-      nvl.destroy();
-      nvlRef.current = null;
-      setLayoutDone(false);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // ─── 테이블 데이터 변경 시 그래프 업데이트 ──────────────────
-
-  useEffect(() => {
-    const nvl = nvlRef.current;
-    if (!nvl) return;
-
-    if (tables.length === 0) {
-      // 테이블 없으면 그래프 비우기
-      const existingNodes = nvl.getNodes();
-      const existingRels = nvl.getRelationships();
-      if (existingNodes.length > 0) {
-        nvl.removeNodesWithIds(existingNodes.map((n) => n.id));
-      }
-      if (existingRels.length > 0) {
-        nvl.removeRelationshipsWithIds(existingRels.map((r) => r.id));
-      }
-      return;
-    }
-
-    // 이펙트 내에서 엣지 계산 (의존성 안정화)
+    // 엣지 추출
     const edges = extractEdges(tables);
 
-    // NVL 노드 생성 — 각 테이블이 하나의 노드
+    // NVL 노드/엣지 생성
     const nodes: NvlNode[] = tables.map((table) => ({
       id: table.name,
       caption: table.name,
       color: getTableColor(table),
       size: 25,
     }));
-
-    // NVL 엣지 생성 — FK 관계
     const relationships: NvlRelationship[] = edges.map((edge) => ({
       id: edge.id,
       from: edge.from,
@@ -415,38 +269,94 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       captionSize: 10,
     }));
 
-    // 기존 요소 제거 후 새로 추가 (addAndUpdateElementsInGraph 사용)
-    const existingNodes = nvl.getNodes();
-    const existingRels = nvl.getRelationships();
-    if (existingRels.length > 0) {
-      nvl.removeRelationshipsWithIds(existingRels.map((r) => r.id));
-    }
-    if (existingNodes.length > 0) {
-      nvl.removeNodesWithIds(existingNodes.map((n) => n.id));
-    }
-
-    // 새 요소 추가
-    nvl.addAndUpdateElementsInGraph(nodes, relationships);
-
-    // 선택 상태 초기화
-    setSelectedNodeId(null);
+    // NVL 초기화 시 데이터를 바로 전달 (빈 배열로 생성 후 추가하면 렌더링 안 됨)
     setLayoutDone(false);
+    const nvl = new NVL(container, nodes, relationships, {
+      disableTelemetry: true,
+      initialZoom: 1.0,
+      renderer: 'canvas',
+      layout: 'forceDirected',
+      minZoom: 0.05,
+      maxZoom: 5,
+      allowDynamicMinZoom: true,
+      callbacks: {
+        onLayoutDone: () => {
+          setLayoutDone(true);
+          const allIds = nvl.getNodes().map((n) => n.id);
+          if (allIds.length > 0) {
+            nvl.fit(allIds, { animated: false });
+          }
+          setZoomLevel(Math.round(nvl.getScale() * 100));
+        },
+        onError: (err) => console.error('[NVLSchemaGraph] NVL 오류:', err),
+      },
+    });
+    nvlRef.current = nvl;
 
-    // onLayoutDone 콜백이 호출되지 않는 경우를 위한 폴백 타이머
-    // (노드가 적거나 레이아웃이 즉시 완료될 때 콜백 누락 가능)
-    const fallbackTimer = setTimeout(() => {
-      setLayoutDone(true);
-      // 뷰포트 맞춤
-      const allNodeIds = nvl.getNodes().map((n) => n.id);
-      if (allNodeIds.length > 0) {
-        try {
-          nvl.fit(allNodeIds, { animated: false });
-        } catch { /* nvl이 이미 destroy된 경우 무시 */ }
+    // 인터랙션 핸들러
+    const click = new ClickInteraction(nvl, { selectOnClick: true });
+    click.updateCallback('onNodeClick', (node) => {
+      setSelectedNodeId((prev) => {
+        const v = prev === node.id ? null : node.id;
+        onNodeSelect?.(v);
+        return v;
+      });
+    });
+    click.updateCallback('onCanvasClick', () => {
+      setSelectedNodeId(null);
+      onNodeSelect?.(null);
+      nvl.deselectAll();
+    });
+    click.updateCallback('onNodeDoubleClick', (node) => {
+      const allN = nvl.getNodes();
+      const allR = nvl.getRelationships();
+      const connNodes = new Set<string>([node.id]);
+      const connRels = new Set<string>();
+      for (const r of allR) {
+        if (r.from === node.id || r.to === node.id) {
+          connRels.add(r.id);
+          connNodes.add(r.from);
+          connNodes.add(r.to);
+        }
       }
-    }, 2000);
+      nvl.updateElementsInGraph(
+        allN.map((n) => ({ ...n, disabled: !connNodes.has(n.id), activated: connNodes.has(n.id) })),
+        allR.map((r) => ({ ...r, disabled: !connRels.has(r.id) })),
+      );
+    });
+    click.updateCallback('onCanvasDoubleClick', () => {
+      const allN = nvl.getNodes();
+      const allR = nvl.getRelationships();
+      nvl.updateElementsInGraph(
+        allN.map((n) => ({ ...n, disabled: false, activated: false })),
+        allR.map((r) => ({ ...r, disabled: false })),
+      );
+    });
+    const drag = new DragNodeInteraction(nvl);
+    const pan = new PanInteraction(nvl);
+    const zoom = new ZoomInteraction(nvl);
+    zoom.updateCallback('onZoom', (v) => setZoomLevel(Math.round(v * 100)));
+    interactionsRef.current = [click, drag, pan, zoom];
 
-    return () => clearTimeout(fallbackTimer);
-  }, [tables]);
+    // 폴백 타이머 (onLayoutDone 미호출 대비)
+    const fallback = setTimeout(() => {
+      setLayoutDone(true);
+      try {
+        const ids = nvl.getNodes().map((n) => n.id);
+        if (ids.length > 0) nvl.fit(ids, { animated: false });
+      } catch { /* destroy 후 호출 방지 */ }
+    }, 3000);
+
+    return () => {
+      clearTimeout(fallback);
+      for (const i of interactionsRef.current) i.destroy();
+      interactionsRef.current = [];
+      nvl.destroy();
+      nvlRef.current = null;
+      setLayoutDone(false);
+      setSelectedNodeId(null);
+    };
+  }, [tables, onNodeSelect]);
 
   // ─── 리사이즈 옵저버 ───────────────────────────────────────
 
