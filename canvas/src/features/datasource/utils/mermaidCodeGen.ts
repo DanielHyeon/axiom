@@ -47,7 +47,9 @@ function inferForeignKey(
     baseName,                   // user
     baseName + 's',            // users
     baseName + 'es',           // processes
-    baseName.replace(/ie$/, 'y'), // categories (역변환은 어려우나 기본 시도)
+    baseName.replace(/ie$/, 'y'), // categories
+    baseName + 'ations',       // org → organizations
+    baseName + 'izations',     // org → organizations
   ];
 
   for (const candidate of candidates) {
@@ -56,7 +58,14 @@ function inferForeignKey(
     }
   }
 
-  // 테이블명이 복수형이 아닐 수 있으므로 baseName 자체가 테이블에 있으면 매핑
+  // 접두사 매칭: baseName으로 시작하는 테이블이 하나만 있으면 매핑
+  const prefixMatches = [...allTableNames].filter(
+    (t) => t.startsWith(baseName) && t !== baseName,
+  );
+  if (prefixMatches.length === 1) {
+    return { isFk: true, referencedTable: prefixMatches[0] };
+  }
+
   return { isFk: false };
 }
 

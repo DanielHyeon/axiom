@@ -40,14 +40,17 @@ function toERDColumn(
     const lower = col.name.toLowerCase();
     if (lower.endsWith('_id')) {
       const baseName = lower.slice(0, -3); // '_id' 제거
-      // 복수형 후보 탐색: user → user, users, useres
-      const candidates = [
+      // 정확한 복수형 후보 탐색: user → user, users, useres
+      const exactCandidates = [
         baseName,
         baseName + 's',
         baseName + 'es',
         baseName.replace(/ie$/, 'y'),
+        baseName + 'ations', // org → organizations
+        baseName + 'izations', // org → organizations
+        baseName + 'anizations', // org → organizations
       ];
-      for (const candidate of candidates) {
+      for (const candidate of exactCandidates) {
         if (allTableNames.has(candidate)) {
           return {
             name: col.name,
@@ -58,6 +61,21 @@ function toERDColumn(
             nullable: col.nullable,
           };
         }
+      }
+      // 접두사 매칭: baseName으로 시작하는 테이블이 하나만 있으면 매핑
+      // 예: org_id → baseName "org" → "organizations" (org로 시작)
+      const prefixMatches = [...allTableNames].filter(
+        (t) => t.startsWith(baseName) && t !== baseName,
+      );
+      if (prefixMatches.length === 1) {
+        return {
+          name: col.name,
+          dataType: col.data_type,
+          isPrimaryKey: false,
+          isForeignKey: true,
+          referencedTable: prefixMatches[0],
+          nullable: col.nullable,
+        };
       }
     }
   }
