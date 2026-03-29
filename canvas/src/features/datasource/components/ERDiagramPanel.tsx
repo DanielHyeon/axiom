@@ -145,17 +145,35 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
     );
   }
 
-  // ERD 내용물 — 전체화면/인라인 양쪽에서 동일하게 사용
-  const erdContent = (
-    <div
-      ref={containerRef}
-      className={`flex flex-col ${
-        isFullscreen
-          ? 'fixed inset-0 z-[9999] bg-background'
-          : 'h-full'
-      }`}
-    >
-      {/* 툴바 */}
+  // 전체화면일 때 Portal로 body에 직접 렌더링 (부모 overflow-hidden 탈출)
+  if (isFullscreen) {
+    return createPortal(
+      <div
+        ref={containerRef}
+        className="fixed inset-0 z-[9999] flex flex-col bg-background w-screen h-screen"
+      >
+        <ERDToolbar
+          filter={filter}
+          onFilterChange={setFilter}
+          stats={stats}
+          onDownloadSvg={handleDownloadSvg}
+          onRefresh={() => refetch()}
+          isLoading={isLoading}
+          onToggleFullscreen={handleToggleFullscreen}
+          isFullscreen={isFullscreen}
+        />
+        {/* 전체화면: 남은 영역 전부 ERD에 할당 */}
+        <div className="flex-1 min-h-0 overflow-auto" data-erd-svg-container>
+          <MermaidERDRenderer mermaidCode={code} />
+        </div>
+      </div>,
+      document.body,
+    );
+  }
+
+  // 인라인 모드
+  return (
+    <div ref={containerRef} className="flex flex-col h-full">
       <ERDToolbar
         filter={filter}
         onFilterChange={setFilter}
@@ -166,18 +184,9 @@ export function ERDiagramPanel({ datasourceId }: ERDiagramPanelProps) {
         onToggleFullscreen={handleToggleFullscreen}
         isFullscreen={isFullscreen}
       />
-
-      {/* ERD 렌더링 영역 */}
-      <div className="flex-1 overflow-auto" data-erd-svg-container>
+      <div className="flex-1 min-h-0 overflow-auto" data-erd-svg-container>
         <MermaidERDRenderer mermaidCode={code} />
       </div>
     </div>
   );
-
-  // 전체화면일 때 Portal로 body에 직접 렌더링 (부모 overflow-hidden 탈출)
-  if (isFullscreen) {
-    return createPortal(erdContent, document.body);
-  }
-
-  return erdContent;
 }
