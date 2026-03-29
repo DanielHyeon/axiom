@@ -22,8 +22,21 @@ import {
   PanInteraction,
   ZoomInteraction,
 } from '@neo4j-nvl/interaction-handlers';
-import { X, Table2, Key, ArrowRight } from 'lucide-react';
+import { X, Table2, Key, ArrowRight, Maximize } from 'lucide-react';
+import type { Layout } from '@neo4j-nvl/base';
 import type { ERDTableInfo } from '@/shared/types/schema';
+
+// ─── 레이아웃 스위처 설정 ─────────────────────────────────────
+// NVL이 지원하는 5가지 레이아웃 모드 (free 제외 — 수동 배치 전용)
+// NVL이 지원하는 6가지 레이아웃 모드 전체
+const LAYOUT_OPTIONS: { key: Layout; label: string }[] = [
+  { key: 'forceDirected', label: 'Force' },
+  { key: 'hierarchical', label: 'Hierarchy' },
+  { key: 'circular', label: 'Circular' },
+  { key: 'grid', label: 'Grid' },
+  { key: 'd3Force', label: 'D3' },
+  { key: 'free', label: 'Free' },
+];
 
 // ─── 테이블 노드 컬러 팔레트 ─────────────────────────────────
 // 주의: schemaColorMap은 아래 getTableColor 내부에서 useMemo를 통해 관리
@@ -232,6 +245,8 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
   const [zoomLevel, setZoomLevel] = useState(100);
   /** 레이아웃 완료 여부 */
   const [layoutDone, setLayoutDone] = useState(false);
+  /** 현재 그래프 레이아웃 모드 */
+  const [currentLayout, setCurrentLayout] = useState<Layout>('forceDirected');
 
   // 스키마별 색상 매핑 (컴포넌트 스코프 — 모듈 싱글톤 방지)
   const schemaColorMap = useMemo(() => buildSchemaColorMap(tables), [tables]);
@@ -301,7 +316,7 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       caption: edge.caption,
       color: '#9CA3AB',
       width: 2,
-      captionSize: 10,
+      captionSize: 5,
     }));
 
     // NVL 초기화 — 생성자 시그니처: new NVL(frame, nodes, rels, options, callbacks)
@@ -318,9 +333,9 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       disableWebWorkers: true,
       initialZoom: 1.0,
       renderer: 'canvas',
-      relationshipLabelFontSize: 7,
-      relationshipWidth: 1.5,
-      nodeCaptionFontSize: 11,
+      relationshipLabelFontSize: 5,
+      relationshipWidth: 1,
+      nodeCaptionFontSize: 10,
       nodeCaptionColor: '#333333',
       panOnClick: false,
       zoomOnClick: false,
@@ -494,6 +509,36 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
     onNodeSelectRef.current?.(null);
   }, []);
 
+  // ─── 레이아웃 변경 핸들러 ──────────────────────────────────
+
+  const handleLayoutChange = useCallback((layout: Layout) => {
+    const nvl = nvlRef.current;
+    if (!nvl) return;
+    setCurrentLayout(layout);
+    // NVL 레이아웃 모드 전환 — 레이아웃 엔진이 노드 재배치 후 onLayoutDone 콜백 호출
+    nvl.setLayout(layout);
+    // 레이아웃 완료 대기 후 전체 노드가 보이도록 fit 실행
+    setTimeout(() => {
+      try {
+        const ids = nvl.getNodes().map((n) => n.id);
+        if (ids.length > 0) nvl.fit(ids, { animated: true });
+        setZoomLevel(Math.round(nvl.getScale() * 100));
+      } catch { /* destroy된 인스턴스 안전 처리 */ }
+    }, 600);
+  }, []);
+
+  // ─── 전체 보기 (Fit All) 핸들러 ─────────────────────────────
+
+  const handleFitAll = useCallback(() => {
+    const nvl = nvlRef.current;
+    if (!nvl) return;
+    const allNodeIds = nvl.getNodes().map((n) => n.id);
+    if (allNodeIds.length > 0) {
+      nvl.fit(allNodeIds, { animated: true });
+    }
+    setZoomLevel(Math.round(nvl.getScale() * 100));
+  }, []);
+
   // ─── 빈 상태 처리 ──────────────────────────────────────────
 
   if (tables.length === 0) {
@@ -560,6 +605,16 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
         >
           Reset
         </button>
+        {/* 전체 보기 (Fit All) 버튼 */}
+        <button
+          type="button"
+          onClick={handleFitAll}
+          className="px-1.5 py-1 text-foreground/60 hover:text-foreground transition-colors border-l border-border"
+          title={t('datasource.graph.fitAll', '전체 보기')}
+          aria-label={t('datasource.graph.fitAll', '전체 보기')}
+        >
+          <Maximize className="h-3 w-3" />
+        </button>
       </div>
 
       {/* 통계 뱃지 — 좌상단 */}
@@ -571,6 +626,29 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
           {t('datasource.graph.edgeCount', '관계')}: {edgesData.length}
         </span>
       </div>
+
+      {/* 레이아웃 스위처 — 우상단 (선택 패널 미표시 시만 노출) */}
+      {!selectedTable && (
+        <div className="absolute top-4 right-4 z-10 flex items-center gap-0.5 bg-card/95 border border-border rounded-full px-1 py-0.5 shadow-sm">
+          {LAYOUT_OPTIONS.map((opt) => (
+            <button
+              key={opt.key}
+              type="button"
+              onClick={() => handleLayoutChange(opt.key)}
+              className={`px-2 py-0.5 rounded-full text-[10px] font-medium transition-colors ${
+                currentLayout === opt.key
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-transparent text-foreground/60 hover:text-foreground hover:bg-muted'
+              }`}
+              title={`${opt.label} 레이아웃`}
+              aria-label={`${opt.label} 레이아웃`}
+              aria-pressed={currentLayout === opt.key ? 'true' : 'false'}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 선택된 노드 상세 패널 */}
       {selectedTable && (
