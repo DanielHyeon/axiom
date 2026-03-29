@@ -15,7 +15,7 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import NVL from '@neo4j-nvl/base';
-import type { Node as NvlNode, Relationship as NvlRelationship, ExternalCallbacks } from '@neo4j-nvl/base';
+import type { Node as NvlNode, Relationship as NvlRelationship } from '@neo4j-nvl/base';
 import {
   ClickInteraction,
   DragNodeInteraction,
@@ -269,28 +269,47 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
       captionSize: 10,
     }));
 
-    // NVL 초기화 시 데이터를 바로 전달 (빈 배열로 생성 후 추가하면 렌더링 안 됨)
+    // NVL 초기화 — KAIR 패턴: callbacks는 5번째 인자로 전달해야 동작함
     setLayoutDone(false);
-    const nvl = new NVL(container, nodes, relationships, {
+    const nvlOptions = {
       disableTelemetry: true,
+      disableWebWorkers: true,      // KAIR과 동일 — Web Worker 비활성화
       initialZoom: 1.0,
-      renderer: 'canvas',
-      layout: 'forceDirected',
+      renderer: 'canvas' as const,
+      layout: 'forceDirected' as const,
       minZoom: 0.05,
       maxZoom: 5,
       allowDynamicMinZoom: true,
-      callbacks: {
-        onLayoutDone: () => {
-          setLayoutDone(true);
-          const allIds = nvl.getNodes().map((n) => n.id);
-          if (allIds.length > 0) {
-            nvl.fit(allIds, { animated: false });
-          }
-          setZoomLevel(Math.round(nvl.getScale() * 100));
-        },
-        onError: (err) => console.error('[NVLSchemaGraph] NVL 오류:', err),
+      nodeCaptionFontSize: 12,
+      nodeCaptionColor: '#333333',
+      relationshipLabelFontSize: 10,
+      relationshipWidth: 2,
+      panOnClick: false,
+      zoomOnClick: false,
+      layoutOptions: {
+        iterations: 150,
+        animationDuration: 0,
+        disableAnimation: true,
+        separateComponents: true,
+        componentSpacing: 200,
+        nodeRepulsion: 800,
+        linkDistance: 100,
+        gravity: 0.05,
       },
-    });
+    };
+    // callbacks는 반드시 5번째 인자 (NVL 생성자 시그니처: frame, nodes, rels, options, callbacks)
+    const nvlCallbacks = {
+      onLayoutDone: () => {
+        setLayoutDone(true);
+        const allIds = nvl.getNodes().map((n: NvlNode) => n.id);
+        if (allIds.length > 0) {
+          nvl.fit(allIds, { animated: false });
+        }
+        setZoomLevel(Math.round(nvl.getScale() * 100));
+      },
+      onError: (err: unknown) => console.error('[NVLSchemaGraph] NVL 오류:', err),
+    };
+    const nvl = new NVL(container, nodes, relationships, nvlOptions, nvlCallbacks);
     nvlRef.current = nvl;
 
     // 인터랙션 핸들러
