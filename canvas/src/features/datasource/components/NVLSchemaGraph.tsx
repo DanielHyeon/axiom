@@ -587,94 +587,17 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
   // ─── 렌더링 ────────────────────────────────────────────────
 
   const graphContent = (
-    <div className={`relative overflow-hidden bg-card ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-screen' : 'w-full h-full'}`}>
-      {/* NVL 렌더링 컨테이너 — position:relative 필수!
-          NVL은 내부적으로 position:absolute canvas를 생성하므로
-          컨테이너가 positioned element여야 canvas가 올바르게 배치된다. */}
-      <div
-        ref={containerRef}
-        className="relative w-full h-full"
-        role="application"
-        aria-label={`스키마 그래프. 테이블 ${tables.length}개, 관계 ${edgesData.length}개 표시.`}
-      />
-
-      {/* 레이아웃 진행 중 표시 */}
-      {!layoutDone && tables.length > 0 && (
-        <div className="absolute inset-0 flex items-center justify-center bg-card/60 z-10 pointer-events-none">
-          <div className="flex items-center gap-2 text-sm text-foreground/60">
-            <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
-            {t('datasource.graph.layoutRunning', '레이아웃 계산 중...')}
-          </div>
+    <div className={`flex flex-col ${isFullscreen ? 'fixed inset-0 z-[9999] w-screen h-screen bg-background' : 'h-full'}`}>
+      {/* ─── 상단 툴바 (ERD 툴바와 동일한 구조) ─── */}
+      <div className="flex items-center gap-3 p-3 border-b border-border bg-muted/50 shrink-0">
+        {/* 통계 */}
+        <div className="flex items-center gap-3 text-[10px] text-foreground/50 font-mono">
+          <span>{t('datasource.graph.nodeCount', '노드')}: {tables.length}</span>
+          <span>{t('datasource.graph.edgeCount', '관계')}: {edgesData.length}</span>
         </div>
-      )}
 
-      {/* 줌 컨트롤 — 좌하단 고정 */}
-      <div className="absolute bottom-4 left-4 flex items-center gap-1 bg-card border border-border rounded shadow-sm z-10">
-        <button
-          type="button"
-          onClick={handleZoomIn}
-          className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title={t('datasourceExt.zoomIn', '확대')}
-          aria-label={t('datasourceExt.zoomIn', '확대')}
-        >
-          +
-        </button>
-        <span className="px-2 py-1 text-[10px] text-foreground/60 font-mono min-w-[40px] text-center">
-          {zoomLevel}%
-        </span>
-        <button
-          type="button"
-          onClick={handleZoomOut}
-          className="px-2 py-1 text-xs text-foreground/60 hover:text-foreground transition-colors"
-          title={t('datasourceExt.zoomOut', '축소')}
-          aria-label={t('datasourceExt.zoomOut', '축소')}
-        >
-          -
-        </button>
-        <button
-          type="button"
-          onClick={handleResetView}
-          className="px-2 py-1 text-[10px] text-foreground/60 hover:text-foreground transition-colors border-l border-border"
-          title={t('datasourceExt.resetZoom', '초기화')}
-          aria-label={t('datasourceExt.resetZoom', '초기화')}
-        >
-          Reset
-        </button>
-        {/* 전체 보기 (Fit All) 버튼 */}
-        <button
-          type="button"
-          onClick={handleFitAll}
-          className="px-1.5 py-1 text-foreground/60 hover:text-foreground transition-colors border-l border-border"
-          title={t('datasource.graph.fitAll', '전체 보기')}
-          aria-label={t('datasource.graph.fitAll', '전체 보기')}
-        >
-          <Maximize className="h-3 w-3" />
-        </button>
-        {/* 전체화면 토글 */}
-        <button
-          type="button"
-          onClick={handleToggleFullscreen}
-          className="px-1.5 py-1 text-foreground/60 hover:text-foreground transition-colors border-l border-border"
-          title={isFullscreen ? '전체화면 종료' : '전체화면'}
-          aria-label={isFullscreen ? '전체화면 종료' : '전체화면'}
-        >
-          {isFullscreen ? <Minimize2 className="h-3 w-3" /> : <Maximize2 className="h-3 w-3" />}
-        </button>
-      </div>
-
-      {/* 통계 뱃지 — 좌상단 */}
-      <div className="absolute top-4 left-4 flex items-center gap-3 z-10">
-        <span className="px-2 py-1 bg-card/90 border border-border rounded text-[10px] font-mono text-foreground/60 shadow-sm">
-          {t('datasource.graph.nodeCount', '노드')}: {tables.length}
-        </span>
-        <span className="px-2 py-1 bg-card/90 border border-border rounded text-[10px] font-mono text-foreground/60 shadow-sm">
-          {t('datasource.graph.edgeCount', '관계')}: {edgesData.length}
-        </span>
-      </div>
-
-      {/* 레이아웃 스위처 — 우상단 (선택 패널 미표시 시만 노출) */}
-      {!selectedTable && (
-        <div className="absolute top-4 right-4 z-10 flex items-center gap-0.5 bg-card/95 border border-border rounded-full px-1 py-0.5 shadow-sm">
+        {/* 레이아웃 스위처 */}
+        <div className="flex items-center gap-0.5 bg-card border border-border rounded-full px-1 py-0.5">
           {LAYOUT_OPTIONS.map((opt) => (
             <button
               key={opt.key}
@@ -685,15 +608,48 @@ export function NVLSchemaGraph({ tables, onNodeSelect }: NVLSchemaGraphProps) {
                   ? 'bg-primary text-primary-foreground'
                   : 'bg-transparent text-foreground/60 hover:text-foreground hover:bg-muted'
               }`}
-              title={`${opt.label} 레이아웃`}
-              aria-label={`${opt.label} 레이아웃`}
-              aria-pressed={currentLayout === opt.key ? 'true' : 'false'}
+              aria-pressed={currentLayout === opt.key}
             >
               {opt.label}
             </button>
           ))}
         </div>
-      )}
+
+        {/* 우측 액션 버튼 */}
+        <div className="ml-auto flex items-center gap-1">
+          <button type="button" onClick={handleZoomIn} className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors" title="확대">+</button>
+          <span className="px-1 text-[10px] text-foreground/60 font-mono min-w-[32px] text-center">{zoomLevel}%</span>
+          <button type="button" onClick={handleZoomOut} className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors" title="축소">-</button>
+          <button type="button" onClick={handleResetView} className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors" title="초기화">Reset</button>
+          <button type="button" onClick={handleFitAll} className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors" title="전체 보기">
+            <Maximize className="h-3.5 w-3.5" />
+          </button>
+          {/* 전체화면 토글 — ERDToolbar와 동일 위치 */}
+          <button type="button" onClick={handleToggleFullscreen} className="p-1.5 rounded text-foreground/60 hover:text-foreground hover:bg-muted transition-colors" title={isFullscreen ? '전체화면 종료' : '전체화면'}>
+            {isFullscreen ? <Minimize2 className="h-3.5 w-3.5" /> : <Maximize2 className="h-3.5 w-3.5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* ─── NVL 렌더링 영역 ─── */}
+      <div className="relative flex-1 min-h-0 overflow-hidden bg-card">
+        <div
+          ref={containerRef}
+          className="relative w-full h-full"
+          role="application"
+          aria-label={`스키마 그래프. 테이블 ${tables.length}개, 관계 ${edgesData.length}개 표시.`}
+        />
+
+        {/* 레이아웃 진행 중 표시 */}
+        {!layoutDone && tables.length > 0 && (
+          <div className="absolute inset-0 flex items-center justify-center bg-card/60 z-10 pointer-events-none">
+            <div className="flex items-center gap-2 text-sm text-foreground/60">
+              <div className="h-4 w-4 border-2 border-foreground/30 border-t-foreground/60 rounded-full animate-spin" />
+              {t('datasource.graph.layoutRunning', '레이아웃 계산 중...')}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* 선택된 노드 상세 패널 */}
       {selectedTable && (
