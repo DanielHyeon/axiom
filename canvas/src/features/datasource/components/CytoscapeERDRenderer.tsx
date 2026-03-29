@@ -134,29 +134,29 @@ function shortType(rawType: string): string {
   return rawType.length > 12 ? rawType.slice(0, 10) + '..' : rawType;
 }
 
-/** 테이블의 멀티라인 라벨 생성 (테이블명 + 구분선 + 컬럼 목록) */
-function buildNodeLabel(table: ERDTableInfo, maxCols: number = 12): string {
+/** 테이블의 컴팩트 멀티라인 라벨 생성 (테이블 카드 형태) */
+function buildNodeLabel(table: ERDTableInfo, maxCols: number = 6): string {
   const lines: string[] = [];
 
-  // 테이블 헤더
-  lines.push(table.name);
-  lines.push('─'.repeat(Math.min(table.name.length + 4, 28)));
+  // 테이블 헤더 (대문자)
+  lines.push(`📋 ${table.name}`);
+  lines.push('───────────');
 
-  // 컬럼 목록
+  // 컬럼 목록 (최대 6개로 제한 — 컴팩트)
   const displayCols = table.columns.slice(0, maxCols);
   for (const col of displayCols) {
-    let prefix = '  ';
-    if (col.isPrimaryKey) prefix = 'PK';
-    else if (col.isForeignKey) prefix = 'FK';
+    let icon = '  ';
+    if (col.isPrimaryKey) icon = '🔑';
+    else if (col.isForeignKey) icon = '🔗';
 
     const type = shortType(col.dataType);
-    lines.push(`${prefix} ${col.name}: ${type}`);
+    lines.push(`${icon} ${col.name} ${type}`);
   }
 
   // 생략된 컬럼 수 표시
   const remaining = table.columns.length - displayCols.length;
   if (remaining > 0) {
-    lines.push(`   ... +${remaining}`);
+    lines.push(`   ＋${remaining} more`);
   }
 
   return lines.join('\n');
@@ -165,66 +165,65 @@ function buildNodeLabel(table: ERDTableInfo, maxCols: number = 12): string {
 // ─── Cytoscape 스타일 정의 ────────────────────────────────
 
 const CYTOSCAPE_STYLE: cytoscape.StylesheetStyle[] = [
-  // 노드 기본 스타일 — 테이블 카드 형태
+  // 노드 기본 스타일 — 컴팩트 테이블 카드
   {
     selector: 'node',
     style: {
-      // 라벨
+      // 라벨 — 작은 폰트, 좌측 정렬
       label: 'data(label)',
       'text-wrap': 'wrap' as any,
-      'text-max-width': '260px' as any,
+      'text-max-width': '180px' as any,
       'text-valign': 'center',
       'text-halign': 'center',
       'font-family': 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace',
-      'font-size': 10,
+      'font-size': 8,
       color: '#333333',
       'text-justification': 'left' as any,
 
-      // 배경 및 테두리
+      // 배경 및 테두리 — 테이블 카드 형태
       'background-color': '#FFFFFF',
       'border-width': 1,
-      'border-color': '#E5E5E5',
+      'border-color': '#D1D5DB',
       shape: 'round-rectangle',
 
-      // 크기 — data 속성에서 계산된 값 사용 (label deprecated 대체)
+      // 크기 — 데이터 기반 계산
       width: 'data(nodeWidth)',
       height: 'data(nodeHeight)',
-      'padding-top': '12px' as any,
-      'padding-bottom': '12px' as any,
-      'padding-left': '14px' as any,
-      'padding-right': '14px' as any,
+      'padding-top': '6px' as any,
+      'padding-bottom': '6px' as any,
+      'padding-left': '8px' as any,
+      'padding-right': '8px' as any,
 
-      // 상호작용
       'overlay-opacity': 0,
       'z-index': 1,
     },
   },
-  // 엣지 기본 스타일
+  // 엣지 — 얇은 화살표
   {
     selector: 'edge',
     style: {
-      width: 1.5,
-      'line-color': '#CCCCCC',
-      'target-arrow-color': '#CCCCCC',
+      width: 1,
+      'line-color': '#D1D5DB',
+      'target-arrow-color': '#9CA3AF',
       'target-arrow-shape': 'triangle',
-      'arrow-scale': 0.8,
+      'arrow-scale': 0.6,
       'curve-style': 'bezier',
       label: 'data(label)',
-      'font-size': 8,
+      'font-size': 7,
       'font-family': 'ui-monospace, SFMono-Regular, monospace',
-      color: '#888888',
+      color: '#9CA3AF',
       'text-rotation': 'autorotate',
       'text-outline-width': 2,
       'text-outline-color': '#FFFFFF',
-      'text-margin-y': -8,
+      'text-margin-y': -6,
       'overlay-opacity': 0,
     },
   },
-  // 선택된 노드 — 오렌지 테두리 (#FF8400)
+  // 선택된 노드 — 오렌지 테두리
   {
     selector: 'node:selected',
     style: {
-      'border-width': 2.5,
+      'border-width': 2,
       'border-color': '#FF8400',
       'z-index': 20,
     },
@@ -373,16 +372,15 @@ export function CytoscapeERDRenderer({
     // FK 관계 추출
     const relations = extractRelations(tables);
 
-    // 노드 생성 — 각 테이블이 하나의 노드
-    // 노드 크기를 라벨 줄 수 기반으로 계산 (width: 'label' deprecated 대체)
+    // 노드 생성 — 컴팩트 테이블 카드 (폰트 8px 기준 크기 계산)
     const nodes: cytoscape.ElementDefinition[] = tables.map((table) => {
       const label = buildNodeLabel(table);
       const lines = label.split('\n');
       const maxLineLen = Math.max(...lines.map((l) => l.length));
-      // 문자 폭 6px 기준 + 좌우 패딩 28px
-      const nodeWidth = Math.max(maxLineLen * 6.5 + 28, 120);
-      // 줄 높이 14px + 상하 패딩 24px
-      const nodeHeight = lines.length * 14 + 24;
+      // 문자 폭 5px 기준 (8px 폰트) + 좌우 패딩 16px
+      const nodeWidth = Math.max(maxLineLen * 5 + 16, 100);
+      // 줄 높이 11px (8px 폰트) + 상하 패딩 12px
+      const nodeHeight = lines.length * 11 + 12;
       return {
         group: 'nodes' as const,
         data: {
@@ -424,8 +422,8 @@ export function CytoscapeERDRenderer({
       name: 'cose-bilkent',
       animate: false,
       nodeDimensionsIncludeLabels: true,
-      idealEdgeLength: 200,
-      nodeRepulsion: 8000,
+      idealEdgeLength: 120,
+      nodeRepulsion: 4000,
       gravity: 0.15,
       numIter: 3000,
       tile: true,
